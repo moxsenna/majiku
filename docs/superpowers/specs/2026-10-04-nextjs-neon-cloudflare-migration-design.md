@@ -41,7 +41,7 @@ Kopling yang diganti (hasil audit kode):
 ## 3. Fase & Kriteria Selesai
 
 ### Fase 1 — Next.js + Neon + BetterAuth + Workers (titik stabil pertama)
-Scaffold Next.js; port 35 halaman + semua komponen sebagai client components; pasang Drizzle + Neon (migrations untuk 11 tabel + 2 stored procedure); pasang BetterAuth (login, signup tenant, logout, session); shim `useAuth`/`hasRole` agar `RoleProtectedRoute` dan halaman berubah minimal; hapus semua dependensi Supabase & Lovable; deploy ke Workers.
+Scaffold Next.js; port 35 halaman + semua komponen sebagai client components; pasang Drizzle + Neon (migrations untuk 11 tabel + 2 stored procedure); pasang BetterAuth (login, signup tenant, logout, session); shim `useAuth`/`hasRole` agar `RoleProtectedRoute` dan halaman berubah minimal; hapus semua dependensi Supabase & Lovable; deploy ke Workers. Komponen yang tidak direferensikan halaman mana pun (daftar di §7) **tidak ikut dipindah** — kode lamanya tetap tersimpan di baseline commit.
 **Selesai bila**: `next build` bersih; 35+ route bisa diakses (smoke test daftar route lama vs baru); login/logout + proteksi role berfungsi; 7 titik query lama membaca dari Neon dengan data seed; aplikasi live di URL Workers.
 
 ### Fase 2 — SEO & Marketplace layer
@@ -82,7 +82,20 @@ Halaman publik (Fase 2) membaca Neon langsung di server component tanpa lewat br
 | Drizzle + stored procedure belum terbiasa | Procedure dipindah sebagai SQL migrations apa adanya; dipanggil via `drizzle.execute(sql\`...\`)` |
 | Kecepatan Neon free tier (cold start compute) | Terima di Fase 1; auto-suspend dikonfigurasi; scale-to-zero justru hemat |
 
-## 7. Keputusan Terbuka (default sudah dipilih, bisa diubah saat review)
+## 7. Penanganan Temuan Audit Awal
+
+Prinsip: **migrasi memindahkan perilaku apa adanya, bukan memperbaiki produk**. Perbaikan produk dikeluarkan dari migrasi supaya kalau ada yang rusak, kita tahu penyebabnya infrastruktur — bukan logika baru. Setiap temuan dari audit awal dipetakan eksplisit:
+
+| Temuan awal | Penanganan di migrasi | Kapan |
+|---|---|---|
+| Alur trial backend sudah jadi, frontend belum nyambung (`ParentRegistration` masih `setTimeout`, `CRM` masih stage demo, `submit_trial_review`/`admit_trial_candidate` belum dipanggil UI mana pun) | Backend (2 stored procedure + tabel `trial_applications`) dipindah apa adanya ke Neon di Fase 1 sehingga tetap siap. **Wiring frontend-nya bukan bagian migrasi** — jadi task produk pertama setelah Fase 1 stabil, berjalan paralel dengan Fase 2 | Setelah Fase 1 |
+| Hanya 4 area live query Supabase (Attendance, Billing, TutorPayout, WaitingList = 7 titik query); sisanya hardcoded/`demoData.ts` | Fase 1: 7 titik query diganti Drizzle + data seed; halaman mock dipindah tetap mock (perilaku identik). Wiring halaman mock ke DB masuk Fase 3 hardening | Fase 1 & Fase 3 |
+| Komponen orphan (tidak pernah di-import): `CreateInvoiceDialog`, `LeaveManagementWidget`, `PushNotificationSetup`, `ActivityNotificationWidget`, `NavLink`, `AffiliateWidget`, `BrandPlacementWidget`, `ChurnManagementWidget`, `RewardWidget` | **Tidak dipindah** ke Next — mencegah membawa kode mati ke codebase baru; tetap dapat diambil dari baseline commit kalau nanti dibutuhkan | Fase 1 |
+| QR scanner masih simulasi (`Math.random`) | Dipindah apa adanya (simulasi). Kamera nyata (client-side, mis. library `html5-qrcode`/zxing) adalah fitur produk baru, bukan migrasi | Backlog produk |
+| Chat tanpa realtime | Tetap mock; realtime via Durable Objects di luar lingkup sampai chat dijadwalkan rilis | Deferred (YAGNI) |
+| RLS + `has_role()` jadi satu-satunya lapisan keamanan | Diganti model otorisasi server-side (§2 poin 5) — temuan ini justru diselesaikan oleh migrasi itu sendiri | Fase 1 |
+
+## 8. Keputusan Terbuka (default sudah dipilih, bisa diubah saat review)
 
 1. Auth = **BetterAuth** email+password (alternatif yang dilewatkan: Supabase Auth jembatan — tidak relevan lagi; Clerk — vendor lock; Auth.js — DX lebih kasar untuk role).
 2. Driver = **neon-http** (alternatif: Hyperdrive + node-postgres — menunggu sampai butuh pooling nyata).
