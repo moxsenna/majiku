@@ -1,23 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Session, User } from "@supabase/supabase-js";
+"use client";
 
-export type AppRole = "admin" | "moderator" | "user" | "parent" | "tutor";
+import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from "react";
+import { authClient } from "@/lib/auth-client";
+import { getMyRoles, type AppRole } from "@/server/actions/roles";
 
-interface AuthContextValue {
-  session: Session | null;
-  user: User | null;
-  roles: AppRole[];
-  /** true while session or roles are still being resolved */
-  loading: boolean;
-  isAdmin: boolean;
-  hasRole: (role: AppRole) => boolean;
-  /** Landing route matching the highest-priority role of the user */
-  roleHome: string;
-  signOut: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+export type { AppRole };
 
 export function homeForRoles(roles: AppRole[]): string {
   if (roles.includes("admin")) return "/dashboard";
@@ -26,77 +13,82 @@ export function homeForRoles(roles: AppRole[]): string {
   return "/";
 }
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+export interface AuthUser {
+  id: string;
+  email: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+export interface AuthContextType {
+  session: unknown | null;
+  user: AuthUser | null;
+  roles: AppRole[];
+  loading: boolean;
+  isAdmin: boolean;
+  hasRole: (role: AppRole) => boolean;
+  roleHome: string;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType>({
+  session: null,
+  user: null,
+  roles: [],
+  loading: true,
+  isAdmin: false,
+  hasRole: () => false,
+  roleHome: "/",
+  signOut: async () => {},
+});
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const { data, isPending } = authClient.useSession();
   const [roles, setRoles] = useState<AppRole[]>([]);
-  const [sessionLoading, setSessionLoading] = useState(true);
   const [rolesLoading, setRolesLoading] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setSessionLoading(false);
-    });
-
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setSessionLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const userId = session?.user?.id;
-    if (!userId) {
+    if (data?.user) {
+      setRolesLoading(true);
+      getMyRoles()
+        .then(setRoles)
+        .catch(() => setRoles([]))
+        .finally(() => setRolesLoading(false));
+    } else {
       setRoles([]);
       setRolesLoading(false);
-      return;
     }
+  }, [data?.user?.id]);
 
-    let cancelled = false;
-    setRolesLoading(true);
-    supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        setRoles(error || !data ? [] : (data.map((r) => r.role) as AppRole[]));
-        setRolesLoading(false);
-      });
+  const hasRole = (role: AppRole) =>
+    roles.includes("admin") || roles.includes(role);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [session?.user?.id]);
+  const roleHome = useMemo(() => homeForRoles(roles), [roles]);
+  const isAdmin = roles.includes("admin");
 
-  const hasRole = useCallback(
-    (role: AppRole) => roles.includes(role) || roles.includes("admin"),
-    [roles]
+  return (
+    <AuthContext.Provider
+      value={{
+        session: data?.session ?? null,
+        user: (data?.user as AuthUser) ?? null,
+        roles,
+        loading: isPending || rolesLoading,
+        isAdmin,
+        hasRole,
+        roleHome,
+        signOut: async () => {
+          await authClient.signOut();
+          setRoles([]);
+        },
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
-
-  const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    setRoles([]);
-  }, []);
-
-  const value: AuthContextValue = {
-    session,
-    user: session?.user ?? null,
-    roles,
-    loading: sessionLoading || rolesLoading,
-    isAdmin: roles.includes("admin"),
-    hasRole,
-    roleHome: homeForRoles(roles),
-    signOut,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
-}
+};

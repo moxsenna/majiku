@@ -6,15 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Sparkles, ArrowLeft, Eye, EyeOff, Mail, Lock, Building2, User, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { getRoleHome } from "@/lib/roleRedirect";
 
 export default function Auth() {
   const { mode } = useParams<{ mode: string }>();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState(mode === "register" ? "register" : "login");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,13 +21,13 @@ export default function Auth() {
 
   // Redirect if already logged in (to the dashboard matching the user's role)
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        const home = await getRoleHome(session.user.id);
-        navigate(home, { replace: true });
+    authClient.getSession().then(async (res) => {
+      if (res?.data?.session) {
+        const home = await getRoleHome(res.data.user.id);
+        window.location.href = home;
       }
     });
-  }, [navigate]);
+  }, []);
 
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
@@ -49,18 +48,18 @@ export default function Auth() {
       return;
     }
     setIsLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await authClient.signIn.email({
       email: loginForm.email,
       password: loginForm.password,
     });
     if (error) {
       setIsLoading(false);
-      toast({ title: "Login Gagal", description: error.message, variant: "destructive" });
+      toast({ title: "Login Gagal", description: error.message || "Email atau password salah", variant: "destructive" });
     } else {
-      const home = data.user ? await getRoleHome(data.user.id) : "/";
+      const home = await getRoleHome(data?.user?.id);
       setIsLoading(false);
       toast({ title: "Login Berhasil!", description: "Selamat datang kembali di MAJIKU" });
-      navigate(home, { replace: true });
+      window.location.href = home;
     }
   };
 
@@ -79,24 +78,17 @@ export default function Auth() {
       return;
     }
     setIsLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { error } = await authClient.signUp.email({
       email: registerForm.email,
       password: registerForm.password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: {
-          full_name: registerForm.name,
-          institution_name: registerForm.institutionName,
-          institution_type: registerForm.institutionType,
-          phone: registerForm.phone,
-        },
-      },
+      name: registerForm.name || registerForm.email,
     });
     setIsLoading(false);
     if (error) {
-      toast({ title: "Pendaftaran Gagal", description: error.message, variant: "destructive" });
+      toast({ title: "Pendaftaran Gagal", description: error.message || "Pendaftaran gagal", variant: "destructive" });
     } else {
-      toast({ title: "Pendaftaran Berhasil!", description: "Silakan cek email untuk verifikasi akun Anda." });
+      toast({ title: "Pendaftaran Berhasil!", description: "Silakan masuk dengan akun baru Anda." });
+      setActiveTab("login");
     }
   };
 
@@ -221,7 +213,6 @@ export default function Auth() {
                           value={registerForm.confirmPassword} onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })} />
                       </div>
                     </div>
-
 
                     <div className="flex items-start space-x-2">
                       <Checkbox id="terms" checked={registerForm.agreeTerms}
