@@ -30,3 +30,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.tsbuildinfo
+
+# Next.js & Cloudflare
+.next/
+.open-next/
+.dev.vars
+.env.local
+.env*.local
+next-env.d.ts
