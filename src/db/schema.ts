@@ -124,7 +124,7 @@ export const classes = pgTable("classes", {
 
 export const tutors = pgTable("tutors", {
   id: text("id").primaryKey(),
-  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }).unique(),
   name: text("name").notNull(),
   email: text("email"),
   phone: text("phone"),

@@ -2,9 +2,9 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { tutors, tutorClassAssignments, classes } from "@/db/schema";
+import { tutors, tutorClassAssignments, classes, user } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 
@@ -167,6 +167,109 @@ export async function toggleTutorActive(id: string, isActive: boolean): Promise<
       updatedAt: new Date(),
     })
     .where(eq(tutors.id, id))
+    .returning({ id: tutors.id });
+
+  if (result.length === 0) {
+    throw new Error("Tutor tidak ditemukan");
+  }
+}
+
+export interface LinkableUser {
+  id: string;
+  name: string;
+  email: string;
+  linkedTutorName: string | null;
+}
+
+export async function listLinkableUsers(): Promise<LinkableUser[]> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+
+  const rows = await db
+    .select({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      linkedTutorName: tutors.name,
+    })
+    .from(user)
+    .leftJoin(tutors, eq(tutors.userId, user.id))
+    .orderBy(asc(user.name));
+
+  return rows;
+}
+
+export async function linkTutorUser(tutorId: string, userId: string): Promise<void> {
+  await requireAdminOrModerator();
+
+  if (!tutorId) {
+    throw new Error("ID tutor wajib diisi");
+  }
+  if (!userId) {
+    throw new Error("ID akun wajib diisi");
+  }
+
+  const [targetTutor] = await db
+    .select({ id: tutors.id })
+    .from(tutors)
+    .where(eq(tutors.id, tutorId))
+    .limit(1);
+
+  if (!targetTutor) {
+    throw new Error("Tutor tidak ditemukan");
+  }
+
+  const [targetUser] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1);
+
+  if (!targetUser) {
+    throw new Error("Akun tidak ditemukan");
+  }
+
+  const [alreadyLinked] = await db
+    .select({ id: tutors.id })
+    .from(tutors)
+    .where(and(eq(tutors.userId, userId), ne(tutors.id, tutorId)))
+    .limit(1);
+
+  if (alreadyLinked) {
+    throw new Error("Akun sudah tertaut ke tutor lain");
+  }
+
+  const result = await db
+    .update(tutors)
+    .set({
+      userId,
+      updatedAt: new Date(),
+    })
+    .where(eq(tutors.id, tutorId))
+    .returning({ id: tutors.id });
+
+  if (result.length === 0) {
+    throw new Error("Tutor tidak ditemukan");
+  }
+}
+
+export async function unlinkTutorUser(tutorId: string): Promise<void> {
+  await requireAdminOrModerator();
+
+  if (!tutorId) {
+    throw new Error("ID tutor wajib diisi");
+  }
+
+  const result = await db
+    .update(tutors)
+    .set({
+      userId: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(tutors.id, tutorId))
     .returning({ id: tutors.id });
 
   if (result.length === 0) {

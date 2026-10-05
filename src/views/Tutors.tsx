@@ -24,6 +24,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Users,
   Plus,
   Search,
@@ -38,20 +45,25 @@ import {
   UserX,
   Loader2,
   BookOpen,
+  User,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   createTutor,
   updateTutor,
   toggleTutorActive,
+  linkTutorUser,
+  unlinkTutorUser,
   type TutorRecord,
   type TutorWithAssignments,
   type CreateTutorInput,
   type UpdateTutorInput,
+  type LinkableUser,
 } from "@/server/actions/tutorsCrud";
 
 interface TutorsProps {
   initialData: TutorWithAssignments[];
+  linkableUsers?: LinkableUser[];
 }
 
 const formatCurrency = (amount: number | string | null | undefined) => {
@@ -64,7 +76,7 @@ const formatCurrency = (amount: number | string | null | undefined) => {
   }).format(num);
 };
 
-export default function Tutors({ initialData }: TutorsProps) {
+export default function Tutors({ initialData, linkableUsers = [] }: TutorsProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -75,6 +87,10 @@ export default function Tutors({ initialData }: TutorsProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingTutor, setEditingTutor] = useState<TutorRecord | null>(null);
+
+  const [isLinkOpen, setIsLinkOpen] = useState(false);
+  const [linkingTutor, setLinkingTutor] = useState<TutorRecord | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState("");
 
   const [createForm, setCreateForm] = useState({
     name: "",
@@ -221,6 +237,55 @@ export default function Tutors({ initialData }: TutorsProps) {
     });
   };
 
+  const openLinkDialog = (tutor: TutorRecord) => {
+    setLinkingTutor(tutor);
+    setSelectedUserId(tutor.userId || "");
+    setIsLinkOpen(true);
+  };
+
+  const handleLinkSubmit = () => {
+    if (!linkingTutor || !selectedUserId) return;
+
+    startTransition(async () => {
+      try {
+        await linkTutorUser(linkingTutor.id, selectedUserId);
+        toast({
+          title: "Akun berhasil ditautkan",
+          description: `Akun berhasil ditautkan ke tutor "${linkingTutor.name}"`,
+        });
+        setIsLinkOpen(false);
+        setLinkingTutor(null);
+        setSelectedUserId("");
+        router.refresh();
+      } catch (err) {
+        toast({
+          title: "Gagal menautkan akun",
+          description: err instanceof Error ? err.message : "Terjadi kesalahan",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
+  const handleUnlinkAccount = (tutor: TutorRecord) => {
+    startTransition(async () => {
+      try {
+        await unlinkTutorUser(tutor.id);
+        toast({
+          title: "Tautan akun dilepas",
+          description: `Tautan akun untuk tutor "${tutor.name}" berhasil dilepas`,
+        });
+        router.refresh();
+      } catch (err) {
+        toast({
+          title: "Gagal melepas tautan",
+          description: err instanceof Error ? err.message : "Terjadi kesalahan",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
   return (
     <DashboardLayout
       title="Kelola Tutor"
@@ -301,87 +366,140 @@ export default function Tutors({ initialData }: TutorsProps) {
 
       {/* Tutors Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredTutors.map(({ tutor, assignments }) => (
-          <Card
-            key={tutor.id}
-            className={`overflow-hidden transition-shadow hover:shadow-md ${
-              !tutor.isActive ? "opacity-75 bg-muted/30" : ""
-            }`}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={tutor.photoUrl || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {tutor.name
-                        .split(" ")
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase() || "TU"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-base leading-tight">{tutor.name}</CardTitle>
-                    <div className="mt-1">
-                      <Badge
-                        variant={tutor.isActive ? "default" : "secondary"}
-                        className="text-xs"
-                      >
-                        {tutor.isActive ? "Aktif" : "Nonaktif"}
-                      </Badge>
+        {filteredTutors.map(({ tutor, assignments }) => {
+          const linkedAccount = tutor.userId
+            ? linkableUsers.find((u) => u.id === tutor.userId)
+            : null;
+          const linkedEmail = linkedAccount?.email || tutor.userId;
+
+          return (
+            <Card
+              key={tutor.id}
+              className={`overflow-hidden transition-shadow hover:shadow-md ${
+                !tutor.isActive ? "opacity-75 bg-muted/30" : ""
+              }`}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={tutor.photoUrl || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                        {tutor.name
+                          .split(" ")
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase() || "TU"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-base leading-tight">{tutor.name}</CardTitle>
+                      <div className="mt-1">
+                        <Badge
+                          variant={tutor.isActive ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {tutor.isActive ? "Aktif" : "Nonaktif"}
+                        </Badge>
+                      </div>
                     </div>
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" disabled={isPending}>
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                      <DropdownMenuItem
+                        className="gap-2 cursor-pointer"
+                        onClick={() => openEditDialog(tutor)}
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit Data Tutor
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="gap-2 cursor-pointer"
+                        onClick={() => handleToggleActive(tutor)}
+                      >
+                        <Power className="w-4 h-4" />
+                        {tutor.isActive ? "Nonaktifkan Tutor" : "Aktifkan Tutor"}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-1">
+                {/* Contact Info */}
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  {tutor.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{tutor.email}</span>
+                    </div>
+                  )}
+                  {tutor.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-3.5 w-3.5 shrink-0" />
+                      <span>{tutor.phone}</span>
+                    </div>
+                  )}
+                  {!tutor.email && !tutor.phone && (
+                    <p className="italic">Belum ada kontak terdaftar</p>
+                  )}
+                </div>
+
+                {/* Account Linking */}
+                <div className="pt-3 border-t">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Akun Sistem
+                      </span>
+                    </div>
+                    {tutor.userId ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleUnlinkAccount(tutor)}
+                        disabled={isPending}
+                      >
+                        Lepas Tautan
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => openLinkDialog(tutor)}
+                        disabled={isPending}
+                      >
+                        Tautkan Akun
+                      </Button>
+                    )}
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between text-xs">
+                    {tutor.userId ? (
+                      <span
+                        className="truncate font-mono text-[11px] text-muted-foreground"
+                        title={linkedEmail || undefined}
+                      >
+                        {linkedEmail}
+                      </span>
+                    ) : (
+                      <Badge variant="secondary" className="text-[10px] font-normal py-0 px-1.5">
+                        Belum tertaut
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" disabled={isPending}>
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                    <DropdownMenuItem
-                      className="gap-2 cursor-pointer"
-                      onClick={() => openEditDialog(tutor)}
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit Data Tutor
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="gap-2 cursor-pointer"
-                      onClick={() => handleToggleActive(tutor)}
-                    >
-                      <Power className="w-4 h-4" />
-                      {tutor.isActive ? "Nonaktifkan Tutor" : "Aktifkan Tutor"}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-1">
-              {/* Contact Info */}
-              <div className="space-y-2 text-xs text-muted-foreground">
-                {tutor.email && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{tutor.email}</span>
-                  </div>
-                )}
-                {tutor.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 shrink-0" />
-                    <span>{tutor.phone}</span>
-                  </div>
-                )}
-                {!tutor.email && !tutor.phone && (
-                  <p className="italic">Belum ada kontak terdaftar</p>
-                )}
-              </div>
-
-              {/* Class Assignments */}
+                {/* Class Assignments */}
               <div className="pt-3 border-t">
                 <div className="flex items-center gap-1.5 mb-2">
                   <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
@@ -417,7 +535,8 @@ export default function Tutors({ initialData }: TutorsProps) {
               </div>
             </CardContent>
           </Card>
-        ))}
+        );
+      })}
       </div>
 
       {filteredTutors.length === 0 && (
@@ -568,6 +687,81 @@ export default function Tutors({ initialData }: TutorsProps) {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Tautkan Akun */}
+      <Dialog open={isLinkOpen} onOpenChange={setIsLinkOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tautkan Akun</DialogTitle>
+            <DialogDescription>
+              Pilih akun pengguna BetterAuth untuk ditautkan ke pengajar{" "}
+              <span className="font-semibold text-foreground">
+                {linkingTutor?.name}
+              </span>
+              .
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="link-user-select">Pilih Akun Pengguna</Label>
+              <Select
+                value={selectedUserId}
+                onValueChange={setSelectedUserId}
+              >
+                <SelectTrigger id="link-user-select" className="w-full">
+                  <SelectValue placeholder="Pilih akun pengguna..." />
+                </SelectTrigger>
+                <SelectContent className="bg-background border shadow-lg z-50 max-h-60">
+                  {linkableUsers.length === 0 ? (
+                    <div className="p-2 text-xs text-muted-foreground text-center">
+                      Tidak ada akun pengguna yang tersedia
+                    </div>
+                  ) : (
+                    linkableUsers.map((u) => {
+                      const isAlreadyLinked = Boolean(u.linkedTutorName);
+                      const label = isAlreadyLinked
+                        ? `${u.name} — ${u.email} (tertaut ke ${u.linkedTutorName})`
+                        : `${u.name} — ${u.email}`;
+
+                      return (
+                        <SelectItem
+                          key={u.id}
+                          value={u.id}
+                          disabled={isAlreadyLinked}
+                        >
+                          {label}
+                        </SelectItem>
+                      );
+                    })
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsLinkOpen(false);
+                setLinkingTutor(null);
+                setSelectedUserId("");
+              }}
+              disabled={isPending}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              onClick={handleLinkSubmit}
+              disabled={isPending || !selectedUserId}
+            >
+              {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Tautkan Akun
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

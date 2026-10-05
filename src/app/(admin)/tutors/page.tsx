@@ -1,9 +1,12 @@
 import Tutors from "@/views/Tutors";
-import { listTutorsWithAssignments } from "@/server/actions/tutorsCrud";
+import { listTutorsWithAssignments, listLinkableUsers } from "@/server/actions/tutorsCrud";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const tutorsWithAssignments = await listTutorsWithAssignments();
-  return <Tutors initialData={tutorsWithAssignments} />;
+  const [tutorsWithAssignments, linkableUsers] = await Promise.all([
+    listTutorsWithAssignments(),
+    listLinkableUsers(),
+  ]);
+  return <Tutors initialData={tutorsWithAssignments} linkableUsers={linkableUsers} />;
 }
