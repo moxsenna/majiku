@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
-import { putPhoto } from "@/server/r2";
+import { getMyRoles } from "@/server/actions/roles";
+import { putPhoto, ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from "@/server/r2";
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
@@ -8,6 +9,12 @@ export async function POST(req: Request) {
   });
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const roles = await getMyRoles();
+  const isAllowed = roles.some((r) => r === "admin" || r === "moderator" || r === "tutor");
+  if (!isAllowed) {
+    return Response.json({ error: "Forbidden: role tidak diizinkan" }, { status: 403 });
   }
 
   let formData: FormData;
@@ -44,6 +51,21 @@ export async function POST(req: Request) {
       { error: "Maksimal 6 file sekaligus" },
       { status: 400 }
     );
+  }
+
+  for (const file of files) {
+    if (!ALLOWED_MIME_TYPES[file.type]) {
+      return Response.json(
+        { error: `Format file ${file.name || "yang dipilih"} harus JPG/PNG/WebP` },
+        { status: 400 }
+      );
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return Response.json(
+        { error: `Ukuran file ${file.name || "yang dipilih"} melebihi batas 5MB` },
+        { status: 400 }
+      );
+    }
   }
 
   try {

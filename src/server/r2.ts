@@ -18,10 +18,10 @@ export type R2Bucket = {
   delete?(keys: string | string[]): Promise<unknown>;
 };
 
-const KEY_REGEX = /^(reports|gallery)\/[0-9a-f-]{36}\.(jpg|jpeg|png|webp)$/;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const KEY_REGEX = /^(reports|gallery)\/[0-9a-f-]{36}\.(jpg|jpeg|png|webp)$/;
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-const ALLOWED_MIME_TYPES: Record<string, string> = {
+export const ALLOWED_MIME_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
