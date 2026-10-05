@@ -44,6 +44,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
+import { submitTrialApplication } from "@/server/actions/trial";
 
 const programs = [
   {
@@ -162,16 +163,42 @@ export default function ParentRegistration() {
       return;
     }
 
-    setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
+    try {
+      setIsSubmitting(true);
+      await submitTrialApplication({
+        programKey: selectedProgram,
+        childName: formData.childName,
+        childNickname: formData.childNickname || undefined,
+        childBirthDate: formData.birthDate || undefined,
+        childGender: formData.gender || undefined,
+        allergies: formData.allergies || undefined,
+        medicalNotes: formData.medicalNotes || undefined,
+        parentName: formData.parentName || undefined,
+        parentPhone: formData.parentPhone || undefined,
+        parentEmail: formData.parentEmail || undefined,
+        address: formData.address || undefined,
+        emergencyContact: formData.emergencyContact || undefined,
+        emergencyPhone: formData.emergencyPhone || undefined,
+        requestedStartDate: formData.startDate || undefined,
+        parentNotes: formData.additionalNotes || undefined,
+      });
 
-    toast({
-      title: "Pendaftaran Berhasil! 🎉",
-      description: "Tim kami akan menghubungi Anda dalam 1-2 hari kerja",
-    });
+      toast({
+        title: "Pengajuan trial terkirim",
+        description: "Tim kami akan segera memproses pengajuan Anda.",
+      });
 
-    router.push("/parent");
+      router.push("/parent");
+    } catch (e) {
+      const err = e as Error;
+      toast({
+        title: "Gagal mengirim pengajuan",
+        description: err.message || "Terjadi kesalahan saat mengirim pengajuan trial",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const nextStep = () => {
@@ -669,7 +696,7 @@ export default function ParentRegistration() {
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Mendaftar...
+                  Mengirim...
                 </span>
               ) : (
                 <>

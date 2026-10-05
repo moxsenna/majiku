@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,10 +31,13 @@ import {
   LogOut,
   CreditCard,
   GraduationCap,
+  FileText,
 } from "lucide-react";
 import { PromoBanner } from "@/components/promo/PromoBanner";
 import { ParentActivityWidget } from "@/components/dashboard/ParentActivityWidget";
 import { ProgramInfoBanner } from "@/components/parent/ProgramInfoBanner";
+import { TrialStatusList } from "@/components/parent/TrialStatusList";
+import type { TrialApplicationRow } from "@/server/actions/trial";
 
 // Mock data for child
 const childData = {
@@ -145,7 +150,11 @@ const categoryColors = {
   activity: "bg-primary/10 text-primary",
 };
 
-export default function ParentPortal() {
+interface ParentPortalProps {
+  trialStatus?: TrialApplicationRow[];
+}
+
+export default function ParentPortal({ trialStatus = [] }: ParentPortalProps) {
   const [activeTab, setActiveTab] = useState<"feed" | "progress" | "gallery">("feed");
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({
     "1": true,
@@ -286,6 +295,15 @@ export default function ParentPortal() {
             {/* Program Info & Testimonials Banner */}
             <div className="px-4 pb-4">
               <ProgramInfoBanner />
+            </div>
+
+            {/* Status Trial & Pendaftaran */}
+            <div className="px-4 pb-4">
+              <h3 className="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                Status Trial & Pendaftaran
+              </h3>
+              <TrialStatusList applications={trialStatus} />
             </div>
 
             {/* Feed */}
