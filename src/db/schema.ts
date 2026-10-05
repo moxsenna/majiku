@@ -287,3 +287,17 @@ export const dailyReports = pgTable("daily_reports", {
 });
 
 export type DailyReportRow = typeof dailyReports.$inferSelect;
+
+export const galleryPhotos = pgTable("gallery_photos", {
+  id: text("id").primaryKey(),
+  studentId: text("student_id").references(() => students.id, { onDelete: "set null" }),
+  classId: text("class_id").references(() => classes.id, { onDelete: "set null" }),
+  photoKey: text("photo_key").notNull(),
+  caption: text("caption"),
+  uploadedByUserId: text("uploaded_by_user_id").references(() => user.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type GalleryPhoto = typeof galleryPhotos.$inferSelect;
+

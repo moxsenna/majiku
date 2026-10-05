@@ -74,3 +74,20 @@ export async function getPhoto(key: string): Promise<R2ObjectBody | null> {
   const bucket = getBucket();
   return await bucket.get(key);
 }
+
+export async function deletePhoto(key: string): Promise<void> {
+  if (!KEY_REGEX.test(key) || key.includes("..") || key.startsWith("/")) {
+    console.warn(`[deletePhoto] Key tidak valid diabaikan: ${key}`);
+    return;
+  }
+
+  try {
+    const bucket = getBucket();
+    if (typeof bucket.delete === "function") {
+      await bucket.delete(key);
+    }
+  } catch (err) {
+    console.warn(`[deletePhoto] Gagal menghapus foto dari R2 (best-effort): ${key}`, err);
+  }
+}
+
