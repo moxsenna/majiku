@@ -25,10 +25,10 @@ export interface StudentWithEnrollments {
 
 export interface CreateStudentInput {
   name: string;
-  dateOfBirth?: string;
-  parentName?: string;
-  parentPhone?: string;
-  parentEmail?: string;
+  dateOfBirth?: string | null;
+  parentName?: string | null;
+  parentPhone?: string | null;
+  parentEmail?: string | null;
   classId?: string;
   sessionsQuota?: number;
   billingDay?: number;
@@ -36,10 +36,10 @@ export interface CreateStudentInput {
 
 export interface UpdateStudentInput {
   name?: string;
-  dateOfBirth?: string;
-  parentName?: string;
-  parentPhone?: string;
-  parentEmail?: string;
+  dateOfBirth?: string | null;
+  parentName?: string | null;
+  parentPhone?: string | null;
+  parentEmail?: string | null;
 }
 
 async function getSessionSafely() {
@@ -169,10 +169,22 @@ export async function updateStudent(
   };
 
   if (partial.name !== undefined) updateValues.name = partial.name.trim();
-  if (partial.dateOfBirth !== undefined) updateValues.dateOfBirth = partial.dateOfBirth?.trim() || null;
-  if (partial.parentName !== undefined) updateValues.parentName = partial.parentName?.trim() || null;
-  if (partial.parentPhone !== undefined) updateValues.parentPhone = partial.parentPhone?.trim() || null;
-  if (partial.parentEmail !== undefined) updateValues.parentEmail = partial.parentEmail?.trim() || null;
+  if (partial.dateOfBirth !== undefined) {
+    updateValues.dateOfBirth =
+      typeof partial.dateOfBirth === "string" ? partial.dateOfBirth.trim() || null : partial.dateOfBirth;
+  }
+  if (partial.parentName !== undefined) {
+    updateValues.parentName =
+      typeof partial.parentName === "string" ? partial.parentName.trim() || null : partial.parentName;
+  }
+  if (partial.parentPhone !== undefined) {
+    updateValues.parentPhone =
+      typeof partial.parentPhone === "string" ? partial.parentPhone.trim() || null : partial.parentPhone;
+  }
+  if (partial.parentEmail !== undefined) {
+    updateValues.parentEmail =
+      typeof partial.parentEmail === "string" ? partial.parentEmail.trim() || null : partial.parentEmail;
+  }
 
   const result = await db
     .update(students)

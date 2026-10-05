@@ -12,22 +12,22 @@ export type ClassRecord = typeof classes.$inferSelect;
 
 export interface CreateClassInput {
   name: string;
-  description?: string;
-  capacity?: number;
-  pricePerMonth?: number | string;
-  sessionsPerMonth?: number;
-  schedule?: string;
-  location?: string;
+  description?: string | null;
+  capacity?: number | null;
+  pricePerMonth?: number | string | null;
+  sessionsPerMonth?: number | null;
+  schedule?: string | null;
+  location?: string | null;
 }
 
 export interface UpdateClassInput {
   name?: string;
-  description?: string;
-  capacity?: number;
-  pricePerMonth?: number | string;
-  sessionsPerMonth?: number;
-  schedule?: string;
-  location?: string;
+  description?: string | null;
+  capacity?: number | null;
+  pricePerMonth?: number | string | null;
+  sessionsPerMonth?: number | null;
+  schedule?: string | null;
+  location?: string | null;
 }
 
 async function getSessionSafely() {
@@ -111,7 +111,10 @@ export async function updateClass(id: string, partial: UpdateClassInput): Promis
   };
 
   if (partial.name !== undefined) updateValues.name = partial.name.trim();
-  if (partial.description !== undefined) updateValues.description = partial.description.trim() || null;
+  if (partial.description !== undefined) {
+    updateValues.description =
+      typeof partial.description === "string" ? partial.description.trim() || null : partial.description;
+  }
   if (partial.capacity !== undefined) {
     updateValues.capacity =
       partial.capacity !== null && !isNaN(Number(partial.capacity)) ? Number(partial.capacity) : null;
@@ -119,7 +122,7 @@ export async function updateClass(id: string, partial: UpdateClassInput): Promis
   if (partial.pricePerMonth !== undefined) {
     updateValues.pricePerMonth =
       partial.pricePerMonth !== null && String(partial.pricePerMonth).trim() !== ""
-        ? String(partial.pricePerMonth)
+        ? String(partial.pricePerMonth).trim()
         : null;
   }
   if (partial.sessionsPerMonth !== undefined) {
@@ -128,8 +131,14 @@ export async function updateClass(id: string, partial: UpdateClassInput): Promis
         ? Number(partial.sessionsPerMonth)
         : null;
   }
-  if (partial.schedule !== undefined) updateValues.schedule = partial.schedule.trim() || null;
-  if (partial.location !== undefined) updateValues.location = partial.location.trim() || null;
+  if (partial.schedule !== undefined) {
+    updateValues.schedule =
+      typeof partial.schedule === "string" ? partial.schedule.trim() || null : partial.schedule;
+  }
+  if (partial.location !== undefined) {
+    updateValues.location =
+      typeof partial.location === "string" ? partial.location.trim() || null : partial.location;
+  }
 
   const result = await db
     .update(classes)

@@ -186,12 +186,12 @@ export default function Classes({ initialClasses }: ClassesProps) {
       try {
         const partial: UpdateClassInput = {
           name: formData.name.trim(),
-          description: formData.description.trim() || undefined,
-          capacity: formData.capacity ? Number(formData.capacity) : undefined,
-          pricePerMonth: formData.pricePerMonth ? formData.pricePerMonth : undefined,
-          sessionsPerMonth: formData.sessionsPerMonth ? Number(formData.sessionsPerMonth) : undefined,
-          schedule: formData.schedule.trim() || undefined,
-          location: formData.location.trim() || undefined,
+          description: formData.description.trim(),
+          capacity: formData.capacity ? Number(formData.capacity) : null,
+          pricePerMonth: formData.pricePerMonth.trim() ? formData.pricePerMonth.trim() : null,
+          sessionsPerMonth: formData.sessionsPerMonth ? Number(formData.sessionsPerMonth) : null,
+          schedule: formData.schedule.trim(),
+          location: formData.location.trim(),
         };
 
         await updateClass(editingClass.id, partial);

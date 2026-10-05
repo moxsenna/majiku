@@ -233,10 +233,10 @@ export default function Students({ initialData, availableClasses }: StudentsProp
       try {
         const partial: UpdateStudentInput = {
           name: editForm.name.trim(),
-          dateOfBirth: editForm.dateOfBirth.trim() || undefined,
-          parentName: editForm.parentName.trim() || undefined,
-          parentPhone: editForm.parentPhone.trim() || undefined,
-          parentEmail: editForm.parentEmail.trim() || undefined,
+          dateOfBirth: editForm.dateOfBirth.trim() || null,
+          parentName: editForm.parentName.trim(),
+          parentPhone: editForm.parentPhone.trim(),
+          parentEmail: editForm.parentEmail.trim(),
         };
 
         await updateStudent(editingStudent.id, partial);

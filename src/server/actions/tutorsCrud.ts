@@ -24,14 +24,14 @@ export interface TutorWithAssignments {
 
 export interface CreateTutorInput {
   name: string;
-  email?: string;
-  phone?: string;
+  email?: string | null;
+  phone?: string | null;
 }
 
 export interface UpdateTutorInput {
   name?: string;
-  email?: string;
-  phone?: string;
+  email?: string | null;
+  phone?: string | null;
 }
 
 async function getSessionSafely() {
@@ -133,8 +133,14 @@ export async function updateTutor(
   };
 
   if (partial.name !== undefined) updateValues.name = partial.name.trim();
-  if (partial.email !== undefined) updateValues.email = partial.email.trim() || null;
-  if (partial.phone !== undefined) updateValues.phone = partial.phone.trim() || null;
+  if (partial.email !== undefined) {
+    updateValues.email =
+      typeof partial.email === "string" ? partial.email.trim() || null : partial.email;
+  }
+  if (partial.phone !== undefined) {
+    updateValues.phone =
+      typeof partial.phone === "string" ? partial.phone.trim() || null : partial.phone;
+  }
 
   const result = await db
     .update(tutors)

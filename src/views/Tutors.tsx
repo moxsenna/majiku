@@ -179,8 +179,8 @@ export default function Tutors({ initialData }: TutorsProps) {
       try {
         const partial: UpdateTutorInput = {
           name: editForm.name.trim(),
-          email: editForm.email.trim() || undefined,
-          phone: editForm.phone.trim() || undefined,
+          email: editForm.email.trim(),
+          phone: editForm.phone.trim(),
         };
 
         await updateTutor(editingTutor.id, partial);
