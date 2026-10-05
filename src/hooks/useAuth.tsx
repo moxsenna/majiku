@@ -3,15 +3,10 @@
 import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from "react";
 import { authClient } from "@/lib/auth-client";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { roleHome, homeForRoles } from "@/lib/roleRedirect";
 
 export type { AppRole };
-
-export function homeForRoles(roles: AppRole[]): string {
-  if (roles.includes("admin")) return "/dashboard";
-  if (roles.includes("tutor")) return "/tutor";
-  if (roles.includes("parent")) return "/parent";
-  return "/";
-}
+export { roleHome, homeForRoles };
 
 export interface AuthUser {
   id: string;
