@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, desc, eq, ilike, or, SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
@@ -16,17 +17,31 @@ export async function listActiveTenants(filters: TenantFilters = {}) {
     conds.push(
       or(ilike(tenants.name, `%${filters.q}%`), ilike(tenants.description, `%${filters.q}%`))!
     );
-  return db.select().from(tenants).where(and(...conds)).orderBy(desc(tenants.isVerified), tenants.name);
+  return db
+    .select()
+    .from(tenants)
+    .where(and(...conds))
+    .orderBy(desc(tenants.isVerified), tenants.name)
+    .limit(60);
 }
 
-export async function getTenantBySlug(slug: string) {
-  const rows = await db.select().from(tenants).where(and(eq(tenants.slug, slug), eq(tenants.isActive, true))).limit(1);
+export const getTenantBySlug = cache(async (slug: string) => {
+  const rows = await db
+    .select()
+    .from(tenants)
+    .where(and(eq(tenants.slug, slug), eq(tenants.isActive, true)))
+    .limit(1);
   return rows[0] ?? null;
-}
+});
 
-export async function getAllTenantSlugs(): Promise<string[]> {
-  const rows = await db.select({ slug: tenants.slug }).from(tenants).where(eq(tenants.isActive, true));
-  return rows.map((r) => r.slug);
+export async function getAllTenantSlugs(): Promise<{ slug: string; updatedAt: Date | null }[]> {
+  return db
+    .select({
+      slug: tenants.slug,
+      updatedAt: tenants.updatedAt,
+    })
+    .from(tenants)
+    .where(eq(tenants.isActive, true));
 }
 
 export async function getFeaturedTenants(limit = 6) {

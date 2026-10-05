@@ -211,4 +211,33 @@ Tabel verifikasi tag SEO via curl view-source:
   - Response: `HTTP 429 Too Many Requests`
   - Error: `Error 1027: This website has been temporarily rate limited`
   - Penyebab: Kuota harian Cloudflare Workers Free Tier (100.000 requests/hari) telah tercapai dari load Fase 1.
-  - Mitigasi & Next Steps: Kuota ter-reset secara otomatis pada UTC midnight. Karena deploy OpenNext sukses dan bundle worker tersimpan di Cloudflare edge, staging akan otomatis pulih saat reset tanpa memerlukan redeploy ulang.
+- **Mitigasi & Next Steps**: Kuota ter-reset secara otomatis pada UTC midnight. Karena deploy OpenNext sukses dan bundle worker tersimpan di Cloudflare edge, staging akan otomatis pulih saat reset tanpa memerlukan redeploy ulang.
+
+---
+
+## 6. Final Fix Wave (Review Findings)
+
+**Tanggal**: 2026-10-05  
+**Redeployed Worker Version ID**: `c9d0acf8-70cf-488f-bf07-e2c3f3d0ae3c`
+
+### Item Perbaikan:
+1. **Fix 1 (Important) — Rute Microsite Masuk Sitemap**: Rute statis sitemap diperbarui menjadi `["", "/marketplace", "/site/daycare", "/site/preschool", "/site/bimbel"]`.
+2. **Fix 2 (Important) — React `cache()` untuk `getTenantBySlug`**: Menghilangkan query duplikat Neon DB antara `generateMetadata` dan SSR render komponen pada halaman detail tenant (`src/lib/tenants.ts`).
+3. **Fix 3 (Important) — Rute Auth Dikeluarkan dari Sitemap & Noindex**:
+   - Dihapus `/auth/login` dan `/auth/register` dari sitemap.
+   - Ditambahkan Server Component `src/app/(public)/auth/[mode]/layout.tsx` dengan metadata `robots: { index: false, follow: true }` karena `page.tsx` adalah Client Component (`"use client"`).
+4. **Fix 4 (Minor) — Query Bounding Marketplace**: `listActiveTenants` ditambahkan `.limit(60)` untuk membatasi beban query database.
+5. **Fix 5 (Minor) — Real `lastModified` di Sitemap**:
+   - `getAllTenantSlugs` diekstensi mengembalikan `{ slug, updatedAt }`.
+   - Rute tenant menggunakan `lastModified: row.updatedAt ?? new Date()`.
+   - Rute statis tidak menyertakan `lastModified` (dihilangkan agar ditangani langsung oleh search engine crawler).
+
+### Hasil Verifikasi Ulang:
+- `npx tsc --noEmit`: Clean (0 errors).
+- `npm run lint`: Clean (0 errors).
+- `npm run build`: Succeeded (37 static pages).
+- Local Dev Sitemap XML: 15 URL (5 statis tanpa lastmod, 10 tenant dengan real DB timestamp lastmod, 0 auth URL).
+- Local Dev Auth: `/auth/login` & `/auth/register` menyajikan `<meta name="robots" content="noindex, follow"/>`.
+- Local Dev Tenant Detail: `/marketplace/majiku-kids` title tag hadir (`<title>Majiku Kids — Tangerang | MAJIKU</title>`).
+- Staging Redeployment: Berhasil diunggah ke Cloudflare edge dengan Version ID `c9d0acf8-70cf-488f-bf07-e2c3f3d0ae3c`.
+
