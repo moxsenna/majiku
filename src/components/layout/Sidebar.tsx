@@ -45,12 +45,23 @@ const menuItems = [
   { icon: Cake, label: "Ulang Tahun", path: "/birthdays" },
 ];
 
+const tutorMenuItems = [
+  { icon: Home, label: "Dashboard", path: "/tutor" },
+  { icon: ClipboardCheck, label: "Trial", path: "/tutor/trials" },
+  { icon: ClipboardCheck, label: "Absensi", path: "/tutor/attendance" },
+  { icon: Calendar, label: "Upload Progress", path: "/tutor/progress" },
+  { icon: MessageSquare, label: "Komunikasi", path: "/tutor/chat" },
+  { icon: GraduationCap, label: "Panduan", path: "/tutor/guides" },
+];
+
 const bottomItems = [
   { icon: Settings, label: "Pengaturan", path: "/settings" },
 ];
 
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const isTutor = pathname.startsWith("/tutor");
+  const navItems = isTutor ? tutorMenuItems : menuItems;
 
   return (
     <>
@@ -63,7 +74,9 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             </div>
             <div>
               <h1 className="font-bold text-sidebar-foreground text-lg">MAJIKU</h1>
-              <p className="text-xs text-sidebar-foreground/60">Daycare Management</p>
+              <p className="text-xs text-sidebar-foreground/60">
+                {isTutor ? "Portal Tutor" : "Daycare Management"}
+              </p>
             </div>
           </div>
         )}
@@ -76,7 +89,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => {
+        {navItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <Link

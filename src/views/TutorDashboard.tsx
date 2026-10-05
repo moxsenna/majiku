@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const tutorNav = [
   { icon: Home, label: "Dashboard", path: "/tutor" },
+  { icon: ClipboardCheck, label: "Trial", path: "/tutor/trials" },
   { icon: Upload, label: "Upload Progress", path: "/tutor/progress" },
   { icon: MessageCircle, label: "Chat", path: "/tutor/chat" },
   { icon: ClipboardCheck, label: "Absensi", path: "/tutor/attendance" },
@@ -276,7 +277,13 @@ export default function TutorDashboard() {
           </div>
 
           {/* Quick Actions - Now styled as distinct buttons */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+            <QuickActionButton
+              icon={ClipboardCheck}
+              label="Antrean Trial"
+              color="blue"
+              onClick={() => router.push("/tutor/trials")}
+            />
             <QuickActionButton
               icon={Upload}
               label="Upload Laporan"
