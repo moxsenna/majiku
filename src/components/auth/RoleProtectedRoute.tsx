@@ -1,14 +1,18 @@
-import { Navigate, useLocation } from "react-router-dom";
+"use client";
+
+import { redirect, usePathname } from "next/navigation";
 import { useAuth, type AppRole } from "@/hooks/useAuth";
 
 interface RoleProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole: AppRole;
+  role?: AppRole;
+  requiredRole?: AppRole;
 }
 
-export function RoleProtectedRoute({ children, requiredRole }: RoleProtectedRouteProps) {
+export function RoleProtectedRoute({ children, role, requiredRole }: RoleProtectedRouteProps) {
+  const targetRole = role ?? requiredRole;
   const { session, loading, hasRole, roleHome } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
 
   if (loading) {
     return (
@@ -19,12 +23,12 @@ export function RoleProtectedRoute({ children, requiredRole }: RoleProtectedRout
   }
 
   if (!session) {
-    return <Navigate to="/auth/login" replace state={{ from: location.pathname }} />;
+    redirect(`/auth/login?from=${encodeURIComponent(pathname || "")}`);
   }
 
-  if (!hasRole(requiredRole)) {
+  if (targetRole && !hasRole(targetRole)) {
     // Send the user to the dashboard they actually have access to.
-    return <Navigate to={roleHome} replace />;
+    redirect(roleHome);
   }
 
   return <>{children}</>;

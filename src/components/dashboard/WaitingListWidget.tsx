@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Users, AlertCircle, Bell, CheckCircle2, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 export function WaitingListWidget() {
   const { data: waitingList = [] } = useQuery({
@@ -30,7 +30,7 @@ export function WaitingListWidget() {
             <Users className="h-4 w-4 text-primary" />
             <h3 className="font-semibold text-sm">Waiting List</h3>
           </div>
-          <Link to="/crm">
+          <Link href="/crm">
             <Button variant="ghost" size="sm" className="h-7 text-xs">Lihat</Button>
           </Link>
         </div>

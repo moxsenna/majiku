@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { 
   ArrowLeft, Clock, MapPin, CheckCircle2, XCircle, 
   Calendar, TrendingUp, AlertCircle, QrCode
@@ -61,7 +61,7 @@ export default function TutorAttendance() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex items-center gap-3 p-4">
-          <Link to="/tutor">
+          <Link href="/tutor">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="w-5 h-5" />
             </Button>

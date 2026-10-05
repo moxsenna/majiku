@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { 
   ArrowLeft, BookOpen, Play, FileText, CheckCircle2,
   Clock, Star, ChevronRight, Search, Filter,
@@ -129,7 +129,7 @@ export default function TutorGuides() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex items-center gap-3 p-4">
-          <Link to="/tutor">
+          <Link href="/tutor">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="w-5 h-5" />
             </Button>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -792,17 +792,17 @@ export default function DaycareMarketplace() {
               </div>
             </SheetContent>
           </Sheet>
-          <Link to="/parent" className="flex flex-col items-center gap-1 p-2">
+          <Link href="/parent" className="flex flex-col items-center gap-1 p-2">
             <div className="w-12 h-12 -mt-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
               <Baby className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xs text-primary font-medium">Anak Saya</span>
           </Link>
-          <Link to="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <MessageCircle className="h-6 w-6" />
             <span className="text-xs">Pesan</span>
           </Link>
-          <Link to="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <User className="h-6 w-6" />
             <span className="text-xs">Profil</span>
           </Link>

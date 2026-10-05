@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,7 +50,8 @@ import {
   Dumbbell
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useParams } from "react-router-dom";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -1008,7 +1011,7 @@ export default function VendorSite() {
               </div>
             </div>
             <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center md:text-right">
-              © 2024 {vendor.name}. Powered by <Link to="/saas" className="text-primary font-semibold hover:underline">MAJIKU</Link>
+              © 2024 {vendor.name}. Powered by <Link href="/saas" className="text-primary font-semibold hover:underline">MAJIKU</Link>
             </p>
           </div>
         </div>

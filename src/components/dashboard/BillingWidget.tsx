@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreditCard, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface BillingItem {
   id: string;
@@ -41,7 +41,7 @@ export function BillingWidget({ items, totalRevenue, pendingAmount }: BillingWid
             <p className="text-xs sm:text-sm text-muted-foreground">Bulan ini</p>
           </div>
         </div>
-        <Link to="/billing">
+        <Link href="/billing">
           <Button variant="soft" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 shrink-0">
             Lihat Semua
           </Button>

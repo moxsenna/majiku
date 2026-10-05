@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -174,7 +174,7 @@ export default function ParentPortal() {
                 3
               </span>
             </Button>
-            <Link to="/parent/chat">
+            <Link href="/parent/chat">
               <Button variant="ghost" size="icon-sm">
                 <MessageCircle className="h-5 w-5" />
               </Button>
@@ -207,25 +207,25 @@ export default function ParentPortal() {
 
         {/* Quick Actions */}
         <div className="px-4 py-3 flex gap-2 overflow-x-auto">
-          <Link to="/parent/marketplace">
+          <Link href="/parent/marketplace">
             <Button variant="default" size="sm" className="flex-shrink-0 gap-2">
               <Search className="h-4 w-4" />
               Cari Daycare
             </Button>
           </Link>
-          <Link to="/parent/registration">
+          <Link href="/parent/registration">
             <Button variant="outline" size="sm" className="flex-shrink-0 gap-2">
               <Plus className="h-4 w-4" />
               Daftar Program
             </Button>
           </Link>
-          <Link to="/parent/billing">
+          <Link href="/parent/billing">
             <Button variant="outline" size="sm" className="flex-shrink-0 gap-2">
               <CreditCard className="h-4 w-4" />
               Lihat Tagihan
             </Button>
           </Link>
-          <Link to="/parent/chat">
+          <Link href="/parent/chat">
             <Button variant="outline" size="sm" className="flex-shrink-0 gap-2">
               <MessageCircle className="h-4 w-4" />
               Chat Admin
@@ -589,20 +589,20 @@ export default function ParentPortal() {
             <Home className="h-6 w-6" />
             <span className="text-xs">Beranda</span>
           </button>
-          <Link to="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-6 w-6" />
             <span className="text-xs">Katalog</span>
           </Link>
-          <Link to="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <CreditCard className="h-6 w-6" />
             <span className="text-xs">Tagihan</span>
           </Link>
-          <Link to="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground relative">
+          <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground relative">
             <MessageCircle className="h-6 w-6" />
             <span className="absolute -top-1 right-0 h-4 w-4 bg-primary rounded-full text-[10px] font-bold text-primary-foreground flex items-center justify-center">2</span>
             <span className="text-xs">Chat</span>
           </Link>
-          <Link to="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <User className="h-6 w-6" />
             <span className="text-xs">Profil</span>
           </Link>

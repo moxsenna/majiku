@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -5,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Clock, 
   LogIn, 
-  LogOut,
+  LogOut, 
   QrCode,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
 interface AttendanceEntry {
@@ -30,14 +33,14 @@ interface AttendanceWidgetProps {
 export function AttendanceWidget({ entries, totalStudents, presentCount }: AttendanceWidgetProps) {
   const attendanceRate = Math.round((presentCount / totalStudents) * 100);
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleScanQR = () => {
     toast({
       title: "QR Scanner",
       description: "Membuka QR Scanner untuk absensi siswa...",
     });
-    navigate("/attendance");
+    router.push("/attendance");
   };
 
   return (
@@ -110,7 +113,7 @@ export function AttendanceWidget({ entries, totalStudents, presentCount }: Atten
           ))}
         </div>
 
-        <Link to="/attendance">
+        <Link href="/attendance">
           <Button variant="outline" className="w-full mt-3 sm:mt-4 text-xs sm:text-sm">
             Lihat Semua Kehadiran
           </Button>

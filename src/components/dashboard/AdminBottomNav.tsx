@@ -1,5 +1,8 @@
+"use client";
+
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { 
   CreditCard, GraduationCap, BookOpen, LayoutDashboard, Bell, 
   Users, ClipboardCheck, MessageSquare, Calendar, Settings,
@@ -56,7 +59,7 @@ const formatCurrency = (amount: number) => {
 };
 
 export function AdminBottomNav() {
-  const location = useLocation();
+  const pathname = usePathname();
   const { toast } = useToast();
   const [billingOpen, setBillingOpen] = useState(false);
   const [salaryOpen, setSalaryOpen] = useState(false);
@@ -116,23 +119,23 @@ export function AdminBottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border lg:hidden">
         <div className="flex items-center justify-around h-16 px-1">
           {navItems.map((item) => {
-            const isActive = item.href && location.pathname === item.href;
+            const isActive = item.href && pathname === item.href;
             const Icon = item.icon;
             
             if (item.href) {
               return (
                 <Link
                   key={item.label}
-                  to={item.href}
+                  href={item.href}
                   className={`flex flex-col items-center justify-center flex-1 py-2 relative transition-colors ${
                     isActive ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   <div className="relative">
                     <Icon className="h-5 w-5" />
-                    {item.badge && (
+                    {"badge" in item && Boolean(item.badge) && (
                       <span className="absolute -top-1 -right-2 h-4 min-w-4 px-1 bg-destructive rounded-full text-[10px] font-bold text-white flex items-center justify-center">
-                        {item.badge}
+                        {(item as { badge?: number }).badge}
                       </span>
                     )}
                   </div>
@@ -216,7 +219,7 @@ export function AdminBottomNav() {
                 return (
                   <Link
                     key={item.label}
-                    to={item.href!}
+                    href={item.href!}
                     onClick={() => setMenuOpen(false)}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted/50 transition-colors"
                   >

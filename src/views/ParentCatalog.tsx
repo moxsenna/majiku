@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -145,7 +145,7 @@ export default function ParentCatalog() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex items-center gap-3 p-4">
-          <Link to="/parent">
+          <Link href="/parent">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -242,7 +242,7 @@ export default function ParentCatalog() {
                         <ExternalLink className="w-3.5 h-3.5 ml-2" />
                       </Button>
                     ) : (
-                      <Link to={featuredPromo.ctaLink}>
+                      <Link href={featuredPromo.ctaLink}>
                         <Button size="sm" className="bg-white text-foreground hover:bg-white/90">
                           {featuredPromo.ctaText}
                           <ExternalLink className="w-3.5 h-3.5 ml-2" />
@@ -320,7 +320,7 @@ export default function ParentCatalog() {
                           {item.ctaText}
                         </Button>
                       ) : (
-                        <Link to={item.ctaLink} onClick={(e) => e.stopPropagation()}>
+                        <Link href={item.ctaLink} onClick={(e) => e.stopPropagation()}>
                           <Button size="sm" variant="outline" className="w-full h-8 text-xs">
                             {item.ctaText}
                           </Button>

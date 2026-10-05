@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Calendar, Clock, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface ScheduleItem {
   id: string;
@@ -86,7 +86,7 @@ export function TutorScheduleWidget({ schedules }: TutorScheduleWidgetProps) {
                 </div>
               </div>
             ))}
-            <Link to="/tutor/schedule">
+            <Link href="/tutor/schedule">
               <Button variant="outline" className="w-full text-xs sm:text-sm h-8 sm:h-9">
                 Lihat Jadwal Lengkap
                 <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />

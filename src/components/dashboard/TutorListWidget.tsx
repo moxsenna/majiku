@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface Tutor {
   id: string;
@@ -77,7 +77,7 @@ export function TutorListWidget({ tutors }: TutorListWidgetProps) {
             </div>
           </div>
         ))}
-        <Link to="/tutors">
+        <Link href="/tutors">
           <Button variant="outline" className="w-full text-xs sm:text-sm h-8 sm:h-9">
             Lihat Semua Tutor
             <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />

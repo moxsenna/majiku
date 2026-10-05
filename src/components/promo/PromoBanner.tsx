@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -95,7 +95,7 @@ export function PromoBanner({ variant = "slider" }: PromoBannerProps) {
             <Tag className="w-4 h-4 text-primary" />
             Promo & Penawaran
           </h3>
-          <Link to="/parent/catalog">
+          <Link href="/parent/catalog">
             <Button variant="ghost" size="sm" className="text-xs text-primary h-7 px-2">
               Lihat Semua
               <ChevronRight className="w-3 h-3 ml-1" />
@@ -112,7 +112,7 @@ export function PromoBanner({ variant = "slider" }: PromoBannerProps) {
           {promoItems.map((promo) => (
             <Link 
               key={promo.id} 
-              to={promo.ctaLink}
+              href={promo.ctaLink}
               className="snap-start flex-shrink-0 w-[280px] first:ml-0"
             >
               <Card className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] h-full">
@@ -197,7 +197,7 @@ export function PromoBanner({ variant = "slider" }: PromoBannerProps) {
     
     return (
       <div className="space-y-3">
-        <Link to="/parent/catalog">
+        <Link href="/parent/catalog">
           <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-0">
               <div className="relative h-40">
@@ -257,7 +257,7 @@ export function PromoBanner({ variant = "slider" }: PromoBannerProps) {
   // Single variant - compact
   const firstPromo = promoItems[0];
   return (
-    <Link to="/parent/catalog">
+    <Link href="/parent/catalog">
       <Card className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-all group">
         <CardContent className="p-0">
           <div className="flex items-center gap-3 p-3">

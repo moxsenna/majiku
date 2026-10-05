@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Clock, FileCheck, CheckCircle, XCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface PendingReport {
   id: string;
@@ -106,7 +106,7 @@ export function PendingReportsWidget({ reports, onApprove, onReject }: PendingRe
                 </div>
               </div>
             ))}
-            <Link to="/reports/pending">
+            <Link href="/reports/pending">
               <Button variant="outline" className="w-full text-xs sm:text-sm h-8 sm:h-9">
                 Lihat Semua ({reports.length} laporan)
                 <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />

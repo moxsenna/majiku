@@ -12,7 +12,7 @@ import {
   Heart,
   MessageCircle,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 
 interface DailyReportItem {
@@ -80,7 +80,7 @@ export function DailyReportFeed({ reports }: DailyReportFeedProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between p-3 sm:p-6">
         <CardTitle className="text-sm sm:text-base">Aktivitas Hari Ini</CardTitle>
-        <Link to="/daily-reports">
+        <Link href="/daily-reports">
           <Button variant="soft" size="sm" className="text-xs sm:text-sm">
             Lihat Semua
           </Button>

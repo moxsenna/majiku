@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { 
   GraduationCap, 
   Users, 
@@ -151,10 +151,10 @@ export default function SaasLanding() {
               <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimoni</a>
             </div>
             <div className="flex items-center gap-3">
-              <Link to="/auth/login">
+              <Link href="/auth/login">
                 <Button variant="ghost">Masuk</Button>
               </Link>
-              <Link to="/auth/register">
+              <Link href="/auth/register">
                 <Button className="gradient-primary text-primary-foreground">
                   Daftar Gratis
                 </Button>
@@ -181,13 +181,13 @@ export default function SaasLanding() {
               Dari manajemen siswa hingga billing, semua dalam satu tempat.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/auth/register">
+              <Link href="/auth/register">
                 <Button size="lg" className="gradient-primary text-primary-foreground text-lg px-8 h-14">
                   Mulai Gratis 14 Hari
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link to="/demo">
+              <Link href="/demo">
                 <Button size="lg" variant="outline" className="text-lg px-8 h-14">
                   Lihat Demo
                 </Button>
@@ -256,7 +256,7 @@ export default function SaasLanding() {
                   </li>
                 ))}
               </ul>
-              <Link to="/demo">
+              <Link href="/demo">
                 <Button className="gap-2">
                   Lihat Demo Dashboard
                   <ArrowRight className="h-4 w-4" />
@@ -364,7 +364,7 @@ export default function SaasLanding() {
                   </li>
                 ))}
               </ul>
-              <Link to="/parent">
+              <Link href="/parent">
                 <Button variant="outline" className="gap-2">
                   <Smartphone className="h-4 w-4" />
                   Lihat Portal Orang Tua
@@ -398,7 +398,7 @@ export default function SaasLanding() {
                   </li>
                 ))}
               </ul>
-              <Link to="/tutor">
+              <Link href="/tutor">
                 <Button variant="outline" className="gap-2">
                   <Monitor className="h-4 w-4" />
                   Lihat Dashboard Tutor
@@ -565,7 +565,7 @@ export default function SaasLanding() {
                       </li>
                     ))}
                   </ul>
-                  <Link to="/auth/register">
+                  <Link href="/auth/register">
                     <Button 
                       className={`w-full ${plan.popular ? 'gradient-primary text-primary-foreground' : ''}`}
                       variant={plan.popular ? "default" : "outline"}
@@ -628,7 +628,7 @@ export default function SaasLanding() {
                 Bergabung dengan 500+ lembaga pendidikan yang sudah menggunakan MAJIKU. 
                 Gratis 14 hari, tanpa kartu kredit.
               </p>
-              <Link to="/auth/register">
+              <Link href="/auth/register">
                 <Button size="lg" variant="secondary" className="text-lg px-8 h-14">
                   Mulai Sekarang
                   <ArrowRight className="w-5 h-5 ml-2" />

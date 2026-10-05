@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Download, ExternalLink, Printer, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { downloadInvoicePDF } from "@/lib/invoiceExport";
 import { toast } from "sonner";
 
@@ -99,15 +99,17 @@ export function InvoiceModal({ invoice, open, onOpenChange }: InvoiceModalProps)
           <Separator />
 
           {/* Invoice Items */}
-          <div className="space-y-2">
-            <p className="font-medium text-sm">Detail Tagihan</p>
-            {invoice.items.map((item, index) => (
-              <div key={index} className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{item.description}</span>
-                <span>{formatCurrency(item.amount)}</span>
-              </div>
-            ))}
-          </div>
+          {invoice.items && invoice.items.length > 0 && (
+            <div className="space-y-2">
+              <p className="font-medium text-sm">Detail Tagihan</p>
+              {invoice.items.map((item, index) => (
+                <div key={index} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{item.description}</span>
+                  <span>{formatCurrency(item.amount)}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <Separator />
 
@@ -115,7 +117,7 @@ export function InvoiceModal({ invoice, open, onOpenChange }: InvoiceModalProps)
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span>{formatCurrency(invoice.subtotal)}</span>
+              <span>{formatCurrency(invoice.subtotal ?? invoice.total ?? invoice.amount ?? 0)}</span>
             </div>
             {invoice.discount && invoice.discount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
@@ -125,7 +127,7 @@ export function InvoiceModal({ invoice, open, onOpenChange }: InvoiceModalProps)
             )}
             <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
               <span>Total</span>
-              <span className="text-primary">{formatCurrency(invoice.total)}</span>
+              <span className="text-primary">{formatCurrency(invoice.total ?? invoice.amount ?? 0)}</span>
             </div>
           </div>
 
@@ -155,7 +157,7 @@ export function InvoiceModal({ invoice, open, onOpenChange }: InvoiceModalProps)
 
           {/* Actions */}
           <div className="flex gap-2 pt-2">
-            <Link to={`/parent/invoice/${invoice.id}`} className="flex-1">
+            <Link href={`/parent/invoice/${invoice.id}`} className="flex-1">
               <Button variant="outline" className="w-full">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Lihat Detail
@@ -191,7 +193,7 @@ export function InvoiceModal({ invoice, open, onOpenChange }: InvoiceModalProps)
           </div>
 
           {invoice.status !== "paid" && (
-            <Link to="/parent/payment">
+            <Link href="/parent/payment">
               <Button variant="hero" className="w-full">
                 Bayar Sekarang
               </Button>

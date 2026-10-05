@@ -10,7 +10,7 @@ import {
   Sparkles,
   Star
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 // Banner data
 const bannerItems = [
@@ -139,7 +139,7 @@ export function ProgramInfoBanner() {
               </Badge>
               <h3 className="font-bold text-lg text-foreground">{banner.title}</h3>
               <p className="text-sm text-muted-foreground">{banner.subtitle}</p>
-              <Link to={banner.link}>
+              <Link href={banner.link}>
                 <Button size="sm" className="mt-3 gap-1">
                   {banner.cta}
                   <ChevronRight className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function ProgramInfoBanner() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-base">Kegiatan Kelas Lain</h3>
-          <Link to="/parent/marketplace" className="text-sm text-primary font-medium">
+          <Link href="/parent/marketplace" className="text-sm text-primary font-medium">
             Lihat Semua
           </Link>
         </div>

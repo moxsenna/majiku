@@ -1,5 +1,8 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -116,7 +119,7 @@ const formatCurrency = (amount: number) => {
 };
 
 export default function ParentRegistration() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [selectedProgram, setSelectedProgram] = useState<string>("");
@@ -168,7 +171,7 @@ export default function ParentRegistration() {
       description: "Tim kami akan menghubungi Anda dalam 1-2 hari kerja",
     });
 
-    navigate("/parent");
+    router.push("/parent");
   };
 
   const nextStep = () => {
@@ -192,7 +195,7 @@ export default function ParentRegistration() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border">
         <div className="flex items-center gap-3 px-4 h-14">
-          <Link to="/parent">
+          <Link href="/parent">
             <Button variant="ghost" size="icon-sm">
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -682,23 +685,23 @@ export default function ParentRegistration() {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
         <div className="flex items-center justify-around py-2 max-w-lg mx-auto">
-          <Link to="/parent" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <Home className="h-6 w-6" />
             <span className="text-xs">Beranda</span>
           </Link>
-          <Link to="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-6 w-6" />
             <span className="text-xs">Katalog</span>
           </Link>
-          <Link to="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <CreditCard className="h-6 w-6" />
             <span className="text-xs">Tagihan</span>
           </Link>
-          <Link to="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <MessageCircle className="h-6 w-6" />
             <span className="text-xs">Chat</span>
           </Link>
-          <Link to="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <User className="h-6 w-6" />
             <span className="text-xs">Profil</span>
           </Link>

@@ -1,5 +1,8 @@
+"use client";
+
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   Users, MessageCircle, Clock, Target, BookOpen, Camera, 
   Bell, ChevronRight, TrendingUp, CheckCircle2, AlertCircle,
@@ -85,8 +88,8 @@ const earningsData = {
 };
 
 export default function TutorDashboard() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(tutorNotifications);
@@ -97,7 +100,7 @@ export default function TutorDashboard() {
       title: "Buka Editor Laporan",
       description: `Merevisi laporan ${notif?.studentName}`,
     });
-    navigate("/tutor/progress");
+    router.push("/tutor/progress");
   };
 
   return (
@@ -131,11 +134,11 @@ export default function TutorDashboard() {
             {tutorNav.map((item) => (
               <Link
                 key={item.path}
-                to={item.path}
+                href={item.path}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-xl transition-colors",
-                  location.pathname === item.path
+                  pathname === item.path
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted"
                 )}
@@ -165,10 +168,10 @@ export default function TutorDashboard() {
             {tutorNav.map((item) => (
               <Link
                 key={item.path}
-                to={item.path}
+                href={item.path}
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-xl transition-colors",
-                  location.pathname === item.path
+                  pathname === item.path
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted text-muted-foreground hover:text-foreground"
                 )}
@@ -278,25 +281,25 @@ export default function TutorDashboard() {
               icon={Upload}
               label="Upload Laporan"
               color="orange"
-              onClick={() => navigate("/tutor/progress")}
+              onClick={() => router.push("/tutor/progress")}
             />
             <QuickActionButton
               icon={Clock}
               label="Absensi"
               color="green"
-              onClick={() => navigate("/tutor/attendance")}
+              onClick={() => router.push("/tutor/attendance")}
             />
             <QuickActionButton
               icon={MessageCircle}
               label="Chat"
               color="blue"
-              onClick={() => navigate("/tutor/chat")}
+              onClick={() => router.push("/tutor/chat")}
             />
             <QuickActionButton
               icon={BookOpen}
               label="Panduan"
               color="purple"
-              onClick={() => navigate("/tutor/guides")}
+              onClick={() => router.push("/tutor/guides")}
             />
           </div>
 
@@ -336,7 +339,7 @@ export default function TutorDashboard() {
                     </div>
                   </div>
                 ))}
-                <Link to="/tutor/progress">
+                <Link href="/tutor/progress">
                   <Button variant="outline" className="w-full mt-2">
                     Upload Laporan Harian
                     <ChevronRight className="w-4 h-4 ml-2" />
@@ -366,7 +369,7 @@ export default function TutorDashboard() {
                     <p className="text-sm text-muted-foreground line-clamp-1">{msg.message}</p>
                   </div>
                 ))}
-                <Link to="/tutor/chat">
+                <Link href="/tutor/chat">
                   <Button variant="outline" className="w-full mt-2">
                     Lihat Semua Pesan
                     <ChevronRight className="w-4 h-4 ml-2" />
@@ -395,7 +398,7 @@ export default function TutorDashboard() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Progress KPI Bulan Ini</CardTitle>
-                  <Link to="/tutor/kpi">
+                  <Link href="/tutor/kpi">
                     <Button variant="ghost" size="sm">
                       Detail <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
@@ -438,10 +441,10 @@ export default function TutorDashboard() {
           {tutorNav.slice(0, 5).map((item) => (
             <Link
               key={item.path}
-              to={item.path}
+              href={item.path}
               className={cn(
                 "flex flex-col items-center gap-1 p-2 rounded-lg min-w-[60px]",
-                location.pathname === item.path
+                pathname === item.path
                   ? "text-primary"
                   : "text-muted-foreground"
               )}

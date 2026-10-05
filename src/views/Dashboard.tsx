@@ -113,7 +113,7 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {statsData.map((stat, index) => (
-          <div key={index} onClick={stat.onClick} className={stat.onClick ? "cursor-pointer" : ""}>
+          <div key={index} onClick={stat.onClick} className="cursor-pointer">
             <StatsCard {...stat} />
           </div>
         ))}

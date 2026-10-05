@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +27,7 @@ export default function ParentProfile() {
       <header className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-3">
-            <Link to="/parent">
+            <Link href="/parent">
               <Button variant="ghost" size="icon-sm">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -137,19 +137,19 @@ export default function ParentProfile() {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
         <div className="flex items-center justify-around py-2 max-w-lg mx-auto">
-          <Link to="/parent" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <Home className="h-6 w-6" />
             <span className="text-xs">Beranda</span>
           </Link>
-          <Link to="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-6 w-6" />
             <span className="text-xs">Katalog</span>
           </Link>
-          <Link to="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <CreditCard className="h-6 w-6" />
             <span className="text-xs">Tagihan</span>
           </Link>
-          <Link to="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <MessageCircle className="h-6 w-6" />
             <span className="text-xs">Chat</span>
           </Link>
