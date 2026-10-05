@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import {
   Home,
   Bell,
@@ -14,21 +15,14 @@ import {
   User,
   Heart,
   MessageSquare,
-  Bookmark,
-  Share2,
-  MoreHorizontal,
   Search,
   Plus,
   Image as ImageIcon,
   ShoppingBag,
   TrendingUp,
-  Calendar,
   Utensils,
   Moon,
-  Smile,
-  Activity,
-  ChevronRight,
-  LogOut,
+  Clock,
   CreditCard,
   GraduationCap,
   FileText,
@@ -37,7 +31,9 @@ import { PromoBanner } from "@/components/promo/PromoBanner";
 import { ParentActivityWidget } from "@/components/dashboard/ParentActivityWidget";
 import { ProgramInfoBanner } from "@/components/parent/ProgramInfoBanner";
 import { TrialStatusList } from "@/components/parent/TrialStatusList";
+import { todayInWib } from "@/lib/datetime";
 import type { TrialApplicationRow } from "@/server/actions/trial";
+import type { ReportRow } from "@/server/actions/dailyReports";
 
 // Mock data for child
 const childData = {
@@ -51,79 +47,6 @@ const childData = {
   checkInTime: "07:45",
 };
 
-// Mock feed data
-const feedItems = [
-  {
-    id: "1",
-    type: "photo",
-    author: {
-      name: "Ibu Dina",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100",
-      role: "Guru Kelas",
-    },
-    content: "Kegiatan melukis hari ini sangat seru! Aisyah menunjukkan kreativitas yang luar biasa dengan memilih warna-warna cerah untuk lukisannya. 🎨",
-    images: ["https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800"],
-    taggedChildren: ["Aisyah Putri", "Keisha Azzahra"],
-    time: "2 jam lalu",
-    likes: 24,
-    comments: 5,
-    liked: true,
-    saved: false,
-  },
-  {
-    id: "2",
-    type: "update",
-    category: "meal",
-    author: {
-      name: "Ibu Sarah",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100",
-      role: "Guru Kelas",
-    },
-    content: "Aisyah makan siang dengan lahap! Menghabiskan nasi, sayur bayam, dan ayam goreng. Minum susu satu gelas penuh. 🍚",
-    time: "4 jam lalu",
-    likes: 12,
-    comments: 2,
-    liked: false,
-    saved: false,
-  },
-  {
-    id: "3",
-    type: "photo",
-    author: {
-      name: "Pak Ahmad",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100",
-      role: "Guru Olahraga",
-    },
-    content: "Bermain di playground! Anak-anak sangat bersemangat bermain bersama teman-teman. Aisyah sangat aktif hari ini! ⛲",
-    images: [
-      "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=800",
-      "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=800",
-    ],
-    taggedChildren: ["Aisyah Putri", "Raka Pratama", "Arjuna Wijaya"],
-    time: "Kemarin",
-    likes: 45,
-    comments: 8,
-    liked: true,
-    saved: true,
-  },
-  {
-    id: "4",
-    type: "update",
-    category: "nap",
-    author: {
-      name: "Ibu Maya",
-      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100",
-      role: "Pengasuh",
-    },
-    content: "Tidur siang selama 1.5 jam dengan nyenyak. Bangun dengan ceria dan langsung bermain dengan teman-teman! 😴",
-    time: "Kemarin",
-    likes: 8,
-    comments: 1,
-    liked: false,
-    saved: false,
-  },
-];
-
 // Progress/milestone data
 const progressData = {
   attendance: { current: 22, total: 24, percentage: 92 },
@@ -136,34 +59,72 @@ const progressData = {
   ],
 };
 
-const categoryIcons = {
-  meal: Utensils,
-  nap: Moon,
-  mood: Smile,
-  activity: Activity,
-};
+function formatReportDate(dateStr: string): string {
+  if (!dateStr) return "";
+  const today = todayInWib();
+  const yesterday = todayInWib(new Date(Date.now() - 86400000));
+  if (dateStr === today) return "Hari ini";
+  if (dateStr === yesterday) return "Kemarin";
+  try {
+    const d = new Date(dateStr + "T00:00:00");
+    return format(d, "d MMMM yyyy", { locale: idLocale });
+  } catch {
+    return dateStr;
+  }
+}
 
-const categoryColors = {
-  meal: "bg-success/10 text-success",
-  nap: "bg-info/10 text-info",
-  mood: "bg-highlight/10 text-highlight",
-  activity: "bg-primary/10 text-primary",
-};
+function formatReportTime(date: Date | string | null | undefined): string {
+  if (!date) return "";
+  try {
+    const d = typeof date === "string" ? new Date(date) : date;
+    if (isNaN(d.getTime())) return "";
+    return format(d, "HH:mm");
+  } catch {
+    return "";
+  }
+}
+
+function formatMood(mood?: string | null): string {
+  if (!mood) return "";
+  const trimmed = mood.trim();
+  const lower = trimmed.toLowerCase();
+  if (
+    trimmed.startsWith("😊") ||
+    trimmed.startsWith("😐") ||
+    trimmed.startsWith("😢") ||
+    trimmed.startsWith("😴") ||
+    trimmed.startsWith("🤒")
+  ) {
+    return trimmed;
+  }
+  if (lower === "senang" || lower.includes("ceria") || lower.includes("happy")) {
+    return `😊 ${trimmed}`;
+  }
+  if (lower === "biasa" || lower.includes("normal") || lower.includes("calm")) {
+    return `😐 ${trimmed}`;
+  }
+  if (lower === "sedih" || lower.includes("sad")) {
+    return `😢 ${trimmed}`;
+  }
+  if (lower === "lelah" || lower.includes("capek") || lower.includes("tired")) {
+    return `😴 ${trimmed}`;
+  }
+  if (lower.includes("sehat") || lower.includes("sakit") || lower.includes("sick")) {
+    return `🤒 ${trimmed}`;
+  }
+  return trimmed;
+}
 
 interface ParentPortalProps {
   trialStatus?: TrialApplicationRow[];
+  reports?: ReportRow[];
 }
 
-export default function ParentPortal({ trialStatus = [] }: ParentPortalProps) {
+export default function ParentPortal({
+  trialStatus = [],
+  reports = [],
+}: ParentPortalProps) {
   const [activeTab, setActiveTab] = useState<"feed" | "progress" | "gallery">("feed");
-  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({
-    "1": true,
-    "3": true,
-  });
-
-  const toggleLike = (postId: string) => {
-    setLikedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -308,117 +269,114 @@ export default function ParentPortal({ trialStatus = [] }: ParentPortalProps) {
 
             {/* Feed */}
             <div className="space-y-4">
-              {feedItems.map((item) => (
-                <Card key={item.id} className="rounded-none sm:rounded-xl border-x-0 sm:border-x sm:mx-4">
-                  <CardContent className="p-0">
-                    {/* Post Header */}
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={item.author.avatar} />
-                          <AvatarFallback>{item.author.name.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold text-sm text-foreground">{item.author.name}</p>
-                          <p className="text-xs text-muted-foreground">{item.author.role} • {item.time}</p>
-                        </div>
-                      </div>
-                      {item.type === "update" && item.category && (
-                        <Badge className={categoryColors[item.category as keyof typeof categoryColors]}>
-                          {item.category === "meal" && "🍽️ Makan"}
-                          {item.category === "nap" && "😴 Tidur"}
-                          {item.category === "mood" && "😊 Mood"}
-                        </Badge>
-                      )}
-                      <Button variant="ghost" size="icon-sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {/* Images */}
-                    {item.images && item.images.length > 0 && (
-                      <div className={`relative ${item.images.length > 1 ? "grid grid-cols-2 gap-0.5" : ""}`}>
-                        {item.images.map((img, idx) => (
-                          <img
-                            key={idx}
-                            src={img}
-                            alt=""
-                            className="w-full aspect-square object-cover"
-                          />
-                        ))}
-                        {item.taggedChildren && item.taggedChildren.length > 0 && (
-                          <div className="absolute bottom-2 left-2">
-                            <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-xs">
-                              <User className="h-3 w-3 mr-1" />
-                              {item.taggedChildren.length} anak ditandai
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-between px-4 py-2">
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={() => toggleLike(item.id)}
-                          className="flex items-center gap-1 transition-transform active:scale-125"
-                        >
-                          <Heart
-                            className={`h-6 w-6 ${
-                              likedPosts[item.id]
-                                ? "fill-red-500 text-red-500"
-                                : "text-foreground"
-                            }`}
-                          />
-                        </button>
-                        <button className="flex items-center gap-1">
-                          <MessageSquare className="h-6 w-6 text-foreground" />
-                        </button>
-                        <button>
-                          <Share2 className="h-6 w-6 text-foreground" />
-                        </button>
-                      </div>
-                      <button>
-                        <Bookmark
-                          className={`h-6 w-6 ${
-                            item.saved ? "fill-foreground text-foreground" : "text-foreground"
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    {/* Likes */}
-                    <div className="px-4">
-                      <p className="font-semibold text-sm">{item.likes + (likedPosts[item.id] && !feedItems.find(f => f.id === item.id)?.liked ? 1 : 0)} suka</p>
-                    </div>
-
-                    {/* Content */}
-                    <div className="px-4 pb-2">
-                      <p className="text-sm">
-                        <span className="font-semibold">{item.author.name}</span>{" "}
-                        {item.content}
-                      </p>
-                    </div>
-
-                    {/* Tagged Children */}
-                    {item.taggedChildren && item.taggedChildren.length > 0 && (
-                      <div className="px-4 pb-2">
-                        <p className="text-xs text-muted-foreground">
-                          Dengan: {item.taggedChildren.join(", ")}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Comments */}
-                    {item.comments > 0 && (
-                      <button className="px-4 pb-3 text-sm text-muted-foreground">
-                        Lihat semua {item.comments} komentar
-                      </button>
-                    )}
+              {reports.length === 0 ? (
+                <Card className="rounded-none sm:rounded-xl border-x-0 sm:border-x sm:mx-4 border-dashed">
+                  <CardContent className="py-12 px-4 text-center space-y-2">
+                    <FileText className="h-10 w-10 text-muted-foreground mx-auto opacity-40 mb-2" />
+                    <h4 className="font-semibold text-foreground text-base">
+                      Belum ada laporan dari tutor
+                    </h4>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                      Laporan harian aktivitas anak Anda akan muncul di sini setelah tutor menerbitkannya.
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
+              ) : (
+                reports.map((report) => {
+                  const timeStr = formatReportTime(report.createdAt);
+                  return (
+                    <Card
+                      key={report.id}
+                      className="rounded-none sm:rounded-xl border-x-0 sm:border-x sm:mx-4"
+                    >
+                      <CardContent className="p-4 sm:p-5">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              {report.studentAvatar && (
+                                <AvatarImage
+                                  src={report.studentAvatar}
+                                  alt={report.studentName}
+                                />
+                              )}
+                              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
+                                {report.studentName.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-semibold text-sm text-foreground">
+                                {report.studentName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {report.className ? `${report.className} • ` : ""}
+                                {formatReportDate(report.reportDate)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Badges: mood, meals, nap */}
+                        {(report.mood || report.meals || report.nap) && (
+                          <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                            {report.mood && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-amber-500/10 text-amber-700 dark:text-amber-400 font-normal"
+                              >
+                                {formatMood(report.mood)}
+                              </Badge>
+                            )}
+                            {report.meals && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-normal flex items-center gap-1"
+                              >
+                                <Utensils className="h-3 w-3" />
+                                <span>Makan: {report.meals}</span>
+                              </Badge>
+                            )}
+                            {report.nap && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-blue-500/10 text-blue-700 dark:text-blue-400 font-normal flex items-center gap-1"
+                              >
+                                <Moon className="h-3 w-3" />
+                                <span>Tidur: {report.nap}</span>
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Activities */}
+                        {report.activities && (
+                          <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+                            {report.activities}
+                          </p>
+                        )}
+
+                        {/* Notes */}
+                        {report.notes && (
+                          <div className="mt-3 p-3 rounded-lg bg-muted/40 border border-border/50 text-xs text-muted-foreground">
+                            <span className="font-semibold text-foreground block mb-0.5">
+                              Catatan Tutor:
+                            </span>
+                            <p className="whitespace-pre-line leading-relaxed">{report.notes}</p>
+                          </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="pt-3 mt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" />
+                            Ditulis oleh tutor{timeStr ? ` • ${timeStr}` : ""}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
             </div>
           </div>
         )}

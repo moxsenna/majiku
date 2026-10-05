@@ -36,6 +36,8 @@ export interface DailyReportItem {
   updatedAt: Date | null;
 }
 
+export type ReportRow = DailyReportItem;
+
 export interface CreateDailyReportInput {
   studentIds: string[];
   reportDate: string;
