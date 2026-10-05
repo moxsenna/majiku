@@ -50,6 +50,8 @@ export const tenants = pgTable("tenants", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+export type TenantRow = typeof tenants.$inferSelect;
+
 // BetterAuth (skema bawaan better-auth/adapters/drizzle)
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
