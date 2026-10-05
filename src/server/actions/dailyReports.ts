@@ -2,12 +2,19 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { dailyReports, students, classes } from "@/db/schema";
+import {
+  dailyReports,
+  students,
+  classes,
+  studentEnrollments,
+  tutors,
+  tutorClassAssignments,
+} from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { isValidDateString } from "@/lib/datetime";
+import { isValidDateString, todayInWib } from "@/lib/datetime";
 
 export interface DailyReportItem {
   id: string;
@@ -30,15 +37,20 @@ export interface DailyReportItem {
 }
 
 export interface CreateDailyReportInput {
-  studentId: string;
+  studentIds: string[];
   reportDate: string;
-  classId?: string | null;
   mood?: string | null;
   meals?: string | null;
   nap?: string | null;
   activities?: string | null;
   notes?: string | null;
-  photos?: string[];
+}
+
+export interface MyStudentItem {
+  id: string;
+  name: string;
+  className: string | null;
+  hasReportToday: boolean;
 }
 
 export interface StudentOption {
@@ -120,34 +132,219 @@ export async function listDailyReports(reportDate: string): Promise<DailyReportI
 
 export async function createDailyReport(
   input: CreateDailyReportInput
-): Promise<{ id: string }> {
+): Promise<{ created: number }> {
   const session = await requireTutorOrAdmin();
 
-  if (!input.studentId || !input.studentId.trim()) {
-    throw new Error("Siswa wajib dipilih");
+  if (!input.studentIds || !Array.isArray(input.studentIds) || input.studentIds.length === 0) {
+    throw new Error("Pilih minimal satu siswa");
   }
+
+  const studentIds = Array.from(
+    new Set(input.studentIds.map((id) => (typeof id === "string" ? id.trim() : "")).filter(Boolean))
+  );
+
+  if (studentIds.length === 0) {
+    throw new Error("Pilih minimal satu siswa");
+  }
+
   if (!input.reportDate || !isValidDateString(input.reportDate.trim())) {
     throw new Error("Format tanggal laporan tidak valid (harus YYYY-MM-DD)");
   }
 
-  const reportId = randomUUID();
+  const activities = input.activities?.trim() || null;
+  const notes = input.notes?.trim() || null;
 
-  await db.insert(dailyReports).values({
-    id: reportId,
-    studentId: input.studentId.trim(),
-    classId: input.classId?.trim() || null,
+  if (!activities && !notes) {
+    throw new Error("Isi aktivitas atau catatan");
+  }
+
+  const mood = input.mood?.trim() || null;
+  const meals = input.meals?.trim() || null;
+  const nap = input.nap?.trim() || null;
+  const reportDate = input.reportDate.trim();
+
+  // Lookup classId dari student_enrollments aktif per siswa (satu query di awal untuk semua siswa)
+  const enrollments = await db
+    .select({
+      studentId: studentEnrollments.studentId,
+      classId: studentEnrollments.classId,
+    })
+    .from(studentEnrollments)
+    .where(
+      and(
+        inArray(studentEnrollments.studentId, studentIds),
+        eq(studentEnrollments.isActive, true)
+      )
+    );
+
+  const studentClassMap = new Map<string, string>();
+  for (const enr of enrollments) {
+    if (!studentClassMap.has(enr.studentId) && enr.classId) {
+      studentClassMap.set(enr.studentId, enr.classId);
+    }
+  }
+
+  const rowsToInsert = studentIds.map((studentId) => ({
+    id: randomUUID(),
+    studentId,
+    classId: studentClassMap.get(studentId) || null,
     tutorUserId: session.user.id,
-    reportDate: input.reportDate.trim(),
-    mood: input.mood?.trim() || null,
-    meals: input.meals?.trim() || null,
-    nap: input.nap?.trim() || null,
-    activities: input.activities?.trim() || null,
-    notes: input.notes?.trim() || null,
-    photos: input.photos || [],
-    status: "submitted",
+    reportDate,
+    mood,
+    meals,
+    nap,
+    activities,
+    notes,
+    photos: [] as string[],
+    status: "submitted" as const,
+  }));
+
+  await db.transaction(async (tx) => {
+    await tx.insert(dailyReports).values(rowsToInsert);
   });
 
-  return { id: reportId };
+  return { created: studentIds.length };
+}
+
+export async function getMyStudents(): Promise<MyStudentItem[]> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const today = todayInWib();
+
+  if (roles.includes("admin") || roles.includes("moderator")) {
+    const rows = await db
+      .select({
+        id: students.id,
+        name: students.name,
+        className: classes.name,
+        reportId: dailyReports.id,
+      })
+      .from(students)
+      .leftJoin(
+        studentEnrollments,
+        and(
+          eq(studentEnrollments.studentId, students.id),
+          eq(studentEnrollments.isActive, true)
+        )
+      )
+      .leftJoin(
+        classes,
+        and(
+          eq(classes.id, studentEnrollments.classId),
+          eq(classes.isActive, true)
+        )
+      )
+      .leftJoin(
+        dailyReports,
+        and(
+          eq(dailyReports.studentId, students.id),
+          eq(dailyReports.reportDate, today)
+        )
+      )
+      .where(eq(students.isActive, true))
+      .orderBy(asc(students.name));
+
+    const map = new Map<string, MyStudentItem>();
+    for (const row of rows) {
+      let entry = map.get(row.id);
+      if (!entry) {
+        entry = {
+          id: row.id,
+          name: row.name,
+          className: row.className || null,
+          hasReportToday: false,
+        };
+        map.set(row.id, entry);
+      }
+      if (!entry.className && row.className) {
+        entry.className = row.className;
+      }
+      if (row.reportId) {
+        entry.hasReportToday = true;
+      }
+    }
+
+    return Array.from(map.values());
+  }
+
+  if (roles.includes("tutor")) {
+    const rows = await db
+      .select({
+        id: students.id,
+        name: students.name,
+        className: classes.name,
+        reportId: dailyReports.id,
+      })
+      .from(tutors)
+      .innerJoin(
+        tutorClassAssignments,
+        and(
+          eq(tutorClassAssignments.tutorId, tutors.id),
+          eq(tutorClassAssignments.isActive, true)
+        )
+      )
+      .innerJoin(
+        classes,
+        and(
+          eq(classes.id, tutorClassAssignments.classId),
+          eq(classes.isActive, true)
+        )
+      )
+      .innerJoin(
+        studentEnrollments,
+        and(
+          eq(studentEnrollments.classId, classes.id),
+          eq(studentEnrollments.isActive, true)
+        )
+      )
+      .innerJoin(
+        students,
+        and(
+          eq(students.id, studentEnrollments.studentId),
+          eq(students.isActive, true)
+        )
+      )
+      .leftJoin(
+        dailyReports,
+        and(
+          eq(dailyReports.studentId, students.id),
+          eq(dailyReports.reportDate, today)
+        )
+      )
+      .where(
+        and(
+          eq(tutors.userId, session.user.id),
+          eq(tutors.isActive, true)
+        )
+      )
+      .orderBy(asc(students.name));
+
+    const map = new Map<string, MyStudentItem>();
+    for (const row of rows) {
+      let entry = map.get(row.id);
+      if (!entry) {
+        entry = {
+          id: row.id,
+          name: row.name,
+          className: row.className || null,
+          hasReportToday: false,
+        };
+        map.set(row.id, entry);
+      }
+      if (!entry.className && row.className) {
+        entry.className = row.className;
+      }
+      if (row.reportId) {
+        entry.hasReportToday = true;
+      }
+    }
+
+    return Array.from(map.values());
+  }
+
+  return [];
 }
 
 export async function deleteDailyReport(id: string): Promise<void> {

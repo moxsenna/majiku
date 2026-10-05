@@ -130,11 +130,19 @@ export default function DailyReports({
       });
       return;
     }
+    if (!activities.trim() && !notes.trim()) {
+      toast({
+        title: "Validasi gagal",
+        description: "Isi aktivitas atau catatan",
+        variant: "destructive",
+      });
+      return;
+    }
 
     startTransition(async () => {
       try {
         await createDailyReport({
-          studentId,
+          studentIds: [studentId],
           reportDate,
           mood: mood.trim() || null,
           meals: meals.trim() || null,
