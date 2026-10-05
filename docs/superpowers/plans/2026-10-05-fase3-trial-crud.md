@@ -24,7 +24,7 @@
 
 ## BAGIAN A — Alur Trial
 
-### Task A1: Server actions trial (`src/server/actions/trial.ts`)
+### Task 1: Server actions trial (`src/server/actions/trial.ts`)
 
 **Files:**
 - Create: `src/server/actions/trial.ts`
@@ -57,10 +57,10 @@ getSchedulingOptions(): Promise<{ tutors: {id,name}[]; classes: {id,name}[] }>  
 `TrialPipelineRow` = row trial + `className: string|null` + `tutorName: string|null`. Semua fungsi: `getSessionSafely()` pola `trialProcedures.ts`; role check via `getMyRoles()`; unauth read → `[]`, unauth mutation → throw.
 
 - [ ] **Step 1:** Tulis `src/server/actions/trial.ts` lengkap sesuai interfaces (drizzle `db.update().set().where().returning()` — cek `result.length === 0` untuk guard throw; `db.insert().values().returning()` untuk submit).
-- [ ] **Step 2:** `npx tsc --noEmit` clean. Verifikasi manual query dengan tsx script sementara (insert trial dummy sebagai usr_parent → getTrialPipeline perlu session, jadi cukup verifikasi INSERT/UPDATE SQL via drizzle di script lalu hapus baris dummy — ATAU andalkan verifikasi E2E di A2-A4; minimal: tsc + build).
+- [ ] **Step 2:** `npx tsc --noEmit` clean. Verifikasi manual query dengan tsx script sementara (insert trial dummy sebagai usr_parent → getTrialPipeline perlu session, jadi cukup verifikasi INSERT/UPDATE SQL via drizzle di script lalu hapus baris dummy — ATAU andalkan verifikasi E2E di Task 2-4; minimal: tsc + build).
 - [ ] **Step 3:** Commit `feat(trial): server actions alur trial — submit, schedule, awaiting-review, queries`
 
-### Task A2: Parent side — wizard submit nyata + status trial
+### Task 2: Parent side — wizard submit nyata + status trial
 
 **Files:**
 - Modify: `src/views/ParentRegistration.tsx` (ganti simulasi `setTimeout` di submit handler akhir), `src/app/(parent)/parent/registration/page.tsx` (thin server page tetap), `src/app/(parent)/parent/page.tsx` + `src/views/ParentPortal.tsx` (tambah section Status Trial)
@@ -72,7 +72,7 @@ getSchedulingOptions(): Promise<{ tutors: {id,name}[]; classes: {id,name}[] }>  
 - `(parent)/parent/page.tsx` → fetch `getMyTrialApplications()` → pass ke ParentPortal sebagai props → ParentPortal render `<TrialStatusList>` di atas timeline (section baru berjudul "Status Trial & Pendaftaran"; empty state: CTA ke /parent/registration).
 - [ ] Steps: implement → dev server login parent test (buat user parent via API sign-up + assign-role) → submit wizard → cek row DB via tsx → status muncul di /parent → commit `feat(trial): parent submit trial nyata + status di portal`
 
-### Task A3: Admin CRM — pipeline operasional
+### Task 3: Admin CRM — pipeline operasional
 
 **Files:**
 - Modify: `src/app/(admin)/crm/page.tsx` (async server page: fetch getTrialPipeline + getSchedulingOptions → props), `src/views/CRM.tsx` (rewrite tab Pipeline)
@@ -86,7 +86,7 @@ getSchedulingOptions(): Promise<{ tutors: {id,name}[]; classes: {id,name}[] }>  
 - Tab lain (Leads lama, Automation, Campaigns, Tickets, Integrations): Leads tab lama DIHAPUS (digantikan pipeline trial); tab mock lain dibiarkan. Hapus `initialLeads`, tipe `Lead`, `moveLeadToStage` yang tidak lagi dipakai.
 - [ ] Steps: implement → seed 1 trial submitted via tsx (parent_user_id usr_parent) → dev: login admin (bikin user admin test via sign-up + assign-role) → jadwalkan → tandai (A4) → admit → murid muncul (cek DB) → commit `feat(crm): pipeline trial operasional — jadwal, admit, data nyata`
 
-### Task A4: Tutor — antrean & form review `/tutor/trials`
+### Task 4: Tutor — antrean & form review `/tutor/trials`
 
 **Files:**
 - Create: `src/app/(tutor)/tutor/trials/page.tsx` (async server page fetch getMyTrialQueue), `src/components/tutor/TrialReviewCard.tsx` (client: tombol "Mulai Observasi/Selesaikan Sesi" → markTrialAwaitingReview; form catatan observasi + radio rekomendasi → `submitTrialReview`)
@@ -99,7 +99,7 @@ getSchedulingOptions(): Promise<{ tutors: {id,name}[]; classes: {id,name}[] }>  
 - Sidebar: cek struktur menu tutor yang ada; tambahkan item hanya untuk grup tutor.
 - [ ] Steps: implement → seed 1 trial scheduled dengan tutor_id = `tut_1` → verifikasi query getMyTrialQueue via tsx perlu session (lewati), cukup build + curl 307 → commit `feat(trial): antrean & form review tutor /tutor/trials`
 
-### Task A5: Verifikasi alur trial + deploy
+### Task 5: Verifikasi alur trial + deploy
 
 - [ ] **E2E script terdokumentasi**: buat `scripts/seed-trial-demo.ts` (idempotent): 1 trial `submitted` (usr_parent), 1 trial `scheduled` (tutor tut_1, class cls_1), 1 trial `recommended` (suitable, class cls_1, reviewed). Jalankan. Commit `test(trial): seed demo pipeline trial`.
 - [ ] `npx tsc --noEmit` + `npm run build` + smoke: /crm, /tutor/trials, /parent, /parent/registration → 307 tanpa cookie (protected tetap).
@@ -110,35 +110,35 @@ getSchedulingOptions(): Promise<{ tutors: {id,name}[]; classes: {id,name}[] }>  
 
 ## BAGIAN B — Wiring CRUD mock
 
-### Task B1: Classes CRUD
+### Task 6: Classes CRUD
 
 **Files:** Create `src/server/actions/classesCrud.ts`; Modify `src/app/(admin)/classes/page.tsx` (server page fetch), `src/views/Classes.tsx` (props-driven).
 
 **Interfaces:** `listClasses()` (admin), `createClass(input {name, description?, capacity?, pricePerMonth?, sessionsPerMonth?, schedule?, location?})`, `updateClass(id, partial)`, `toggleClassActive(id, isActive)` — semua admin only; guard unique name tidak wajib (biarkan DB). Page: fetch + props → view render dari props, dialog create/edit memanggil action, sukses → `router.refresh()` + toast.
 - [ ] Implement → build → commit `feat(classes): CRUD kelas nyata via server actions`
 
-### Task B2: Students CRUD (+enrollment)
+### Task 7: Students CRUD (+enrollment)
 
 **Files:** Create `src/server/actions/studentsCrud.ts`; Modify `src/app/(admin)/students/page.tsx`, `src/views/Students.tsx`.
 
 **Interfaces:** `listStudentsWithEnrollments()` (admin: students + enrollments join classes, kumpulan enrollment per siswa), `createStudent(input {name, dateOfBirth?, parentName?, parentPhone?, parentEmail?} + enrollment? {classId, sessionsQuota?, billingDay?})` (INSERT student, lalu INSERT enrollment bila classId diisi — transaksi `db.transaction`), `updateStudent(id, partial)`, `toggleStudentActive(id, isActive)`. View: table dari props; dialog create dengan optional pilih kelas; parent_user_id TIDAK diset dari sini (kecuali input email cocok — YAGNI: skip linking).
 - [ ] Implement → build → commit `feat(students): CRUD siswa + enrollment via server actions`
 
-### Task B3: Tutors CRUD
+### Task 8: Tutors CRUD
 
 **Files:** Create `src/server/actions/tutorsCrud.ts`; Modify `src/app/(admin)/tutors/page.tsx`, `src/views/Tutors.tsx`.
 
 **Interfaces:** `listTutorsWithAssignments()` (tutors + tutor_class_assignments join classes), `createTutor(input {name, email?, phone?})` (user_id TIDAK diset — linking akun nanti), `updateTutor(id, partial)`, `toggleTutorActive(id, isActive)`. View: card roster dari props; dialog create/edit.
 - [ ] Implement → build → commit `feat(tutors): CRUD tutor via server actions`
 
-### Task B4: DailyReports — tabel baru + wiring
+### Task 9: DailyReports — tabel baru + wiring
 
 **Files:** Modify `src/db/schema.ts` (+ enum `report_status {draft,submitted}` + tabel `dailyReports`: id, studentId fk, classId fk, tutorUserId fk user nullable, reportDate date, mood text, meals text, nap text, activities text, notes text, photos jsonb string[], status default 'submitted', timestamps) + generate + migrate; Create `src/server/actions/dailyReports.ts`; Modify `src/app/(admin)/daily-reports/page.tsx`, `src/views/DailyReports.tsx`; Create `scripts/seed-reports.ts` (10 laporan hari ini).
 
 **Interfaces:** `listDailyReports(date: string)` (admin: join students), `createDailyReport(input {studentId, reportDate, mood?, meals?, nap?, activities?, notes?})` (tutor|admin; tutor_user_id dari session), `getReportsForParent()` (parent: hanya anaknya — join students WHERE parent_user_id; dipakai ParentPortal feed nanti — cukup actionnya, UI parent feed tetap mock). View admin: filter tanggal (default hari ini) + list kartu + dialog create (pilih siswa).
 - [ ] Implement → migrate → seed → build → commit `feat(reports): tabel daily_reports + wiring DailyReports admin/tutor`
 
-### Task B5: Verifikasi akhir Fase 3
+### Task 10: Verifikasi akhir Fase 3
 
 - [ ] tsc + build + smoke semua route (lama + /tutor/trials + baru). Update verification doc. Deploy staging (jika kuota tersedia). Commit `chore(fase3): verifikasi akhir`.
 
