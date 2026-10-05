@@ -28,7 +28,8 @@ export function middleware(req: NextRequest) {
   const isProtected = PROTECTED.some((re) => re.test(req.nextUrl.pathname));
   if (isProtected && !hasSession) {
     const url = new URL("/auth/login", req.url);
-    url.searchParams.set("next", req.nextUrl.pathname);
+    const target = req.nextUrl.pathname + req.nextUrl.search;
+    url.searchParams.set("next", target);
     return NextResponse.redirect(url);
   }
   return NextResponse.next();

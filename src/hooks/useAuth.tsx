@@ -40,18 +40,24 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { data, isPending } = authClient.useSession();
   const [roles, setRoles] = useState<AppRole[]>([]);
-  const [rolesLoading, setRolesLoading] = useState(false);
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+  const rolesLoading = Boolean(data?.user && loadedUserId !== data.user.id);
 
   useEffect(() => {
-    if (data?.user) {
-      setRolesLoading(true);
+    const userId = data?.user?.id;
+    if (userId) {
       getMyRoles()
-        .then(setRoles)
-        .catch(() => setRoles([]))
-        .finally(() => setRolesLoading(false));
+        .then((r) => {
+          setRoles(r);
+          setLoadedUserId(userId);
+        })
+        .catch(() => {
+          setRoles([]);
+          setLoadedUserId(userId);
+        });
     } else {
       setRoles([]);
-      setRolesLoading(false);
+      setLoadedUserId(null);
     }
   }, [data?.user?.id]);
 
@@ -74,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut: async () => {
           await authClient.signOut();
           setRoles([]);
+          setLoadedUserId(null);
         },
       }}
     >

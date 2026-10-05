@@ -5,7 +5,7 @@ config({ path: ".env.local" });
 import { eq } from "drizzle-orm";
 import { db } from "../src/db";
 import { user, userRoles } from "../src/db/schema";
-import type { AppRole } from "../src/types/auth";
+import type { AppRole } from "../src/server/actions/roles";
 
 async function assign(email: string, role: AppRole) {
   const users = await db.select().from(user).where(eq(user.email, email));
@@ -17,7 +17,7 @@ async function assign(email: string, role: AppRole) {
   await db
     .insert(userRoles)
     .values({
-      id: `ur_${targetUser.id.slice(0, 10)}`,
+      id: `ur_${targetUser.id.slice(0, 8)}_${role}`,
       userId: targetUser.id,
       role: role,
     })

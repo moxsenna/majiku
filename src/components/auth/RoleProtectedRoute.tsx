@@ -23,7 +23,7 @@ export function RoleProtectedRoute({ children, role, requiredRole }: RoleProtect
   }
 
   if (!session) {
-    redirect(`/auth/login?from=${encodeURIComponent(pathname || "")}`);
+    redirect(`/auth/login?next=${encodeURIComponent(pathname || "")}`);
   }
 
   if (targetRole && !hasRole(targetRole)) {

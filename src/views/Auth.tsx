@@ -26,6 +26,11 @@ export default function Auth() {
   useEffect(() => {
     authClient.getSession().then(async (res) => {
       if (res?.data?.session) {
+        const next = new URLSearchParams(window.location.search).get("next");
+        if (next && next.startsWith("/") && !next.startsWith("//")) {
+          window.location.href = next;
+          return;
+        }
         const home = await getRoleHome(res.data.user.id);
         window.location.href = home;
       }
@@ -59,10 +64,15 @@ export default function Auth() {
       setIsLoading(false);
       toast({ title: "Login Gagal", description: error.message || "Email atau password salah", variant: "destructive" });
     } else {
-      const home = await getRoleHome(data?.user?.id);
       setIsLoading(false);
       toast({ title: "Login Berhasil!", description: "Selamat datang kembali di MAJIKU" });
-      window.location.href = home;
+      const next = new URLSearchParams(window.location.search).get("next");
+      if (next && next.startsWith("/") && !next.startsWith("//")) {
+        window.location.href = next;
+      } else {
+        const home = await getRoleHome(data?.user?.id);
+        window.location.href = home;
+      }
     }
   };
 
@@ -81,17 +91,26 @@ export default function Auth() {
       return;
     }
     setIsLoading(true);
-    const { error } = await authClient.signUp.email({
+    const { data, error } = await authClient.signUp.email({
       email: registerForm.email,
       password: registerForm.password,
       name: registerForm.name || registerForm.email,
     });
-    setIsLoading(false);
     if (error) {
+      setIsLoading(false);
       toast({ title: "Pendaftaran Gagal", description: error.message || "Pendaftaran gagal", variant: "destructive" });
     } else {
+      setIsLoading(false);
       toast({ title: "Pendaftaran Berhasil!", description: "Silakan masuk dengan akun baru Anda." });
-      setActiveTab("login");
+      const next = new URLSearchParams(window.location.search).get("next");
+      if (next && next.startsWith("/") && !next.startsWith("//")) {
+        window.location.href = next;
+      } else if (data?.user) {
+        const home = await getRoleHome(data?.user?.id);
+        window.location.href = home;
+      } else {
+        setActiveTab("login");
+      }
     }
   };
 

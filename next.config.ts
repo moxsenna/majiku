@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   typescript: { ignoreBuildErrors: false },
   eslint: { ignoreDuringBuilds: true },
+  async redirects() {
+    return [
+      { source: "/demo", destination: "/vendor", permanent: false },
+      { source: "/vendor/dashboard", destination: "/vendor", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

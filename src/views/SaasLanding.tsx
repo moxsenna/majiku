@@ -187,7 +187,7 @@ export default function SaasLanding() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link href="/demo">
+              <Link href="/vendor">
                 <Button size="lg" variant="outline" className="text-lg px-8 h-14">
                   Lihat Demo
                 </Button>
@@ -256,7 +256,7 @@ export default function SaasLanding() {
                   </li>
                 ))}
               </ul>
-              <Link href="/demo">
+              <Link href="/vendor">
                 <Button className="gap-2">
                   Lihat Demo Dashboard
                   <ArrowRight className="h-4 w-4" />
