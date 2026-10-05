@@ -46,6 +46,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { todayInWib } from "@/lib/datetime";
 import {
   createDailyReport,
   deleteDailyReport,
@@ -99,7 +100,7 @@ export default function DailyReports({
   const [activities, setActivities] = useState("");
   const [notes, setNotes] = useState("");
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInWib();
 
   const resetForm = () => {
     setStudentId("");

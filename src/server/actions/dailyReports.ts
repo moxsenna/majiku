@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { dailyReports, students, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { isValidDateString } from "@/lib/datetime";
 
 export interface DailyReportItem {
   id: string;
@@ -79,6 +80,8 @@ async function requireTutorOrAdmin() {
 }
 
 export async function listDailyReports(reportDate: string): Promise<DailyReportItem[]> {
+  if (!reportDate || !isValidDateString(reportDate)) return [];
+
   const session = await getSessionSafely();
   if (!session) return [];
 
@@ -123,8 +126,8 @@ export async function createDailyReport(
   if (!input.studentId || !input.studentId.trim()) {
     throw new Error("Siswa wajib dipilih");
   }
-  if (!input.reportDate || !input.reportDate.trim()) {
-    throw new Error("Tanggal laporan wajib diisi");
+  if (!input.reportDate || !isValidDateString(input.reportDate.trim())) {
+    throw new Error("Format tanggal laporan tidak valid (harus YYYY-MM-DD)");
   }
 
   const reportId = randomUUID();

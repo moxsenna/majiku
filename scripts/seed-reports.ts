@@ -5,12 +5,13 @@ config({ path: ".env.local" });
 import { sql } from "drizzle-orm";
 import { db } from "../src/db";
 import { dailyReports } from "../src/db/schema";
+import { todayInWib } from "../src/lib/datetime";
 
 async function main() {
   console.log("Seeding daily reports...");
 
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const today = todayInWib();
+  const yesterday = todayInWib(new Date(Date.now() - 86400000));
 
   const sampleReports = [
     {

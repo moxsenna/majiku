@@ -3,6 +3,7 @@ import {
   listDailyReports,
   getStudentOptions,
 } from "@/server/actions/dailyReports";
+import { todayInWib, isValidDateString } from "@/lib/datetime";
 
 interface PageProps {
   searchParams: Promise<{ date?: string }>;
@@ -10,8 +11,9 @@ interface PageProps {
 
 export default async function Page({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
-  const today = new Date().toISOString().slice(0, 10);
-  const selectedDate = resolvedParams.date || today;
+  const today = todayInWib();
+  const rawDate = resolvedParams.date?.trim();
+  const selectedDate = rawDate && isValidDateString(rawDate) ? rawDate : today;
 
   const [reports, studentOptions] = await Promise.all([
     listDailyReports(selectedDate),
