@@ -1,6 +1,12 @@
-"use client";
-import DaycareMarketplace from "@/views/DaycareMarketplace";
+import { MarketplaceContent } from "@/components/marketplace/MarketplaceContent";
 
-export default function Page() {
-  return <DaycareMarketplace />;
+type SearchParams = Promise<{ type?: string; city?: string; q?: string }>;
+
+export default async function ParentMarketplacePage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const sp = await searchParams;
+  return <MarketplaceContent searchParams={sp} />;
 }
