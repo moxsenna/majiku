@@ -156,13 +156,13 @@ export async function scheduleTrial(
     .where(
       and(
         eq(trialApplications.id, trialId),
-        eq(trialApplications.status, "submitted")
+        inArray(trialApplications.status, ["submitted", "scheduled"])
       )
     )
     .returning({ id: trialApplications.id });
 
   if (result.length === 0) {
-    throw new Error("Pengajuan tidak ditemukan atau sudah dijadwalkan");
+    throw new Error("Pengajuan tidak ditemukan atau tidak dapat dijadwalkan");
   }
 }
 
