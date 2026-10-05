@@ -9,6 +9,7 @@ import {
   time,
   timestamp,
   unique,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const appRole = pgEnum("app_role", ["admin", "moderator", "user", "parent", "tutor"]);
@@ -20,6 +21,34 @@ export const ticketPriority = pgEnum("ticket_priority", ["low", "medium", "high"
 export const ticketStatus = pgEnum("ticket_status", ["open", "in_progress", "resolved", "closed"]);
 export const trialStatus = pgEnum("trial_status", ["submitted", "scheduled", "awaiting_review", "recommended", "repeat_trial", "not_suitable", "admitted"]);
 export const trialRecommendation = pgEnum("trial_recommendation", ["suitable", "repeat_trial", "not_suitable"]);
+export const tenantType = pgEnum("tenant_type", ["daycare", "preschool", "bimbel"]);
+
+export interface TenantProgram {
+  name: string;
+  ageRange: string;
+  priceFrom: string;
+}
+
+export const tenants = pgTable("tenants", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  type: tenantType("type").notNull().default("daycare"),
+  tagline: text("tagline"),
+  description: text("description"),
+  city: text("city").notNull(),
+  address: text("address"),
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
+  priceFrom: numeric("price_from").notNull(),
+  programs: jsonb("programs").$type<TenantProgram[]>().default([]),
+  photos: jsonb("photos").$type<string[]>().default([]),
+  whatsapp: text("whatsapp"),
+  isVerified: boolean("is_verified").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
 
 // BetterAuth (skema bawaan better-auth/adapters/drizzle)
 export const user = pgTable("user", {

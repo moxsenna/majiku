@@ -16,6 +16,7 @@ import {
   attendance,
   invoices,
   waitingList,
+  tenants,
 } from "../src/db/schema";
 
 async function main() {
@@ -655,6 +656,333 @@ async function main() {
     ])
     .onConflictDoNothing();
 
+  // 12. Tenants (10 rows for marketplace)
+  await db
+    .insert(tenants)
+    .values([
+      {
+        id: "tnt_1",
+        slug: "majiku-kids",
+        name: "Majiku Kids",
+        type: "daycare",
+        tagline: "Sensory Daycare & Early Learning Space",
+        description:
+          "Daycare dan kelas stimulasi tumbuh kembang anak berbasis sensorik dan bermain aktif di Tangerang.",
+        city: "Tangerang",
+        address: "Jl. Boulevard Bintaro Jaya Blok B7, Tangerang Selatan",
+        latitude: "-6.2758",
+        longitude: "106.7082",
+        priceFrom: "700000",
+        programs: [
+          {
+            name: "Tiny Tints",
+            ageRange: "2-4 tahun",
+            priceFrom: "700000",
+          },
+          {
+            name: "Majiku Pop Up Class",
+            ageRange: "2-3 tahun",
+            priceFrom: "125000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800",
+        ],
+        whatsapp: "6281234567890",
+        isVerified: true,
+        isActive: true,
+      },
+      {
+        id: "tnt_2",
+        slug: "lentera-kecil-preschool",
+        name: "Lentera Kecil Preschool",
+        type: "preschool",
+        tagline: "Montessori Early Childhood Education",
+        description:
+          "Preschool dengan pendekatan Montessori berstandar internasional untuk kemandirian dan rasa ingin tahu anak.",
+        city: "Jakarta Selatan",
+        address: "Jl. Kemang Raya No. 42, Jakarta Selatan",
+        latitude: "-6.2608",
+        longitude: "106.8157",
+        priceFrom: "2500000",
+        programs: [
+          {
+            name: "Toddler Community",
+            ageRange: "1.5-3 tahun",
+            priceFrom: "2500000",
+          },
+          {
+            name: "Children House",
+            ageRange: "3-6 tahun",
+            priceFrom: "3200000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+        ],
+        whatsapp: "6281198765432",
+        isVerified: true,
+        isActive: true,
+      },
+      {
+        id: "tnt_3",
+        slug: "bintang-pelajar-bimbel-depok",
+        name: "Bimbel Bintang Prestasi Depok",
+        type: "bimbel",
+        tagline: "Bimbingan Belajar SD & Persiapan Masuk SMP Unggulan",
+        description:
+          "Bimbel interaktif dengan metode pemahaman konsep logika dan pendampingan PR harian anak.",
+        city: "Depok",
+        address: "Jl. Margonda Raya No. 180, Depok",
+        latitude: "-6.3725",
+        longitude: "106.8322",
+        priceFrom: "850000",
+        programs: [
+          {
+            name: "Kelas Reguler SD",
+            ageRange: "6-12 tahun",
+            priceFrom: "850000",
+          },
+          {
+            name: "Intensif Ujian & Olimpiade",
+            ageRange: "9-12 tahun",
+            priceFrom: "1400000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800",
+        ],
+        whatsapp: "6281311223344",
+        isVerified: true,
+        isActive: true,
+      },
+      {
+        id: "tnt_4",
+        slug: "tunas-harapan-daycare-bandung",
+        name: "Tunas Harapan Daycare",
+        type: "daycare",
+        tagline: "Home Away From Home for Your Little Ones",
+        description:
+          "Penitipan anak ramah dan aman dengan pengawasan dokter anak berkala serta asupan nutrisi sehat di Bandung.",
+        city: "Bandung",
+        address: "Jl. R.E. Martadinata No. 88, Bandung",
+        latitude: "-6.9080",
+        longitude: "107.6163",
+        priceFrom: "1800000",
+        programs: [
+          {
+            name: "Full Day Care",
+            ageRange: "3 bulan - 4 tahun",
+            priceFrom: "2200000",
+          },
+          {
+            name: "Half Day Stimulasi",
+            ageRange: "1-4 tahun",
+            priceFrom: "1800000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800",
+        ],
+        whatsapp: "6281722334455",
+        isVerified: true,
+        isActive: true,
+      },
+      {
+        id: "tnt_5",
+        slug: "mentari-preschool-surabaya",
+        name: "Mentari Preschool Surabaya",
+        type: "preschool",
+        tagline: "Nurturing Curious and Confident Minds",
+        description:
+          "Pendidikan anak usia dini berbasis kurikulum bilingual (Indonesia - Inggris) dengan fokus sosio-emosional.",
+        city: "Surabaya",
+        address: "Jl. Raya Darmo Permai II No. 15, Surabaya",
+        latitude: "-7.2831",
+        longitude: "112.6845",
+        priceFrom: "2100000",
+        programs: [
+          {
+            name: "Nursery",
+            ageRange: "2-3 tahun",
+            priceFrom: "2100000",
+          },
+          {
+            name: "Kindergarten A & B",
+            ageRange: "4-6 tahun",
+            priceFrom: "2800000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800",
+        ],
+        whatsapp: "6281933445566",
+        isVerified: true,
+        isActive: true,
+      },
+      {
+        id: "tnt_6",
+        slug: "cerdas-ceria-bimbel-bekasi",
+        name: "Cerdas Ceria Learning Center",
+        type: "bimbel",
+        tagline: "Belajar Menyenangkan, Nilai Membanggakan",
+        description:
+          "Bimbel baca tulis hitung (calistung) dan matematika kreatif anak usia dini hingga sekolah dasar di Bekasi.",
+        city: "Bekasi",
+        address: "Jl. Boulevard Raya Grand Galaxy City Ruko RGA No. 12, Bekasi",
+        latitude: "-6.2635",
+        longitude: "106.9744",
+        priceFrom: "750000",
+        programs: [
+          {
+            name: "Calistung Fun Learning",
+            ageRange: "4-6 tahun",
+            priceFrom: "750000",
+          },
+          {
+            name: "Matematika Logika Cilik",
+            ageRange: "7-10 tahun",
+            priceFrom: "950000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800",
+        ],
+        whatsapp: "6281544556677",
+        isVerified: false,
+        isActive: true,
+      },
+      {
+        id: "tnt_7",
+        slug: "kasih-bunda-daycare-tangerang",
+        name: "Kasih Bunda Daycare & Nursery",
+        type: "daycare",
+        tagline: "Kasih Sayang Ibu di Tempat Penitipan Terpercaya",
+        description:
+          "Fasilitas penitipan anak dengan CCTV online 24 jam untuk orang tua dan menu gizi terstandarisasi.",
+        city: "Tangerang",
+        address: "Jl. MH Thamrin No. 25, Cikokol, Tangerang",
+        latitude: "-6.2088",
+        longitude: "106.6342",
+        priceFrom: "1500000",
+        programs: [
+          {
+            name: "Infant Care",
+            ageRange: "2-12 bulan",
+            priceFrom: "2000000",
+          },
+          {
+            name: "Toddler Daycare",
+            ageRange: "1-3 tahun",
+            priceFrom: "1500000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1596464716127-f2a829822301?w=800",
+        ],
+        whatsapp: "6281255667788",
+        isVerified: false,
+        isActive: true,
+      },
+      {
+        id: "tnt_8",
+        slug: "pelangi-preschool-jakarta",
+        name: "Pelangi Nusantara Preschool",
+        type: "preschool",
+        tagline: "Play, Learn, and Grow Together",
+        description:
+          "Mendorong kecerdasan majemuk (multiple intelligences) anak melalui seni, musik, dan eksplorasi sains.",
+        city: "Jakarta Selatan",
+        address: "Jl. Tebet Barat Dalam Raya No. 50, Jakarta Selatan",
+        latitude: "-6.2415",
+        longitude: "106.8485",
+        priceFrom: "2800000",
+        programs: [
+          {
+            name: "Early Explorers",
+            ageRange: "2-3 tahun",
+            priceFrom: "2800000",
+          },
+          {
+            name: "Kindy Creative",
+            ageRange: "4-5 tahun",
+            priceFrom: "3500000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800",
+        ],
+        whatsapp: "6281366778899",
+        isVerified: false,
+        isActive: true,
+      },
+      {
+        id: "tnt_9",
+        slug: "al-falah-bimbel-quran-depok",
+        name: "Al-Falah Islamic Tutoring",
+        type: "bimbel",
+        tagline: "Membentuk Generasi Cerdas dan Berakhlak Mulia",
+        description:
+          "Bimbingan tahsin Al-Quran dan pendampingan materi akademik sekolah dasar dengan suasana islami.",
+        city: "Depok",
+        address: "Jl. Siliwangi No. 14, Depok",
+        latitude: "-6.4025",
+        longitude: "106.8285",
+        priceFrom: "700000",
+        programs: [
+          {
+            name: "Tahsin & Iqro Cilik",
+            ageRange: "4-8 tahun",
+            priceFrom: "700000",
+          },
+          {
+            name: "Bimbel Tematik SD",
+            ageRange: "7-12 tahun",
+            priceFrom: "900000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=800",
+        ],
+        whatsapp: "6281877889900",
+        isVerified: false,
+        isActive: true,
+      },
+      {
+        id: "tnt_10",
+        slug: "sahabat-kecil-daycare-bandung",
+        name: "Sahabat Kecil Daycare",
+        type: "daycare",
+        tagline: "Ruang Tumbuh Nyaman dan Hangat Bagi Buah Hati",
+        description:
+          "Daycare dengan area outdoor luas di Bandung utara untuk melatih motorik kasar dan koneksi anak dengan alam.",
+        city: "Bandung",
+        address: "Jl. Setiabudi No. 102, Bandung",
+        latitude: "-6.8645",
+        longitude: "107.5932",
+        priceFrom: "1600000",
+        programs: [
+          {
+            name: "Daycare Harian / Drop-in",
+            ageRange: "1-5 tahun",
+            priceFrom: "150000",
+          },
+          {
+            name: "Daycare Bulanan Full Day",
+            ageRange: "1-5 tahun",
+            priceFrom: "1600000",
+          },
+        ],
+        photos: [
+          "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=800",
+        ],
+        whatsapp: "6281988990011",
+        isVerified: false,
+        isActive: true,
+      },
+    ])
+    .onConflictDoNothing();
+
   // Verifikasi jumlah baris per tabel
   const tables = [
     "user",
@@ -668,6 +996,7 @@ async function main() {
     "attendance",
     "invoices",
     "waiting_list",
+    "tenants",
   ];
 
   console.log("Verifikasi jumlah baris di database:");
