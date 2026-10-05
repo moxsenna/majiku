@@ -426,7 +426,11 @@ export default function DailyReports({
                       {report.photos.map((photo, i) => (
                         <img
                           key={i}
-                          src={photo}
+                          src={
+                            photo.startsWith("http") || photo.startsWith("/")
+                              ? photo
+                              : `/api/photos/${photo}`
+                          }
                           alt={`Foto aktivitas ${i + 1}`}
                           className="rounded-lg object-cover w-full h-36"
                         />

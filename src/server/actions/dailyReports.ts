@@ -15,6 +15,7 @@ import {
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { isValidDateString, todayInWib } from "@/lib/datetime";
+import { deletePhoto } from "@/server/r2";
 
 export interface DailyReportItem {
   id: string;
@@ -374,10 +375,21 @@ export async function deleteDailyReport(id: string): Promise<void> {
   const result = await db
     .delete(dailyReports)
     .where(eq(dailyReports.id, id))
-    .returning({ id: dailyReports.id });
+    .returning({ id: dailyReports.id, photos: dailyReports.photos });
 
   if (result.length === 0) {
     throw new Error("Laporan tidak ditemukan");
+  }
+
+  const report = result[0];
+  if (report?.photos && Array.isArray(report.photos)) {
+    for (const key of report.photos) {
+      if (typeof key === "string") {
+        await deletePhoto(key).catch((err) =>
+          console.error("Gagal hapus foto report R2:", key, err)
+        );
+      }
+    }
   }
 }
 
