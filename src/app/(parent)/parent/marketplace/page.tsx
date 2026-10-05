@@ -1,6 +1,6 @@
 import { MarketplaceContent } from "@/components/marketplace/MarketplaceContent";
 
-type SearchParams = Promise<{ type?: string; city?: string; q?: string }>;
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function ParentMarketplacePage({
   searchParams,
@@ -8,5 +8,5 @@ export default async function ParentMarketplacePage({
   searchParams: SearchParams;
 }) {
   const sp = await searchParams;
-  return <MarketplaceContent searchParams={sp} />;
+  return <MarketplaceContent searchParams={sp} action="/parent/marketplace" />;
 }

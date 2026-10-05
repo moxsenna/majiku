@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Temukan dan bandingkan daycare, preschool, dan bimbel terverifikasi di seluruh Indonesia.",
 };
 
-type SearchParams = Promise<{ type?: string; city?: string; q?: string }>;
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function MarketplacePage({
   searchParams,

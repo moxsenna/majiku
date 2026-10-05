@@ -4,25 +4,34 @@ import { MarketplaceFilters } from "@/components/marketplace/MarketplaceFilters"
 
 export interface MarketplaceContentProps {
   searchParams?: {
-    type?: string;
-    city?: string;
-    q?: string;
+    type?: string | string[];
+    city?: string | string[];
+    q?: string | string[];
+    [key: string]: string | string[] | undefined;
   };
   action?: string;
 }
 
+const cleanString = (val?: string | string[]) =>
+  typeof val === "string" ? val.trim() || undefined : undefined;
+
 export async function MarketplaceContent({
   searchParams,
-  action,
+  action = "/marketplace",
 }: MarketplaceContentProps) {
   const sp = searchParams ?? {};
+  const city = cleanString(sp.city);
+  const q = cleanString(sp.q);
+  const type =
+    typeof sp.type === "string" &&
+    (sp.type === "daycare" || sp.type === "preschool" || sp.type === "bimbel")
+      ? sp.type
+      : undefined;
+
   const filters: TenantFilters = {
-    type:
-      sp.type === "daycare" || sp.type === "preschool" || sp.type === "bimbel"
-        ? sp.type
-        : undefined,
-    city: sp.city?.trim() || undefined,
-    q: sp.q?.trim() || undefined,
+    type,
+    city,
+    q,
   };
 
   const tenantList = await listActiveTenants(filters);
@@ -33,7 +42,7 @@ export async function MarketplaceContent({
       <p className="mt-2 text-muted-foreground">
         {tenantList.length} pusat pembelajaran ditemukan
       </p>
-      <MarketplaceFilters current={sp} action={action} />
+      <MarketplaceFilters current={{ type, city, q }} action={action} />
       <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {tenantList.map((t) => (
           <TenantCard key={t.id} tenant={t} />
