@@ -1,0 +1,169 @@
+"use server";
+
+import { randomUUID } from "node:crypto";
+import { headers } from "next/headers";
+import { asc, desc, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { tutors, tutorClassAssignments, classes } from "@/db/schema";
+import { auth } from "@/server/auth";
+import { getMyRoles, type AppRole } from "@/server/actions/roles";
+
+export type TutorRecord = typeof tutors.$inferSelect;
+
+export interface TutorAssignmentDetail {
+  assignmentId: string;
+  classId: string;
+  className: string | null;
+  ratePerSession: string | null;
+}
+
+export interface TutorWithAssignments {
+  tutor: TutorRecord;
+  assignments: TutorAssignmentDetail[];
+}
+
+export interface CreateTutorInput {
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface UpdateTutorInput {
+  name?: string;
+  email?: string;
+  phone?: string;
+}
+
+async function getSessionSafely() {
+  try {
+    const h = await headers();
+    return await auth.api.getSession({ headers: h });
+  } catch {
+    return null;
+  }
+}
+
+async function requireAdminOrModerator() {
+  const session = await getSessionSafely();
+  if (!session) {
+    throw new Error("Unauthorized: Anda harus login");
+  }
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) {
+    throw new Error("Hanya admin atau moderator yang memiliki akses");
+  }
+  return session;
+}
+
+export async function listTutorsWithAssignments(): Promise<TutorWithAssignments[]> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+
+  const rows = await db
+    .select({
+      tutor: tutors,
+      assignmentId: tutorClassAssignments.id,
+      classId: tutorClassAssignments.classId,
+      className: classes.name,
+      ratePerSession: tutorClassAssignments.ratePerSession,
+    })
+    .from(tutors)
+    .leftJoin(tutorClassAssignments, eq(tutors.id, tutorClassAssignments.tutorId))
+    .leftJoin(classes, eq(tutorClassAssignments.classId, classes.id))
+    .orderBy(desc(tutors.createdAt), asc(tutors.name));
+
+  const map = new Map<string, TutorWithAssignments>();
+  for (const row of rows) {
+    let entry = map.get(row.tutor.id);
+    if (!entry) {
+      entry = { tutor: row.tutor, assignments: [] };
+      map.set(row.tutor.id, entry);
+    }
+    if (row.assignmentId && row.classId) {
+      entry.assignments.push({
+        assignmentId: row.assignmentId,
+        classId: row.classId,
+        className: row.className,
+        ratePerSession: row.ratePerSession,
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+export async function createTutor(input: CreateTutorInput): Promise<{ id: string }> {
+  await requireAdminOrModerator();
+
+  if (!input.name || !input.name.trim()) {
+    throw new Error("Nama tutor wajib diisi");
+  }
+
+  const id = randomUUID();
+  await db.insert(tutors).values({
+    id,
+    name: input.name.trim(),
+    email: input.email?.trim() || null,
+    phone: input.phone?.trim() || null,
+    isActive: true,
+  });
+
+  return { id };
+}
+
+export async function updateTutor(
+  id: string,
+  partial: UpdateTutorInput
+): Promise<void> {
+  await requireAdminOrModerator();
+
+  if (!id) {
+    throw new Error("ID tutor wajib diisi");
+  }
+
+  if (partial.name !== undefined && !partial.name.trim()) {
+    throw new Error("Nama tutor tidak boleh kosong");
+  }
+
+  const updateValues: Partial<typeof tutors.$inferInsert> = {
+    updatedAt: new Date(),
+  };
+
+  if (partial.name !== undefined) updateValues.name = partial.name.trim();
+  if (partial.email !== undefined) updateValues.email = partial.email.trim() || null;
+  if (partial.phone !== undefined) updateValues.phone = partial.phone.trim() || null;
+
+  const result = await db
+    .update(tutors)
+    .set(updateValues)
+    .where(eq(tutors.id, id))
+    .returning({ id: tutors.id });
+
+  if (result.length === 0) {
+    throw new Error("Tutor tidak ditemukan");
+  }
+}
+
+export async function toggleTutorActive(id: string, isActive: boolean): Promise<void> {
+  await requireAdminOrModerator();
+
+  if (!id) {
+    throw new Error("ID tutor wajib diisi");
+  }
+
+  const result = await db
+    .update(tutors)
+    .set({
+      isActive,
+      updatedAt: new Date(),
+    })
+    .where(eq(tutors.id, id))
+    .returning({ id: tutors.id });
+
+  if (result.length === 0) {
+    throw new Error("Tutor tidak ditemukan");
+  }
+}
