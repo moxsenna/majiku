@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { db } from "@/db";
 import { attendance, studentEnrollments, students, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -43,13 +43,18 @@ async function getSessionSafely() {
 
 export async function getTodayAttendance(): Promise<AttendanceRow[]> {
   const session = await getSessionSafely();
-  const roles: AppRole[] = session ? await getMyRoles().catch(() => []) : [];
-  const isParentOnly = session && roles.includes("parent") && !roles.includes("admin") && !roles.includes("moderator");
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isTutor = roles.includes("tutor");
+  const isParent = roles.includes("parent");
+
+  if (!isAdmin && !isTutor && !isParent) return [];
 
   const today = new Date().toISOString().slice(0, 10);
   const conditions = [eq(attendance.date, today)];
 
-  if (isParentOnly && session) {
+  if (!isAdmin && isParent) {
     conditions.push(eq(students.parentUserId, session.user.id));
   }
 
@@ -72,6 +77,65 @@ export async function getTodayAttendance(): Promise<AttendanceRow[]> {
     .innerJoin(students, eq(attendance.studentId, students.id))
     .innerJoin(classes, eq(attendance.classId, classes.id))
     .where(and(...conditions));
+
+  return rows.map((r) => ({
+    ...r,
+    date: String(r.date),
+    student_id: r.studentId,
+    check_in_time: r.checkInTime,
+    check_out_time: r.checkOutTime,
+    permit_type: r.permitType,
+    permit_reason: r.permitReason,
+    is_free_permit: r.isFreePermit,
+    checked_in_by: r.checkedInBy,
+    students: { name: r.studentName },
+    classes: { name: r.className },
+  }));
+}
+
+export async function getMonthlyAttendance(year: number, month: number): Promise<AttendanceRow[]> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isTutor = roles.includes("tutor");
+  const isParent = roles.includes("parent");
+
+  if (!isAdmin && !isTutor && !isParent) return [];
+
+  const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+  const conditions = [
+    gte(attendance.date, startDate),
+    lte(attendance.date, endDate),
+  ];
+
+  if (!isAdmin && isParent) {
+    conditions.push(eq(students.parentUserId, session.user.id));
+  }
+
+  const rows = await db
+    .select({
+      id: attendance.id,
+      date: attendance.date,
+      status: attendance.status,
+      checkInTime: attendance.checkInTime,
+      checkOutTime: attendance.checkOutTime,
+      permitType: attendance.permitType,
+      permitReason: attendance.permitReason,
+      isFreePermit: attendance.isFreePermit,
+      checkedInBy: attendance.checkedInBy,
+      studentId: attendance.studentId,
+      studentName: students.name,
+      className: classes.name,
+    })
+    .from(attendance)
+    .innerJoin(students, eq(attendance.studentId, students.id))
+    .innerJoin(classes, eq(attendance.classId, classes.id))
+    .where(and(...conditions))
+    .orderBy(desc(attendance.date));
 
   return rows.map((r) => ({
     ...r,
@@ -111,12 +175,17 @@ export interface AttendanceEnrollmentRow {
 
 export async function getAttendanceEnrollments(): Promise<AttendanceEnrollmentRow[]> {
   const session = await getSessionSafely();
-  const roles: AppRole[] = session ? await getMyRoles().catch(() => []) : [];
-  const isParentOnly = session && roles.includes("parent") && !roles.includes("admin") && !roles.includes("moderator");
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isTutor = roles.includes("tutor");
+  const isParent = roles.includes("parent");
+
+  if (!isAdmin && !isTutor && !isParent) return [];
 
   const conditions = [eq(studentEnrollments.isActive, true)];
 
-  if (isParentOnly && session) {
+  if (!isAdmin && isParent) {
     conditions.push(eq(students.parentUserId, session.user.id));
   }
 

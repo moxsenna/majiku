@@ -71,11 +71,15 @@ async function getCallerTutorId(userId: string): Promise<string | null> {
 
 export async function getTutors(): Promise<TutorItem[]> {
   const session = await getSessionSafely();
-  const roles: AppRole[] = session ? await getMyRoles().catch(() => []) : [];
-  const isTutorOnly = session && roles.includes("tutor") && !roles.includes("admin") && !roles.includes("moderator");
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isTutor = roles.includes("tutor");
+
+  if (!isAdmin && !isTutor) return [];
 
   const conditions = [eq(tutors.isActive, true)];
-  if (isTutorOnly && session) {
+  if (!isAdmin && isTutor) {
     conditions.push(eq(tutors.userId, session.user.id));
   }
 
@@ -93,11 +97,15 @@ export async function getTutors(): Promise<TutorItem[]> {
 
 export async function getTutorAssignments(): Promise<TutorAssignmentItem[]> {
   const session = await getSessionSafely();
-  const roles: AppRole[] = session ? await getMyRoles().catch(() => []) : [];
-  const isTutorOnly = session && roles.includes("tutor") && !roles.includes("admin") && !roles.includes("moderator");
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isTutor = roles.includes("tutor");
+
+  if (!isAdmin && !isTutor) return [];
 
   const conditions = [eq(tutorClassAssignments.isActive, true)];
-  if (isTutorOnly && session) {
+  if (!isAdmin && isTutor) {
     const tutorId = await getCallerTutorId(session.user.id);
     if (!tutorId) return [];
     conditions.push(eq(tutorClassAssignments.tutorId, tutorId));
@@ -137,20 +145,24 @@ export async function getTutorAssignments(): Promise<TutorAssignmentItem[]> {
 }
 
 export async function getTutorBonuses(month?: number, year?: number): Promise<TutorBonusItem[]> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isTutor = roles.includes("tutor");
+
+  if (!isAdmin && !isTutor) return [];
+
   const now = new Date();
   const targetMonth = month ?? now.getMonth() + 1;
   const targetYear = year ?? now.getFullYear();
-
-  const session = await getSessionSafely();
-  const roles: AppRole[] = session ? await getMyRoles().catch(() => []) : [];
-  const isTutorOnly = session && roles.includes("tutor") && !roles.includes("admin") && !roles.includes("moderator");
 
   const conditions = [
     eq(tutorBonuses.month, targetMonth),
     eq(tutorBonuses.year, targetYear),
   ];
 
-  if (isTutorOnly && session) {
+  if (!isAdmin && isTutor) {
     const tutorId = await getCallerTutorId(session.user.id);
     if (!tutorId) return [];
     conditions.push(eq(tutorBonuses.tutorId, tutorId));
@@ -172,6 +184,14 @@ export async function getTutorBonuses(month?: number, year?: number): Promise<Tu
 }
 
 export async function getClasses(): Promise<ClassItem[]> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isTutor = roles.includes("tutor");
+
+  if (!isAdmin && !isTutor) return [];
+
   const rows = await db.select().from(classes).where(eq(classes.isActive, true));
   return rows.map((r) => ({
     id: r.id,
@@ -209,11 +229,12 @@ export async function updateTutorRate(params: {
   rate: number;
 }) {
   const session = await getSessionSafely();
-  if (session) {
-    const roles: AppRole[] = await getMyRoles().catch(() => []);
-    if (!roles.includes("admin") && !roles.includes("moderator")) {
-      throw new Error("Hanya admin yang dapat mengubah tarif tutor");
-    }
+  if (!session) {
+    throw new Error("Unauthorized: Anda harus login untuk mengubah tarif tutor");
+  }
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) {
+    throw new Error("Hanya admin yang dapat mengubah tarif tutor");
   }
 
   if (params.assignmentId) {
@@ -242,17 +263,18 @@ export async function addTutorBonus(params: {
   month?: number;
   year?: number;
 }) {
+  const session = await getSessionSafely();
+  if (!session) {
+    throw new Error("Unauthorized: Anda harus login untuk menambahkan bonus tutor");
+  }
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) {
+    throw new Error("Hanya admin yang dapat menambahkan bonus tutor");
+  }
+
   const now = new Date();
   const m = params.month ?? now.getMonth() + 1;
   const y = params.year ?? now.getFullYear();
-
-  const session = await getSessionSafely();
-  if (session) {
-    const roles: AppRole[] = await getMyRoles().catch(() => []);
-    if (!roles.includes("admin") && !roles.includes("moderator")) {
-      throw new Error("Hanya admin yang dapat menambahkan bonus tutor");
-    }
-  }
 
   await db.insert(tutorBonuses).values({
     id: "tb_" + randomUUID().replace(/-/g, "").slice(0, 12),

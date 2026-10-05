@@ -54,11 +54,15 @@ async function getSessionSafely() {
 
 export async function getInvoices(): Promise<InvoiceRow[]> {
   const session = await getSessionSafely();
-  const roles: AppRole[] = session ? await getMyRoles().catch(() => []) : [];
-  const isParentOnly = session && roles.includes("parent") && !roles.includes("admin") && !roles.includes("moderator");
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isParent = roles.includes("parent");
+
+  if (!isAdmin && !isParent) return [];
 
   const conditions = [];
-  if (isParentOnly && session) {
+  if (!isAdmin && isParent) {
     conditions.push(eq(students.parentUserId, session.user.id));
   }
 
@@ -143,11 +147,15 @@ export interface BillingEnrollmentRow {
 
 export async function getBillingEnrollments(): Promise<BillingEnrollmentRow[]> {
   const session = await getSessionSafely();
-  const roles: AppRole[] = session ? await getMyRoles().catch(() => []) : [];
-  const isParentOnly = session && roles.includes("parent") && !roles.includes("admin") && !roles.includes("moderator");
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  const isParent = roles.includes("parent");
+
+  if (!isAdmin && !isParent) return [];
 
   const conditions = [eq(studentEnrollments.isActive, true)];
-  if (isParentOnly && session) {
+  if (!isAdmin && isParent) {
     conditions.push(eq(students.parentUserId, session.user.id));
   }
 

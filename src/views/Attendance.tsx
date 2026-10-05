@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getTodayAttendance, getAttendanceEnrollments } from "@/server/actions/attendance";
+import { getTodayAttendance, getMonthlyAttendance, getAttendanceEnrollments } from "@/server/actions/attendance";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -21,10 +21,20 @@ export default function Attendance() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
 
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
   // Fetch attendance with student + class names
   const { data: attendanceData = [] } = useQuery({
     queryKey: ["attendance-page"],
     queryFn: getTodayAttendance,
+  });
+
+  // Fetch monthly attendance for student detail modal
+  const { data: monthlyAttendance = [] } = useQuery({
+    queryKey: ["attendance-monthly", currentYear, currentMonth],
+    queryFn: () => getMonthlyAttendance(currentYear, currentMonth),
   });
 
   // Fetch enrollments for quota tracking
@@ -46,7 +56,7 @@ export default function Attendance() {
   };
 
   const filteredData = todayRecords.filter((record) => {
-    const name = (record.students as any)?.name || "";
+    const name = record.studentName || record.students?.name || "";
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === "all" || record.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -57,16 +67,18 @@ export default function Attendance() {
     ? enrollments.find((e) => e.student_id === selectedStudent)
     : null;
   const studentAttendance = selectedStudent
-    ? attendanceData.filter((a) => a.student_id === selectedStudent)
+    ? monthlyAttendance.filter((a) => a.student_id === selectedStudent)
     : [];
   const studentMonthAttendance = studentAttendance.filter((a) => {
     const d = new Date(a.date);
-    const now = new Date();
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    const currentDate = new Date();
+    return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
   });
 
-  const statusBadge = (status: string) => {
-    const map: Record<string, { variant: any; label: string }> = {
+  type BadgeVariant = NonNullable<BadgeProps["variant"]>;
+
+  const statusBadge = (status: string): { variant: BadgeVariant; label: string } => {
+    const map: Record<string, { variant: BadgeVariant; label: string }> = {
       present: { variant: "success", label: "Hadir" },
       late: { variant: "warning", label: "Terlambat" },
       absent: { variant: "destructive", label: "Tidak Hadir" },
@@ -139,12 +151,12 @@ export default function Attendance() {
                 <div key={e.id} className="p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors"
                   onClick={() => setSelectedStudent(e.student_id)}>
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-medium text-sm text-foreground truncate">{(e.students as any)?.name}</p>
+                    <p className="font-medium text-sm text-foreground truncate">{e.studentName || e.students?.name}</p>
                     <Badge variant={remaining <= 1 ? "destructive" : remaining <= 3 ? "warning" : "success"} className="text-[10px]">
                       Sisa {remaining}/{e.sessions_quota}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2">{(e.classes as any)?.name}</p>
+                  <p className="text-xs text-muted-foreground mb-2">{e.className || e.classes?.name}</p>
                   <Progress value={pct} className="h-1.5 mb-1" />
                   <div className="flex justify-between text-[10px] text-muted-foreground">
                     <span>{e.sessions_used} sesi terpakai</span>
@@ -175,8 +187,8 @@ export default function Attendance() {
               </thead>
               <tbody>
                 {filteredData.map((record) => {
-                  const name = (record.students as any)?.name || "—";
-                  const className = (record.classes as any)?.name || "—";
+                  const name = record.studentName || record.students?.name || "—";
+                  const className = record.className || record.classes?.name || "—";
                   const badge = statusBadge(record.status);
                   return (
                     <tr key={record.id} className="border-b border-border hover:bg-muted/20 transition-colors">
@@ -202,7 +214,7 @@ export default function Attendance() {
                           <div className="flex items-center gap-1 text-sm text-muted-foreground"><LogOut className="h-3 w-3" />{formatTime(record.check_out_time)}</div>
                         ) : <span className="text-sm text-muted-foreground">-</span>}
                       </td>
-                      <td className="p-4"><Badge variant={badge.variant as any}>{badge.label}</Badge></td>
+                      <td className="p-4"><Badge variant={badge.variant}>{badge.label}</Badge></td>
                       <td className="p-4 hidden lg:table-cell">
                         <span className="text-sm text-muted-foreground">
                           {record.status === "permit" ? `${record.permit_type === "sick" ? "Sakit" : record.permit_type === "family" ? "Keluarga" : "Lainnya"}${record.permit_reason ? ` - ${record.permit_reason}` : ""}${record.is_free_permit ? " (Gratis)" : " (Kurangi kuota)"}` : record.checked_in_by || "-"}
@@ -237,11 +249,11 @@ export default function Attendance() {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12">
-                  <AvatarFallback>{((studentEnrollment.students as any)?.name || "").slice(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{((studentEnrollment.studentName || studentEnrollment.students?.name || "").slice(0, 2).toUpperCase())}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold">{(studentEnrollment.students as any)?.name}</p>
-                  <p className="text-sm text-muted-foreground">{(studentEnrollment.classes as any)?.name}</p>
+                  <p className="font-semibold">{studentEnrollment.studentName || studentEnrollment.students?.name}</p>
+                  <p className="text-sm text-muted-foreground">{studentEnrollment.className || studentEnrollment.classes?.name}</p>
                 </div>
               </div>
 
@@ -278,7 +290,7 @@ export default function Attendance() {
                       <div key={a.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground w-20">{new Date(a.date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}</span>
-                          <Badge variant={b.variant as any} className="text-[10px]">{b.label}</Badge>
+                          <Badge variant={b.variant} className="text-[10px]">{b.label}</Badge>
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {a.check_in_time && formatTime(a.check_in_time)}
