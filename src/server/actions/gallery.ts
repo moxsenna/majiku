@@ -95,8 +95,8 @@ export async function uploadGalleryPhotos(
   if (!Array.isArray(photoKeys) || photoKeys.length === 0) {
     throw new Error("Minimal 1 foto harus diunggah");
   }
-  if (photoKeys.length > 10) {
-    throw new Error("Maksimal 10 foto sekaligus");
+  if (photoKeys.length > 6) {
+    throw new Error("Maksimal 6 foto sekaligus");
   }
 
   for (const key of photoKeys) {
@@ -169,8 +169,17 @@ export async function deleteGalleryPhoto(id: string): Promise<void> {
 
   await db.delete(galleryPhotos).where(eq(galleryPhotos.id, id));
 
-  // Best-effort hapus dari R2
-  await deletePhoto(photo.photoKey);
+  // Hanya hapus dari R2 jika tidak ada baris lain yang masih menggunakan photoKey ini
+  const [stillUsed] = await db
+    .select({ id: galleryPhotos.id })
+    .from(galleryPhotos)
+    .where(eq(galleryPhotos.photoKey, photo.photoKey))
+    .limit(1);
+
+  if (!stillUsed) {
+    // Best-effort hapus dari R2
+    await deletePhoto(photo.photoKey);
+  }
 }
 
 export async function listGalleryOptions(): Promise<{

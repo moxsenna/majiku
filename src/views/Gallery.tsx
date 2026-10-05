@@ -65,6 +65,8 @@ export interface GalleryProps {
   canUpload?: boolean;
 }
 
+const MAX_PHOTOS = 6;
+
 export default function Gallery({
   initialPhotos,
   studentOptions = [],
@@ -115,14 +117,19 @@ export default function Gallery({
     if (!files || files.length === 0) return;
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const fileArray = Array.from(files);
+    const selectedFiles = Array.from(files);
 
-    if (uploadedKeys.length + fileArray.length > 10) {
-      toast.error("Maksimal 10 foto per unggahan");
+    if (selectedFiles.length > 6) {
+      toast.error("Maksimal 6 file sekaligus");
       return;
     }
 
-    for (const file of fileArray) {
+    if (uploadedKeys.length + selectedFiles.length > MAX_PHOTOS) {
+      toast.error(`Maksimal ${MAX_PHOTOS} foto per unggahan`);
+      return;
+    }
+
+    for (const file of selectedFiles) {
       if (!allowedTypes.includes(file.type)) {
         toast.error(`Format file "${file.name}" harus JPG/PNG/WebP`);
         return;
@@ -137,7 +144,7 @@ export default function Gallery({
     try {
       const formData = new FormData();
       formData.append("prefix", "gallery");
-      for (const file of fileArray) {
+      for (const file of selectedFiles) {
         formData.append("files", file);
       }
 
@@ -449,7 +456,7 @@ export default function Gallery({
           <div className="space-y-4 py-2">
             {/* File Upload Input & Previews */}
             <div className="space-y-2">
-              <Label>Foto Kegiatan (Maks. 10 foto, JPG/PNG/WebP maks. 5MB)</Label>
+              <Label>Foto Kegiatan — Maks. 6 foto per upload (JPG, PNG, WebP hingga 5MB per foto)</Label>
 
               <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors bg-muted/20">
                 <Upload className="h-6 w-6 text-muted-foreground mb-1" />
