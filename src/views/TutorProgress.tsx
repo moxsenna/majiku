@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, Upload, Camera, Check, 
   Utensils, Moon, Smile, BookOpen,
-  Users, FileText, Loader2
+  Users, FileText, Loader2, X
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,9 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
   const [napValue, setNapValue] = useState("");
   const [activities, setActivities] = useState("");
   const [notes, setNotes] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggleStudent = (id: string) => {
     setSelectedStudents((prev) =>
@@ -58,6 +61,66 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
     setNapValue("");
     setActivities("");
     setNotes("");
+    setPhotos([]);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+
+    const files = Array.from(fileList);
+    // Reset input so re-selecting same files triggers change event
+    e.target.value = "";
+
+    if (photos.length + files.length > 6) {
+      toast.error(`Maksimal 6 foto per laporan (tersisa kuota ${6 - photos.length})`);
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`Format file "${file.name}" harus JPG/PNG/WebP`);
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`Ukuran file "${file.name}" melebihi batas 5MB`);
+        return;
+      }
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("prefix", "reports");
+      for (const file of files) {
+        formData.append("files", file);
+      }
+
+      const res = await fetch("/api/photos", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal mengunggah foto");
+      }
+
+      if (Array.isArray(data.keys)) {
+        setPhotos((prev) => [...prev, ...data.keys]);
+        toast.success(`${data.keys.length} foto berhasil diunggah`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah foto";
+      toast.error(msg);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removePhoto = (indexToRemove: number) => {
+    setPhotos((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSubmit = () => {
@@ -80,6 +143,7 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
           nap: napValue.trim() || undefined,
           activities: activities.trim() || undefined,
           notes: notes.trim() || undefined,
+          photos: photos.length > 0 ? photos : undefined,
         });
 
         toast.success(`Laporan untuk ${res.created} siswa terkirim`);
@@ -346,24 +410,93 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
           </CardContent>
         </Card>
 
-        {/* Photo Upload Placeholder */}
-        <Card className="border-border bg-muted/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2 text-muted-foreground">
-              <Camera className="w-5 h-5" />
-              Foto Kegiatan
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-xl border border-dashed border-border bg-muted/50 p-6 text-center">
-              <Camera className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-              <p className="text-sm font-medium text-muted-foreground">
-                Unggah foto — menyusul
-              </p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
-                Fitur penyimpanan foto kegiatan akan tersedia pada pembaruan mendatang.
-              </p>
+        {/* Photo Upload */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Camera className="w-5 h-5 text-indigo-500" />
+                Foto Kegiatan
+              </CardTitle>
+              <span className="text-xs text-muted-foreground">
+                {photos.length}/6 foto
+              </span>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              disabled={isPending || isUploading || photos.length >= 6}
+            />
+
+            {photos.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {photos.map((key, idx) => (
+                  <div
+                    key={key}
+                    className="relative aspect-square rounded-xl overflow-hidden border border-border group bg-muted"
+                  >
+                    <img
+                      src={`/api/photos/${key}`}
+                      alt={`Foto kegiatan ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(idx)}
+                      disabled={isPending || isUploading}
+                      aria-label="Hapus foto"
+                      className="absolute top-1.5 right-1.5 p-1 bg-black/60 hover:bg-black/80 text-white rounded-full transition-opacity shadow-sm"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {photos.length < 6 && (
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => !isPending && !isUploading && fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (!isPending && !isUploading) fileInputRef.current?.click();
+                  }
+                }}
+                className={cn(
+                  "rounded-xl border-2 border-dashed border-border p-6 text-center cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted/40 flex flex-col items-center justify-center gap-2",
+                  (isPending || isUploading) && "opacity-60 pointer-events-none cursor-not-allowed"
+                )}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-8 h-8 text-primary animate-spin mb-1" />
+                    <p className="text-sm font-medium text-foreground">Mengunggah foto...</p>
+                    <p className="text-xs text-muted-foreground">Mohon tunggu sebentar</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+                      <Camera className="w-5 h-5" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">
+                      {photos.length === 0 ? "Unggah Foto Kegiatan" : "Tambah Foto Lagi"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG, atau WebP (maks. 5MB per file, hingga {6 - photos.length} foto lagi)
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -372,12 +505,17 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
           onClick={handleSubmit}
           className="w-full h-12 text-base font-semibold"
           size="lg"
-          disabled={isPending || students.length === 0}
+          disabled={isPending || isUploading || students.length === 0}
         >
           {isPending ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
               Mengirim Laporan...
+            </>
+          ) : isUploading ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Mengunggah Foto...
             </>
           ) : (
             <>

@@ -32,6 +32,7 @@ import { ParentActivityWidget } from "@/components/dashboard/ParentActivityWidge
 import { ProgramInfoBanner } from "@/components/parent/ProgramInfoBanner";
 import { TrialStatusList } from "@/components/parent/TrialStatusList";
 import { todayInWib } from "@/lib/datetime";
+import { cn } from "@/lib/utils";
 import type { TrialApplicationRow } from "@/server/actions/trial";
 import type { ReportRow } from "@/server/actions/dailyReports";
 
@@ -362,6 +363,34 @@ export default function ParentPortal({
                               Catatan Tutor:
                             </span>
                             <p className="whitespace-pre-line leading-relaxed">{report.notes}</p>
+                          </div>
+                        )}
+
+                        {/* Photos */}
+                        {report.photos && report.photos.length > 0 && (
+                          <div
+                            className={cn(
+                              "mt-3 grid gap-2",
+                              report.photos.length === 1
+                                ? "grid-cols-1"
+                                : report.photos.length === 2
+                                ? "grid-cols-2"
+                                : "grid-cols-2 sm:grid-cols-3"
+                            )}
+                          >
+                            {report.photos.map((photoKey, pIdx) => (
+                              <div
+                                key={photoKey}
+                                className="relative aspect-video sm:aspect-square rounded-lg overflow-hidden bg-muted border border-border/60"
+                              >
+                                <img
+                                  src={`/api/photos/${photoKey}`}
+                                  alt="Foto laporan"
+                                  className="w-full h-full object-cover transition-transform hover:scale-105"
+                                  loading="lazy"
+                                />
+                              </div>
+                            ))}
                           </div>
                         )}
 

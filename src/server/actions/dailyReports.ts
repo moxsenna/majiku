@@ -46,6 +46,7 @@ export interface CreateDailyReportInput {
   nap?: string | null;
   activities?: string | null;
   notes?: string | null;
+  photos?: string[] | null;
 }
 
 export interface MyStudentItem {
@@ -165,6 +166,20 @@ export async function createDailyReport(
   const nap = input.nap?.trim() || null;
   const reportDate = input.reportDate.trim();
 
+  const REPORT_PHOTO_KEY_REGEX = /^reports\/[0-9a-f-]{36}\.(jpg|jpeg|png|webp)$/;
+  let validatedPhotos: string[] = [];
+  if (input.photos && Array.isArray(input.photos)) {
+    if (input.photos.length > 6) {
+      throw new Error("Maksimal 6 foto per laporan");
+    }
+    for (const key of input.photos) {
+      if (typeof key !== "string" || !REPORT_PHOTO_KEY_REGEX.test(key)) {
+        throw new Error("Key foto tidak valid");
+      }
+    }
+    validatedPhotos = [...input.photos];
+  }
+
   // Lookup classId dari student_enrollments aktif per siswa (satu query di awal untuk semua siswa)
   const enrollments = await db
     .select({
@@ -197,7 +212,7 @@ export async function createDailyReport(
     nap,
     activities,
     notes,
-    photos: [] as string[],
+    photos: validatedPhotos,
     status: "submitted" as const,
   }));
 
