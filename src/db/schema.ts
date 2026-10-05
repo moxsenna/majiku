@@ -22,6 +22,7 @@ export const ticketStatus = pgEnum("ticket_status", ["open", "in_progress", "res
 export const trialStatus = pgEnum("trial_status", ["submitted", "scheduled", "awaiting_review", "recommended", "repeat_trial", "not_suitable", "admitted"]);
 export const trialRecommendation = pgEnum("trial_recommendation", ["suitable", "repeat_trial", "not_suitable"]);
 export const tenantType = pgEnum("tenant_type", ["daycare", "preschool", "bimbel"]);
+export const reportStatus = pgEnum("report_status", ["draft", "submitted"]);
 
 export interface TenantProgram {
   name: string;
@@ -267,3 +268,22 @@ export const trialApplications = pgTable("trial_applications", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
+
+export const dailyReports = pgTable("daily_reports", {
+  id: text("id").primaryKey(),
+  studentId: text("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  classId: text("class_id").references(() => classes.id, { onDelete: "set null" }),
+  tutorUserId: text("tutor_user_id").references(() => user.id, { onDelete: "set null" }),
+  reportDate: date("report_date").notNull(),
+  mood: text("mood"),
+  meals: text("meals"),
+  nap: text("nap"),
+  activities: text("activities"),
+  notes: text("notes"),
+  photos: jsonb("photos").$type<string[]>().default([]),
+  status: reportStatus("status").notNull().default("submitted"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type DailyReportRow = typeof dailyReports.$inferSelect;

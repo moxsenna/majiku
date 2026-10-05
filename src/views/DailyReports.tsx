@@ -1,210 +1,572 @@
-import { useState } from "react";
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Plus,
-  Filter,
+  Calendar,
   Utensils,
   Moon,
   Smile,
-  AlertCircle,
-  Heart,
-  MessageCircle,
-  Image as ImageIcon,
+  Activity,
+  FileText,
   MoreVertical,
+  Trash2,
+  Loader2,
+  Clock,
+  Sparkles,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  createDailyReport,
+  deleteDailyReport,
+  type DailyReportItem,
+  type StudentOption,
+} from "@/server/actions/dailyReports";
 
-interface DailyReport {
-  id: string;
-  studentName: string;
-  studentAvatar?: string;
-  className: string;
-  time: string;
-  type: "meal" | "nap" | "mood" | "incident" | "activity" | "photo";
-  title: string;
-  description: string;
-  imageUrl?: string;
-  staffName: string;
-  likes: number;
-  comments: number;
+interface DailyReportsProps {
+  initialReports: DailyReportItem[];
+  studentOptions: StudentOption[];
+  selectedDate: string;
 }
 
-const typeConfig = {
-  meal: { icon: Utensils, color: "bg-success/10 text-success", label: "Makan" },
-  nap: { icon: Moon, color: "bg-info/10 text-info", label: "Tidur" },
-  mood: { icon: Smile, color: "bg-highlight/10 text-highlight", label: "Mood" },
-  incident: { icon: AlertCircle, color: "bg-destructive/10 text-destructive", label: "Insiden" },
-  activity: { icon: Heart, color: "bg-primary/10 text-primary", label: "Aktivitas" },
-  photo: { icon: ImageIcon, color: "bg-secondary text-secondary-foreground", label: "Foto" },
-};
+function formatReportTime(date: Date | string | null | undefined): string {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB";
+}
 
-const reports: DailyReport[] = [
-  {
-    id: "1",
-    studentName: "Aisyah Putri",
-    studentAvatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=100",
-    className: "Kelas Bunga Matahari",
-    time: "10:30",
-    type: "meal",
-    title: "Makan Siang",
-    description: "Aisyah makan dengan lahap hari ini! Dia menghabiskan nasi, sayur bayam, dan ayam goreng. 🍚",
-    staffName: "Ibu Sarah",
-    likes: 5,
-    comments: 2,
-  },
-  {
-    id: "2",
-    studentName: "Raka Pratama",
-    studentAvatar: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=100",
-    className: "Kelas Pelangi",
-    time: "12:15",
-    type: "nap",
-    title: "Tidur Siang",
-    description: "Raka tidur selama 1.5 jam dengan nyenyak. Bangun dengan ceria! 😴",
-    staffName: "Ibu Maya",
-    likes: 3,
-    comments: 1,
-  },
-  {
-    id: "3",
-    studentName: "Keisha Azzahra",
-    studentAvatar: "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=100",
-    className: "Kelas Bintang",
-    time: "14:00",
-    type: "activity",
-    title: "Aktivitas Seni",
-    description: "Keisha sangat antusias saat melukis dengan cat air. Hasil karyanya sangat bagus!",
-    imageUrl: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400",
-    staffName: "Ibu Dina",
-    likes: 12,
-    comments: 4,
-  },
-  {
-    id: "4",
-    studentName: "Arjuna Wijaya",
-    studentAvatar: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=100",
-    className: "Kelas Bunga Matahari",
-    time: "09:45",
-    type: "mood",
-    title: "Mood Ceria",
-    description: "Arjuna datang dengan mood yang sangat baik hari ini. Sangat aktif bermain dengan teman-teman! 😊",
-    staffName: "Pak Ahmad",
-    likes: 8,
-    comments: 3,
-  },
-];
+function formatReportDate(dateStr: string): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
-export default function DailyReports() {
-  const [selectedType, setSelectedType] = useState("all");
+export default function DailyReports({
+  initialReports,
+  studentOptions,
+  selectedDate,
+}: DailyReportsProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
-  const filteredReports = selectedType === "all" 
-    ? reports 
-    : reports.filter(r => r.type === selectedType);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [studentId, setStudentId] = useState("");
+  const [reportDate, setReportDate] = useState(selectedDate);
+  const [mood, setMood] = useState("");
+  const [meals, setMeals] = useState("");
+  const [nap, setNap] = useState("");
+  const [activities, setActivities] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const resetForm = () => {
+    setStudentId("");
+    setReportDate(selectedDate);
+    setMood("");
+    setMeals("");
+    setNap("");
+    setActivities("");
+    setNotes("");
+  };
+
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!studentId) {
+      toast({
+        title: "Validasi gagal",
+        description: "Pilih siswa terlebih dahulu",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!reportDate) {
+      toast({
+        title: "Validasi gagal",
+        description: "Tanggal laporan wajib diisi",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        await createDailyReport({
+          studentId,
+          reportDate,
+          mood: mood.trim() || null,
+          meals: meals.trim() || null,
+          nap: nap.trim() || null,
+          activities: activities.trim() || null,
+          notes: notes.trim() || null,
+        });
+
+        toast({
+          title: "Laporan tersimpan",
+          description: "Laporan harian berhasil dibuat dan dikirim.",
+        });
+
+        setCreateOpen(false);
+        resetForm();
+        router.refresh();
+      } catch (err: unknown) {
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : "Terjadi kesalahan saat menyimpan laporan";
+        toast({
+          title: "Gagal menyimpan laporan",
+          description: errorMsg,
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (!confirm(`Hapus laporan harian untuk ${name}?`)) return;
+
+    startTransition(async () => {
+      try {
+        await deleteDailyReport(id);
+        toast({
+          title: "Laporan dihapus",
+          description: `Laporan untuk ${name} berhasil dihapus.`,
+        });
+        router.refresh();
+      } catch (err: unknown) {
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : "Terjadi kesalahan saat menghapus laporan";
+        toast({
+          title: "Gagal menghapus",
+          description: errorMsg,
+          variant: "destructive",
+        });
+      }
+    });
+  };
 
   return (
-    <DashboardLayout title="Laporan Harian" subtitle="Timeline aktivitas dan perkembangan anak">
+    <DashboardLayout
+      title="Laporan Harian"
+      subtitle="Timeline aktivitas dan perkembangan anak"
+    >
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant={selectedType === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedType("all")}
-          >
-            Semua
-          </Button>
-          {Object.entries(typeConfig).map(([key, config]) => (
-            <Button
-              key={key}
-              variant={selectedType === key ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedType(key)}
-            >
-              <config.icon className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">{config.label}</span>
+        <form
+          action="/daily-reports"
+          method="get"
+          className="flex flex-wrap items-center gap-2 sm:gap-3"
+        >
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              name="date"
+              defaultValue={selectedDate}
+              className="w-40 sm:w-44"
+              aria-label="Filter tanggal laporan"
+            />
+            <Button type="submit" variant="outline" size="sm">
+              <Calendar className="h-4 w-4 mr-1.5" />
+              Filter
             </Button>
-          ))}
-        </div>
+            {selectedDate !== today && (
+              <a
+                href="/daily-reports"
+                className="inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                Hari Ini
+              </a>
+            )}
+          </div>
+        </form>
 
-        <Button variant="hero" size="sm">
+        <Button
+          variant="hero"
+          size="sm"
+          onClick={() => {
+            setReportDate(selectedDate);
+            setCreateOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Tambah Laporan</span>
-          <span className="sm:hidden">Tambah</span>
+          <span>Tulis Laporan</span>
         </Button>
+      </div>
+
+      {/* Date Header Indicator */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm font-medium text-muted-foreground">
+          Menampilkan laporan untuk:{" "}
+          <strong className="text-foreground">
+            {formatReportDate(selectedDate)}
+          </strong>{" "}
+          ({initialReports.length} laporan)
+        </p>
       </div>
 
       {/* Reports Feed */}
       <div className="space-y-4 max-w-3xl">
-        {filteredReports.map((report) => {
-          const config = typeConfig[report.type];
-          const Icon = config.icon;
-          
-          return (
-            <Card key={report.id} variant="interactive">
+        {initialReports.length === 0 ? (
+          <Card className="border-dashed border-2">
+            <CardContent className="py-12 text-center space-y-3">
+              <Sparkles className="w-10 h-10 text-muted-foreground mx-auto opacity-50" />
+              <div className="space-y-1">
+                <p className="font-semibold text-foreground">
+                  Belum ada laporan harian
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Tidak ada laporan yang dicatat untuk tanggal{" "}
+                  {formatReportDate(selectedDate)}.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  setReportDate(selectedDate);
+                  setCreateOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                Tulis Laporan Sekarang
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          initialReports.map((report) => (
+            <Card key={report.id} variant="interactive" className="border-border">
               <CardContent className="p-4 sm:p-6">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <Avatar size="lg">
-                      <AvatarImage src={report.studentAvatar} />
-                      <AvatarFallback>{report.studentName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      {report.studentAvatar && (
+                        <AvatarImage src={report.studentAvatar} />
+                      )}
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                        {report.studentName.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold text-foreground">{report.studentName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {report.className} • {report.time}
+                      <p className="font-semibold text-foreground text-base">
+                        {report.studentName}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                        {report.className && <span>{report.className} &bull;</span>}
+                        <Clock className="h-3 w-3 inline" />
+                        <span>
+                          {report.createdAt
+                            ? formatReportTime(report.createdAt)
+                            : report.reportDate}
+                        </span>
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={config.color}>
-                      <Icon className="h-3 w-3 mr-1" />
-                      {report.title}
+                    <Badge
+                      variant={
+                        report.status === "submitted" ? "default" : "secondary"
+                      }
+                    >
+                      {report.status === "submitted" ? "Terkirim" : "Draft"}
                     </Badge>
-                    <Button variant="ghost" size="icon-sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          disabled={isPending}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive cursor-pointer"
+                          onClick={() =>
+                            handleDelete(report.id, report.studentName)
+                          }
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Hapus Laporan
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
 
-                {/* Content */}
-                <p className="text-foreground/80 mb-4">{report.description}</p>
+                {/* Report Sections */}
+                <div className="space-y-3 mt-3 text-sm">
+                  {report.mood && (
+                    <div className="flex items-start gap-2.5 bg-highlight/10 p-2.5 rounded-lg border border-highlight/20">
+                      <Smile className="h-4 w-4 text-highlight shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-foreground text-xs block">
+                          Mood & Emosi
+                        </span>
+                        <p className="text-foreground/90 text-sm mt-0.5">
+                          {report.mood}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-                {/* Image */}
-                {report.imageUrl && (
-                  <div className="rounded-xl overflow-hidden mb-4">
-                    <img
-                      src={report.imageUrl}
-                      alt={report.title}
-                      className="w-full h-48 sm:h-64 object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                )}
+                  {report.meals && (
+                    <div className="flex items-start gap-2.5 bg-success/10 p-2.5 rounded-lg border border-success/20">
+                      <Utensils className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-foreground text-xs block">
+                          Makan & Minum
+                        </span>
+                        <p className="text-foreground/90 text-sm mt-0.5">
+                          {report.meals}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <p className="text-xs text-muted-foreground">
-                    Dicatat oleh: {report.staffName}
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
-                      <Heart className="h-4 w-4" />
-                      <span>{report.likes}</span>
-                    </button>
-                    <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
-                      <MessageCircle className="h-4 w-4" />
-                      <span>{report.comments}</span>
-                    </button>
-                  </div>
+                  {report.nap && (
+                    <div className="flex items-start gap-2.5 bg-info/10 p-2.5 rounded-lg border border-info/20">
+                      <Moon className="h-4 w-4 text-info shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-foreground text-xs block">
+                          Tidur Siang
+                        </span>
+                        <p className="text-foreground/90 text-sm mt-0.5">
+                          {report.nap}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {report.activities && (
+                    <div className="flex items-start gap-2.5 bg-primary/10 p-2.5 rounded-lg border border-primary/20">
+                      <Activity className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-foreground text-xs block">
+                          Aktivitas & Pembelajaran
+                        </span>
+                        <p className="text-foreground/90 text-sm mt-0.5">
+                          {report.activities}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {report.notes && (
+                    <div className="flex items-start gap-2.5 bg-muted/60 p-2.5 rounded-lg border border-border">
+                      <FileText className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-semibold text-foreground text-xs block">
+                          Catatan Guru
+                        </span>
+                        <p className="text-foreground/90 text-sm mt-0.5 whitespace-pre-wrap">
+                          {report.notes}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {Array.isArray(report.photos) && report.photos.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {report.photos.map((photo, i) => (
+                        <img
+                          key={i}
+                          src={photo}
+                          alt={`Foto aktivitas ${i + 1}`}
+                          className="rounded-lg object-cover w-full h-36"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
+          ))
+        )}
       </div>
+
+      {/* Dialog Tulis Laporan */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Tulis Laporan Harian
+            </DialogTitle>
+            <DialogDescription>
+              Catat perkembangan, makanan, tidur, dan aktivitas anak untuk hari ini.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateSubmit} className="space-y-4 mt-2">
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="report-student">Pilih Siswa *</Label>
+                <Select
+                  value={studentId}
+                  onValueChange={setStudentId}
+                  disabled={isPending || studentOptions.length === 0}
+                >
+                  <SelectTrigger id="report-student">
+                    <SelectValue
+                      placeholder={
+                        studentOptions.length === 0
+                          ? "Belum ada siswa aktif"
+                          : "Pilih Siswa"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {studentOptions.map((stu) => (
+                      <SelectItem key={stu.id} value={stu.id}>
+                        {stu.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {studentOptions.length === 0 && (
+                  <p className="text-[11px] text-destructive">
+                    Belum ada siswa aktif terdaftar.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="report-date">Tanggal Laporan *</Label>
+                <Input
+                  id="report-date"
+                  type="date"
+                  value={reportDate}
+                  onChange={(e) => setReportDate(e.target.value)}
+                  disabled={isPending}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="report-mood">Mood & Suasana Hati</Label>
+                <Input
+                  id="report-mood"
+                  placeholder="Contoh: Ceria, bersemangat bermain dengan teman"
+                  value={mood}
+                  onChange={(e) => setMood(e.target.value)}
+                  disabled={isPending}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="report-meals">Makan & Minum</Label>
+                <Input
+                  id="report-meals"
+                  placeholder="Contoh: Habis 1 porsi nasi, sayur bayam, dan ayam. Minum air cukup."
+                  value={meals}
+                  onChange={(e) => setMeals(e.target.value)}
+                  disabled={isPending}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="report-nap">Tidur Siang</Label>
+                <Input
+                  id="report-nap"
+                  placeholder="Contoh: Tidur 1.5 jam (12:30 - 14:00), bangun tanpa rewel."
+                  value={nap}
+                  onChange={(e) => setNap(e.target.value)}
+                  disabled={isPending}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="report-activities">Aktivitas & Pembelajaran</Label>
+                <Textarea
+                  id="report-activities"
+                  placeholder="Contoh: Menggambar dengan krayon, menyusun balok lego, melatih sensorik pasir kinetik."
+                  value={activities}
+                  onChange={(e) => setActivities(e.target.value)}
+                  disabled={isPending}
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="report-notes">Catatan Tambahan untuk Orang Tua</Label>
+                <Textarea
+                  id="report-notes"
+                  placeholder="Contoh: Anak sempat terantuk pelan di karpet tapi tidak ada luka. Baju ganti sudah dipakai 1 set."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  disabled={isPending}
+                  rows={2}
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCreateOpen(false)}
+                disabled={isPending}
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending || studentOptions.length === 0}
+              >
+                {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Kirim Laporan
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

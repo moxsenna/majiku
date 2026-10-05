@@ -22,6 +22,13 @@
       "when": 1791177152109,
       "tag": "0002_tenants",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791196968585,
+      "tag": "0003_daily_reports",
+      "breakpoints": true
     }
   ]
 }
