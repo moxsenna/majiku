@@ -90,7 +90,7 @@ export default async function TenantDetailPage({ params }: TenantPageProps) {
     <main className="mx-auto max-w-5xl px-4 py-8 space-y-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       {"\n"}
 

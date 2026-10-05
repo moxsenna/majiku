@@ -25,7 +25,7 @@ export function ProgramList({ tenant }: ProgramListProps) {
         <>
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd).replace(/</g, "\\u003c") }}
           />
           {"\n"}
         </>
