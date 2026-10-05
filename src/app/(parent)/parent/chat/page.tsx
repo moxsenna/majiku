@@ -1,6 +1,14 @@
-"use client";
 import ParentChat from "@/views/ParentChat";
+import {
+  listMyConversations,
+  getChatPartners,
+} from "@/server/actions/chat";
 
-export default function Page() {
-  return <ParentChat />;
+export default async function Page() {
+  const [conversations, partners] = await Promise.all([
+    listMyConversations(),
+    getChatPartners(),
+  ]);
+
+  return <ParentChat conversations={conversations} partners={partners} />;
 }
