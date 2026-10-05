@@ -324,3 +324,15 @@ export const messages = pgTable("messages", {
 export type ConversationRow = typeof conversations.$inferSelect;
 export type ChatMessageRow = typeof messages.$inferSelect;
 
+
+export const announcements = pgTable("announcements", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  sentByUserId: text("sent_by_user_id").references(() => user.id, { onDelete: "set null" }),
+  recipientCount: integer("recipient_count").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type AnnouncementRow = typeof announcements.$inferSelect;

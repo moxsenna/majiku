@@ -31,6 +31,8 @@ import { PromoBanner } from "@/components/promo/PromoBanner";
 import { ParentActivityWidget } from "@/components/dashboard/ParentActivityWidget";
 import { ProgramInfoBanner } from "@/components/parent/ProgramInfoBanner";
 import { TrialStatusList } from "@/components/parent/TrialStatusList";
+import { AnnouncementsCard } from "@/components/parent/AnnouncementsCard";
+import type { AnnouncementItem } from "@/components/parent/AnnouncementsCard";
 import { todayInWib } from "@/lib/datetime";
 import { cn } from "@/lib/utils";
 import type { TrialApplicationRow } from "@/server/actions/trial";
@@ -119,11 +121,13 @@ function formatMood(mood?: string | null): string {
 interface ParentPortalProps {
   trialStatus?: TrialApplicationRow[];
   reports?: ReportRow[];
+  announcements?: AnnouncementItem[];
 }
 
 export default function ParentPortal({
   trialStatus = [],
   reports = [],
+  announcements = [],
 }: ParentPortalProps) {
   const [activeTab, setActiveTab] = useState<"feed" | "progress" | "gallery">("feed");
 
@@ -258,6 +262,9 @@ export default function ParentPortal({
             <div className="px-4 pb-4">
               <ProgramInfoBanner />
             </div>
+
+            {/* Pengumuman */}
+            <AnnouncementsCard announcements={announcements} />
 
             {/* Status Trial & Pendaftaran */}
             <div className="px-4 pb-4">

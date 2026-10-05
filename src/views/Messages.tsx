@@ -1,129 +1,283 @@
-import { useState, useMemo } from "react";
+"use client";
+
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ConversationList, type Conversation } from "@/components/messages/ConversationList";
-import { ChatArea, type ChatMessage } from "@/components/messages/ChatArea";
-import { RequestAnalyticsChart } from "@/components/messages/RequestAnalyticsChart";
-import { FloatingChatNotification } from "@/components/messages/FloatingChatNotification";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Megaphone, Send, Trash2, Users, CalendarDays, MessageSquarePlus } from "lucide-react";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
+import {
+  createAnnouncement,
+  deleteAnnouncement,
+  type AnnouncementRow,
+} from "@/server/actions/announcements";
 
-const initialConversations: Conversation[] = [
-  {
-    id: "1", type: "direct", name: "Ibu Sari Putri",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100",
-    lastMessage: "Terima kasih untuk updatenya, Bu", lastMessageTime: "10:30",
-    unreadCount: 2, isRead: false, studentName: "Aisyah Putri",
-    parentStatus: "enrolled", labels: ["Pembayaran"],
-  },
-  {
-    id: "2", type: "direct", name: "Bpk. Rudi Pratama",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100",
-    lastMessage: "Raka pulang jam berapa hari ini?", lastMessageTime: "09:15",
-    unreadCount: 0, isRead: true, studentName: "Raka Pratama",
-    parentStatus: "enrolled", labels: ["Jadwal"],
-  },
-  {
-    id: "3", type: "broadcast", name: "Pengumuman Kelas Bintang",
-    lastMessage: "Reminder: Besok ada kegiatan outing...", lastMessageTime: "Kemarin",
-    unreadCount: 0, isRead: true, parentStatus: "enrolled", labels: [],
-  },
-  {
-    id: "4", type: "direct", name: "Ibu Dewi Azzahra",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100",
-    lastMessage: "Keisha hari ini bawa bekal dari rumah", lastMessageTime: "Kemarin",
-    unreadCount: 0, isRead: true, studentName: "Keisha Azzahra",
-    parentStatus: "enrolled", labels: ["Info Umum"],
-  },
-  {
-    id: "5", type: "direct", name: "Ibu Rina Wulandari",
-    avatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100",
-    lastMessage: "Apakah kelas Bulan masih ada slot?", lastMessageTime: "08:45",
-    unreadCount: 1, isRead: false, studentName: "Zahra Wulandari",
-    parentStatus: "waiting_list", labels: ["Ketersediaan"],
-  },
-  {
-    id: "6", type: "direct", name: "Bpk. Andi Susanto",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100",
-    lastMessage: "Mau tanya soal biaya pendaftaran", lastMessageTime: "Kemarin",
-    unreadCount: 0, isRead: true, studentName: "Dika Susanto",
-    parentStatus: "waiting_list", labels: ["Pembayaran", "Ketersediaan"],
-  },
-];
+interface MessagesProps {
+  announcements: AnnouncementRow[];
+}
 
-const sampleMessages: Record<string, ChatMessage[]> = {
-  "1": [
-    { id: "1", sender: "Ibu Sari Putri", content: "Selamat pagi Bu, bagaimana kondisi Aisyah hari ini?", time: "08:30", isMe: false },
-    { id: "2", sender: "Admin", content: "Selamat pagi Bu Sari! Aisyah sudah check-in jam 07:45 tadi. Kondisinya baik dan ceria 😊", time: "08:35", isMe: true },
-    { id: "3", sender: "Ibu Sari Putri", content: "Alhamdulillah, terima kasih untuk updatenya, Bu", time: "10:30", isMe: false },
-  ],
-  "5": [
-    { id: "1", sender: "Ibu Rina Wulandari", content: "Selamat pagi, apakah kelas Bulan masih ada slot untuk anak saya?", time: "08:45", isMe: false },
-  ],
-};
+export default function Messages({ announcements }: MessagesProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
-export default function Messages() {
-  const [conversations, setConversations] = useState(initialConversations);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(conversations[0]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AnnouncementRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const messages = selectedConversation ? (sampleMessages[selectedConversation.id] || []) : [];
+  const stats = useMemo(() => {
+    const now = new Date();
+    const monthNow = now.getMonth();
+    const yearNow = now.getFullYear();
+    const monthCount = announcements.filter((a) => {
+      const d = a.createdAt ? new Date(a.createdAt) : null;
+      return d && d.getMonth() === monthNow && d.getFullYear() === yearNow;
+    }).length;
+    const latestRecipients =
+      announcements.length > 0 ? (announcements[0].recipientCount ?? 0) : 0;
+    return { total: announcements.length, monthCount, latestRecipients };
+  }, [announcements]);
 
-  const totalUnread = useMemo(() => conversations.reduce((sum, c) => sum + c.unreadCount, 0), [conversations]);
-
-  const labelCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    conversations.forEach((c) => c.labels.forEach((l) => { counts[l] = (counts[l] || 0) + 1; }));
-    return counts;
-  }, [conversations]);
-
-  const handleAddLabel = (label: string) => {
-    if (!selectedConversation) return;
-    setConversations((prev) =>
-      prev.map((c) => c.id === selectedConversation.id && !c.labels.includes(label)
-        ? { ...c, labels: [...c.labels, label] } : c)
-    );
-    setSelectedConversation((prev) => prev && !prev.labels.includes(label) ? { ...prev, labels: [...prev.labels, label] } : prev);
+  const handleSend = async () => {
+    setIsSending(true);
+    try {
+      const result = await createAnnouncement({ title, body });
+      toast({
+        title: "Broadcast terkirim",
+        description: `Pengumuman dikirim ke ${result.recipientCount} orang tua`,
+      });
+      setTitle("");
+      setBody("");
+      setComposerOpen(false);
+      startTransition(() => router.refresh());
+    } catch (e) {
+      const err = e as Error;
+      toast({
+        title: "Gagal mengirim pengumuman",
+        description: err.message || "Terjadi kesalahan saat mengirim broadcast",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const handleRemoveLabel = (label: string) => {
-    if (!selectedConversation) return;
-    setConversations((prev) =>
-      prev.map((c) => c.id === selectedConversation.id ? { ...c, labels: c.labels.filter((l) => l !== label) } : c)
-    );
-    setSelectedConversation((prev) => prev ? { ...prev, labels: prev.labels.filter((l) => l !== label) } : prev);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await deleteAnnouncement(deleteTarget.id);
+      toast({ title: "Pengumuman dihapus" });
+      setDeleteTarget(null);
+      startTransition(() => router.refresh());
+    } catch (e) {
+      const err = e as Error;
+      toast({
+        title: "Gagal menghapus",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
-  const handleSendMessage = (_text: string) => {
-    // Will integrate with backend later
-  };
-
-  const handleScrollToUnread = () => {
-    const firstUnread = conversations.find((c) => c.unreadCount > 0);
-    if (firstUnread) setSelectedConversation(firstUnread);
-  };
+  const canSubmit = title.trim().length >= 3 && body.trim().length >= 10;
 
   return (
-    <DashboardLayout title="Komunikasi" subtitle="Chat dengan orang tua wali murid" hideNavbarActions>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-140px)]">
-        <ConversationList
-          conversations={conversations}
-          selectedId={selectedConversation?.id || null}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onSelect={setSelectedConversation}
-        />
-        <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
-          <div className="flex-1 min-h-0">
-            <ChatArea
-              conversation={selectedConversation}
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              onAddLabel={handleAddLabel}
-              onRemoveLabel={handleRemoveLabel}
+    <DashboardLayout
+      title="Komunikasi"
+      subtitle="Broadcast pengumuman ke orang tua wali murid"
+      hideNavbarActions
+    >
+      <div className="space-y-4">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Megaphone className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-xs text-muted-foreground">Total Pengumuman</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center">
+                <CalendarDays className="h-5 w-5 text-secondary-foreground" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.monthCount}</p>
+                <p className="text-xs text-muted-foreground">Bulan Ini</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center">
+                <Users className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.latestRecipients}</p>
+                <p className="text-xs text-muted-foreground">Penerima Terakhir</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Composer */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MessageSquarePlus className="h-4 w-4 text-primary" /> Broadcast Baru
+            </CardTitle>
+            <CardDescription>
+              Pengumuman akan tampil di portal seluruh orang tua yang terdaftar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Input
+              placeholder="Judul pengumuman (3-120 karakter)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={120}
             />
-          </div>
-          <RequestAnalyticsChart labelCounts={labelCounts} />
+            <div className="space-y-1">
+              <Textarea
+                placeholder="Isi pengumuman (10-2000 karakter)"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                maxLength={2000}
+                rows={4}
+              />
+              <p className="text-xs text-muted-foreground text-right">{body.length}/2000</p>
+            </div>
+            <Button
+              className="w-full sm:w-auto"
+              disabled={!canSubmit || isPending}
+              onClick={() => setComposerOpen(true)}
+            >
+              <Send className="h-4 w-4" /> Kirim Broadcast
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* History */}
+        <div className="space-y-3">
+          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+            Riwayat Pengumuman
+          </h3>
+          {announcements.length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                Belum ada pengumuman yang dikirim.
+              </CardContent>
+            </Card>
+          )}
+          {announcements.map((a) => (
+            <Card key={a.id}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-sm">{a.title}</p>
+                      <Badge variant="secondary">
+                        <Users className="h-3 w-3 mr-1" />
+                        {a.recipientCount ?? 0} penerima
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-3">
+                      {a.body}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {a.createdAt
+                        ? format(new Date(a.createdAt), "d MMMM yyyy, HH:mm", { locale: idLocale })
+                        : "-"}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Hapus pengumuman"
+                    onClick={() => setDeleteTarget(a)}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
-      <FloatingChatNotification unreadCount={totalUnread} onClick={handleScrollToUnread} />
+
+      {/* Send confirmation */}
+      <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Kirim Broadcast?</DialogTitle>
+            <DialogDescription>
+              Pengumuman &ldquo;{title}&rdquo; akan dikirim ke seluruh orang tua yang terdaftar.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setComposerOpen(false)} disabled={isSending}>
+              Batal
+            </Button>
+            <Button onClick={handleSend} disabled={isSending}>
+              {isSending ? "Mengirim..." : "Ya, Kirim"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus pengumuman?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Pengumuman &ldquo;{deleteTarget?.title}&rdquo; akan dihapus dari portal orang tua.
+              Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? "Menghapus..." : "Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
