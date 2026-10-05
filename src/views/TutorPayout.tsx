@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  getTutors,
+  getTutorAssignments,
+  getTutorBonuses,
+  getClasses,
+  updateTutorRate,
+  addTutorBonus,
+} from "@/server/actions/payout";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,21 +37,13 @@ export default function TutorPayout() {
   // Fetch tutors
   const { data: tutors = [] } = useQuery({
     queryKey: ["tutors"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("tutors").select("*").eq("is_active", true);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getTutors,
   });
 
   // Fetch assignments with class info
   const { data: assignments = [] } = useQuery({
     queryKey: ["tutor-assignments"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("tutor_class_assignments").select("*, classes(name, sessions_per_month)").eq("is_active", true);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getTutorAssignments,
   });
 
   // Fetch bonuses for current month
@@ -54,34 +53,19 @@ export default function TutorPayout() {
 
   const { data: bonuses = [] } = useQuery({
     queryKey: ["tutor-bonuses", currentMonth, currentYear],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("tutor_bonuses").select("*").eq("month", currentMonth).eq("year", currentYear);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => getTutorBonuses(currentMonth, currentYear),
   });
 
   // Fetch classes
   const { data: classes = [] } = useQuery({
     queryKey: ["classes"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("classes").select("*").eq("is_active", true);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getClasses,
   });
 
   // Update rate mutation
   const updateRate = useMutation({
-    mutationFn: async (params: { assignmentId?: string; tutorId: string; classId: string; rate: number }) => {
-      if (params.assignmentId) {
-        const { error } = await supabase.from("tutor_class_assignments").update({ rate_per_session: params.rate }).eq("id", params.assignmentId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("tutor_class_assignments").insert({ tutor_id: params.tutorId, class_id: params.classId, rate_per_session: params.rate });
-        if (error) throw error;
-      }
-    },
+    mutationFn: (params: { assignmentId?: string; tutorId: string; classId: string; rate: number }) =>
+      updateTutorRate(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tutor-assignments"] });
       toast({ title: "Berhasil", description: "Tarif per sesi berhasil diperbarui" });
@@ -91,12 +75,14 @@ export default function TutorPayout() {
 
   // Add bonus mutation
   const addBonus = useMutation({
-    mutationFn: async (params: { tutorId: string; amount: number; description: string }) => {
-      const { error } = await supabase.from("tutor_bonuses").insert({
-        tutor_id: params.tutorId, amount: params.amount, description: params.description, month: currentMonth, year: currentYear,
-      });
-      if (error) throw error;
-    },
+    mutationFn: (params: { tutorId: string; amount: number; description: string }) =>
+      addTutorBonus({
+        tutorId: params.tutorId,
+        amount: params.amount,
+        description: params.description,
+        month: currentMonth,
+        year: currentYear,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tutor-bonuses"] });
       toast({ title: "Berhasil", description: "Bonus berhasil ditambahkan" });

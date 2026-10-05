@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { getTodayAttendance, getAttendanceEnrollments } from "@/server/actions/attendance";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,27 +24,13 @@ export default function Attendance() {
   // Fetch attendance with student + class names
   const { data: attendanceData = [] } = useQuery({
     queryKey: ["attendance-page"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("attendance")
-        .select("*, students(name, parent_name), classes(name)")
-        .order("date", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getTodayAttendance,
   });
 
   // Fetch enrollments for quota tracking
   const { data: enrollments = [] } = useQuery({
     queryKey: ["enrollments"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("student_enrollments")
-        .select("*, students(name), classes(name)")
-        .eq("is_active", true);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getAttendanceEnrollments,
   });
 
   // Today's records
@@ -224,7 +210,7 @@ export default function Attendance() {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => setSelectedStudent(record.student_id)}><Eye className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => setSelectedStudent(record.student_id ?? null)}><Eye className="h-3 w-3" /></Button>
                           {!record.check_in_time && <Button variant="soft" size="sm"><LogIn className="h-3 w-3 mr-1" /><span className="hidden sm:inline">In</span></Button>}
                           {record.check_in_time && !record.check_out_time && <Button variant="outline" size="sm"><LogOut className="h-3 w-3 mr-1" /><span className="hidden sm:inline">Out</span></Button>}
                         </div>

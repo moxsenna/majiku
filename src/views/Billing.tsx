@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { getInvoices, getBillingEnrollments } from "@/server/actions/billing";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,26 +28,12 @@ export default function Billing() {
 
   const { data: invoices = [] } = useQuery({
     queryKey: ["invoices"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("invoices")
-        .select("*, students(name, parent_name, parent_email, parent_phone, registration_date)")
-        .order("due_date", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getInvoices,
   });
 
   const { data: enrollments = [] } = useQuery({
     queryKey: ["enrollments-billing"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("student_enrollments")
-        .select("*, students(name), classes(name, price_per_month)")
-        .eq("is_active", true);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getBillingEnrollments,
   });
 
   const filteredInvoices = invoices.filter((inv) => {
@@ -163,7 +149,7 @@ export default function Billing() {
                   <div className="flex items-center justify-between sm:justify-end gap-4">
                     <div className="text-right">
                       <p className="font-bold text-primary">{formatCurrency(inv.total)}</p>
-                      <p className="text-xs text-muted-foreground">Jatuh tempo: {new Date(inv.due_date).toLocaleDateString("id-ID")}</p>
+                      <p className="text-xs text-muted-foreground">Jatuh tempo: {inv.due_date ? new Date(inv.due_date).toLocaleDateString("id-ID") : "-"}</p>
                     </div>
                     <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
                   </div>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { getWaitingList } from "@/server/actions/waitingList";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,14 +10,7 @@ import { Link } from "react-router-dom";
 export function WaitingListWidget() {
   const { data: waitingList = [] } = useQuery({
     queryKey: ["waiting-list-stats"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("waiting_list")
-        .select("*, classes(name, capacity)")
-        .order("priority", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: getWaitingList,
   });
 
   const stats = {
@@ -81,7 +74,7 @@ export function WaitingListWidget() {
             <div key={w.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
               <div className="min-w-0">
                 <p className="text-xs font-medium truncate">{w.student_name}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{(w.classes as any)?.name}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{w.classes?.name}</p>
               </div>
               <Badge variant="warning" className="text-[10px] shrink-0">Menunggu</Badge>
             </div>
