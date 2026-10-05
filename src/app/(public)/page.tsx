@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   description:
     "Platform all-in-one manajemen daycare, PAUD, preschool, dan bimbingan belajar. Dilengkapi direktori dan marketplace lembaga terverifikasi.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default async function Page() {
