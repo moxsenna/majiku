@@ -8,5 +8,11 @@
   "durable_objects": {
     "bindings": [{ "name": "NEXT_INC_CACHE_DO", "class_name": "DOQueueHandler" }]
   },
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS_BUCKET",
+      "bucket_name": "majiku-photos"
+    }
+  ],
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }]
 }

@@ -19,6 +19,7 @@ const PROTECTED = [
   /^\/vendor/,
   /^\/tutor/,
   /^\/parent/,
+  /^\/api\/photos/,
 ];
 
 export function middleware(req: NextRequest) {
@@ -27,6 +28,9 @@ export function middleware(req: NextRequest) {
     req.cookies.has("__Secure-better-auth.session_token");
   const isProtected = PROTECTED.some((re) => re.test(req.nextUrl.pathname));
   if (isProtected && !hasSession) {
+    if (req.nextUrl.pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const url = new URL("/auth/login", req.url);
     const target = req.nextUrl.pathname + req.nextUrl.search;
     url.searchParams.set("next", target);
@@ -55,5 +59,6 @@ export const config = {
     "/vendor/:path*",
     "/tutor/:path*",
     "/parent/:path*",
+    "/api/photos/:path*",
   ],
 };
