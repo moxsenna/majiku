@@ -35,6 +35,7 @@ dist-ssr
 # Next.js & Cloudflare
 .next/
 .open-next/
+.wrangler/
 .dev.vars
 .env.local
 .env*.local
