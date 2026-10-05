@@ -9,6 +9,7 @@ import {
   time,
   timestamp,
   unique,
+  index,
   jsonb,
 } from "drizzle-orm/pg-core";
 
@@ -300,4 +301,26 @@ export const galleryPhotos = pgTable("gallery_photos", {
 });
 
 export type GalleryPhoto = typeof galleryPhotos.$inferSelect;
+
+export const conversations = pgTable("conversations", {
+  id: text("id").primaryKey(),
+  parentUserId: text("parent_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  tutorUserId: text("tutor_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  studentId: text("student_id").references(() => students.id, { onDelete: "set null" }),
+  lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (t) => [unique("conversations_parent_tutor_key").on(t.parentUserId, t.tutorUserId)]);
+
+export const messages = pgTable("messages", {
+  id: text("id").primaryKey(),
+  conversationId: text("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  senderUserId: text("sender_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+  readAt: timestamp("read_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (t) => [index("messages_conversation_created_idx").on(t.conversationId, t.createdAt)]);
+
+export type ConversationRow = typeof conversations.$inferSelect;
+export type ChatMessageRow = typeof messages.$inferSelect;
 
