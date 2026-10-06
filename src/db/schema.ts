@@ -392,3 +392,29 @@ export const lessonPlans = pgTable("lesson_plans", {
 });
 
 export type LessonPlanRow = typeof lessonPlans.$inferSelect;
+
+export const paymentOrders = pgTable("payment_orders", {
+  id: text("id").primaryKey(),
+  invoiceId: text("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  parentUserId: text("parent_user_id").references(() => user.id, { onDelete: "set null" }),
+  externalOrderId: text("external_order_id").notNull().unique(),
+  paycoreOrderId: text("paycore_order_id").unique(),
+  productKey: text("product_key").notNull().default("spp_invoice"),
+  amount: numeric("amount").notNull(),
+  currency: text("currency").notNull().default("IDR"),
+  paymentStatus: text("payment_status").notNull().default("pending"),
+  checkoutUrl: text("checkout_url"),
+  paidAt: timestamp("paid_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const paycoreEvents = pgTable("paycore_events", {
+  eventId: text("event_id").primaryKey(),
+  paycoreOrderId: text("paycore_order_id").notNull().unique(),
+  eventType: text("event_type").notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true }).defaultNow(),
+  rawPayload: jsonb("raw_payload"),
+});
+
+export type PaymentOrderRow = typeof paymentOrders.$inferSelect;
