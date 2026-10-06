@@ -208,14 +208,16 @@ export async function createInvoicePaymentOrder(
     .returning({ id: paymentOrders.id });
 
   try {
+    const phone = detail.parentPhone?.trim();
     const result = await createPayCoreOrder({
+      externalOrderId,
       amount,
       invoiceNumber: detail.invoiceNumber,
       invoiceId: detail.id,
       customer: {
         name: session.user.name ?? detail.parentName ?? "Orang Tua",
         email: session.user.email,
-        phone: detail.parentPhone ?? "",
+        ...(phone && phone.length >= 8 ? { phone } : {}),
       },
     });
 

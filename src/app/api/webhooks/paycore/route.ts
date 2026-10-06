@@ -59,19 +59,14 @@ export async function POST(req: Request) {
     return Response.json({ error: "Payload tidak lengkap" }, { status: 400 });
   }
 
-  // 5. Dedupe event_id di level DB (unique PK)
-  const inserted = await db
-    .insert(paycoreEvents)
-    .values({
-      eventId,
-      paycoreOrderId: data.order_id,
-      eventType,
-      rawPayload: body as unknown as Record<string, unknown>,
-    })
-    .onConflictDoNothing()
-    .returning({ eventId: paycoreEvents.eventId });
+  // 5. Cek apakah event_id sudah pernah diproses sebelumnya (idempotency check)
+  const existingEvent = await db
+    .select({ eventId: paycoreEvents.eventId })
+    .from(paycoreEvents)
+    .where(eq(paycoreEvents.eventId, eventId))
+    .limit(1);
 
-  if (inserted.length === 0) {
+  if (existingEvent.length > 0) {
     // Sudah pernah diproses — balas 200 agar PayCore berhenti retry
     return Response.json({ ok: true, note: "already processed" });
   }
@@ -111,25 +106,42 @@ export async function POST(req: Request) {
     return Response.json({ error: "Data order tidak cocok" }, { status: 400 });
   }
 
-  // Simpan paycoreOrderId bila baru diketahui dari event
-  if (!order.paycoreOrderId) {
-    await db
-      .update(paymentOrders)
-      .set({ paycoreOrderId: data.order_id, updatedAt: new Date() })
-      .where(eq(paymentOrders.id, order.id));
-  }
-
   if (eventType === "payment.succeeded") {
-    // 8. Fulfillment dalam SATU transaction — idempotent terhadap invoice lunas
+    // 8. Fulfillment dalam SATU transaction atomik: catat event dedupe + update order + update invoice
     await db.transaction(async (tx) => {
+      const inserted = await tx
+        .insert(paycoreEvents)
+        .values({
+          eventId,
+          paycoreOrderId: data.order_id,
+          eventType,
+          rawPayload: body as unknown as Record<string, unknown>,
+        })
+        .onConflictDoNothing()
+        .returning({ eventId: paycoreEvents.eventId });
+
+      // Jika ada eksekusi paralel yang sudah mencatat event ini duluan:
+      if (inserted.length === 0) {
+        return;
+      }
+
       await tx
         .update(paymentOrders)
-        .set({ paymentStatus: "paid", paidAt: data.paid_at ? new Date(data.paid_at) : new Date(), updatedAt: new Date() })
+        .set({
+          paycoreOrderId: data.order_id,
+          paymentStatus: "paid",
+          paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
+          updatedAt: new Date(),
+        })
         .where(eq(paymentOrders.id, order.id));
 
       await tx
         .update(invoices)
-        .set({ status: "paid", paidAt: data.paid_at ? new Date(data.paid_at) : new Date(), updatedAt: new Date() })
+        .set({
+          status: "paid",
+          paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
+          updatedAt: new Date(),
+        })
         .where(eq(invoices.id, order.invoiceId));
     });
     return Response.json({ ok: true });
@@ -137,13 +149,35 @@ export async function POST(req: Request) {
 
   if (eventType === "payment.failed" || eventType === "payment.expired") {
     const status = eventType === "payment.failed" ? "failed" : "expired";
-    await db
-      .update(paymentOrders)
-      .set({ paymentStatus: status, updatedAt: new Date() })
-      .where(eq(paymentOrders.id, order.id));
+    await db.transaction(async (tx) => {
+      await tx
+        .insert(paycoreEvents)
+        .values({
+          eventId,
+          paycoreOrderId: data.order_id,
+          eventType,
+          rawPayload: body as unknown as Record<string, unknown>,
+        })
+        .onConflictDoNothing();
+
+      await tx
+        .update(paymentOrders)
+        .set({ paymentStatus: status, updatedAt: new Date() })
+        .where(eq(paymentOrders.id, order.id));
+    });
     return Response.json({ ok: true });
   }
 
-  // Event lain diterima tanpa aksi
+  // Event lain dicatat
+  await db
+    .insert(paycoreEvents)
+    .values({
+      eventId,
+      paycoreOrderId: data.order_id,
+      eventType,
+      rawPayload: body as unknown as Record<string, unknown>,
+    })
+    .onConflictDoNothing();
+
   return Response.json({ ok: true, note: `event ${eventType} dicatat` });
 }

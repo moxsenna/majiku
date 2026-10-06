@@ -175,7 +175,7 @@ export default function ParentBilling({
                   <Button
                     variant="hero"
                     className="flex-1"
-                    disabled={isPayingId === activeInvoice.id}
+                    disabled={isPayingId === activeInvoice.id || !paymentsEnabled}
                     onClick={() => handlePayOnline(activeInvoice.id)}
                   >
                     {isPayingId === activeInvoice.id ? (

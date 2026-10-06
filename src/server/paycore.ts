@@ -21,6 +21,7 @@ export function isPaymentsEnabled(): boolean {
     "PAYCORE_KEY_ID",
     "PAYCORE_APP_SECRET",
     "PAYCORE_WEBHOOK_SECRET",
+    "PAYCORE_RETURN_URL",
   ];
   return required.every((k) => Boolean(process.env[k]?.trim()));
 }
@@ -67,10 +68,11 @@ interface PayCoreOrderResponse {
 }
 
 export interface CreateOrderParams {
+  externalOrderId: string;
   amount: number; // IDR integer, SELALU dari DB — bukan dari frontend
   invoiceNumber: string;
   invoiceId: string;
-  customer: { name: string; email: string; phone: string };
+  customer: { name: string; email: string; phone?: string };
 }
 
 export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
@@ -88,7 +90,15 @@ export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
   const secret = requireEnv("PAYCORE_APP_SECRET");
   const returnUrl = requireEnv("PAYCORE_RETURN_URL");
 
-  const externalOrderId = `majiku-inv-${params.invoiceId}-${crypto.randomUUID().slice(0, 8)}`;
+  const externalOrderId = params.externalOrderId;
+  const customer: Record<string, string> = {
+    name: params.customer.name,
+    email: params.customer.email,
+  };
+  if (params.customer.phone && params.customer.phone.trim().length >= 8) {
+    customer.phone = params.customer.phone.trim();
+  }
+
   const body = JSON.stringify({
     external_order_id: externalOrderId,
     merchant_profile_id: MERCHANT_PROFILE_ID,
@@ -96,7 +106,7 @@ export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
     description: `SPP ${params.invoiceNumber}`,
     amount: params.amount,
     currency: "IDR",
-    customer: params.customer,
+    customer,
     return_url: returnUrl,
     fulfillment_data: {
       invoice_id: params.invoiceId,
