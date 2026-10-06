@@ -336,3 +336,59 @@ export const announcements = pgTable("announcements", {
 });
 
 export type AnnouncementRow = typeof announcements.$inferSelect;
+
+export const scheduleType = pgEnum("schedule_type", [
+  "class",
+  "activity",
+  "event",
+  "holiday",
+]);
+
+export const classSchedules = pgTable("class_schedules", {
+  id: text("id").primaryKey(),
+  classId: text("class_id").references(() => classes.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  dayOfWeek: integer("day_of_week").notNull(),
+  startTime: text("start_time").notNull(),
+  durationMinutes: integer("duration_minutes").notNull(),
+  location: text("location"),
+  type: scheduleType("type").notNull().default("class"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type ClassScheduleRow = typeof classSchedules.$inferSelect;
+
+export const planStatus = pgEnum("plan_status", [
+  "draft",
+  "upcoming",
+  "in_progress",
+  "completed",
+]);
+
+export interface LessonPlanActivity {
+  id: string;
+  title: string;
+  durationMinutes: number;
+  description?: string;
+  completed: boolean;
+}
+
+export const lessonPlans = pgTable("lesson_plans", {
+  id: text("id").primaryKey(),
+  classId: text("class_id").references(() => classes.id, { onDelete: "set null" }),
+  tutorUserId: text("tutor_user_id").references(() => user.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  subject: text("subject"),
+  planDate: date("plan_date").notNull(),
+  timeRange: text("time_range"),
+  objectives: jsonb("objectives").$type<string[]>().default([]),
+  activities: jsonb("activities").$type<LessonPlanActivity[]>().default([]),
+  materials: jsonb("materials").$type<string[]>().default([]),
+  status: planStatus("status").notNull().default("upcoming"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type LessonPlanRow = typeof lessonPlans.$inferSelect;
