@@ -25,6 +25,7 @@ import { downloadInvoicePDF } from "@/lib/invoiceExport";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
+import { PaymentModal } from "@/components/payment/PaymentModal";
 import {
   createInvoicePaymentOrder,
   type ParentInvoiceDetail as ParentInvoiceDetailType,
@@ -52,6 +53,10 @@ interface Props {
 
 export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props) {
   const [isPaying, setIsPaying] = useState(false);
+  const [paymentModalData, setPaymentModalData] = useState<{
+    open: boolean;
+    checkoutUrl: string;
+  } | null>(null);
   const config = statusConfig[invoice.status] || statusConfig.unpaid;
   const StatusIcon = config.icon;
 
@@ -104,15 +109,31 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
     setIsPaying(true);
     try {
       const { checkoutUrl } = await createInvoicePaymentOrder(invoice.id);
-      window.location.href = checkoutUrl;
+      setPaymentModalData({
+        open: true,
+        checkoutUrl,
+      });
     } catch (e: any) {
       toast.error(e.message || "Gagal menghubungkan ke payment gateway");
+    } finally {
       setIsPaying(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {paymentModalData && (
+        <PaymentModal
+          open={paymentModalData.open}
+          onOpenChange={(open) =>
+            setPaymentModalData((prev) => (prev ? { ...prev, open } : null))
+          }
+          invoiceId={invoice.id}
+          invoiceNumber={invoice.invoiceNumber}
+          amount={invoice.total}
+          checkoutUrl={paymentModalData.checkoutUrl}
+        />
+      )}
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b border-border print:hidden">
         <div className="flex items-center justify-between px-4 h-14">

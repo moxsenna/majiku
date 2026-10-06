@@ -21,6 +21,7 @@ import {
   FileText,
 } from "lucide-react";
 import { InvoiceModal } from "@/components/invoice/InvoiceModal";
+import { PaymentModal } from "@/components/payment/PaymentModal";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -50,6 +51,13 @@ export default function ParentBilling({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isPayingId, setIsPayingId] = useState<string | null>(null);
+  const [paymentModalData, setPaymentModalData] = useState<{
+    open: boolean;
+    invoiceId: string;
+    invoiceNumber: string;
+    amount: number;
+    checkoutUrl: string;
+  } | null>(null);
 
   const activeInvoice = useMemo(() => {
     return invoices.find((inv) => inv.status === "unpaid" || inv.status === "overdue") || null;
@@ -99,7 +107,7 @@ export default function ParentBilling({
     setModalOpen(true);
   };
 
-  const handlePayOnline = async (invoiceId: string) => {
+  const handlePayOnline = async (invoiceId: string, customInvoice?: ParentInvoiceSummary) => {
     if (!paymentsEnabled) {
       toast({
         title: "Pembayaran Online Belum Aktif",
@@ -109,22 +117,42 @@ export default function ParentBilling({
       return;
     }
 
+    const inv = customInvoice || invoices.find((i) => i.id === invoiceId);
     setIsPayingId(invoiceId);
     try {
       const { checkoutUrl } = await createInvoicePaymentOrder(invoiceId);
-      window.location.href = checkoutUrl;
+      setPaymentModalData({
+        open: true,
+        invoiceId,
+        invoiceNumber: inv?.invoiceNumber || "INV",
+        amount: inv?.total || 0,
+        checkoutUrl,
+      });
     } catch (e: any) {
       toast({
         title: "Gagal Membuat Pembayaran",
         description: e.message || "Terjadi kesalahan saat menghubungi payment gateway",
         variant: "destructive",
       });
+    } finally {
       setIsPayingId(null);
     }
   };
 
   return (
     <>
+      {paymentModalData && (
+        <PaymentModal
+          open={paymentModalData.open}
+          onOpenChange={(open) =>
+            setPaymentModalData((prev) => (prev ? { ...prev, open } : null))
+          }
+          invoiceId={paymentModalData.invoiceId}
+          invoiceNumber={paymentModalData.invoiceNumber}
+          amount={paymentModalData.amount}
+          checkoutUrl={paymentModalData.checkoutUrl}
+        />
+      )}
       {selectedInvoice && (
         <InvoiceModal
           invoice={selectedInvoice}
@@ -284,7 +312,7 @@ export default function ParentBilling({
                             size="sm"
                             className="h-8 text-xs"
                             disabled={isPayingId === invoice.id || !paymentsEnabled}
-                            onClick={() => handlePayOnline(invoice.id)}
+                            onClick={() => handlePayOnline(invoice.id, invoice)}
                           >
                             Bayar
                           </Button>

@@ -232,3 +232,22 @@ export async function createInvoicePaymentOrder(
     throw e;
   }
 }
+
+export async function checkInvoiceStatus(
+  invoiceId: string
+): Promise<{ isPaid: boolean; status: string }> {
+  const session = await getSessionSafely();
+  if (!session) {
+    return { isPaid: false, status: "unauthenticated" };
+  }
+
+  const detail = await getMyInvoiceById(invoiceId);
+  if (!detail) {
+    return { isPaid: false, status: "not_found" };
+  }
+
+  return {
+    isPaid: detail.status === "paid",
+    status: detail.status,
+  };
+}
