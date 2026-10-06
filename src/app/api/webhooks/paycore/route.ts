@@ -106,26 +106,10 @@ export async function POST(req: Request) {
     return Response.json({ error: "Data order tidak cocok" }, { status: 400 });
   }
 
-  if (eventType === "payment.succeeded") {
-    // 8. Fulfillment dalam SATU transaction atomik: catat event dedupe + update order + update invoice
-    await db.transaction(async (tx) => {
-      const inserted = await tx
-        .insert(paycoreEvents)
-        .values({
-          eventId,
-          paycoreOrderId: data.order_id,
-          eventType,
-          rawPayload: body as unknown as Record<string, unknown>,
-        })
-        .onConflictDoNothing()
-        .returning({ eventId: paycoreEvents.eventId });
-
-      // Jika ada eksekusi paralel yang sudah mencatat event ini duluan:
-      if (inserted.length === 0) {
-        return;
-      }
-
-      await tx
+  try {
+    if (eventType === "payment.succeeded") {
+      // 8. Fulfillment: update order + update invoice + catat event dedupe
+      await db
         .update(paymentOrders)
         .set({
           paycoreOrderId: data.order_id,
@@ -135,7 +119,7 @@ export async function POST(req: Request) {
         })
         .where(eq(paymentOrders.id, order.id));
 
-      await tx
+      await db
         .update(invoices)
         .set({
           status: "paid",
@@ -143,14 +127,8 @@ export async function POST(req: Request) {
           updatedAt: new Date(),
         })
         .where(eq(invoices.id, order.invoiceId));
-    });
-    return Response.json({ ok: true });
-  }
 
-  if (eventType === "payment.failed" || eventType === "payment.expired") {
-    const status = eventType === "payment.failed" ? "failed" : "expired";
-    await db.transaction(async (tx) => {
-      await tx
+      await db
         .insert(paycoreEvents)
         .values({
           eventId,
@@ -160,24 +138,46 @@ export async function POST(req: Request) {
         })
         .onConflictDoNothing();
 
-      await tx
+      return Response.json({ ok: true });
+    }
+
+    if (eventType === "payment.failed" || eventType === "payment.expired") {
+      const status = eventType === "payment.failed" ? "failed" : "expired";
+      await db
         .update(paymentOrders)
         .set({ paymentStatus: status, updatedAt: new Date() })
         .where(eq(paymentOrders.id, order.id));
-    });
-    return Response.json({ ok: true });
+
+      await db
+        .insert(paycoreEvents)
+        .values({
+          eventId,
+          paycoreOrderId: data.order_id,
+          eventType,
+          rawPayload: body as unknown as Record<string, unknown>,
+        })
+        .onConflictDoNothing();
+
+      return Response.json({ ok: true });
+    }
+
+    // Event lain dicatat
+    await db
+      .insert(paycoreEvents)
+      .values({
+        eventId,
+        paycoreOrderId: data.order_id,
+        eventType,
+        rawPayload: body as unknown as Record<string, unknown>,
+      })
+      .onConflictDoNothing();
+
+    return Response.json({ ok: true, note: `event ${eventType} dicatat` });
+  } catch (err: any) {
+    console.error("Gagal memproses webhook paycore:", err);
+    return Response.json(
+      { error: "Internal error processing webhook", message: err?.message },
+      { status: 500 }
+    );
   }
-
-  // Event lain dicatat
-  await db
-    .insert(paycoreEvents)
-    .values({
-      eventId,
-      paycoreOrderId: data.order_id,
-      eventType,
-      rawPayload: body as unknown as Record<string, unknown>,
-    })
-    .onConflictDoNothing();
-
-  return Response.json({ ok: true, note: `event ${eventType} dicatat` });
 }

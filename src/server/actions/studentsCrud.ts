@@ -115,37 +115,35 @@ export async function createStudent(input: CreateStudentInput): Promise<{ id: st
   const studentId = randomUUID();
   const today = new Date().toISOString().slice(0, 10);
 
-  await db.transaction(async (tx) => {
-    await tx.insert(students).values({
-      id: studentId,
-      name: input.name.trim(),
-      dateOfBirth: input.dateOfBirth?.trim() || null,
-      parentName: input.parentName?.trim() || null,
-      parentPhone: input.parentPhone?.trim() || null,
-      parentEmail: input.parentEmail?.trim() || null,
-      registrationDate: today,
+  await db.insert(students).values({
+    id: studentId,
+    name: input.name.trim(),
+    dateOfBirth: input.dateOfBirth?.trim() || null,
+    parentName: input.parentName?.trim() || null,
+    parentPhone: input.parentPhone?.trim() || null,
+    parentEmail: input.parentEmail?.trim() || null,
+    registrationDate: today,
+    isActive: true,
+  });
+
+  if (input.classId?.trim()) {
+    await db.insert(studentEnrollments).values({
+      id: randomUUID(),
+      studentId,
+      classId: input.classId.trim(),
+      sessionsQuota:
+        input.sessionsQuota !== undefined && !isNaN(Number(input.sessionsQuota))
+          ? Number(input.sessionsQuota)
+          : 12,
+      sessionsUsed: 0,
+      billingDay:
+        input.billingDay !== undefined && !isNaN(Number(input.billingDay))
+          ? Number(input.billingDay)
+          : 1,
+      enrollmentDate: today,
       isActive: true,
     });
-
-    if (input.classId?.trim()) {
-      await tx.insert(studentEnrollments).values({
-        id: randomUUID(),
-        studentId,
-        classId: input.classId.trim(),
-        sessionsQuota:
-          input.sessionsQuota !== undefined && !isNaN(Number(input.sessionsQuota))
-            ? Number(input.sessionsQuota)
-            : 12,
-        sessionsUsed: 0,
-        billingDay:
-          input.billingDay !== undefined && !isNaN(Number(input.billingDay))
-            ? Number(input.billingDay)
-            : 1,
-        enrollmentDate: today,
-        isActive: true,
-      });
-    }
-  });
+  }
 
   return { id: studentId };
 }

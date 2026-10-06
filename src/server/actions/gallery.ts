@@ -111,24 +111,12 @@ export async function uploadGalleryPhotos(
 
   let createdCount = 0;
 
-  await db.transaction(async (tx) => {
-    for (const key of photoKeys) {
-      if (validStudentIds.length > 0) {
-        for (const sId of validStudentIds) {
-          await tx.insert(galleryPhotos).values({
-            id: randomUUID(),
-            studentId: sId,
-            classId,
-            photoKey: key,
-            caption,
-            uploadedByUserId: session.user.id,
-          });
-          createdCount++;
-        }
-      } else {
-        await tx.insert(galleryPhotos).values({
+  for (const key of photoKeys) {
+    if (validStudentIds.length > 0) {
+      for (const sId of validStudentIds) {
+        await db.insert(galleryPhotos).values({
           id: randomUUID(),
-          studentId: null,
+          studentId: sId,
           classId,
           photoKey: key,
           caption,
@@ -136,8 +124,18 @@ export async function uploadGalleryPhotos(
         });
         createdCount++;
       }
+    } else {
+      await db.insert(galleryPhotos).values({
+        id: randomUUID(),
+        studentId: null,
+        classId,
+        photoKey: key,
+        caption,
+        uploadedByUserId: session.user.id,
+      });
+      createdCount++;
     }
-  });
+  }
 
   return { created: createdCount };
 }

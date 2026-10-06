@@ -217,9 +217,7 @@ export async function createDailyReport(
     status: "submitted" as const,
   }));
 
-  await db.transaction(async (tx) => {
-    await tx.insert(dailyReports).values(rowsToInsert);
-  });
+  await db.insert(dailyReports).values(rowsToInsert);
 
   return { created: studentIds.length };
 }
