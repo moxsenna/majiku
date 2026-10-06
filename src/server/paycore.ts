@@ -3,7 +3,7 @@
 // Secret hanya via env server. Frontend tidak pernah menyentuh PayCore.
 
 const PAYMENT_PRODUCT_KEY = "spp_invoice";
-const MERCHANT_PROFILE_ID = "appvibe_default";
+const MERCHANT_PROFILE_ID = "mp_appvibe_default";
 
 function requireEnv(name: string): string {
   const v = process.env[name];
