@@ -55,7 +55,8 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
   const [isPaying, setIsPaying] = useState(false);
   const [paymentModalData, setPaymentModalData] = useState<{
     open: boolean;
-    checkoutUrl: string;
+    checkoutUrl?: string | null;
+    qrString?: string | null;
   } | null>(null);
   const config = statusConfig[invoice.status] || statusConfig.unpaid;
   const StatusIcon = config.icon;
@@ -108,10 +109,11 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
     }
     setIsPaying(true);
     try {
-      const { checkoutUrl } = await createInvoicePaymentOrder(invoice.id);
+      const result = await createInvoicePaymentOrder(invoice.id);
       setPaymentModalData({
         open: true,
-        checkoutUrl,
+        checkoutUrl: result.checkoutUrl,
+        qrString: result.qrString,
       });
     } catch (e: any) {
       toast.error(e.message || "Gagal menghubungkan ke payment gateway");
@@ -132,6 +134,7 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
           invoiceNumber={invoice.invoiceNumber}
           amount={invoice.total}
           checkoutUrl={paymentModalData.checkoutUrl}
+          qrString={paymentModalData.qrString}
         />
       )}
       {/* Header */}

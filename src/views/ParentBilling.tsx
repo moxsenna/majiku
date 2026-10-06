@@ -56,7 +56,8 @@ export default function ParentBilling({
     invoiceId: string;
     invoiceNumber: string;
     amount: number;
-    checkoutUrl: string;
+    checkoutUrl?: string | null;
+    qrString?: string | null;
   } | null>(null);
 
   const activeInvoice = useMemo(() => {
@@ -120,13 +121,14 @@ export default function ParentBilling({
     const inv = customInvoice || invoices.find((i) => i.id === invoiceId);
     setIsPayingId(invoiceId);
     try {
-      const { checkoutUrl } = await createInvoicePaymentOrder(invoiceId);
+      const result = await createInvoicePaymentOrder(invoiceId);
       setPaymentModalData({
         open: true,
         invoiceId,
         invoiceNumber: inv?.invoiceNumber || "INV",
         amount: inv?.total || 0,
-        checkoutUrl,
+        checkoutUrl: result.checkoutUrl,
+        qrString: result.qrString,
       });
     } catch (e: any) {
       toast({
@@ -151,6 +153,7 @@ export default function ParentBilling({
           invoiceNumber={paymentModalData.invoiceNumber}
           amount={paymentModalData.amount}
           checkoutUrl={paymentModalData.checkoutUrl}
+          qrString={paymentModalData.qrString}
         />
       )}
       {selectedInvoice && (

@@ -3,7 +3,7 @@
 // Secret hanya via env server. Frontend tidak pernah menyentuh PayCore.
 
 const PAYMENT_PRODUCT_KEY = "spp_invoice";
-const MERCHANT_PROFILE_ID = "mp_appvibe_default";
+const MERCHANT_PROFILE_ID = "mp_appvibe_duitku_v2";
 
 function requireEnv(name: string): string {
   const v = process.env[name];
@@ -64,6 +64,7 @@ interface PayCoreOrderResponse {
   provider_variant?: string | null;
   payment_method?: string | null;
   checkout_url?: string;
+  qr_string?: string | null;
   expires_at?: string;
 }
 
@@ -78,6 +79,7 @@ export interface CreateOrderParams {
 export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
   paycoreOrderId: string;
   checkoutUrl: string;
+  qrString?: string | null;
   expiresAt?: string;
 }> {
   if (!isPaymentsEnabled()) {
@@ -99,6 +101,8 @@ export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
     customer.phone = params.customer.phone.trim();
   }
 
+  const paymentMethod = process.env.PAYMENT_MODE === "live" ? "SP" : "NQ";
+
   const body = JSON.stringify({
     external_order_id: externalOrderId,
     merchant_profile_id: MERCHANT_PROFILE_ID,
@@ -106,6 +110,7 @@ export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
     description: `SPP ${params.invoiceNumber}`,
     amount: params.amount,
     currency: "IDR",
+    payment_method: paymentMethod,
     customer,
     return_url: returnUrl,
     fulfillment_data: {
@@ -154,6 +159,7 @@ export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
   return {
     paycoreOrderId: data.order_id,
     checkoutUrl: data.checkout_url,
+    qrString: data.qr_string ?? null,
     expiresAt: data.expires_at,
   };
 }

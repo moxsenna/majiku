@@ -169,7 +169,11 @@ export async function getMyInvoiceById(
 
 export async function createInvoicePaymentOrder(
   invoiceId: string
-): Promise<{ checkoutUrl: string }> {
+): Promise<{
+  checkoutUrl: string;
+  qrString: string | null;
+  expiresAt: string | null;
+}> {
   const session = await getSessionSafely();
   if (!session) {
     throw new Error("Unauthorized: Anda harus login untuk membayar");
@@ -226,7 +230,11 @@ export async function createInvoicePaymentOrder(
       .set({ paycoreOrderId: result.paycoreOrderId, checkoutUrl: result.checkoutUrl, updatedAt: new Date() })
       .where(eq(paymentOrders.id, pending.id));
 
-    return { checkoutUrl: result.checkoutUrl };
+    return {
+      checkoutUrl: result.checkoutUrl,
+      qrString: result.qrString ?? null,
+      expiresAt: result.expiresAt ?? null,
+    };
   } catch (e) {
     // Order tetap pending di lokal untuk audit; pesan error asli diteruskan
     throw e;
