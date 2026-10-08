@@ -20,6 +20,7 @@ import { TutorEarningsWidget } from "@/components/dashboard/TutorEarningsWidget"
 import { TutorNotificationsWidget } from "@/components/dashboard/TutorNotificationsWidget";
 import { TutorLessonPlanWidget } from "@/components/dashboard/TutorLessonPlanWidget";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const tutorNav = [
   { icon: Home, label: "Dashboard", path: "/tutor" },
@@ -92,7 +93,7 @@ export default function TutorDashboard() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState(tutorNotifications);
 
   const handleReviseReport = (notifId: string) => {
@@ -104,118 +105,27 @@ export default function TutorDashboard() {
     router.push("/tutor/progress");
   };
 
+  const displayName = user?.name || "Guru Pengajar";
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border lg:hidden">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-primary-foreground" />
-            </div>
+    <div className="p-4 lg:p-6 pb-20 lg:pb-6 space-y-6">
+      {/* Welcome Card */}
+      <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-bold text-foreground">MAJIKU Tutor</h1>
-              <p className="text-xs text-muted-foreground">Selamat datang, Ibu Sarah</p>
+              <h2 className="text-xl sm:text-2xl font-bold mb-1">Selamat Datang, {displayName}! 👋</h2>
+              <p className="text-sm text-primary-foreground/80">Pantau dan kelola aktivitas belajar mengajar harian siswa Anda</p>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">3</span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <nav className="border-t border-border bg-background p-4 space-y-2">
-            {tutorNav.map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 p-3 rounded-xl transition-colors",
-                  pathname === item.path
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
-                )}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        )}
-      </header>
-
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex w-64 min-h-screen bg-card border-r border-border flex-col p-4">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg text-foreground">MAJIKU</h1>
-              <p className="text-xs text-muted-foreground">Portal Tutor</p>
-            </div>
-          </div>
-
-          <nav className="space-y-2 flex-1">
-            {tutorNav.map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={cn(
-                  "flex items-center gap-3 p-3 rounded-xl transition-colors",
-                  pathname === item.path
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-
-          <div className="pt-4 border-t border-border">
-            <div className="flex items-center gap-3 p-3">
-              <Avatar>
-                <AvatarImage src="" />
-                <AvatarFallback className="bg-primary/10 text-primary">SS</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">Ibu Sarah</p>
-                <p className="text-xs text-muted-foreground">Tutor Kelas A</p>
+            <div className="hidden md:block">
+              <div className="text-right">
+                <p className="text-xs text-primary-foreground/70">Portal Tutor MAJIKU</p>
+                <Badge variant="outline" className="border-primary-foreground/40 text-primary-foreground text-xs mt-1">Aktif Mengajar</Badge>
               </div>
             </div>
           </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6">
-          {/* Welcome Card */}
-          <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-1">Selamat Pagi, Ibu Sarah! 👋</h2>
-                  <p className="text-primary-foreground/80">Hari ini ada 12 siswa hadir di kelas Anda</p>
-                </div>
-                <div className="hidden md:block">
-                  <div className="text-right">
-                    <p className="text-sm text-primary-foreground/70">Jumat, 13 Desember 2024</p>
-                    <p className="text-3xl font-bold">08:30</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        </CardContent>
+      </Card>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -439,29 +349,6 @@ export default function TutorDashboard() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border lg:hidden z-50">
-        <div className="flex items-center justify-around py-2">
-          {tutorNav.slice(0, 5).map((item) => (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={cn(
-                "flex flex-col items-center gap-1 p-2 rounded-lg min-w-[60px]",
-                pathname === item.path
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="text-xs">{item.label.split(' ')[0]}</span>
-            </Link>
-          ))}
         </div>
-      </nav>
-    </div>
   );
 }

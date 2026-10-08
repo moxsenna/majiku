@@ -19,6 +19,7 @@ dist-ssr
 # Tooling cache
 .v2c/
 .superpowers/
+.zcode/
 
 # Editor directories and files
 .vscode/*

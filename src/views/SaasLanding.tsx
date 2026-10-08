@@ -26,8 +26,18 @@ import {
   ClipboardCheck,
   Calendar,
   Image,
-  Play
+  Play,
+  ChevronDown,
+  HeartHandshake,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const features = [
   {
@@ -162,13 +172,50 @@ export default function SaasLanding({
               <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Harga</a>
               <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimoni</a>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href="/auth/login">
-                <Button variant="ghost">Masuk</Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button className="gradient-primary text-primary-foreground">
-                  Daftar Gratis
+            <div className="flex items-center gap-2 sm:gap-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="gap-1.5 text-xs sm:text-sm">
+                    <span>Masuk Portal</span>
+                    <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 p-1.5">
+                  <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Pilih Portal Masuk</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/parent/login" className="flex items-center gap-2.5 py-2 cursor-pointer">
+                      <HeartHandshake className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="font-semibold text-xs text-foreground">Orang Tua Murid</p>
+                        <p className="text-[10px] text-muted-foreground">parent.majiku.web.id</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/tutor/login" className="flex items-center gap-2.5 py-2 cursor-pointer">
+                      <BookOpen className="h-4 w-4 text-info" />
+                      <div>
+                        <p className="font-semibold text-xs text-foreground">Guru & Pendidik</p>
+                        <p className="text-[10px] text-muted-foreground">tutor.majiku.web.id</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/login" className="flex items-center gap-2.5 py-2 cursor-pointer">
+                      <GraduationCap className="h-4 w-4 text-foreground" />
+                      <div>
+                        <p className="font-semibold text-xs text-foreground">Admin Daycare</p>
+                        <p className="text-[10px] text-muted-foreground">admin.majiku.web.id</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Link href="/admin/register">
+                <Button className="gradient-primary text-primary-foreground text-xs sm:text-sm shadow-sm">
+                  Daftar Lembaga
                 </Button>
               </Link>
             </div>

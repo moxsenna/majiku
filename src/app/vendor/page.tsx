@@ -5,7 +5,7 @@ import VendorDashboard from "@/views/VendorDashboard";
 
 export default function Page() {
   return (
-    <RoleProtectedRoute role="admin">
+    <RoleProtectedRoute role="superadmin">
       <VendorDashboard />
     </RoleProtectedRoute>
   );

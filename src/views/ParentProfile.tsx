@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,8 +21,22 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ParentProfile() {
+  const { user, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.href = "/parent/login";
+  };
+
+  const displayName = user?.name || "Orang Tua Siswa";
+  const displayEmail = user?.email || "ortu@email.com";
+  const userInitials = (user?.name || user?.email || "OT")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -32,7 +48,7 @@ export default function ParentProfile() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <h1 className="font-bold text-lg">Profil</h1>
+            <h1 className="font-bold text-lg">Profil Orang Tua</h1>
           </div>
           <Button variant="ghost" size="icon-sm">
             <Settings className="h-5 w-5" />
@@ -47,34 +63,21 @@ export default function ParentProfile() {
             <div className="flex flex-col items-center">
               <div className="relative">
                 <Avatar size="2xl">
-                  <AvatarImage src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200" />
-                  <AvatarFallback>SP</AvatarFallback>
+                  <AvatarFallback className="text-xl font-bold bg-primary/20 text-primary">
+                    {userInitials}
+                  </AvatarFallback>
                 </Avatar>
-                <Button
-                  variant="secondary"
-                  size="icon-sm"
-                  className="absolute -bottom-1 -right-1 rounded-full"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
               </div>
-              <h2 className="mt-4 font-bold text-xl">Ibu Sari Putri</h2>
-              <p className="text-sm text-muted-foreground">Orang Tua dari Aisyah Putri</p>
+              <h2 className="mt-4 font-bold text-xl">{displayName}</h2>
+              <p className="text-sm text-muted-foreground">Akun Orang Tua Terdaftar</p>
             </div>
 
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Phone className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Telepon</p>
-                  <p className="font-medium text-sm">+62 812-3456-7890</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <Mail className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="font-medium text-sm">sari.putri@email.com</p>
+                  <p className="font-medium text-sm">{displayEmail}</p>
                 </div>
               </div>
             </div>
@@ -84,18 +87,15 @@ export default function ParentProfile() {
         {/* Child Info */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-semibold mb-3">Data Anak</h3>
+            <h3 className="font-semibold mb-3">Informasi Anak</h3>
             <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/30">
               <Avatar size="lg">
-                <AvatarImage src="https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=100" />
-                <AvatarFallback>AP</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary">AN</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="font-semibold">Aisyah Putri</p>
-                <p className="text-sm text-muted-foreground">Kelas Bunga Matahari</p>
-                <p className="text-xs text-muted-foreground">5 tahun • Bergabung Jan 2023</p>
+                <p className="font-semibold">Siswa Terdaftar</p>
+                <p className="text-xs text-muted-foreground">Pantau laporan harian dan tagihan SPP di portal ini</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -105,8 +105,8 @@ export default function ParentProfile() {
           <CardContent className="p-0">
             {[
               { icon: Bell, label: "Notifikasi", desc: "Atur preferensi notifikasi" },
-              { icon: Shield, label: "Keamanan", desc: "Password & keamanan akun" },
-              { icon: HelpCircle, label: "Bantuan", desc: "FAQ & hubungi kami" },
+              { icon: Shield, label: "Keamanan Akun", desc: "Password & perlindungan data" },
+              { icon: HelpCircle, label: "Bantuan & Kontak Daycare", desc: "Hubungi admin sekolah" },
             ].map((item, index) => (
               <button
                 key={index}
@@ -128,9 +128,13 @@ export default function ParentProfile() {
         </Card>
 
         {/* Logout */}
-        <Button variant="outline" className="w-full text-destructive hover:text-destructive">
+        <Button
+          variant="outline"
+          className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={handleLogout}
+        >
           <LogOut className="h-4 w-4 mr-2" />
-          Keluar
+          Keluar dari Akun
         </Button>
       </main>
 

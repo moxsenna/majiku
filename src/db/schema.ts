@@ -13,7 +13,7 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
-export const appRole = pgEnum("app_role", ["admin", "moderator", "user", "parent", "tutor"]);
+export const appRole = pgEnum("app_role", ["superadmin", "admin", "moderator", "user", "parent", "tutor"]);
 export const attendanceStatus = pgEnum("attendance_status", ["present", "absent", "late", "permit"]);
 export const permitType = pgEnum("permit_type", ["sick", "family", "other"]);
 export const invoiceStatus = pgEnum("invoice_status", ["unpaid", "paid", "overdue", "partial"]);

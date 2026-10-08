@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Home,
@@ -15,20 +15,19 @@ import {
   Image,
   CreditCard,
   Settings,
-  ChevronLeft,
-  ChevronRight,
   GraduationCap,
   Cake,
   Menu,
-  X,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
   className?: string;
 }
 
-const menuItems = [
+const adminMenuItems = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
   { icon: Users, label: "Siswa", path: "/students" },
   { icon: Users, label: "CRM & Pipeline", path: "/crm" },
@@ -39,19 +38,10 @@ const menuItems = [
   { icon: Calendar, label: "Lesson Plans", path: "/lesson-plans" },
   { icon: Image, label: "Galeri Foto", path: "/gallery" },
   { icon: MessageSquare, label: "Komunikasi", path: "/messages" },
-  { icon: CreditCard, label: "Billing", path: "/billing" },
+  { icon: CreditCard, label: "Billing SPP", path: "/billing" },
   { icon: CreditCard, label: "Gaji Tutor", path: "/tutor-payout" },
   { icon: Calendar, label: "Jadwal Kelas", path: "/schedule" },
   { icon: Cake, label: "Ulang Tahun", path: "/birthdays" },
-];
-
-const tutorMenuItems = [
-  { icon: Home, label: "Dashboard", path: "/tutor" },
-  { icon: ClipboardCheck, label: "Trial", path: "/tutor/trials" },
-  { icon: ClipboardCheck, label: "Absensi", path: "/tutor/attendance" },
-  { icon: Calendar, label: "Upload Progress", path: "/tutor/progress" },
-  { icon: MessageSquare, label: "Komunikasi", path: "/tutor/chat" },
-  { icon: GraduationCap, label: "Panduan", path: "/tutor/guides" },
 ];
 
 const bottomItems = [
@@ -60,8 +50,16 @@ const bottomItems = [
 
 function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
-  const isTutor = pathname.startsWith("/tutor");
-  const navItems = isTutor ? tutorMenuItems : menuItems;
+  const { user, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.href = "/admin/login";
+  };
+
+  const userInitials = (user?.name || user?.email || "AD")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <>
@@ -75,7 +73,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
             <div>
               <h1 className="font-bold text-sidebar-foreground text-lg">MAJIKU</h1>
               <p className="text-xs text-sidebar-foreground/60">
-                {isTutor ? "Portal Tutor" : "Daycare Management"}
+                Admin Daycare
               </p>
             </div>
           </div>
@@ -89,7 +87,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
+        {adminMenuItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <Link
@@ -97,20 +95,20 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               href={item.path}
               onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group text-xs",
                 isActive
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm"
+                  : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
               <item.icon
                 className={cn(
-                  "h-5 w-5 shrink-0 transition-transform group-hover:scale-110",
+                  "h-4 w-4 shrink-0 transition-transform group-hover:scale-110",
                   isActive && "text-sidebar-primary-foreground"
                 )}
               />
               {!collapsed && (
-                <span className="font-medium text-sm">{item.label}</span>
+                <span>{item.label}</span>
               )}
             </Link>
           );
@@ -127,40 +125,52 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               href={item.path}
               onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-xs",
                 isActive
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
-              <item.icon className="h-5 w-5 shrink-0" />
+              <item.icon className="h-4 w-4 shrink-0" />
               {!collapsed && (
-                <span className="font-medium text-sm">{item.label}</span>
+                <span>{item.label}</span>
               )}
             </Link>
           );
         })}
 
-        {/* User Profile */}
+        {/* User Profile & Logout */}
         <div
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg bg-sidebar-accent mt-2",
+            "flex items-center gap-2.5 p-2 rounded-lg bg-sidebar-accent mt-2",
             collapsed && "justify-center"
           )}
         >
-          <Avatar size="sm">
-            <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" />
-            <AvatarFallback>AD</AvatarFallback>
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-xs font-semibold bg-primary/20 text-primary">
+              {userInitials}
+            </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">
-                Admin User
+              <p className="text-xs font-semibold text-sidebar-foreground truncate">
+                {user?.name || "Admin Daycare"}
               </p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">
-                admin@majiku.id
+              <p className="text-[10px] text-sidebar-foreground/60 truncate">
+                {user?.email || "admin@majiku.id"}
               </p>
             </div>
+          )}
+          {!collapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              title="Keluar / Logout"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
           )}
         </div>
       </div>
@@ -169,7 +179,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 }
 
 export function Sidebar({ className }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -201,20 +211,6 @@ export function Sidebar({ className }: SidebarProps) {
         )}
       >
         <SidebarContent collapsed={collapsed} />
-
-        {/* Collapse button */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="absolute -right-3 top-20 bg-card border border-border rounded-full shadow-md hover:bg-muted z-50"
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4 text-foreground" />
-          ) : (
-            <ChevronLeft className="h-4 w-4 text-foreground" />
-          )}
-        </Button>
       </aside>
     </>
   );

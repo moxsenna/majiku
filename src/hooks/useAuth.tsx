@@ -21,6 +21,7 @@ export interface AuthContextType {
   roles: AppRole[];
   loading: boolean;
   isAdmin: boolean;
+  isSuperadmin: boolean;
   hasRole: (role: AppRole) => boolean;
   roleHome: string;
   signOut: () => Promise<void>;
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType>({
   roles: [],
   loading: true,
   isAdmin: false,
+  isSuperadmin: false,
   hasRole: () => false,
   roleHome: "/",
   signOut: async () => {},
@@ -61,11 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [data?.user?.id]);
 
-  const hasRole = (role: AppRole) =>
-    roles.includes("admin") || roles.includes(role);
+  const hasRole = (role: AppRole) => roles.includes(role);
 
   const roleHome = useMemo(() => homeForRoles(roles), [roles]);
   const isAdmin = roles.includes("admin");
+  const isSuperadmin = roles.includes("superadmin");
 
   return (
     <AuthContext.Provider
@@ -75,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         roles,
         loading: isPending || rolesLoading,
         isAdmin,
+        isSuperadmin,
         hasRole,
         roleHome,
         signOut: async () => {

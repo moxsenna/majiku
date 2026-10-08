@@ -71,6 +71,13 @@
       "when": 1791256789628,
       "tag": "0009_paycore",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791449418699,
+      "tag": "0010_add_superadmin_role",
+      "breakpoints": true
     }
   ]
 }

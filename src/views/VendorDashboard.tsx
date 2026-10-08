@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -77,7 +78,16 @@ const formatCurrency = (amount: number) => {
 
 export default function VendorDashboard() {
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.href = "/vendor/login";
+  };
+
+  const displayName = user?.name || "Super Admin";
+  const displayEmail = user?.email || "admin@majiku.web.id";
 
   const stats = [
     { title: "Total Pengguna", value: "1,247", sub: "Admin, Staf, Orang Tua", change: "+8%", isPositive: true, icon: Users, color: "primary" },
@@ -114,15 +124,18 @@ export default function VendorDashboard() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2">
                     <Avatar className="w-8 h-8"><AvatarFallback className="bg-primary/10 text-primary">SA</AvatarFallback></Avatar>
-                    <span className="hidden sm:block text-sm font-medium">Super Admin</span>
+                    <span className="hidden sm:block text-sm font-medium">{displayName}</span>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <p className="text-xs font-semibold">{displayName}</p>
+                    <p className="text-[10px] text-muted-foreground">{displayEmail}</p>
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem><Settings className="w-4 h-4 mr-2" />Pengaturan</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive"><LogOut className="w-4 h-4 mr-2" />Keluar</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("settings")}><Settings className="w-4 h-4 mr-2" />Pengaturan</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleLogout}><LogOut className="w-4 h-4 mr-2" />Keluar</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

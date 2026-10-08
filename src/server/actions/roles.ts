@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { userRoles } from "@/db/schema";
 import { auth } from "@/server/auth";
 
-export type AppRole = "admin" | "moderator" | "user" | "parent" | "tutor";
+export type AppRole = "superadmin" | "admin" | "moderator" | "user" | "parent" | "tutor";
 
 export async function getMyRoles(): Promise<AppRole[]> {
   try {
