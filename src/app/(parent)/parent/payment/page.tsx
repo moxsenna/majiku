@@ -1,6 +1,5 @@
-"use client";
-import ParentPayment from "@/views/ParentPayment";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <ParentPayment />;
+  redirect("/parent/billing");
 }

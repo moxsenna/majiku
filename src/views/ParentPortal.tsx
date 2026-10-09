@@ -25,7 +25,8 @@ import {
   Clock,
   CreditCard,
   GraduationCap,
-  FileText,
+  Sparkles,
+  ChevronDown,
 } from "lucide-react";
 import { PromoBanner } from "@/components/promo/PromoBanner";
 import { ParentActivityWidget } from "@/components/dashboard/ParentActivityWidget";
@@ -37,30 +38,7 @@ import { todayInWib } from "@/lib/datetime";
 import { cn } from "@/lib/utils";
 import type { TrialApplicationRow } from "@/server/actions/trial";
 import type { ReportRow } from "@/server/actions/dailyReports";
-
-// Mock data for child
-const childData = {
-  id: "1",
-  name: "Aisyah Putri",
-  nickname: "Aisyah",
-  avatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=200",
-  className: "Kelas Bunga Matahari",
-  age: 5,
-  attendanceToday: true,
-  checkInTime: "07:45",
-};
-
-// Progress/milestone data
-const progressData = {
-  attendance: { current: 22, total: 24, percentage: 92 },
-  meals: { good: 18, total: 22, percentage: 82 },
-  activities: 15,
-  milestones: [
-    { id: "1", title: "Bisa menulis nama sendiri", date: "5 Des 2024", icon: "✏️" },
-    { id: "2", title: "Menghafal 10 huruf", date: "28 Nov 2024", icon: "📚" },
-    { id: "3", title: "Bisa berhitung 1-20", date: "15 Nov 2024", icon: "🔢" },
-  ],
-};
+import type { ParentChildData } from "@/server/actions/parentChildren";
 
 function formatReportDate(dateStr: string): string {
   if (!dateStr) return "";
@@ -119,17 +97,30 @@ function formatMood(mood?: string | null): string {
 }
 
 interface ParentPortalProps {
+  childrenList?: ParentChildData[];
   trialStatus?: TrialApplicationRow[];
   reports?: ReportRow[];
   announcements?: AnnouncementItem[];
 }
 
 export default function ParentPortal({
+  childrenList = [],
   trialStatus = [],
   reports = [],
   announcements = [],
 }: ParentPortalProps) {
   const [activeTab, setActiveTab] = useState<"feed" | "progress" | "gallery">("feed");
+  const [selectedChildIndex, setSelectedChildIndex] = useState(0);
+
+  const hasChildren = childrenList.length > 0;
+  const activeChild = hasChildren
+    ? childrenList[selectedChildIndex] || childrenList[0]
+    : null;
+
+  // Kumpulkan foto aktual dari seluruh laporan harian
+  const allReportPhotos = reports.flatMap((r) => r.photos || []);
+  const childPhotos = activeChild?.recentPhotos || [];
+  const galleryPhotos = Array.from(new Set([...childPhotos, ...allReportPhotos]));
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,12 +134,6 @@ export default function ParentPortal({
             <span className="font-bold text-lg">MAJIKU</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon-sm" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary rounded-full text-[10px] font-bold text-primary-foreground flex items-center justify-center">
-                3
-              </span>
-            </Button>
             <Link href="/parent/chat">
               <Button variant="ghost" size="icon-sm">
                 <MessageCircle className="h-5 w-5" />
@@ -157,53 +142,93 @@ export default function ParentPortal({
           </div>
         </div>
 
-        {/* Child Profile Bar */}
-        <div className="px-4 py-3 border-b border-border bg-muted/30">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Avatar size="lg" className="ring-2 ring-primary ring-offset-2">
-                <AvatarImage src={childData.avatar} />
-                <AvatarFallback>{childData.nickname.slice(0, 2)}</AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-success flex items-center justify-center border-2 border-background">
-                <span className="text-[10px]">✓</span>
+        {/* Child Profile Bar / Empty State Header */}
+        {hasChildren && activeChild ? (
+          <div className="px-4 py-3 border-b border-border bg-muted/30">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Avatar size="lg" className="ring-2 ring-primary ring-offset-2">
+                  <AvatarImage src={activeChild.avatar || undefined} />
+                  <AvatarFallback>{activeChild.nickname.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                {activeChild.attendanceToday && (
+                  <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-success flex items-center justify-center border-2 border-background">
+                    <span className="text-[10px] text-white">✓</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-bold text-foreground truncate">{activeChild.name}</h2>
+                  {childrenList.length > 1 && (
+                    <select
+                      className="text-xs bg-muted border border-border rounded px-1 py-0.5"
+                      value={selectedChildIndex}
+                      onChange={(e) => setSelectedChildIndex(Number(e.target.value))}
+                    >
+                      {childrenList.map((c, i) => (
+                        <option key={c.id} value={i}>
+                          {c.nickname}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground truncate">{activeChild.className}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <Badge
+                  variant={activeChild.attendanceToday ? "success" : "secondary"}
+                  className="text-xs"
+                >
+                  {activeChild.attendanceToday ? "Hadir" : "Belum Hadir"}
+                </Badge>
+                {activeChild.checkInTime && (
+                  <p className="text-xs text-muted-foreground mt-1">Check-in: {activeChild.checkInTime}</p>
+                )}
               </div>
             </div>
-            <div className="flex-1">
-              <h2 className="font-bold text-foreground">{childData.name}</h2>
-              <p className="text-xs text-muted-foreground">{childData.className}</p>
-            </div>
-            <div className="text-right">
-              <Badge variant="success" className="text-xs">Hadir</Badge>
-              <p className="text-xs text-muted-foreground mt-1">Check-in: {childData.checkInTime}</p>
+          </div>
+        ) : (
+          <div className="px-4 py-3 border-b border-border bg-primary/5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="font-semibold text-foreground text-sm">Selamat Datang di MAJIKU</h2>
+                <p className="text-xs text-muted-foreground">Akun Anda belum memiliki anak yang terdaftar di kelas.</p>
+              </div>
+              <Link href="/parent/registration" className="shrink-0">
+                <Button size="sm" variant="default" className="text-xs">
+                  Daftar Trial
+                </Button>
+              </Link>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Quick Actions */}
         <div className="px-4 py-3 flex gap-2 overflow-x-auto">
-          <Link href="/parent/marketplace">
-            <Button variant="default" size="sm" className="flex-shrink-0 gap-2">
-              <Search className="h-4 w-4" />
-              Cari Daycare
-            </Button>
-          </Link>
           <Link href="/parent/registration">
-            <Button variant="outline" size="sm" className="flex-shrink-0 gap-2">
+            <Button variant="default" size="sm" className="flex-shrink-0 gap-2">
               <Plus className="h-4 w-4" />
-              Daftar Program
+              Daftar Program / Trial
             </Button>
           </Link>
           <Link href="/parent/billing">
             <Button variant="outline" size="sm" className="flex-shrink-0 gap-2">
               <CreditCard className="h-4 w-4" />
-              Lihat Tagihan
+              Tagihan & SPP
             </Button>
           </Link>
           <Link href="/parent/chat">
             <Button variant="outline" size="sm" className="flex-shrink-0 gap-2">
               <MessageCircle className="h-4 w-4" />
-              Chat Admin
+              Chat Tutor
+            </Button>
+          </Link>
+          <Link href="/parent/marketplace">
+            <Button variant="outline" size="sm" className="flex-shrink-0 gap-2">
+              <Search className="h-4 w-4" />
+              Eksplorasi Cabang
             </Button>
           </Link>
         </div>
@@ -235,104 +260,115 @@ export default function ParentPortal({
       <main className="pb-20">
         {activeTab === "feed" && (
           <div className="max-w-lg mx-auto">
-            {/* Stories/Quick Stats */}
-            <div className="flex gap-4 p-4 overflow-x-auto">
-              {[
-                { label: "Hari Ini", value: "Ceria 😊", color: "bg-highlight/10" },
-                { label: "Makan", value: "Habis ✓", color: "bg-success/10" },
-                { label: "Tidur", value: "1.5 jam", color: "bg-info/10" },
-                { label: "Aktivitas", value: "3", color: "bg-primary/10" },
-              ].map((stat, index) => (
-                <div
-                  key={index}
-                  className={`flex-shrink-0 w-20 h-24 rounded-xl ${stat.color} flex flex-col items-center justify-center p-2 border border-border/50`}
-                >
-                  <span className="text-xs text-muted-foreground">{stat.label}</span>
-                  <span className="text-sm font-bold text-foreground mt-1">{stat.value}</span>
+            {/* Quick Stats jika punya anak */}
+            {hasChildren && activeChild && (
+              <div className="flex gap-4 p-4 overflow-x-auto">
+                <div className="flex-shrink-0 w-24 h-20 rounded-xl bg-primary/10 flex flex-col items-center justify-center p-2 border border-border/50">
+                  <span className="text-[11px] text-muted-foreground">Status</span>
+                  <span className="text-xs font-bold text-foreground mt-1">
+                    {activeChild.attendanceToday ? "Hadir ✓" : "Belum Masuk"}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <div className="flex-shrink-0 w-24 h-20 rounded-xl bg-info/10 flex flex-col items-center justify-center p-2 border border-border/50">
+                  <span className="text-[11px] text-muted-foreground">Kelas</span>
+                  <span className="text-xs font-bold text-foreground mt-1 truncate max-w-[80px]">
+                    {activeChild.className}
+                  </span>
+                </div>
+                <div className="flex-shrink-0 w-24 h-20 rounded-xl bg-highlight/10 flex flex-col items-center justify-center p-2 border border-border/50">
+                  <span className="text-[11px] text-muted-foreground">Laporan</span>
+                  <span className="text-xs font-bold text-foreground mt-1">
+                    {reports.length} Catatan
+                  </span>
+                </div>
+                <div className="flex-shrink-0 w-24 h-20 rounded-xl bg-success/10 flex flex-col items-center justify-center p-2 border border-border/50">
+                  <span className="text-[11px] text-muted-foreground">Usia</span>
+                  <span className="text-xs font-bold text-foreground mt-1">{activeChild.age} Tahun</span>
+                </div>
+              </div>
+            )}
 
-            {/* Activity Schedule Widget */}
-            <div className="px-4 pb-4">
-              <ParentActivityWidget />
-            </div>
+            {/* Jika belum ada anak dan belum ada trial */}
+            {!hasChildren && trialStatus.length === 0 && (
+              <div className="p-4">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-highlight/5">
+                  <CardContent className="p-6 text-center">
+                    <Sparkles className="h-10 w-10 text-primary mx-auto mb-3" />
+                    <h3 className="font-bold text-base text-foreground mb-1">Mulai Petualangan Anak Anda</h3>
+                    <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                      Daftarkan anak Anda untuk mengikuti trial session di daycare MAJIKU. Tutor profesional kami siap membimbing tumbuh kembang buah hati.
+                    </p>
+                    <Link href="/parent/registration">
+                      <Button className="w-full text-xs">Daftar Trial Sekarang</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-            {/* Program Info & Testimonials Banner */}
+            {/* Trial Status Card */}
+            {trialStatus.length > 0 && (
+              <div className="p-4 pt-2">
+                <TrialStatusList applications={trialStatus} />
+              </div>
+            )}
+
+            {/* Program Info */}
             <div className="px-4 pb-4">
               <ProgramInfoBanner />
             </div>
 
-            {/* Pengumuman */}
-            <AnnouncementsCard announcements={announcements} />
+            {/* Announcements */}
+            {announcements.length > 0 && (
+              <div className="px-4 pb-4">
+                <AnnouncementsCard announcements={announcements} />
+              </div>
+            )}
 
-            {/* Status Trial & Pendaftaran */}
-            <div className="px-4 pb-4">
-              <h3 className="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary" />
-                Status Trial & Pendaftaran
-              </h3>
-              <TrialStatusList applications={trialStatus} />
-            </div>
+            {/* Daily Reports Feed */}
+            <div className="p-4 space-y-4">
+              <h3 className="font-bold text-base text-foreground">Laporan Aktivitas Harian</h3>
 
-            {/* Feed */}
-            <div className="space-y-4">
               {reports.length === 0 ? (
-                <Card className="rounded-none sm:rounded-xl border-x-0 sm:border-x sm:mx-4 border-dashed">
-                  <CardContent className="py-12 px-4 text-center space-y-2">
-                    <FileText className="h-10 w-10 text-muted-foreground mx-auto opacity-40 mb-2" />
-                    <h4 className="font-semibold text-foreground text-base">
-                      Belum ada laporan dari tutor
-                    </h4>
-                    <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                      Laporan harian aktivitas anak Anda akan muncul di sini setelah tutor menerbitkannya.
+                <Card>
+                  <CardContent className="p-8 text-center text-muted-foreground">
+                    <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-medium">Belum ada laporan aktivitas</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Laporan harian yang dibuat oleh tutor akan otomatis tampil di sini.
                     </p>
                   </CardContent>
                 </Card>
               ) : (
                 reports.map((report) => {
+                  const dateStr = formatReportDate(report.reportDate);
                   const timeStr = formatReportTime(report.createdAt);
+                  const moodDisplay = formatMood(report.mood);
+
                   return (
-                    <Card
-                      key={report.id}
-                      className="rounded-none sm:rounded-xl border-x-0 sm:border-x sm:mx-4"
-                    >
-                      <CardContent className="p-4 sm:p-5">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              {report.studentAvatar && (
-                                <AvatarImage
-                                  src={report.studentAvatar}
-                                  alt={report.studentName}
-                                />
-                              )}
-                              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                                {report.studentName.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-semibold text-sm text-foreground">
-                                {report.studentName}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {report.className ? `${report.className} • ` : ""}
-                                {formatReportDate(report.reportDate)}
-                              </p>
-                            </div>
+                    <Card key={report.id} className="overflow-hidden border-border/80">
+                      <CardContent className="p-4">
+                        {/* Report Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm text-foreground">
+                              {report.studentName || (activeChild?.name ?? "Siswa")}
+                            </span>
+                            {report.className && (
+                              <Badge variant="outline" className="text-xs font-normal">
+                                {report.className}
+                              </Badge>
+                            )}
                           </div>
+                          <span className="text-xs text-muted-foreground">{dateStr}</span>
                         </div>
 
-                        {/* Badges: mood, meals, nap */}
-                        {(report.mood || report.meals || report.nap) && (
-                          <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                            {report.mood && (
-                              <Badge
-                                variant="secondary"
-                                className="text-xs bg-amber-500/10 text-amber-700 dark:text-amber-400 font-normal"
-                              >
-                                {formatMood(report.mood)}
+                        {/* Badges / Mood / Nap / Meal */}
+                        {(moodDisplay || report.meals || report.nap) && (
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {moodDisplay && (
+                              <Badge variant="secondary" className="text-xs font-normal">
+                                {moodDisplay}
                               </Badge>
                             )}
                             {report.meals && (
@@ -385,7 +421,7 @@ export default function ParentPortal({
                                 : "grid-cols-2 sm:grid-cols-3"
                             )}
                           >
-                            {report.photos.map((photoKey, pIdx) => (
+                            {report.photos.map((photoKey) => (
                               <div
                                 key={photoKey}
                                 className="relative aspect-video sm:aspect-square rounded-lg overflow-hidden bg-muted border border-border/60"
@@ -419,174 +455,74 @@ export default function ParentPortal({
 
         {activeTab === "progress" && (
           <div className="max-w-lg mx-auto p-4 space-y-4">
-            {/* Progress Overview */}
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-bold text-lg mb-4">Progress Bulan Ini</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <div className="relative h-16 w-16 mx-auto mb-2">
-                      <svg className="h-16 w-16 -rotate-90">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="6"
-                          fill="none"
-                          className="text-muted"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="6"
-                          fill="none"
-                          className="text-success"
-                          strokeDasharray={`${progressData.attendance.percentage * 1.76} 176`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">
-                        {progressData.attendance.percentage}%
-                      </span>
+            {reports.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  <TrendingUp className="h-10 w-10 mx-auto mb-3 opacity-40 text-primary" />
+                  <h3 className="font-bold text-foreground text-sm mb-1">Belum Ada Catatan Progres</h3>
+                  <p className="text-xs leading-relaxed">
+                    Ringkasan perkembangan anak, rekap makan, tidur, dan aktivitas akan dikompilasi secara otomatis setelah tutor mengisi laporan harian.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="p-4 space-y-4">
+                  <h3 className="font-bold text-base">Rekap Aktivitas Terkini</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-xl bg-muted/40 border">
+                      <span className="text-xs text-muted-foreground">Total Laporan</span>
+                      <p className="text-xl font-bold text-foreground mt-1">{reports.length}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Kehadiran</p>
-                    <p className="text-xs font-medium">{progressData.attendance.current}/{progressData.attendance.total} hari</p>
+                    <div className="p-3 rounded-xl bg-muted/40 border">
+                      <span className="text-xs text-muted-foreground">Dokumentasi Foto</span>
+                      <p className="text-xl font-bold text-foreground mt-1">{allReportPhotos.length}</p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="relative h-16 w-16 mx-auto mb-2">
-                      <svg className="h-16 w-16 -rotate-90">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="6"
-                          fill="none"
-                          className="text-muted"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="6"
-                          fill="none"
-                          className="text-primary"
-                          strokeDasharray={`${progressData.meals.percentage * 1.76} 176`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">
-                        {progressData.meals.percentage}%
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Makan Baik</p>
-                    <p className="text-xs font-medium">{progressData.meals.good}/{progressData.meals.total} kali</p>
+                  <div className="space-y-2 pt-2">
+                    <span className="text-xs font-semibold text-muted-foreground">Aktivitas Terakhir:</span>
+                    {reports.slice(0, 3).map((r) => (
+                      <div key={r.id} className="p-3 rounded-lg bg-muted/20 border text-xs">
+                        <div className="flex justify-between font-medium text-foreground mb-1">
+                          <span>{r.studentName}</span>
+                          <span className="text-muted-foreground">{formatReportDate(r.reportDate)}</span>
+                        </div>
+                        <p className="text-muted-foreground line-clamp-2">{r.activities || "Aktivitas belajar dan bermain."}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="text-center">
-                    <div className="h-16 w-16 mx-auto mb-2 rounded-full bg-highlight/10 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-highlight">{progressData.activities}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Aktivitas</p>
-                    <p className="text-xs font-medium">diikuti</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Milestones */}
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-bold text-lg mb-4">Pencapaian Terbaru 🏆</h3>
-                <div className="space-y-3">
-                  {progressData.milestones.map((milestone) => (
-                    <div
-                      key={milestone.id}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/30"
-                    >
-                      <div className="h-10 w-10 rounded-full bg-highlight/10 flex items-center justify-center text-xl">
-                        {milestone.icon}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{milestone.title}</p>
-                        <p className="text-xs text-muted-foreground">{milestone.date}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Weekly Summary */}
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-bold text-lg mb-4">Ringkasan Minggu Ini</h3>
-                <div className="space-y-3">
-                  {[
-                    { day: "Senin", mood: "😊", meal: "✓", nap: "✓", activities: 2 },
-                    { day: "Selasa", mood: "😊", meal: "✓", nap: "✓", activities: 3 },
-                    { day: "Rabu", mood: "😴", meal: "½", nap: "✓", activities: 1 },
-                    { day: "Kamis", mood: "😊", meal: "✓", nap: "✓", activities: 2 },
-                    { day: "Jumat", mood: "🎉", meal: "✓", nap: "-", activities: 4 },
-                  ].map((day, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/30 transition-colors"
-                    >
-                      <span className="font-medium text-sm w-16">{day.day}</span>
-                      <span className="text-lg">{day.mood}</span>
-                      <div className="flex items-center gap-1 text-xs">
-                        <Utensils className="h-3 w-3 text-muted-foreground" />
-                        <span className={day.meal === "✓" ? "text-success" : "text-warning"}>{day.meal}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs">
-                        <Moon className="h-3 w-3 text-muted-foreground" />
-                        <span className={day.nap === "✓" ? "text-success" : "text-muted-foreground"}>{day.nap}</span>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">{day.activities} aktivitas</Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
         {activeTab === "gallery" && (
-          <div className="p-4">
-            <div className="grid grid-cols-3 gap-1 max-w-lg mx-auto">
-              {[
-                "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400",
-                "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=400",
-                "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400",
-                "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400",
-                "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=400",
-                "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=400",
-              ].map((img, index) => (
-                <div key={index} className="aspect-square relative group cursor-pointer">
-                  <img
-                    src={img}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="flex items-center gap-4 text-primary-foreground">
-                      <div className="flex items-center gap-1">
-                        <Heart className="h-5 w-5 fill-current" />
-                        <span className="font-bold">{12 + index * 3}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MessageSquare className="h-5 w-5 fill-current" />
-                        <span className="font-bold">{2 + index}</span>
-                      </div>
-                    </div>
+          <div className="p-4 max-w-lg mx-auto">
+            {galleryPhotos.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  <ImageIcon className="h-10 w-10 mx-auto mb-3 opacity-40 text-primary" />
+                  <h3 className="font-bold text-foreground text-sm mb-1">Belum Ada Foto Kegiatan</h3>
+                  <p className="text-xs leading-relaxed">
+                    Foto kegiatan buah hati selama di sekolah akan tampil di galeri ini segera setelah diunggah oleh tutor.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {galleryPhotos.map((photoKey, index) => (
+                  <div key={index} className="aspect-square relative rounded-lg overflow-hidden border bg-muted group">
+                    <img
+                      src={`/api/photos/${photoKey}`}
+                      alt="Foto kegiatan siswa"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
+                    />
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -611,7 +547,6 @@ export default function ParentPortal({
           </Link>
           <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground relative">
             <MessageCircle className="h-6 w-6" />
-            <span className="absolute -top-1 right-0 h-4 w-4 bg-primary rounded-full text-[10px] font-bold text-primary-foreground flex items-center justify-center">2</span>
             <span className="text-xs">Chat</span>
           </Link>
           <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
