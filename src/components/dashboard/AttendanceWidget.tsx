@@ -31,7 +31,7 @@ interface AttendanceWidgetProps {
 }
 
 export function AttendanceWidget({ entries, totalStudents, presentCount }: AttendanceWidgetProps) {
-  const attendanceRate = Math.round((presentCount / totalStudents) * 100);
+  const attendanceRate = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
   const { toast } = useToast();
   const router = useRouter();
 
@@ -73,45 +73,51 @@ export function AttendanceWidget({ entries, totalStudents, presentCount }: Atten
         </div>
 
         {/* Recent check-ins */}
-        <div className="space-y-2 sm:space-y-3">
-          {entries.slice(0, 5).map((entry) => (
-            <div
-              key={entry.id}
-              className="flex items-start sm:items-center justify-between p-2 sm:p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-2"
-            >
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <Avatar size="sm" className="shrink-0">
-                  <AvatarImage src={entry.studentAvatar} />
-                  <AvatarFallback>
-                    {entry.studentName.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <p className="font-medium text-xs sm:text-sm text-foreground truncate">
-                    {entry.studentName}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{entry.className}</p>
+        {entries.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground bg-muted/20 rounded-lg">
+            Belum ada catatan absensi hari ini.
+          </div>
+        ) : (
+          <div className="space-y-2 sm:space-y-3">
+            {entries.slice(0, 5).map((entry) => (
+              <div
+                key={entry.id}
+                className="flex items-start sm:items-center justify-between p-2 sm:p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-2"
+              >
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <Avatar size="sm" className="shrink-0">
+                    <AvatarImage src={entry.studentAvatar} />
+                    <AvatarFallback>
+                      {entry.studentName.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="font-medium text-xs sm:text-sm text-foreground truncate">
+                      {entry.studentName}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{entry.className}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-wrap justify-end">
+                  {entry.checkInTime && (
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-success">
+                      <LogIn className="h-3 w-3" />
+                      {entry.checkInTime}
+                    </div>
+                  )}
+                  {entry.checkOutTime && (
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
+                      <LogOut className="h-3 w-3" />
+                      {entry.checkOutTime}
+                    </div>
+                  )}
+                  <Badge variant={entry.status} className="text-[10px] sm:text-xs">{entry.status}</Badge>
                 </div>
               </div>
-
-              <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-wrap justify-end">
-                {entry.checkInTime && (
-                  <div className="flex items-center gap-1 text-[10px] sm:text-xs text-success">
-                    <LogIn className="h-3 w-3" />
-                    {entry.checkInTime}
-                  </div>
-                )}
-                {entry.checkOutTime && (
-                  <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
-                    <LogOut className="h-3 w-3" />
-                    {entry.checkOutTime}
-                  </div>
-                )}
-                <Badge variant={entry.status} className="text-[10px] sm:text-xs">{entry.status}</Badge>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <Link href="/attendance">
           <Button variant="outline" className="w-full mt-3 sm:mt-4 text-xs sm:text-sm">

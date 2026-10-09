@@ -62,43 +62,49 @@ export function BillingWidget({ items, totalRevenue, pendingAmount }: BillingWid
 
         {/* Recent invoices */}
         <div className="space-y-2 sm:space-y-3">
-          {items.slice(0, 4).map((item) => (
-            <div
-              key={item.id}
-              className={cn(
-                "flex items-start sm:items-center justify-between p-2 sm:p-3 rounded-lg gap-2",
-                item.status === "paid"
-                  ? "bg-success/5"
-                  : item.status === "overdue"
-                  ? "bg-destructive/5"
-                  : "bg-muted/30"
-              )}
-            >
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                {item.status === "paid" ? (
-                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-success shrink-0 mt-0.5 sm:mt-0" />
-                ) : (
-                  <AlertCircle
-                    className={cn(
-                      "h-4 w-4 sm:h-5 sm:w-5 shrink-0 mt-0.5 sm:mt-0",
-                      item.status === "overdue" ? "text-destructive" : "text-warning"
-                    )}
-                  />
+          {items.length === 0 ? (
+            <div className="py-6 text-center text-xs text-muted-foreground bg-muted/20 rounded-xl">
+              Belum ada tagihan aktif.
+            </div>
+          ) : (
+            items.slice(0, 4).map((item) => (
+              <div
+                key={item.id}
+                className={cn(
+                  "flex items-start sm:items-center justify-between p-2 sm:p-3 rounded-lg gap-2",
+                  item.status === "paid"
+                    ? "bg-success/5"
+                    : item.status === "overdue"
+                    ? "bg-destructive/5"
+                    : "bg-muted/30"
                 )}
-                <div className="min-w-0">
-                  <p className="font-medium text-xs sm:text-sm text-foreground truncate">{item.parentName}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                    {item.studentName} • {item.dueDate}
-                  </p>
+              >
+                <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  {item.status === "paid" ? (
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-success shrink-0 mt-0.5 sm:mt-0" />
+                  ) : (
+                    <AlertCircle
+                      className={cn(
+                        "h-4 w-4 sm:h-5 sm:w-5 shrink-0 mt-0.5 sm:mt-0",
+                        item.status === "overdue" ? "text-destructive" : "text-warning"
+                      )}
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-medium text-xs sm:text-sm text-foreground truncate">{item.parentName}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                      {item.studentName} • {item.dueDate}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <p className="font-semibold text-xs sm:text-sm text-foreground whitespace-nowrap">{formatCurrency(item.amount)}</p>
+                  <Badge variant={item.status} className="text-[10px] sm:text-xs">{item.status}</Badge>
                 </div>
               </div>
-
-              <div className="text-right shrink-0">
-                <p className="font-semibold text-xs sm:text-sm text-foreground whitespace-nowrap">{formatCurrency(item.amount)}</p>
-                <Badge variant={item.status} className="text-[10px] sm:text-xs">{item.status}</Badge>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </CardContent>
     </Card>

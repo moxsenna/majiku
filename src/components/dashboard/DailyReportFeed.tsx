@@ -87,8 +87,13 @@ export function DailyReportFeed({ reports }: DailyReportFeedProps) {
         </Link>
       </CardHeader>
       <CardContent className="relative p-3 sm:p-6 pt-0 sm:pt-0">
-        <div className="space-y-3 sm:space-y-4 feed-timeline pl-3 sm:pl-4">
-          {reports.map((report) => {
+        {reports.length === 0 ? (
+          <div className="py-8 text-center text-xs text-muted-foreground bg-muted/20 rounded-xl">
+            Belum ada laporan aktivitas harian yang dipublish hari ini.
+          </div>
+        ) : (
+          <div className="space-y-3 sm:space-y-4 feed-timeline pl-3 sm:pl-4">
+            {reports.map((report) => {
             const Icon = typeIcons[report.type];
             return (
               <div key={report.id} className="relative flex gap-3 sm:gap-4 pb-3 sm:pb-4">
@@ -166,6 +171,7 @@ export function DailyReportFeed({ reports }: DailyReportFeedProps) {
             );
           })}
         </div>
+        )}
       </CardContent>
     </Card>
   );
