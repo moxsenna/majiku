@@ -20,6 +20,7 @@ dist-ssr
 .v2c/
 .superpowers/
 .zcode/
+.reticle/
 
 # Editor directories and files
 .vscode/*

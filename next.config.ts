@@ -1,3 +1,4 @@
+import { withReticle } from '@reticlehq/next';
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
@@ -17,4 +18,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withReticle(nextConfig);
