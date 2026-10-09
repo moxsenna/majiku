@@ -4,11 +4,11 @@
   "name": "majiku",
   "account_id": "5fec996560f37f7a5c8e0128cafd1b7b",
   "routes": [
-    { "pattern": "majiku.web.id/*", "custom_domain": true },
-    { "pattern": "admin.majiku.web.id/*", "custom_domain": true },
-    { "pattern": "parent.majiku.web.id/*", "custom_domain": true },
-    { "pattern": "tutor.majiku.web.id/*", "custom_domain": true },
-    { "pattern": "vendor.majiku.web.id/*", "custom_domain": true }
+    { "pattern": "majiku.web.id", "custom_domain": true },
+    { "pattern": "admin.majiku.web.id", "custom_domain": true },
+    { "pattern": "parent.majiku.web.id", "custom_domain": true },
+    { "pattern": "tutor.majiku.web.id", "custom_domain": true },
+    { "pattern": "vendor.majiku.web.id", "custom_domain": true }
   ],
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -16,11 +16,5 @@
   "durable_objects": {
     "bindings": [{ "name": "NEXT_INC_CACHE_DO", "class_name": "DOQueueHandler" }]
   },
-  "r2_buckets": [
-    {
-      "binding": "PHOTOS_BUCKET",
-      "bucket_name": "majiku-photos"
-    }
-  ],
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }]
 }
