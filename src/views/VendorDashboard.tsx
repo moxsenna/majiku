@@ -31,6 +31,12 @@ import HelpCenterTab from "@/components/vendor/HelpCenterTab";
 import ReportsTab from "@/components/vendor/ReportsTab";
 import FeedbackWidget from "@/components/vendor/FeedbackWidget";
 
+import { useQuery } from "@tanstack/react-query";
+import {
+  getVendorPlatformOverview,
+  type VendorPlatformData,
+} from "@/server/actions/vendorDashboard";
+
 // Demo data
 const revenueData = [
   { month: "Jan", revenue: 45000000 }, { month: "Feb", revenue: 52000000 },
@@ -76,10 +82,23 @@ const formatCurrency = (amount: number) => {
   return `Rp ${(amount / 1000).toFixed(0)}K`;
 };
 
-export default function VendorDashboard() {
+interface VendorDashboardProps {
+  initialData?: VendorPlatformData;
+}
+
+export default function VendorDashboard({ initialData }: VendorDashboardProps) {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+
+  const { data: platformData } = useQuery({
+    queryKey: ["vendor-platform-overview"],
+    queryFn: getVendorPlatformOverview,
+    initialData,
+  });
+
+  const data = platformData || initialData;
+  const isDemo = data?.isDemo ?? true;
 
   const handleLogout = async () => {
     await signOut();
@@ -89,11 +108,48 @@ export default function VendorDashboard() {
   const displayName = user?.name || "Super Admin";
   const displayEmail = user?.email || "admin@majiku.web.id";
 
+  const totalUsersCount = data ? data.totalUsers : 1247;
+  const totalDaycaresCount = data ? data.totalDaycares : 583;
+  const activeDaycaresCount = data ? data.activeDaycaresCount : 548;
+  const totalRevenueAmount = data ? data.totalRevenue : 365505000;
+
   const stats = [
-    { title: "Total Pengguna", value: "1,247", sub: "Admin, Staf, Orang Tua", change: "+8%", isPositive: true, icon: Users, color: "primary" },
-    { title: "Daycare Terdaftar", value: "583", sub: "Aktif: 548, Trial: 35", change: "+12%", isPositive: true, icon: Building2, color: "info" },
-    { title: "MRR", value: formatCurrency(365505000), sub: "Dari subscription vendor", change: "+15%", isPositive: true, icon: DollarSign, color: "success" },
-    { title: "Status Sistem", value: "Normal", sub: "Uptime 99.9%", change: "", isPositive: true, icon: Activity, color: "success" },
+    {
+      title: "Total Pengguna",
+      value: totalUsersCount.toLocaleString("id-ID"),
+      sub: "Admin, Staf, Orang Tua",
+      change: isDemo ? "+8%" : "",
+      isPositive: true,
+      icon: Users,
+      color: "primary",
+    },
+    {
+      title: "Daycare Terdaftar",
+      value: totalDaycaresCount.toLocaleString("id-ID"),
+      sub: `Aktif: ${activeDaycaresCount}`,
+      change: isDemo ? "+12%" : "",
+      isPositive: true,
+      icon: Building2,
+      color: "info",
+    },
+    {
+      title: "MRR / Revenue",
+      value: formatCurrency(totalRevenueAmount),
+      sub: isDemo ? "Dari subscription vendor" : "Total volume transaksi",
+      change: isDemo ? "+15%" : "",
+      isPositive: true,
+      icon: DollarSign,
+      color: "success",
+    },
+    {
+      title: "Status Sistem",
+      value: "Normal",
+      sub: "Workers Edge 99.9%",
+      change: "",
+      isPositive: true,
+      icon: Activity,
+      color: "success",
+    },
   ];
 
   const handleSendReminder = (vendorName: string) => {
@@ -343,8 +399,8 @@ export default function VendorDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="users"><UserManagementTab /></TabsContent>
-          <TabsContent value="daycares"><DaycareManagementTab /></TabsContent>
+          <TabsContent value="users"><UserManagementTab users={data?.users} /></TabsContent>
+          <TabsContent value="daycares"><DaycareManagementTab daycares={data?.daycares} /></TabsContent>
           <TabsContent value="finance"><FinanceTab /></TabsContent>
           <TabsContent value="settings"><PlatformSettingsTab /></TabsContent>
           <TabsContent value="monitoring"><MonitoringTab /></TabsContent>

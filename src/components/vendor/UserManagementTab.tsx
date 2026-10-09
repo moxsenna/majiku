@@ -26,24 +26,36 @@ const roleLabels: Record<string, { label: string; color: string }> = {
   parent: { label: "Orang Tua", color: "bg-success/10 text-success" },
 };
 
-export default function UserManagementTab() {
+import type { VendorUserItem } from "@/server/actions/vendorDashboard";
+
+interface UserManagementTabProps {
+  users?: VendorUserItem[];
+}
+
+export default function UserManagementTab({ users }: UserManagementTabProps) {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const filtered = demoUsers.filter(u => {
+  const list = users && users.length > 0 ? users : demoUsers;
+
+  const filtered = list.filter(u => {
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     const matchRole = roleFilter === "all" || u.role === roleFilter;
     const matchStatus = statusFilter === "all" || u.status === statusFilter;
     return matchSearch && matchRole && matchStatus;
   });
 
+  const superAdminCount = list.filter(u => u.role === "super_admin").length;
+  const adminDaycareCount = list.filter(u => u.role === "admin_daycare").length;
+  const parentCount = list.filter(u => u.role === "parent").length;
+
   const stats = [
-    { label: "Total Pengguna", value: 1247, icon: Users },
-    { label: "Super Admin", value: 3, icon: Shield },
-    { label: "Admin Daycare", value: 583, icon: Shield },
-    { label: "Orang Tua", value: 661, icon: Users },
+    { label: "Total Pengguna", value: list.length, icon: Users },
+    { label: "Super Admin", value: superAdminCount, icon: Shield },
+    { label: "Admin Daycare", value: adminDaycareCount, icon: Shield },
+    { label: "Orang Tua", value: parentCount, icon: Users },
   ];
 
   return (

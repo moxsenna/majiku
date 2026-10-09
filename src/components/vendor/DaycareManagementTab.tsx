@@ -29,21 +29,29 @@ const statusColors: Record<string, string> = {
   inactive: "bg-muted text-muted-foreground",
 };
 
-export default function DaycareManagementTab() {
+import type { DaycareItem } from "@/server/actions/vendorDashboard";
+
+interface DaycareManagementTabProps {
+  daycares?: DaycareItem[];
+}
+
+export default function DaycareManagementTab({ daycares }: DaycareManagementTabProps) {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const filtered = demoDaycares.filter(d => {
+  const list = daycares && daycares.length > 0 ? daycares : demoDaycares;
+
+  const filtered = list.filter(d => {
     const matchSearch = d.name.toLowerCase().includes(search.toLowerCase());
     const matchType = typeFilter === "all" || d.type === typeFilter;
     const matchStatus = statusFilter === "all" || d.status === statusFilter;
     return matchSearch && matchType && matchStatus;
   });
 
-  const totalRevenue = demoDaycares.reduce((s, d) => s + d.revenue, 0);
-  const totalStudents = demoDaycares.reduce((s, d) => s + d.students, 0);
+  const totalRevenue = list.reduce((s, d) => s + d.revenue, 0);
+  const totalStudents = list.reduce((s, d) => s + d.students, 0);
 
   return (
     <div className="space-y-6">
