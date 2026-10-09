@@ -1,11 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { TenantRow } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { DemoAccessModal } from "@/components/demo/DemoAccessModal";
 import { 
   GraduationCap, 
   Users, 
@@ -155,6 +156,8 @@ export default function SaasLanding({
   featuredTenants = [],
   featuredSection,
 }: SaasLandingProps = {}) {
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -210,6 +213,17 @@ export default function SaasLanding({
                       </div>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setDemoModalOpen(true)}
+                    className="flex items-center gap-2.5 py-2 cursor-pointer text-primary"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <div>
+                      <p className="font-semibold text-xs text-primary">Coba Akun Demo</p>
+                      <p className="text-[10px] text-muted-foreground">Eksplorasi tanpa login</p>
+                    </div>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -240,17 +254,21 @@ export default function SaasLanding({
               Dari manajemen siswa hingga billing, semua dalam satu tempat.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/auth/register">
+              <Link href="/admin/register">
                 <Button size="lg" className="gradient-primary text-primary-foreground text-lg px-8 h-14">
                   Mulai Gratis 14 Hari
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link href="/vendor">
-                <Button size="lg" variant="outline" className="text-lg px-8 h-14">
-                  Lihat Demo
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8 h-14 gap-2"
+                onClick={() => setDemoModalOpen(true)}
+              >
+                <Sparkles className="w-5 h-5 text-primary" />
+                Lihat Demo
+              </Button>
             </div>
             <p className="text-sm text-muted-foreground mt-4">
               Tidak perlu kartu kredit • Setup dalam 5 menit
@@ -344,12 +362,10 @@ export default function SaasLanding({
                   </li>
                 ))}
               </ul>
-              <Link href="/vendor">
-                <Button className="gap-2">
-                  Lihat Demo Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button className="gap-2" onClick={() => setDemoModalOpen(true)}>
+                Lihat Demo Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </div>
             <div className="order-1 lg:order-2 relative">
               <div className="absolute inset-0 gradient-primary opacity-10 blur-3xl rounded-full"></div>
@@ -452,12 +468,14 @@ export default function SaasLanding({
                   </li>
                 ))}
               </ul>
-              <Link href="/parent">
-                <Button variant="outline" className="gap-2">
-                  <Smartphone className="h-4 w-4" />
-                  Lihat Portal Orang Tua
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setDemoModalOpen(true)}
+              >
+                <Smartphone className="h-4 w-4" />
+                Lihat Portal Orang Tua
+              </Button>
             </div>
           </div>
 
@@ -486,12 +504,14 @@ export default function SaasLanding({
                   </li>
                 ))}
               </ul>
-              <Link href="/tutor">
-                <Button variant="outline" className="gap-2">
-                  <Monitor className="h-4 w-4" />
-                  Lihat Dashboard Tutor
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setDemoModalOpen(true)}
+              >
+                <Monitor className="h-4 w-4" />
+                Lihat Dashboard Tutor
+              </Button>
             </div>
             <div className="order-1 lg:order-2 relative">
               <div className="absolute inset-0 bg-info/10 blur-3xl rounded-full"></div>
@@ -748,6 +768,9 @@ export default function SaasLanding({
           </div>
         </div>
       </footer>
+
+      {/* Modal Akses Demo Interaktif */}
+      <DemoAccessModal open={demoModalOpen} onOpenChange={setDemoModalOpen} />
     </div>
   );
 }

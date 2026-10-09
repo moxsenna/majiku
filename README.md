@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# MAJIKU — SaaS Manajemen Daycare, Preschool & Bimbel
 
-## Project info
+**MAJIKU** adalah platform SaaS all-in-one untuk manajemen daycare, preschool/TK, dan lembaga bimbingan belajar di Indonesia. Platform ini mencakup sistem manajemen operasional lembaga, portal interaktif orang tua murid, dashboard produktivitas guru/tutor, serta marketplace publik pencarian lembaga.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+- **Domain Utama**: [majiku.web.id](https://majiku.web.id)
+- **Dokumentasi Kredensial Uji Coba**: [docs/TEST_ACCOUNTS.md](docs/TEST_ACCOUNTS.md)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 4 Portal Mandiri (Subdomain Isolation)
 
-**Use Lovable**
+1. **Portal Publik & Marketplace**: [majiku.web.id](https://majiku.web.id)  
+   Landing page informatif, katalog direktori lembaga, detail program, dan tombol akses 1-click Demo interaktif.
+2. **Admin Daycare**: [admin.majiku.web.id](https://admin.majiku.web.id)  
+   Manajemen siswa, rombel/kelas, penugasan tutor, absensi QR code, CRM trial pipeline, tagihan SPP bulanan, dan jadwal mingguan.
+3. **Portal Orang Tua**: [parent.majiku.web.id](https://parent.majiku.web.id)  
+   Aplikasi mobile untuk orang tua memantau kehadiran anak, membaca laporan harian (makan, tidur, mood, aktivitas), melihat galeri foto kegiatan, dan membayar tagihan SPP online via QRIS/VA.
+4. **Portal Guru / Tutor**: [tutor.majiku.web.id](https://tutor.majiku.web.id)  
+   Jadwal mengajar harian, absensi siswa per sesi, upload dokumentasi dan laporan perkembangan anak ke Cloudflare R2, serta review trial calon murid.
+5. **Super Admin Platform**: [vendor.majiku.web.id](https://vendor.majiku.web.id)  
+   Monitoring ekosistem multi-tenant, rekap pengguna seluruh Indonesia, dan analitik transaksi.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Tech Stack
 
-**Use your preferred IDE**
+- **Framework**: Next.js 15 (App Router, React 19)
+- **Runtime & Deployment**: Cloudflare Workers via `@opennextjs/cloudflare`
+- **Database**: Neon PostgreSQL (Serverless HTTP Driver, stateless queries)
+- **ORM**: Drizzle ORM
+- **Authentication**: BetterAuth (email/password, session cookie cross-subdomain `.majiku.web.id`)
+- **Storage**: Cloudflare R2 (`majiku-photos`)
+- **Payment Gateway**: AppVibe PayCore (Duitku QRIS & Virtual Account)
+- **UI & Styling**: Tailwind CSS, Radix UI, shadcn/ui, Lucide Icons
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Kredensial Uji Coba & Demo
 
-Follow these steps:
+Lihat panduan lengkap dan tabel kredensial di [docs/TEST_ACCOUNTS.md](docs/TEST_ACCOUNTS.md).
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Ringkasan Cepat:
+- **Admin Daycare (Data Riil)**: `admin.test@gmail.com` / `Password123!`
+- **Guru / Tutor (Data Riil)**: `tutor.test@gmail.com` / `Password123!`
+- **Orang Tua (Data Riil)**: `parent.test@gmail.com` / `Password123!`
+- **Demo Interaktif (Simulasi)**: Akses langsung via tombol **"Lihat Demo"** di landing page [majiku.web.id](https://majiku.web.id) (atau login manual dengan password `Password123!`).
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Menjalankan Proyek Secara Lokal
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+# 1. Install dependensi
+npm install
+
+# 2. Jalankan server development
 npm run dev
+
+# 3. Jalankan build produksi Next.js
+npm run build
+
+# 4. Verifikasi isolasi akun demo vs data riil
+npx tsx scripts/verify-production-isolation.ts
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
