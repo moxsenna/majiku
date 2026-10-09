@@ -37,7 +37,7 @@ export function AnnouncementsCard({ announcements }: AnnouncementsCardProps) {
               <p className="text-xs text-muted-foreground mt-1 line-clamp-3 whitespace-pre-wrap">
                 {a.body}
               </p>
-              <p className="text-[10px] text-muted-foreground mt-2">
+              <p className="text-[10px] text-muted-foreground mt-2" suppressHydrationWarning>
                 {a.createdAt
                   ? formatDistanceToNow(new Date(a.createdAt), {
                       addSuffix: true,

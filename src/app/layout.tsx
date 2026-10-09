@@ -1,3 +1,4 @@
+import { ReticleDev } from './reticle-dev';
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -12,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
-      <body>
+    <html lang="id" suppressHydrationWarning>
+      <body suppressHydrationWarning>{process.env.NODE_ENV === 'development' ? <ReticleDev /> : null}
         <Providers>{children}</Providers>
       </body>
     </html>

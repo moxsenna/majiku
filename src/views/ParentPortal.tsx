@@ -360,7 +360,7 @@ export default function ParentPortal({
                               </Badge>
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground">{dateStr}</span>
+                          <span className="text-xs text-muted-foreground" suppressHydrationWarning>{dateStr}</span>
                         </div>
 
                         {/* Badges / Mood / Nap / Meal */}
@@ -438,7 +438,7 @@ export default function ParentPortal({
                         )}
 
                         {/* Footer */}
-                        <div className="pt-3 mt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="pt-3 mt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground" suppressHydrationWarning>
                           <span className="flex items-center gap-1.5">
                             <Clock className="h-3.5 w-3.5" />
                             Ditulis oleh tutor{timeStr ? ` • ${timeStr}` : ""}
