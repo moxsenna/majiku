@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
   dailyReports,
@@ -401,7 +401,17 @@ export async function getReportsForParent(): Promise<DailyReportItem[]> {
   const myStudents = await db
     .select({ id: students.id })
     .from(students)
-    .where(eq(students.parentUserId, session.user.id));
+    .where(
+      and(
+        session.user.email
+          ? or(
+              eq(students.parentUserId, session.user.id),
+              eq(students.parentEmail, session.user.email)
+            )
+          : eq(students.parentUserId, session.user.id),
+        eq(students.isActive, true)
+      )
+    );
 
   if (myStudents.length === 0) return [];
   const studentIds = myStudents.map((s) => s.id);

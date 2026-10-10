@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import { invoices, paymentOrders, students, classes, studentEnrollments } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -60,7 +60,16 @@ export async function getMyInvoices(): Promise<ParentInvoiceSummary[]> {
     })
     .from(invoices)
     .innerJoin(students, eq(invoices.studentId, students.id))
-    .where(isAdmin ? undefined : eq(students.parentUserId, session.user.id))
+    .where(
+      isAdmin
+        ? undefined
+        : session.user.email
+        ? or(
+            eq(students.parentUserId, session.user.id),
+            eq(students.parentEmail, session.user.email)
+          )
+        : eq(students.parentUserId, session.user.id)
+    )
     .orderBy(desc(invoices.dueDate));
 
   return rows.map((r) => ({
@@ -108,6 +117,7 @@ export async function getMyInvoiceById(
       studentName: students.name,
       parentName: students.parentName,
       parentPhone: students.parentPhone,
+      parentEmail: students.parentEmail,
       studentParentUserId: students.parentUserId,
     })
     .from(invoices)
@@ -117,7 +127,11 @@ export async function getMyInvoiceById(
 
   const row = rows[0];
   if (!row) return null;
-  if (!isAdmin && row.studentParentUserId !== session.user.id) {
+  if (
+    !isAdmin &&
+    row.studentParentUserId !== session.user.id &&
+    (!session.user.email || row.parentEmail !== session.user.email)
+  ) {
     // Bukan invoice milik parent ini — perlakukan sebagai tidak ditemukan
     return null;
   }

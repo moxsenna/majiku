@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import { invoices, studentEnrollments, students, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -63,7 +63,11 @@ export async function getInvoices(): Promise<InvoiceRow[]> {
 
   const conditions = [];
   if (!isAdmin && isParent) {
-    conditions.push(eq(students.parentUserId, session.user.id));
+    conditions.push(
+      session.user.email
+        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
+        : eq(students.parentUserId, session.user.id)
+    );
   }
 
   const query = db
@@ -156,7 +160,11 @@ export async function getBillingEnrollments(): Promise<BillingEnrollmentRow[]> {
 
   const conditions = [eq(studentEnrollments.isActive, true)];
   if (!isAdmin && isParent) {
-    conditions.push(eq(students.parentUserId, session.user.id));
+    conditions.push(
+      session.user.email
+        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
+        : eq(students.parentUserId, session.user.id)
+    );
   }
 
   const rows = await db

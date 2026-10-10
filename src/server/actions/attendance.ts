@@ -56,7 +56,11 @@ export async function getTodayAttendance(): Promise<AttendanceRow[]> {
   const conditions = [eq(attendance.date, today)];
 
   if (!isAdmin && isParent) {
-    conditions.push(eq(students.parentUserId, session.user.id));
+    conditions.push(
+      session.user.email
+        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
+        : eq(students.parentUserId, session.user.id)
+    );
   }
 
   const rows = await db
@@ -114,7 +118,11 @@ export async function getMonthlyAttendance(year: number, month: number): Promise
   ];
 
   if (!isAdmin && isParent) {
-    conditions.push(eq(students.parentUserId, session.user.id));
+    conditions.push(
+      session.user.email
+        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
+        : eq(students.parentUserId, session.user.id)
+    );
   }
 
   const rows = await db
@@ -187,7 +195,11 @@ export async function getAttendanceEnrollments(): Promise<AttendanceEnrollmentRo
   const conditions = [eq(studentEnrollments.isActive, true)];
 
   if (!isAdmin && isParent) {
-    conditions.push(eq(students.parentUserId, session.user.id));
+    conditions.push(
+      session.user.email
+        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
+        : eq(students.parentUserId, session.user.id)
+    );
   }
 
   const rows = await db

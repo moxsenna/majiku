@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { sql, eq, and, or, desc } from "drizzle-orm";
+import { sql, eq, and, or, desc, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import {
   students,
@@ -60,28 +60,19 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
   const userEmail = session.user.email;
   const isDemo = isDemoEmail(userEmail);
 
-  // Akun demo (*@majiku.test) menyajikan simulasi data anak Aisyah Putri
-  if (isDemo) {
-    return [
-      {
-        id: "demo-child-1",
-        name: "Aisyah Putri",
-        nickname: "Aisyah",
-        avatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=200",
-        className: "Kelas Bunga Matahari",
-        classId: "cls-1",
-        age: 5,
-        attendanceToday: true,
-        checkInTime: "07:45",
-        recentPhotos: [],
-      },
-    ];
+  // Auto-heal / auto-link jika ada siswa yang didaftarkan lembaga dengan email ini tapi belum tersambung ke user.id
+  if (userEmail) {
+    await db
+      .update(students)
+      .set({ parentUserId: session.user.id, updatedAt: new Date() })
+      .where(and(eq(students.parentEmail, userEmail), isNull(students.parentUserId)))
+      .catch(() => {});
   }
 
-  // --- QUERY REAL DATABASE UNTUK AKUN NON-DEMO ---
+  // --- QUERY REAL DATABASE ---
   const todayDate = todayInWib();
 
-  // Query siswa terdaftar milik parent
+  // Query siswa terdaftar milik parent (berdasarkan parentUserId atau parentEmail)
   const myStudents = await db
     .select({
       id: students.id,
@@ -103,12 +94,31 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
     .leftJoin(classes, eq(studentEnrollments.classId, classes.id))
     .where(
       and(
-        eq(students.parentUserId, session.user.id),
+        userEmail
+          ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, userEmail))
+          : eq(students.parentUserId, session.user.id),
         eq(students.isActive, true)
       )
     );
 
+  // Fallback hanya jika tidak ada data sama sekali di database dan merupakan akun demo
   if (myStudents.length === 0) {
+    if (isDemo) {
+      return [
+        {
+          id: "demo-child-1",
+          name: "Aisyah Putri",
+          nickname: "Aisyah",
+          avatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=200",
+          className: "Kelas Bunga Matahari",
+          classId: "cls-1",
+          age: 5,
+          attendanceToday: true,
+          checkInTime: "07:45",
+          recentPhotos: [],
+        },
+      ];
+    }
     return [];
   }
 

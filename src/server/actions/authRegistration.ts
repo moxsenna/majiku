@@ -1,9 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "@/db";
-import { user, userRoles, students, tenants } from "@/db/schema";
+import { user, userRoles, students, tenants, trialApplications } from "@/db/schema";
 import { auth } from "@/server/auth";
 
 export interface RegisterAdminInput {
@@ -161,22 +161,50 @@ export async function registerParentAction(input: RegisterParentInput) {
     })
     .onConflictDoNothing();
 
-  // Jika menyertakan data anak, buat data profil anak awal
+  // 1. Sinkronisasi otomatis: Hubungkan semua siswa yang telah didaftarkan lembaga dengan email ini
+  await db
+    .update(students)
+    .set({
+      parentUserId: res.user.id,
+      parentName: name,
+      parentPhone: input.phone?.trim() || undefined,
+      updatedAt: new Date(),
+    })
+    .where(eq(students.parentEmail, email));
+
+  // 2. Sinkronisasi otomatis: Hubungkan pengajuan trial yang dibuat dengan email ini
+  await db
+    .update(trialApplications)
+    .set({
+      parentUserId: res.user.id,
+      updatedAt: new Date(),
+    })
+    .where(eq(trialApplications.parentEmail, email));
+
+  // 3. Jika menyertakan data anak, buat data profil anak jika belum ada di database
   if (childName) {
-    await db
-      .insert(students)
-      .values({
-        id: crypto.randomUUID(),
-        name: childName,
-        dateOfBirth: input.childBirthDate || null,
-        parentUserId: res.user.id,
-        parentName: name,
-        parentPhone: input.phone?.trim() || null,
-        parentEmail: email,
-        registrationDate: new Date().toISOString().slice(0, 10),
-        isActive: true,
-      })
-      .onConflictDoNothing();
+    const existing = await db
+      .select({ id: students.id })
+      .from(students)
+      .where(and(eq(students.parentUserId, res.user.id), eq(students.name, childName)))
+      .limit(1);
+
+    if (existing.length === 0) {
+      await db
+        .insert(students)
+        .values({
+          id: crypto.randomUUID(),
+          name: childName,
+          dateOfBirth: input.childBirthDate || null,
+          parentUserId: res.user.id,
+          parentName: name,
+          parentPhone: input.phone?.trim() || null,
+          parentEmail: email,
+          registrationDate: new Date().toISOString().slice(0, 10),
+          isActive: true,
+        })
+        .onConflictDoNothing();
+    }
   }
 
   return { success: true, userId: res.user.id, email: res.user.email };

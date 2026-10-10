@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import { waitingList, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -52,7 +52,14 @@ export async function getWaitingList(): Promise<WaitingListRow[]> {
 
   const conditions = [];
   if (!isAdmin && isParent) {
-    conditions.push(eq(waitingList.parentUserId, session.user.id));
+    conditions.push(
+      session.user.email
+        ? or(
+            eq(waitingList.parentUserId, session.user.id),
+            eq(waitingList.parentEmail, session.user.email)
+          )!
+        : eq(waitingList.parentUserId, session.user.id)
+    );
   }
 
   const query = db

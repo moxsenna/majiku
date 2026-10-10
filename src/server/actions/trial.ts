@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { trialApplications, tutors, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -354,7 +354,14 @@ export async function getMyTrialApplications(): Promise<TrialApplicationRow[]> {
     .from(trialApplications)
     .leftJoin(classes, eq(trialApplications.classId, classes.id))
     .leftJoin(tutors, eq(trialApplications.tutorId, tutors.id))
-    .where(eq(trialApplications.parentUserId, session.user.id))
+    .where(
+      session.user.email
+        ? or(
+            eq(trialApplications.parentUserId, session.user.id),
+            eq(trialApplications.parentEmail, session.user.email)
+          )
+        : eq(trialApplications.parentUserId, session.user.id)
+    )
     .orderBy(desc(trialApplications.createdAt));
 
   return rows;
