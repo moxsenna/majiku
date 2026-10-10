@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { db } from "@/db";
 import { tutors, tutorClassAssignments, tutorBonuses, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -64,8 +64,19 @@ async function getSessionSafely() {
   }
 }
 
-async function getCallerTutorId(userId: string): Promise<string | null> {
-  const row = await db.select({ id: tutors.id }).from(tutors).where(eq(tutors.userId, userId)).limit(1);
+async function getCallerTutorId(userId: string, email?: string | null): Promise<string | null> {
+  const row = await db
+    .select({ id: tutors.id })
+    .from(tutors)
+    .where(
+      and(
+        email
+          ? or(eq(tutors.userId, userId), eq(tutors.email, email))
+          : eq(tutors.userId, userId),
+        eq(tutors.isActive, true)
+      )
+    )
+    .limit(1);
   return row[0]?.id ?? null;
 }
 
@@ -80,7 +91,11 @@ export async function getTutors(): Promise<TutorItem[]> {
 
   const conditions = [eq(tutors.isActive, true)];
   if (!isAdmin && isTutor) {
-    conditions.push(eq(tutors.userId, session.user.id));
+    conditions.push(
+      session.user.email
+        ? or(eq(tutors.userId, session.user.id), eq(tutors.email, session.user.email))!
+        : eq(tutors.userId, session.user.id)
+    );
   }
 
   const rows = await db.select().from(tutors).where(and(...conditions));
@@ -106,7 +121,7 @@ export async function getTutorAssignments(): Promise<TutorAssignmentItem[]> {
 
   const conditions = [eq(tutorClassAssignments.isActive, true)];
   if (!isAdmin && isTutor) {
-    const tutorId = await getCallerTutorId(session.user.id);
+    const tutorId = await getCallerTutorId(session.user.id, session.user.email);
     if (!tutorId) return [];
     conditions.push(eq(tutorClassAssignments.tutorId, tutorId));
   }

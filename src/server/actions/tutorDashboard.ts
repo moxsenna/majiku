@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { sql, eq, and, desc } from "drizzle-orm";
+import { sql, eq, and, or, desc, isNull, ne } from "drizzle-orm";
 import { db } from "@/db";
 import {
   tutors,
@@ -12,6 +12,8 @@ import {
   attendance,
   dailyReports,
   classSchedules,
+  conversations,
+  messages,
 } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { isDemoEmail } from "@/lib/demo";
@@ -61,30 +63,6 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
   const userEmail = session?.user?.email;
   const isDemo = isDemoEmail(userEmail);
 
-  // Akun demo (*@majiku.test) menyajikan dataset demo
-  if (isDemo) {
-    return {
-      isDemo: true,
-      isAssigned: true,
-      tutorName: session?.user?.name || "Bu Rina",
-      todayPresentCount: 12,
-      pendingReportsCount: 5,
-      unreadMessagesCount: 3,
-      kpiScore: 92,
-      todayStudents: [
-        { id: "1", name: "Ahmad Rizki", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: true },
-        { id: "2", name: "Siti Aisyah", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: false },
-        { id: "3", name: "Budi Santoso", class: "Kelas Bintang", avatar: "", status: "hadir", needsReport: true },
-        { id: "4", name: "Dewi Lestari", class: "Kelas Pelangi", avatar: "", status: "izin", needsReport: false },
-      ],
-      schedules: [
-        { id: "1", date: "Hari ini", dayName: "Hari ini", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang A1", studentsCount: 15, status: "today" },
-        { id: "2", date: "Besok", dayName: "Besok", className: "Kelas Pelangi", time: "08:00 - 12:00", location: "Ruang A2", studentsCount: 12, status: "upcoming" },
-      ],
-    };
-  }
-
-  // --- QUERY REAL DATABASE UNTUK AKUN TUTOR NON-DEMO ---
   if (!session?.user) {
     return {
       isDemo: false,
@@ -99,18 +77,57 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     };
   }
 
+  // Auto-heal / auto-link tutor jika email cocok tapi userId belum terhubung
+  if (userEmail) {
+    await db
+      .update(tutors)
+      .set({ userId: session.user.id, updatedAt: new Date() })
+      .where(and(eq(tutors.email, userEmail), isNull(tutors.userId)))
+      .catch(() => {});
+  }
+
   const todayDate = todayInWib();
 
-  // 1. Cari profil tutor dari user ID
+  // 1. Cari profil tutor dari user ID atau email
   const [tutorRecord] = await db
     .select({
       id: tutors.id,
       name: tutors.name,
     })
     .from(tutors)
-    .where(and(eq(tutors.userId, session.user.id), eq(tutors.isActive, true)));
+    .where(
+      and(
+        userEmail
+          ? or(eq(tutors.userId, session.user.id), eq(tutors.email, userEmail))
+          : eq(tutors.userId, session.user.id),
+        eq(tutors.isActive, true)
+      )
+    )
+    .limit(1);
 
   if (!tutorRecord) {
+    if (isDemo) {
+      return {
+        isDemo: true,
+        isAssigned: true,
+        tutorName: session.user.name || "Bu Rina",
+        todayPresentCount: 12,
+        pendingReportsCount: 5,
+        unreadMessagesCount: 3,
+        kpiScore: 92,
+        todayStudents: [
+          { id: "1", name: "Ahmad Rizki", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: true },
+          { id: "2", name: "Siti Aisyah", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: false },
+          { id: "3", name: "Budi Santoso", class: "Kelas Bintang", avatar: "", status: "hadir", needsReport: true },
+          { id: "4", name: "Dewi Lestari", class: "Kelas Pelangi", avatar: "", status: "izin", needsReport: false },
+        ],
+        schedules: [
+          { id: "1", date: "Hari ini", dayName: "Hari ini", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang A1", studentsCount: 15, status: "today" },
+          { id: "2", date: "Besok", dayName: "Besok", className: "Kelas Pelangi", time: "08:00 - 12:00", location: "Ruang A2", studentsCount: 12, status: "upcoming" },
+        ],
+      };
+    }
+
     return {
       isDemo: false,
       isAssigned: false,
@@ -142,6 +159,28 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     );
 
   if (assignedClasses.length === 0) {
+    if (isDemo) {
+      return {
+        isDemo: true,
+        isAssigned: true,
+        tutorName: tutorRecord.name,
+        todayPresentCount: 12,
+        pendingReportsCount: 5,
+        unreadMessagesCount: 3,
+        kpiScore: 92,
+        todayStudents: [
+          { id: "1", name: "Ahmad Rizki", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: true },
+          { id: "2", name: "Siti Aisyah", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: false },
+          { id: "3", name: "Budi Santoso", class: "Kelas Bintang", avatar: "", status: "hadir", needsReport: true },
+          { id: "4", name: "Dewi Lestari", class: "Kelas Pelangi", avatar: "", status: "izin", needsReport: false },
+        ],
+        schedules: [
+          { id: "1", date: "Hari ini", dayName: "Hari ini", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang A1", studentsCount: 15, status: "today" },
+          { id: "2", date: "Besok", dayName: "Besok", className: "Kelas Pelangi", time: "08:00 - 12:00", location: "Ruang A2", studentsCount: 12, status: "upcoming" },
+        ],
+      };
+    }
+
     return {
       isDemo: false,
       isAssigned: false,
@@ -267,13 +306,27 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     status: "today",
   }));
 
+  // 7. Hitung pesan chat belum terbaca dari orang tua
+  const [unreadMsg] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(messages)
+    .innerJoin(conversations, eq(messages.conversationId, conversations.id))
+    .where(
+      and(
+        eq(conversations.tutorUserId, session.user.id),
+        ne(messages.senderUserId, session.user.id),
+        isNull(messages.readAt)
+      )
+    );
+  const unreadMessagesCount = unreadMsg?.count || 0;
+
   return {
     isDemo: false,
     isAssigned: true,
     tutorName: tutorRecord.name,
     todayPresentCount,
     pendingReportsCount: mappedStudents.filter((s) => s.needsReport).length,
-    unreadMessagesCount: 0,
+    unreadMessagesCount,
     kpiScore: 90,
     todayStudents: mappedStudents,
     schedules: mappedSchedules,

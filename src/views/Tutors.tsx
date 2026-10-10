@@ -46,6 +46,7 @@ import {
   Loader2,
   BookOpen,
   User,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -54,16 +55,20 @@ import {
   toggleTutorActive,
   linkTutorUser,
   unlinkTutorUser,
+  assignTutorClass,
+  removeTutorClassAssignment,
   type TutorRecord,
   type TutorWithAssignments,
   type CreateTutorInput,
   type UpdateTutorInput,
   type LinkableUser,
 } from "@/server/actions/tutorsCrud";
+import type { ClassRecord } from "@/server/actions/classesCrud";
 
 interface TutorsProps {
   initialData: TutorWithAssignments[];
   linkableUsers?: LinkableUser[];
+  availableClasses?: ClassRecord[];
 }
 
 const formatCurrency = (amount: number | string | null | undefined) => {
@@ -76,7 +81,11 @@ const formatCurrency = (amount: number | string | null | undefined) => {
   }).format(num);
 };
 
-export default function Tutors({ initialData, linkableUsers = [] }: TutorsProps) {
+export default function Tutors({
+  initialData,
+  linkableUsers = [],
+  availableClasses = [],
+}: TutorsProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -91,6 +100,11 @@ export default function Tutors({ initialData, linkableUsers = [] }: TutorsProps)
   const [isLinkOpen, setIsLinkOpen] = useState(false);
   const [linkingTutor, setLinkingTutor] = useState<TutorRecord | null>(null);
   const [selectedUserId, setSelectedUserId] = useState("");
+
+  const [isAssignClassOpen, setIsAssignClassOpen] = useState(false);
+  const [assigningTutor, setAssigningTutor] = useState<TutorRecord | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [sessionRate, setSessionRate] = useState("50000");
 
   const [createForm, setCreateForm] = useState({
     name: "",
@@ -279,6 +293,59 @@ export default function Tutors({ initialData, linkableUsers = [] }: TutorsProps)
       } catch (err) {
         toast({
           title: "Gagal melepas tautan",
+          description: err instanceof Error ? err.message : "Terjadi kesalahan",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
+  const openAssignClassDialog = (tutor: TutorRecord) => {
+    setAssigningTutor(tutor);
+    setSelectedClassId(availableClasses[0]?.id || "");
+    setSessionRate("50000");
+    setIsAssignClassOpen(true);
+  };
+
+  const handleAssignClassSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assigningTutor || !selectedClassId) {
+      toast({ title: "Validasi gagal", description: "Pilih kelas terlebih dahulu", variant: "destructive" });
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        await assignTutorClass(assigningTutor.id, selectedClassId, Number(sessionRate) || 50000);
+        toast({
+          title: "Penugasan Berhasil ✓",
+          description: `Tutor "${assigningTutor.name}" berhasil ditugaskan ke kelas.`,
+        });
+        setIsAssignClassOpen(false);
+        setAssigningTutor(null);
+        router.refresh();
+      } catch (err) {
+        toast({
+          title: "Gagal Menugaskan Kelas",
+          description: err instanceof Error ? err.message : "Terjadi kesalahan",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
+  const handleRemoveAssignment = (assignmentId: string, className?: string | null) => {
+    startTransition(async () => {
+      try {
+        await removeTutorClassAssignment(assignmentId);
+        toast({
+          title: "Penugasan Dihapus",
+          description: `Penugasan kelas ${className || ""} berhasil dilepas.`,
+        });
+        router.refresh();
+      } catch (err) {
+        toast({
+          title: "Gagal Melepas Penugasan",
           description: err instanceof Error ? err.message : "Terjadi kesalahan",
           variant: "destructive",
         });
@@ -501,11 +568,23 @@ export default function Tutors({ initialData, linkableUsers = [] }: TutorsProps)
 
                 {/* Class Assignments */}
               <div className="pt-3 border-t">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-semibold text-muted-foreground">
-                    Kelas Diampu & Honor
-                  </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      Kelas Diampu & Honor
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs gap-1 text-primary hover:text-primary hover:bg-primary/10"
+                    onClick={() => openAssignClassDialog(tutor)}
+                    disabled={isPending || availableClasses.length === 0}
+                  >
+                    <Plus className="h-3 w-3" />
+                    Tugaskan Kelas
+                  </Button>
                 </div>
                 {assignments.length === 0 ? (
                   <p className="text-xs text-muted-foreground italic">
@@ -521,13 +600,25 @@ export default function Tutors({ initialData, linkableUsers = [] }: TutorsProps)
                         <span className="font-medium truncate mr-2">
                           {asg.className || "Kelas Tanpa Nama"}
                         </span>
-                        {asg.ratePerSession ? (
-                          <Badge variant="outline" className="text-xs shrink-0 font-normal">
-                            {formatCurrency(asg.ratePerSession)} / sesi
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground shrink-0">-</span>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {asg.ratePerSession ? (
+                            <Badge variant="outline" className="text-xs font-normal">
+                              {formatCurrency(asg.ratePerSession)} / sesi
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRemoveAssignment(asg.assignmentId, asg.className)}
+                            disabled={isPending}
+                            title="Lepas dari kelas ini"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -762,6 +853,75 @@ export default function Tutors({ initialData, linkableUsers = [] }: TutorsProps)
               Tautkan Akun
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Tugaskan Kelas */}
+      <Dialog open={isAssignClassOpen} onOpenChange={setIsAssignClassOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleAssignClassSubmit}>
+            <DialogHeader>
+              <DialogTitle>Tugaskan Kelas ke Tutor</DialogTitle>
+              <DialogDescription>
+                Pilih rombel/kelas yang akan diampu oleh pengajar{" "}
+                <span className="font-semibold text-foreground">
+                  {assigningTutor?.name}
+                </span>
+                .
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="assign-class-select">Pilih Kelas</Label>
+                <Select
+                  value={selectedClassId}
+                  onValueChange={setSelectedClassId}
+                >
+                  <SelectTrigger id="assign-class-select" className="w-full">
+                    <SelectValue placeholder="Pilih Kelas" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    {availableClasses.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name} {c.schedule ? `(${c.schedule})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="assign-rate-input">Tarif per Sesi (Rp)</Label>
+                <Input
+                  id="assign-rate-input"
+                  type="number"
+                  placeholder="Contoh: 50000"
+                  value={sessionRate}
+                  onChange={(e) => setSessionRate(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsAssignClassOpen(false);
+                  setAssigningTutor(null);
+                }}
+                disabled={isPending}
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending || !selectedClassId}
+              >
+                {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Simpan Penugasan
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

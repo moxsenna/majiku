@@ -236,7 +236,14 @@ export async function getChatPartners(): Promise<ChatPartner[]> {
     const tutorProfile = await db
       .select({ id: tutors.id })
       .from(tutors)
-      .where(and(eq(tutors.userId, session.user.id), eq(tutors.isActive, true)))
+      .where(
+        and(
+          session.user.email
+            ? or(eq(tutors.userId, session.user.id), eq(tutors.email, session.user.email))
+            : eq(tutors.userId, session.user.id),
+          eq(tutors.isActive, true)
+        )
+      )
       .limit(1);
 
     if (tutorProfile.length > 0) {

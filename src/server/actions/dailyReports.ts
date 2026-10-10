@@ -331,7 +331,9 @@ export async function getMyStudents(): Promise<MyStudentItem[]> {
       )
       .where(
         and(
-          eq(tutors.userId, session.user.id),
+          session.user.email
+            ? or(eq(tutors.userId, session.user.id), eq(tutors.email, session.user.email))
+            : eq(tutors.userId, session.user.id),
           eq(tutors.isActive, true)
         )
       )

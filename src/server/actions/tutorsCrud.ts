@@ -103,11 +103,27 @@ export async function createTutor(input: CreateTutorInput): Promise<{ id: string
   }
 
   const id = randomUUID();
+  const email = input.email?.trim().toLowerCase() || null;
+
+  // Auto-link jika email cocok dengan akun user terdaftar
+  let userId: string | null = null;
+  if (email) {
+    const matched = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.email, email))
+      .limit(1);
+    if (matched.length > 0) {
+      userId = matched[0].id;
+    }
+  }
+
   await db.insert(tutors).values({
     id,
     name: input.name.trim(),
-    email: input.email?.trim() || null,
+    email,
     phone: input.phone?.trim() || null,
+    userId,
     isActive: true,
   });
 
@@ -134,8 +150,18 @@ export async function updateTutor(
 
   if (partial.name !== undefined) updateValues.name = partial.name.trim();
   if (partial.email !== undefined) {
-    updateValues.email =
-      typeof partial.email === "string" ? partial.email.trim() || null : partial.email;
+    const trimmedEmail = typeof partial.email === "string" ? partial.email.trim().toLowerCase() || null : partial.email;
+    updateValues.email = trimmedEmail;
+    if (trimmedEmail) {
+      const matched = await db
+        .select({ id: user.id })
+        .from(user)
+        .where(eq(user.email, trimmedEmail))
+        .limit(1);
+      if (matched.length > 0) {
+        updateValues.userId = matched[0].id;
+      }
+    }
   }
   if (partial.phone !== undefined) {
     updateValues.phone =
