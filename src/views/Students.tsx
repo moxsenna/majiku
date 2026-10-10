@@ -51,6 +51,7 @@ import {
   createStudent,
   updateStudent,
   toggleStudentActive,
+  linkStudentParent,
   type StudentRecord,
   type StudentWithEnrollments,
   type CreateStudentInput,
@@ -61,6 +62,7 @@ import type { ClassRecord } from "@/server/actions/classesCrud";
 interface StudentsProps {
   initialData: StudentWithEnrollments[];
   availableClasses: ClassRecord[];
+  linkableParents?: Array<{ id: string; name: string; email: string }>;
 }
 
 function calculateAge(dobStr: string | null | undefined): number | null {
@@ -87,7 +89,7 @@ function formatDate(dateStr: string | null | undefined): string {
   }).format(d);
 }
 
-export default function Students({ initialData, availableClasses }: StudentsProps) {
+export default function Students({ initialData, availableClasses, linkableParents = [] }: StudentsProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -99,6 +101,10 @@ export default function Students({ initialData, availableClasses }: StudentsProp
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
+
+  const [isLinkOpen, setIsLinkOpen] = useState(false);
+  const [linkingStudent, setLinkingStudent] = useState<StudentRecord | null>(null);
+  const [selectedParentUserId, setSelectedParentUserId] = useState<string>("none");
 
   const [createForm, setCreateForm] = useState({
     name: "",
@@ -277,6 +283,38 @@ export default function Students({ initialData, availableClasses }: StudentsProp
     });
   };
 
+  const openLinkParentDialog = (student: StudentRecord) => {
+    setLinkingStudent(student);
+    setSelectedParentUserId(student.parentUserId || "none");
+    setIsLinkOpen(true);
+  };
+
+  const handleLinkSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!linkingStudent) return;
+    startTransition(async () => {
+      try {
+        const targetUserId = selectedParentUserId !== "none" ? selectedParentUserId : null;
+        await linkStudentParent(linkingStudent.id, targetUserId);
+        toast({
+          title: "Tautan Berhasil ✓",
+          description: targetUserId
+            ? `Siswa "${linkingStudent.name}" berhasil ditautkan ke akun orang tua.`
+            : `Tautan akun orang tua untuk "${linkingStudent.name}" telah dilepas.`,
+        });
+        setIsLinkOpen(false);
+        setLinkingStudent(null);
+        router.refresh();
+      } catch (err) {
+        toast({
+          title: "Gagal Menautkan Akun",
+          description: err instanceof Error ? err.message : "Terjadi kesalahan",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
   return (
     <DashboardLayout
       title="Siswa & Enrollment"
@@ -407,6 +445,17 @@ export default function Students({ initialData, availableClasses }: StudentsProp
                             {age} tahun
                           </Badge>
                         )}
+                        {student.parentUserId ? (
+                          <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-300 bg-emerald-50/50">
+                            <UserCheck className="w-3 h-3 mr-1" />
+                            Akun Ortu Terhubung
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-muted-foreground border-dashed">
+                            <UserX className="w-3 h-3 mr-1" />
+                            Belum Terhubung
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -418,6 +467,13 @@ export default function Students({ initialData, availableClasses }: StudentsProp
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                      <DropdownMenuItem
+                        className="gap-2 cursor-pointer"
+                        onClick={() => openLinkParentDialog(student)}
+                      >
+                        <UserCheck className="h-4 w-4" />
+                        Tautkan Akun Ortu
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         className="gap-2 cursor-pointer"
                         onClick={() => openEditDialog(student)}
@@ -762,6 +818,63 @@ export default function Students({ initialData, availableClasses }: StudentsProp
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Simpan Perubahan
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Tautkan Akun Ortu */}
+      <Dialog open={isLinkOpen} onOpenChange={setIsLinkOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleLinkSubmit}>
+            <DialogHeader>
+              <DialogTitle>Tautkan Akun Orang Tua</DialogTitle>
+              <DialogDescription>
+                Pilih akun orang tua yang terdaftar untuk siswa &ldquo;{linkingStudent?.name}&rdquo; agar dapat memantau laporan dan tagihan.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="link-parent-user">Pilih Akun Orang Tua</Label>
+                <Select
+                  value={selectedParentUserId}
+                  onValueChange={setSelectedParentUserId}
+                >
+                  <SelectTrigger id="link-parent-user">
+                    <SelectValue placeholder="Pilih akun ortu terdaftar" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectItem value="none">-- Jangan tautkan akun (Lepas tautan) --</SelectItem>
+                    {linkableParents.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name || p.email} ({p.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {linkableParents.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Belum ada akun orang tua yang mendaftar. Orang tua dapat mendaftar mandiri via portal ortu dengan email yang sama.
+                  </p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsLinkOpen(false);
+                  setLinkingStudent(null);
+                }}
+                disabled={isPending}
+              >
+                Batal
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Simpan Tautan
               </Button>
             </DialogFooter>
           </form>

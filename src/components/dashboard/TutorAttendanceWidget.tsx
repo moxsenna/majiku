@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,11 +12,12 @@ import {
   UserCheck, UserX, Clock, ChevronRight, CheckCircle2, XCircle,
   AlertCircle, Calendar, Users
 } from "lucide-react";
+import { getTodayTutorAttendanceList } from "@/server/actions/attendance";
 
 interface TutorAttendance {
   id: string;
   name: string;
-  className: string;
+  className?: string;
   status: "hadir" | "izin" | "sakit" | "cuti" | "belum";
   checkInTime?: string;
   avatar?: string;
@@ -85,12 +87,33 @@ const statusConfig = {
   belum: { label: "Belum", color: "bg-muted text-muted-foreground border-border", icon: Clock },
 };
 
-export function TutorAttendanceWidget() {
+interface TutorAttendanceWidgetProps {
+  isDemo?: boolean;
+}
+
+export function TutorAttendanceWidget({ isDemo = false }: TutorAttendanceWidgetProps) {
   const { toast } = useToast();
-  const [tutors, setTutors] = useState(demoTutorAttendance);
+  const [demoTutorsState, setDemoTutorsState] = useState(demoTutorAttendance);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
   const [selectedTutor, setSelectedTutor] = useState<TutorAttendance | null>(null);
   const [selectedBackup, setSelectedBackup] = useState("");
+
+  const { data: dbTutors = [] } = useQuery({
+    queryKey: ["tutor-attendance-widget"],
+    queryFn: getTodayTutorAttendanceList,
+    enabled: !isDemo,
+  });
+
+  const tutors: TutorAttendance[] = isDemo
+    ? demoTutorsState
+    : dbTutors.map((t) => ({
+        id: t.id,
+        name: t.name,
+        avatar: t.avatar || undefined,
+        status: (t.status as "hadir" | "izin" | "sakit" | "cuti" | "belum") || "belum",
+        checkInTime: t.checkInTime || undefined,
+        className: "Guru Pendidik",
+      }));
 
   const presentCount = tutors.filter((t) => t.status === "hadir").length;
   const absentCount = tutors.filter((t) => t.status === "izin" || t.status === "sakit" || t.status === "cuti").length;
@@ -99,11 +122,13 @@ export function TutorAttendanceWidget() {
   const handleApproveLeave = () => {
     if (!selectedTutor) return;
 
-    setTutors((prev) =>
-      prev.map((t) =>
-        t.id === selectedTutor.id ? { ...t, needsApproval: false } : t
-      )
-    );
+    if (isDemo) {
+      setDemoTutorsState((prev) =>
+        prev.map((t) =>
+          t.id === selectedTutor.id ? { ...t, needsApproval: false } : t
+        )
+      );
+    }
 
     toast({
       title: "Izin Disetujui",
@@ -117,11 +142,13 @@ export function TutorAttendanceWidget() {
   const handleRejectLeave = () => {
     if (!selectedTutor) return;
 
-    setTutors((prev) =>
-      prev.map((t) =>
-        t.id === selectedTutor.id ? { ...t, needsApproval: false, status: "belum" } : t
-      )
-    );
+    if (isDemo) {
+      setDemoTutorsState((prev) =>
+        prev.map((t) =>
+          t.id === selectedTutor.id ? { ...t, needsApproval: false, status: "belum" } : t
+        )
+      );
+    }
 
     toast({
       title: "Izin Ditolak",

@@ -136,7 +136,7 @@ export default async function SiteTypePage({ params }: SiteTypePageProps) {
                 Masuk
               </Button>
             </Link>
-            <Link href="/auth/register">
+            <Link href="/admin/register">
               <Button size="sm" className="gradient-primary text-primary-foreground">
                 Daftar Lembaga
               </Button>
@@ -252,7 +252,7 @@ export default async function SiteTypePage({ params }: SiteTypePageProps) {
               Daftarkan lembaga Anda di MAJIKU untuk meningkatkan visibilitas dan mengelola pendaftaran siswa baru secara otomatis.
             </p>
           </div>
-          <Link href="/auth/register" className="shrink-0">
+          <Link href="/admin/register" className="shrink-0">
             <Button size="lg" variant="secondary" className="font-semibold">
               Daftarkan Sekarang
               <ArrowRight className="w-4 h-4 ml-2" />

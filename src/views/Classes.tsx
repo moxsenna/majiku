@@ -18,6 +18,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -43,12 +50,14 @@ import {
   updateClass,
   toggleClassActive,
   type ClassRecord,
+  type ClassWithTutorRecord,
   type CreateClassInput,
   type UpdateClassInput,
 } from "@/server/actions/classesCrud";
 
 interface ClassesProps {
-  initialClasses: ClassRecord[];
+  initialClasses: (ClassRecord | ClassWithTutorRecord)[];
+  availableTutors?: Array<{ id: string; name: string }>;
 }
 
 const formatCurrency = (amount: number | string | null | undefined) => {
@@ -60,17 +69,17 @@ const formatCurrency = (amount: number | string | null | undefined) => {
   }).format(num);
 };
 
-export default function Classes({ initialClasses }: ClassesProps) {
+export default function Classes({ initialClasses, availableTutors = [] }: ClassesProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
-  const [classList, setClassList] = useState<ClassRecord[]>(initialClasses);
+  const [classList, setClassList] = useState<(ClassRecord | ClassWithTutorRecord)[]>(initialClasses);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<ClassRecord | null>(null);
+  const [editingClass, setEditingClass] = useState<(ClassRecord | ClassWithTutorRecord) | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -80,6 +89,7 @@ export default function Classes({ initialClasses }: ClassesProps) {
     sessionsPerMonth: "",
     schedule: "",
     location: "",
+    tutorId: "none",
   });
 
   useEffect(() => {
@@ -108,11 +118,12 @@ export default function Classes({ initialClasses }: ClassesProps) {
       sessionsPerMonth: "",
       schedule: "",
       location: "",
+      tutorId: "none",
     });
     setIsAddOpen(true);
   };
 
-  const openEditDialog = (cls: ClassRecord) => {
+  const openEditDialog = (cls: ClassRecord | ClassWithTutorRecord) => {
     setEditingClass(cls);
     setFormData({
       name: cls.name || "",
@@ -125,6 +136,7 @@ export default function Classes({ initialClasses }: ClassesProps) {
           : "",
       schedule: cls.schedule || "",
       location: cls.location || "",
+      tutorId: (cls as ClassWithTutorRecord).tutorId || "none",
     });
     setIsEditOpen(true);
   };
@@ -150,6 +162,7 @@ export default function Classes({ initialClasses }: ClassesProps) {
           sessionsPerMonth: formData.sessionsPerMonth ? Number(formData.sessionsPerMonth) : undefined,
           schedule: formData.schedule.trim() || undefined,
           location: formData.location.trim() || undefined,
+          tutorId: formData.tutorId !== "none" ? formData.tutorId : undefined,
         };
 
         await createClass(input);
@@ -192,6 +205,7 @@ export default function Classes({ initialClasses }: ClassesProps) {
           sessionsPerMonth: formData.sessionsPerMonth ? Number(formData.sessionsPerMonth) : null,
           schedule: formData.schedule.trim(),
           location: formData.location.trim(),
+          tutorId: formData.tutorId !== "none" ? formData.tutorId : null,
         };
 
         await updateClass(editingClass.id, partial);
@@ -390,6 +404,14 @@ export default function Classes({ initialClasses }: ClassesProps) {
                     <span>{cls.sessionsPerMonth} sesi / bulan</span>
                   </div>
                 )}
+                <div className="flex items-center gap-2 pt-1 font-medium text-foreground">
+                  <Users className="w-3.5 h-3.5 shrink-0 text-primary" />
+                  <span>
+                    {(cls as ClassWithTutorRecord).tutorName
+                      ? `Tutor: ${(cls as ClassWithTutorRecord).tutorName}`
+                      : "Tutor: Belum ditugaskan"}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -501,6 +523,25 @@ export default function Classes({ initialClasses }: ClassesProps) {
                   onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-tutor">Pilih Tutor / Guru Pengajar</Label>
+                <Select
+                  value={formData.tutorId}
+                  onValueChange={(val) => setFormData({ ...formData, tutorId: val })}
+                >
+                  <SelectTrigger id="create-tutor">
+                    <SelectValue placeholder="Pilih Guru Pengajar" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectItem value="none">-- Belum Ditugaskan --</SelectItem>
+                    {availableTutors.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <DialogFooter>
               <Button
@@ -610,6 +651,25 @@ export default function Classes({ initialClasses }: ClassesProps) {
                   value={formData.schedule}
                   onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-tutor">Pilih Tutor / Guru Pengajar</Label>
+                <Select
+                  value={formData.tutorId}
+                  onValueChange={(val) => setFormData({ ...formData, tutorId: val })}
+                >
+                  <SelectTrigger id="edit-tutor">
+                    <SelectValue placeholder="Pilih Guru Pengajar" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectItem value="none">-- Belum Ditugaskan --</SelectItem>
+                    {availableTutors.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>

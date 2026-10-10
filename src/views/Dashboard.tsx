@@ -10,7 +10,6 @@ import { BirthdayWidget } from "@/components/dashboard/BirthdayWidget";
 import { BillingWidget } from "@/components/dashboard/BillingWidget";
 import { TutorListWidget } from "@/components/dashboard/TutorListWidget";
 import { ClassListWidget } from "@/components/dashboard/ClassListWidget";
-import { PendingReportsWidget } from "@/components/dashboard/PendingReportsWidget";
 import { TargetProgressWidget } from "@/components/dashboard/TargetProgressWidget";
 import { TopRevenueWidget } from "@/components/dashboard/TopRevenueWidget";
 import { QuotaStatsWidget } from "@/components/dashboard/QuotaStatsWidget";
@@ -71,29 +70,6 @@ export default function Dashboard({ initialData }: DashboardProps) {
 
   const data = dashboardData || initialData;
   const isDemo = data?.isDemo ?? true;
-
-  const [pendingReports, setPendingReports] = useState(
-    data?.pendingReports || []
-  );
-
-  const handleApproveReport = (id: string) => {
-    const report = pendingReports.find((r) => r.id === id);
-    setPendingReports((prev) => prev.filter((r) => r.id !== id));
-    toast({
-      title: "Laporan Disetujui ✓",
-      description: `Laporan ${report?.studentName} telah dipublish ke parent.`,
-    });
-  };
-
-  const handleRejectReport = (id: string) => {
-    const report = pendingReports.find((r) => r.id === id);
-    setPendingReports((prev) => prev.filter((r) => r.id !== id));
-    toast({
-      title: "Laporan Dikembalikan",
-      description: `Laporan ${report?.studentName} dikembalikan ke tutor untuk revisi.`,
-      variant: "destructive",
-    });
-  };
 
   const totalStudents = data?.totalStudents || 0;
   const totalCapacity = data?.totalCapacity || 0;
@@ -200,14 +176,6 @@ export default function Dashboard({ initialData }: DashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* Left Column */}
         <div className="lg:col-span-8 space-y-4 sm:space-y-6">
-          {pendingReports.length > 0 && (
-            <PendingReportsWidget
-              reports={pendingReports}
-              onApprove={handleApproveReport}
-              onReject={handleRejectReport}
-            />
-          )}
-
           <DailyReportFeed reports={data?.recentDailyReports || []} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,7 +186,9 @@ export default function Dashboard({ initialData }: DashboardProps) {
 
         {/* Right Sidebar */}
         <div className="lg:col-span-4 space-y-4 sm:space-y-5">
-          {isDemo && <TutorAttendanceWidget />}
+          {(isDemo || (data?.activeTutorsCount ?? 0) > 0) && (
+            <TutorAttendanceWidget isDemo={isDemo} />
+          )}
           <AttendanceWidget
             entries={attendanceForWidget}
             totalStudents={totalStudents}

@@ -2,13 +2,18 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { classes } from "@/db/schema";
+import { classes, tutorClassAssignments, tutors } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 
 export type ClassRecord = typeof classes.$inferSelect;
+
+export interface ClassWithTutorRecord extends ClassRecord {
+  tutorId?: string | null;
+  tutorName?: string | null;
+}
 
 export interface CreateClassInput {
   name: string;
@@ -18,6 +23,7 @@ export interface CreateClassInput {
   sessionsPerMonth?: number | null;
   schedule?: string | null;
   location?: string | null;
+  tutorId?: string | null;
 }
 
 export interface UpdateClassInput {
@@ -28,6 +34,7 @@ export interface UpdateClassInput {
   sessionsPerMonth?: number | null;
   schedule?: string | null;
   location?: string | null;
+  tutorId?: string | null;
 }
 
 async function getSessionSafely() {
@@ -92,6 +99,16 @@ export async function createClass(input: CreateClassInput): Promise<{ id: string
     isActive: true,
   });
 
+  if (input.tutorId && input.tutorId.trim() && input.tutorId !== "none") {
+    await db.insert(tutorClassAssignments).values({
+      id: randomUUID(),
+      tutorId: input.tutorId.trim(),
+      classId: id,
+      ratePerSession: "50000",
+      isActive: true,
+    }).onConflictDoNothing();
+  }
+
   return { id };
 }
 
@@ -149,6 +166,76 @@ export async function updateClass(id: string, partial: UpdateClassInput): Promis
   if (result.length === 0) {
     throw new Error("Kelas tidak ditemukan");
   }
+
+  if (partial.tutorId !== undefined) {
+    await db.delete(tutorClassAssignments).where(eq(tutorClassAssignments.classId, id));
+    if (partial.tutorId && partial.tutorId.trim() && partial.tutorId !== "none") {
+      await db.insert(tutorClassAssignments).values({
+        id: randomUUID(),
+        tutorId: partial.tutorId.trim(),
+        classId: id,
+        ratePerSession: "50000",
+        isActive: true,
+      }).onConflictDoNothing();
+    }
+  }
+}
+
+export async function assignTutorToClass(classId: string, tutorId: string | null): Promise<void> {
+  await requireAdminOrModerator();
+  if (!classId) throw new Error("ID kelas wajib diisi");
+
+  await db.delete(tutorClassAssignments).where(eq(tutorClassAssignments.classId, classId));
+  if (tutorId && tutorId.trim() && tutorId !== "none") {
+    await db.insert(tutorClassAssignments).values({
+      id: randomUUID(),
+      tutorId: tutorId.trim(),
+      classId,
+      ratePerSession: "50000",
+      isActive: true,
+    }).onConflictDoNothing();
+  }
+}
+
+export async function listClassesWithTutor(): Promise<ClassWithTutorRecord[]> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+
+  const rows = await db
+    .select({
+      cls: classes,
+      tutorId: tutors.id,
+      tutorName: tutors.name,
+    })
+    .from(classes)
+    .leftJoin(
+      tutorClassAssignments,
+      and(eq(tutorClassAssignments.classId, classes.id), eq(tutorClassAssignments.isActive, true))
+    )
+    .leftJoin(tutors, eq(tutors.id, tutorClassAssignments.tutorId))
+    .orderBy(asc(classes.name));
+
+  return rows.map((r) => ({
+    ...r.cls,
+    tutorId: r.tutorId || null,
+    tutorName: r.tutorName || null,
+  }));
+}
+
+export async function listTutorOptions(): Promise<Array<{ id: string; name: string }>> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+
+  return await db
+    .select({ id: tutors.id, name: tutors.name })
+    .from(tutors)
+    .where(eq(tutors.isActive, true))
+    .orderBy(asc(tutors.name));
 }
 
 export async function toggleClassActive(id: string, isActive: boolean): Promise<void> {

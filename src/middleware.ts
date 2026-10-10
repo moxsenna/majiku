@@ -118,7 +118,7 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    if (pathname === "/") {
+    if (pathname === "/" || pathname === "/parent") {
       return NextResponse.rewrite(new URL(`/parent${search}`, req.url));
     }
 
@@ -158,7 +158,7 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    if (pathname === "/") {
+    if (pathname === "/" || pathname === "/tutor") {
       return NextResponse.rewrite(new URL(`/tutor${search}`, req.url));
     }
 

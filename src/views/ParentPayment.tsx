@@ -367,9 +367,9 @@ export default function ParentPayment() {
             <Home className="h-6 w-6" />
             <span className="text-xs">Beranda</span>
           </Link>
-          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-6 w-6" />
-            <span className="text-xs">Katalog</span>
+            <span className="text-xs">Marketplace</span>
           </Link>
           <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-primary">
             <CreditCard className="h-6 w-6" />

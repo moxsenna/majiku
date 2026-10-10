@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { sql, eq, and, desc } from "drizzle-orm";
+import { sql, eq, and, or, desc } from "drizzle-orm";
 import { db } from "@/db";
 import {
   students,
@@ -9,6 +9,7 @@ import {
   studentEnrollments,
   attendance,
   dailyReports,
+  galleryPhotos,
 } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { isDemoEmail } from "@/lib/demo";
@@ -151,6 +152,41 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
     if (r.photos && r.photos.length > 0) {
       const existing = photosMap.get(r.studentId) || [];
       photosMap.set(r.studentId, [...existing, ...r.photos]);
+    }
+  }
+
+  // Ambil foto dokumentasi resmi dari tabel gallery_photos yang diunggah admin untuk anak/kelas ini
+  const classIds = myStudents
+    .map((s) => s.classId)
+    .filter((cid): cid is string => Boolean(cid));
+
+  const galleryConditions = [sql`${galleryPhotos.studentId} IN ${studentIds}`];
+  if (classIds.length > 0) {
+    galleryConditions.push(sql`${galleryPhotos.classId} IN ${classIds}`);
+  }
+
+  const adminPhotos = await db
+    .select({
+      studentId: galleryPhotos.studentId,
+      classId: galleryPhotos.classId,
+      photoKey: galleryPhotos.photoKey,
+    })
+    .from(galleryPhotos)
+    .where(or(...galleryConditions))
+    .orderBy(desc(galleryPhotos.createdAt))
+    .limit(30);
+
+  for (const p of adminPhotos) {
+    if (p.studentId) {
+      const existing = photosMap.get(p.studentId) || [];
+      photosMap.set(p.studentId, [...existing, p.photoKey]);
+    } else if (p.classId) {
+      for (const s of myStudents) {
+        if (s.classId === p.classId) {
+          const existing = photosMap.get(s.id) || [];
+          photosMap.set(s.id, [...existing, p.photoKey]);
+        }
+      }
     }
   }
 

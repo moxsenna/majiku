@@ -117,6 +117,34 @@ export default function TutorPayout() {
 
   const selectedTutorData = selectedTutor ? tutorPayouts.find((t) => t.id === selectedTutor) : null;
 
+  const colorStyles: Record<string, { bg: string; text: string }> = {
+    primary: { bg: "bg-primary/10", text: "text-primary" },
+    success: { bg: "bg-success/10", text: "text-success" },
+    warning: { bg: "bg-warning/10", text: "text-warning" },
+    info: { bg: "bg-info/10", text: "text-info" },
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Nama Tutor", "Email", "Telepon", "Total Sesi (Rp)", "Total Bonus (Rp)", "Total Gaji (Rp)"];
+    const rows = filteredPayouts.map((t) => [
+      `"${t.name}"`,
+      `"${t.email || "-"}"`,
+      `"${t.phone || "-"}"`,
+      t.sessionEarnings,
+      t.totalBonuses,
+      t.totalEarnings,
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `payout-tutor-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Export Selesai ✓", description: "File CSV rekap gaji tutor berhasil diunduh." });
+  };
+
   return (
     <DashboardLayout title="Manajemen Gaji Tutor" subtitle="Kelola tarif per sesi, bonus, dan total gaji tutor">
       {/* Stats */}
@@ -126,21 +154,24 @@ export default function TutorPayout() {
           { icon: TrendingUp, label: "Total Sesi", value: formatCurrency(stats.totalSessions), color: "success" },
           { icon: Award, label: "Total Bonus", value: formatCurrency(stats.totalBonuses), color: "warning" },
           { icon: Calendar, label: "Jumlah Tutor", value: stats.totalTutors.toString(), color: "info" },
-        ].map((s, i) => (
-          <Card key={i} variant="flat">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-${s.color}/10 flex items-center justify-center`}>
-                  <s.icon className={`h-4 w-4 sm:h-5 sm:w-5 text-${s.color}`} />
+        ].map((s, i) => {
+          const style = colorStyles[s.color] || colorStyles.primary;
+          return (
+            <Card key={i} variant="flat">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl ${style.bg} flex items-center justify-center`}>
+                    <s.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${style.text}`} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                    <p className="text-sm sm:text-lg font-bold truncate">{s.value}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
-                  <p className="text-sm sm:text-lg font-bold truncate">{s.value}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Filters */}
@@ -149,7 +180,7 @@ export default function TutorPayout() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Cari tutor..." className="pl-9" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         </div>
-        <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />Export</Button>
+        <Button variant="outline" size="sm" onClick={handleExportCSV}><Download className="h-4 w-4 mr-2" />Export</Button>
       </div>
 
       {/* Tutor Cards */}

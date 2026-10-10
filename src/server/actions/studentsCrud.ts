@@ -2,9 +2,9 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { students, studentEnrollments, classes } from "@/db/schema";
+import { students, studentEnrollments, classes, user, userRoles } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 
@@ -29,6 +29,7 @@ export interface CreateStudentInput {
   parentName?: string | null;
   parentPhone?: string | null;
   parentEmail?: string | null;
+  parentUserId?: string | null;
   classId?: string;
   sessionsQuota?: number;
   billingDay?: number;
@@ -40,6 +41,7 @@ export interface UpdateStudentInput {
   parentName?: string | null;
   parentPhone?: string | null;
   parentEmail?: string | null;
+  parentUserId?: string | null;
 }
 
 async function getSessionSafely() {
@@ -115,10 +117,24 @@ export async function createStudent(input: CreateStudentInput): Promise<{ id: st
   const studentId = randomUUID();
   const today = new Date().toISOString().slice(0, 10);
 
+  // Otomatis tautkan parent_user_id jika parentUserId disediakan atau email cocok dengan user terdaftar
+  let parentUserId: string | null = input.parentUserId?.trim() || null;
+  if (!parentUserId && input.parentEmail?.trim()) {
+    const matchedUser = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.email, input.parentEmail.trim().toLowerCase()))
+      .limit(1);
+    if (matchedUser.length > 0) {
+      parentUserId = matchedUser[0].id;
+    }
+  }
+
   await db.insert(students).values({
     id: studentId,
     name: input.name.trim(),
     dateOfBirth: input.dateOfBirth?.trim() || null,
+    parentUserId,
     parentName: input.parentName?.trim() || null,
     parentPhone: input.parentPhone?.trim() || null,
     parentEmail: input.parentEmail?.trim() || null,
@@ -180,8 +196,22 @@ export async function updateStudent(
       typeof partial.parentPhone === "string" ? partial.parentPhone.trim() || null : partial.parentPhone;
   }
   if (partial.parentEmail !== undefined) {
-    updateValues.parentEmail =
-      typeof partial.parentEmail === "string" ? partial.parentEmail.trim() || null : partial.parentEmail;
+    const trimmedEmail = typeof partial.parentEmail === "string" ? partial.parentEmail.trim() || null : partial.parentEmail;
+    updateValues.parentEmail = trimmedEmail;
+    if (partial.parentUserId === undefined && trimmedEmail) {
+      const matchedUser = await db
+        .select({ id: user.id })
+        .from(user)
+        .where(eq(user.email, trimmedEmail.toLowerCase()))
+        .limit(1);
+      if (matchedUser.length > 0) {
+        updateValues.parentUserId = matchedUser[0].id;
+      }
+    }
+  }
+
+  if (partial.parentUserId !== undefined) {
+    updateValues.parentUserId = partial.parentUserId;
   }
 
   const result = await db
@@ -193,6 +223,40 @@ export async function updateStudent(
   if (result.length === 0) {
     throw new Error("Siswa tidak ditemukan");
   }
+}
+
+export async function linkStudentParent(
+  studentId: string,
+  parentUserId: string | null
+): Promise<void> {
+  await requireAdminOrModerator();
+  if (!studentId) throw new Error("ID siswa wajib diisi");
+
+  await db
+    .update(students)
+    .set({
+      parentUserId: parentUserId || null,
+      updatedAt: new Date(),
+    })
+    .where(eq(students.id, studentId));
+}
+
+export async function getLinkableParents(): Promise<
+  Array<{ id: string; name: string; email: string }>
+> {
+  await requireAdminOrModerator();
+  const rows = await db
+    .select({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    })
+    .from(user)
+    .innerJoin(userRoles, eq(userRoles.userId, user.id))
+    .where(eq(userRoles.role, "parent"))
+    .orderBy(asc(user.name));
+
+  return rows;
 }
 
 export async function toggleStudentActive(id: string, isActive: boolean): Promise<void> {

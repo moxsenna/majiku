@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -6,6 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { isDemoEmail } from "@/lib/demo";
+import { getInvoices } from "@/server/actions/billing";
+import { getTutors } from "@/server/actions/payout";
 import { 
   CreditCard, Wallet, BookOpen, Bell, Send, 
   Clock, AlertTriangle, CheckCircle2, ChevronRight
@@ -51,12 +56,48 @@ const formatCurrency = (amount: number) => {
 
 export function AdminNavbarActions() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const isDemo = isDemoEmail(user?.email);
+
+  const { data: invoices = [] } = useQuery({
+    queryKey: ["invoices"],
+    queryFn: getInvoices,
+  });
+
+  const { data: tutors = [] } = useQuery({
+    queryKey: ["tutors"],
+    queryFn: getTutors,
+  });
+
+  const pendingPayments: PendingPayment[] = isDemo
+    ? demoPendingPayments
+    : invoices
+        .filter((inv) => inv.status !== "paid")
+        .map((inv) => ({
+          id: inv.id,
+          parentName: inv.parentName || "Orang Tua Siswa",
+          studentName: inv.studentName,
+          amount: inv.total,
+          dueDate: inv.dueDate || "Hari ini",
+          daysLeft: 3,
+        }));
+
+  const teacherSalaries: TeacherSalary[] = isDemo
+    ? demoTeacherSalaries
+    : tutors.map((t) => ({
+        id: t.id,
+        name: t.name,
+        amount: 4500000,
+        bonus: 0,
+        status: "ready" as const,
+      }));
+
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [salaryDialogOpen, setSalaryDialogOpen] = useState(false);
   const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
 
-  const totalSalary = demoTeacherSalaries.reduce((sum, t) => sum + t.amount + t.bonus, 0);
-  const readySalaries = demoTeacherSalaries.filter((t) => t.status === "ready").length;
+  const totalSalary = teacherSalaries.reduce((sum, t) => sum + t.amount + t.bonus, 0);
+  const readySalaries = teacherSalaries.filter((t) => t.status === "ready").length;
 
   const handleSendReminder = (payment: PendingPayment) => {
     toast({
@@ -74,7 +115,7 @@ export function AdminNavbarActions() {
             <CreditCard className="h-4 w-4" />
             <span className="hidden sm:inline">Tagihan</span>
             <Badge variant="destructive" className="text-[10px] h-5 px-1.5">
-              {demoPendingPayments.length}
+              {pendingPayments.length}
             </Badge>
           </Button>
         </DialogTrigger>
@@ -87,103 +128,86 @@ export function AdminNavbarActions() {
           </DialogHeader>
           <ScrollArea className="max-h-[60vh]">
             <div className="space-y-3 pr-2">
-              {demoPendingPayments.map((payment) => (
-                <Card key={payment.id} className={payment.daysLeft <= 3 ? "border-warning/30 bg-warning/5" : ""}>
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Avatar size="sm">
-                          <AvatarFallback>{payment.parentName.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{payment.parentName}</p>
-                          <p className="text-xs text-muted-foreground">{payment.studentName}</p>
+              {pendingPayments.length === 0 ? (
+                <p className="text-sm text-center py-6 text-muted-foreground">Tidak ada tagihan tertunda</p>
+              ) : (
+                pendingPayments.map((payment) => (
+                  <Card key={payment.id} className={payment.daysLeft <= 3 ? "border-warning/30 bg-warning/5" : ""}>
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Avatar size="sm">
+                            <AvatarFallback>{payment.parentName.slice(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{payment.parentName}</p>
+                            <p className="text-xs text-muted-foreground">{payment.studentName}</p>
+                          </div>
                         </div>
+                        <Badge variant="outline" className={
+                          payment.daysLeft <= 3 
+                            ? "bg-warning/10 text-warning border-warning/20" 
+                            : "bg-muted"
+                        }>
+                          <Clock className="h-3 w-3 mr-1" />
+                          {payment.daysLeft} hari
+                        </Badge>
                       </div>
-                      <Badge variant="outline" className={
-                        payment.daysLeft <= 3 
-                          ? "bg-warning/10 text-warning border-warning/20" 
-                          : "bg-muted"
-                      }>
-                        <Clock className="h-3 w-3 mr-1" />
-                        {payment.daysLeft} hari
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="font-bold">{formatCurrency(payment.amount)}</p>
-                      <Button size="sm" variant="outline" onClick={() => handleSendReminder(payment)}>
-                        <Send className="h-3 w-3 mr-1" />
-                        Ingatkan
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="flex items-center justify-between">
+                        <p className="font-bold">{formatCurrency(payment.amount)}</p>
+                        <Button size="sm" variant="outline" onClick={() => handleSendReminder(payment)}>
+                          <Send className="h-3 w-3 mr-1" />
+                          Ingatkan
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </ScrollArea>
         </DialogContent>
       </Dialog>
 
-      {/* Teacher Salary */}
+      {/* Teacher Salaries */}
       <Dialog open={salaryDialogOpen} onOpenChange={setSalaryDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1.5 whitespace-nowrap">
+          <Button variant="outline" size="sm" className="gap-1.5 whitespace-nowrap relative">
             <Wallet className="h-4 w-4" />
-            <span className="hidden sm:inline">Gaji</span>
-            <span className="text-xs font-normal hidden md:inline text-muted-foreground">
-              {formatCurrency(totalSalary).replace("Rp", "").trim()}
-            </span>
+            <span className="hidden sm:inline">Gaji Guru</span>
+            <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
+              {readySalaries}
+            </Badge>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
-              Akumulasi Gaji Guru
+              Rekap Gaji Guru
             </DialogTitle>
           </DialogHeader>
-          
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Total Gaji Bulan Ini</p>
-              <p className="text-2xl font-bold text-primary">{formatCurrency(totalSalary)}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {readySalaries}/{demoTeacherSalaries.length} siap dibayar
-              </p>
-            </CardContent>
-          </Card>
-
-          <ScrollArea className="max-h-[40vh]">
+          <div className="p-3 bg-muted/50 rounded-lg flex items-center justify-between mb-3">
+            <span className="text-xs text-muted-foreground">Total Estimasi Gaji:</span>
+            <span className="font-bold text-sm text-primary">{formatCurrency(totalSalary)}</span>
+          </div>
+          <ScrollArea className="max-h-[50vh]">
             <div className="space-y-2 pr-2">
-              {demoTeacherSalaries.map((teacher) => (
-                <Card key={teacher.id}>
-                  <CardContent className="p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar size="sm">
-                        <AvatarFallback>{teacher.name.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">{teacher.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Gaji: {formatCurrency(teacher.amount)}
-                          {teacher.bonus > 0 && ` + Bonus ${formatCurrency(teacher.bonus)}`}
-                        </p>
-                      </div>
+              {teacherSalaries.length === 0 ? (
+                <p className="text-sm text-center py-6 text-muted-foreground">Belum ada guru terdaftar</p>
+              ) : (
+                teacherSalaries.map((t) => (
+                  <div key={t.id} className="flex items-center justify-between p-2.5 rounded-lg border bg-card text-xs">
+                    <div>
+                      <p className="font-semibold">{t.name}</p>
+                      <p className="text-muted-foreground">{formatCurrency(t.amount)}</p>
                     </div>
-                    <Badge variant="outline" className={
-                      teacher.status === "ready" 
-                        ? "bg-success/10 text-success border-success/20"
-                        : "bg-warning/10 text-warning border-warning/20"
-                    }>
-                      {teacher.status === "ready" ? (
-                        <><CheckCircle2 className="h-3 w-3 mr-1" />Ready</>
-                      ) : (
-                        <><Clock className="h-3 w-3 mr-1" />Pending</>
-                      )}
+                    <Badge variant={t.status === "ready" ? "default" : "outline"}>
+                      {t.status === "ready" ? "Siap Dibayar" : "Pending"}
                     </Badge>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                ))
+              )}
             </div>
           </ScrollArea>
         </DialogContent>

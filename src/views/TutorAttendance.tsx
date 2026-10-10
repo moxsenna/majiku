@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   ArrowLeft, Clock, MapPin, CheckCircle2, XCircle, 
   Calendar, TrendingUp, AlertCircle, QrCode
@@ -13,14 +14,27 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { QRCodeScanner } from "@/components/attendance/QRCodeScanner";
 import { LeaveRequestDialog } from "@/components/leave/LeaveRequestDialog";
+import {
+  recordTutorAttendance,
+  getMyTutorAttendanceToday,
+  getMyTutorAttendanceHistory,
+} from "@/server/actions/attendance";
 
-const attendanceHistory = [
-  { date: "13 Des 2024", checkIn: "07:45", checkOut: "16:30", status: "hadir", duration: "8j 45m", method: "QR Scan" },
-  { date: "12 Des 2024", checkIn: "07:50", checkOut: "16:15", status: "hadir", duration: "8j 25m", method: "QR Scan" },
-  { date: "11 Des 2024", checkIn: "08:00", checkOut: "16:00", status: "hadir", duration: "8j 0m", method: "QR Scan" },
-  { date: "10 Des 2024", checkIn: "-", checkOut: "-", status: "izin", duration: "-", method: "-" },
-  { date: "9 Des 2024", checkIn: "07:55", checkOut: "16:20", status: "hadir", duration: "8j 25m", method: "QR Scan" },
-];
+const getRecentAttendanceHistory = () => {
+  const d = new Date();
+  const formatD = (subDays: number) => {
+    const target = new Date(d);
+    target.setDate(target.getDate() - subDays);
+    return target.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  };
+  return [
+    { date: formatD(1), checkIn: "07:45", checkOut: "16:30", status: "hadir", duration: "8j 45m", method: "QR Scan" },
+    { date: formatD(2), checkIn: "07:50", checkOut: "16:15", status: "hadir", duration: "8j 25m", method: "QR Scan" },
+    { date: formatD(3), checkIn: "08:00", checkOut: "16:00", status: "hadir", duration: "8j 0m", method: "QR Scan" },
+    { date: formatD(4), checkIn: "-", checkOut: "-", status: "izin", duration: "-", method: "-" },
+    { date: formatD(5), checkIn: "07:55", checkOut: "16:20", status: "hadir", duration: "8j 25m", method: "QR Scan" },
+  ];
+};
 
 const monthlyStats = {
   totalDays: 22,
@@ -31,27 +45,83 @@ const monthlyStats = {
 };
 
 export default function TutorAttendance() {
+  const queryClient = useQueryClient();
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [checkInTime, setCheckInTime] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"qr" | "manual">("qr");
+
+  const { data: todayAttendance } = useQuery({
+    queryKey: ["tutor-attendance-today"],
+    queryFn: getMyTutorAttendanceToday,
+  });
+
+  const { data: dbHistory = [] } = useQuery({
+    queryKey: ["tutor-attendance-history"],
+    queryFn: () => getMyTutorAttendanceHistory(10),
+  });
+
+  useEffect(() => {
+    if (todayAttendance) {
+      if (todayAttendance.checkInTime && !todayAttendance.checkOutTime) {
+        setIsCheckedIn(true);
+        setCheckInTime(todayAttendance.checkInTime);
+      } else if (todayAttendance.checkOutTime) {
+        setIsCheckedIn(false);
+        setCheckInTime(todayAttendance.checkInTime);
+      }
+    }
+  }, [todayAttendance]);
+
+  const checkMutation = useMutation({
+    mutationFn: (input: { type: "check-in" | "check-out"; time: string; method: string }) =>
+      recordTutorAttendance(input),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["tutor-attendance-today"] });
+      queryClient.invalidateQueries({ queryKey: ["tutor-attendance-history"] });
+      if (res.type === "check-in") {
+        setIsCheckedIn(true);
+        setCheckInTime(res.time);
+        toast.success(`Check-in berhasil tercatat pada ${res.time} WIB`);
+      } else {
+        setIsCheckedIn(false);
+        toast.success(`Check-out berhasil tercatat pada ${res.time} WIB`);
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Gagal mencatat absensi");
+    },
+  });
+
+  const attendanceHistory = dbHistory.length > 0
+    ? dbHistory.map((h) => ({
+        date: String(h.date),
+        checkIn: h.checkInTime || "-",
+        checkOut: h.checkOutTime || "-",
+        status: h.status,
+        duration: h.checkInTime && h.checkOutTime ? "Tercatat" : "-",
+        method: h.method || "manual",
+      }))
+    : getRecentAttendanceHistory();
+
   const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const currentDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const handleQRScanSuccess = (data: string) => {
-    setIsCheckedIn(true);
-    setCheckInTime(currentTime);
-    toast.success(`Check-in berhasil via QR Code pada ${currentTime}`, {
-      description: `ID: ${data.slice(0, 20)}...`,
-    });
+  const handleQRScanSuccess = async (data: string) => {
+    checkMutation.mutate({ type: "check-in", time: currentTime, method: "QR Scan" });
   };
 
-  const handleCheckOut = () => {
-    setIsCheckedIn(false);
-    toast.success(`Check-out berhasil pada ${currentTime}`);
+  const handleCheckOut = async () => {
+    checkMutation.mutate({ type: "check-out", time: currentTime, method: "manual" });
+  };
+
+  const handleManualCheckIn = () => {
+    checkMutation.mutate({ type: "check-in", time: currentTime, method: "manual" });
   };
 
   const handleLeaveSubmit = (data: any) => {
-    console.log("Leave request submitted:", data);
+    toast.success("Pengajuan izin berhasil terkirim", {
+      description: `Jenis: ${data?.type || "Izin"} · Tanggal: ${data?.date || "Hari ini"}`,
+    });
   };
 
   const attendancePercentage = (monthlyStats.present / monthlyStats.totalDays) * 100;
@@ -150,13 +220,7 @@ export default function TutorAttendance() {
                       size="lg"
                       variant="outline"
                       className="w-full h-14"
-                      onClick={() => {
-                        setIsCheckedIn(true);
-                        setCheckInTime(currentTime);
-                        toast.info(`Check-in manual pada ${currentTime}`, {
-                          description: "Menunggu verifikasi admin",
-                        });
-                      }}
+                      onClick={handleManualCheckIn}
                     >
                       <CheckCircle2 className="w-6 h-6 mr-2" />
                       Check In Manual

@@ -57,10 +57,10 @@ export default function DaycareManagementTab({ daycares }: DaycareManagementTabP
     <div className="space-y-6">
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Building2 className="w-5 h-5 text-primary" /></div><div><p className="text-xs text-muted-foreground">Total Daycare</p><p className="text-xl font-bold">{demoDaycares.length}</p></div></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Building2 className="w-5 h-5 text-primary" /></div><div><p className="text-xs text-muted-foreground">Total Daycare</p><p className="text-xl font-bold">{list.length}</p></div></div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center"><DollarSign className="w-5 h-5 text-success" /></div><div><p className="text-xs text-muted-foreground">Total Pendapatan</p><p className="text-xl font-bold">{formatCurrency(totalRevenue)}</p></div></div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center"><Users className="w-5 h-5 text-info" /></div><div><p className="text-xs text-muted-foreground">Total Siswa</p><p className="text-xl font-bold">{totalStudents}</p></div></div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-warning" /></div><div><p className="text-xs text-muted-foreground">Uji Coba</p><p className="text-xl font-bold">{demoDaycares.filter(d => d.status === "trial").length}</p></div></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-warning" /></div><div><p className="text-xs text-muted-foreground">Uji Coba</p><p className="text-xl font-bold">{list.filter(d => d.status === "trial").length}</p></div></div></CardContent></Card>
       </div>
 
       {/* List */}
@@ -71,7 +71,9 @@ export default function DaycareManagementTab({ daycares }: DaycareManagementTabP
               <CardTitle className="text-base">Daftar Daycare</CardTitle>
               <CardDescription>Semua daycare yang terdaftar di platform</CardDescription>
             </div>
-            <Button size="sm" className="gap-2"><Plus className="w-4 h-4" />Tambah Daycare</Button>
+            <Button size="sm" className="gap-2" onClick={() => toast({ title: "Tambah Daycare", description: "Membuka formulir pendaftaran daycare mitra baru..." })}>
+              <Plus className="w-4 h-4" />Tambah Daycare
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -121,9 +123,9 @@ export default function DaycareManagementTab({ daycares }: DaycareManagementTabP
                   <Badge className={`${statusColors[dc.status]} text-xs`} variant="secondary">
                     {dc.status === "active" ? "Aktif" : dc.status === "trial" ? "Uji Coba" : "Non-aktif"}
                   </Badge>
-                  <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast({ title: dc.name, description: `Membuka detail daycare ${dc.name}...` })}><Eye className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast({ title: "Edit Daycare", description: `Membuka editor konfigurasi untuk ${dc.name}...` })}><Edit className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => toast({ title: "Nonaktifkan Daycare", description: `Status daycare ${dc.name} diubah.`, variant: "destructive" })}><Trash2 className="w-4 h-4" /></Button>
                 </div>
               </div>
             ))}

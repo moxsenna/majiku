@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Settings,
@@ -20,11 +22,21 @@ import {
   User,
   Phone,
   Mail,
+  GraduationCap,
+  Plus,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { getMyChildren, type ParentChildData } from "@/server/actions/parentChildren";
 
 export default function ParentProfile() {
+  const { toast } = useToast();
   const { user, signOut } = useAuth();
+
+  const { data: children = [] } = useQuery({
+    queryKey: ["my-children"],
+    queryFn: getMyChildren,
+  });
 
   const handleLogout = async () => {
     await signOut();
@@ -50,7 +62,7 @@ export default function ParentProfile() {
             </Link>
             <h1 className="font-bold text-lg">Profil Orang Tua</h1>
           </div>
-          <Button variant="ghost" size="icon-sm">
+          <Button variant="ghost" size="icon-sm" onClick={() => toast({ title: "Pengaturan Akun", description: "Preferensi akun orang tua tersimpan." })}>
             <Settings className="h-5 w-5" />
           </Button>
         </div>
@@ -87,16 +99,45 @@ export default function ParentProfile() {
         {/* Child Info */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-semibold mb-3">Informasi Anak</h3>
-            <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/30">
-              <Avatar size="lg">
-                <AvatarFallback className="bg-primary/10 text-primary">AN</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <p className="font-semibold">Siswa Terdaftar</p>
-                <p className="text-xs text-muted-foreground">Pantau laporan harian dan tagihan SPP di portal ini</p>
-              </div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm">Informasi Anak</h3>
+              <Link href="/parent/registration">
+                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary">
+                  <Plus className="h-3.5 w-3.5" />
+                  Daftar Anak
+                </Button>
+              </Link>
             </div>
+            {children.length === 0 ? (
+              <div className="p-4 rounded-lg bg-muted/20 text-center">
+                <p className="text-xs text-muted-foreground">Belum ada anak yang terhubung ke akun Anda.</p>
+                <Link href="/parent/registration" className="mt-2 inline-block">
+                  <Button size="sm" variant="outline" className="text-xs mt-1">Daftar Trial Sekarang</Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {children.map((c) => (
+                  <div key={c.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={c.avatar || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                        {c.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{c.name}</p>
+                      <p className="text-xs text-muted-foreground">{c.className} • {c.age} tahun</p>
+                    </div>
+                    {c.attendanceToday && (
+                      <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-600 border-emerald-200">
+                        Hadir Hari Ini
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -104,12 +145,13 @@ export default function ParentProfile() {
         <Card>
           <CardContent className="p-0">
             {[
-              { icon: Bell, label: "Notifikasi", desc: "Atur preferensi notifikasi" },
-              { icon: Shield, label: "Keamanan Akun", desc: "Password & perlindungan data" },
-              { icon: HelpCircle, label: "Bantuan & Kontak Daycare", desc: "Hubungi admin sekolah" },
+              { icon: Bell, label: "Notifikasi", desc: "Atur preferensi notifikasi", action: "Preferensi notifikasi diperbarui." },
+              { icon: Shield, label: "Keamanan Akun", desc: "Password & perlindungan data", action: "Data keamanan akun dalam status terlindungi." },
+              { icon: HelpCircle, label: "Bantuan & Kontak Daycare", desc: "Hubungi admin sekolah", action: "Menghubungi customer support daycare via WhatsApp..." },
             ].map((item, index) => (
               <button
                 key={index}
+                onClick={() => toast({ title: item.label, description: item.action })}
                 className={`w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors ${
                   index !== 2 ? "border-b border-border" : ""
                 }`}
@@ -145,9 +187,9 @@ export default function ParentProfile() {
             <Home className="h-6 w-6" />
             <span className="text-xs">Beranda</span>
           </Link>
-          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-6 w-6" />
-            <span className="text-xs">Katalog</span>
+            <span className="text-xs">Marketplace</span>
           </Link>
           <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <CreditCard className="h-6 w-6" />

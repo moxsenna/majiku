@@ -155,6 +155,20 @@ export const tutorBonuses = pgTable("tutor_bonuses", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+export const tutorAttendance = pgTable("tutor_attendance", {
+  id: text("id").primaryKey(),
+  tutorId: text("tutor_id").references(() => tutors.id, { onDelete: "cascade" }),
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  date: date("date").notNull(),
+  checkInTime: text("check_in_time"),
+  checkOutTime: text("check_out_time"),
+  status: text("status").default("hadir").notNull(),
+  method: text("method").default("manual"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
 export const students = pgTable("students", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),

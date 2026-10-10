@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getTodayAttendance, getMonthlyAttendance, getAttendanceEnrollments } from "@/server/actions/attendance";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getTodayAttendance,
+  getMonthlyAttendance,
+  getAttendanceEnrollments,
+  recordStudentCheckIn,
+  recordStudentCheckOut,
+} from "@/server/actions/attendance";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,17 +15,64 @@ import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { QRCodeScanner } from "@/components/attendance/QRCodeScanner";
+import { useToast } from "@/hooks/use-toast";
 import {
   Search, QrCode, LogIn, LogOut, Clock, Users,
   CheckCircle2, XCircle, AlertCircle, ShieldAlert, Eye,
 } from "lucide-react";
+import { todayInWib } from "@/lib/datetime";
 
 const formatTime = (t: string | null) => t ? t.slice(0, 5) : null;
 
 export default function Attendance() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [isManualCheckInOpen, setIsManualCheckInOpen] = useState(false);
+  const [manualStudentId, setManualStudentId] = useState("");
+
+  const checkInMutation = useMutation({
+    mutationFn: (input: { attendanceId?: string; studentId: string; classId?: string }) =>
+      recordStudentCheckIn(input),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["attendance-page"] });
+      toast({
+        title: "Check-in Berhasil ✓",
+        description: `Check-in berhasil tercatat pada ${res.time} WIB.`,
+      });
+      setIsManualCheckInOpen(false);
+      setManualStudentId("");
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Gagal Check-in",
+        description: err?.message || "Terjadi kesalahan.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const checkOutMutation = useMutation({
+    mutationFn: (input: { attendanceId: string }) => recordStudentCheckOut(input),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["attendance-page"] });
+      toast({
+        title: "Check-out Berhasil ✓",
+        description: `Check-out berhasil tercatat pada ${res.time} WIB.`,
+      });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Gagal Check-out",
+        description: err?.message || "Terjadi kesalahan.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -44,7 +97,7 @@ export default function Attendance() {
   });
 
   // Today's records
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayInWib();
   const todayRecords = attendanceData.filter((r) => r.date === today);
 
   const stats = {
@@ -131,8 +184,12 @@ export default function Attendance() {
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm"><LogIn className="h-4 w-4 mr-2" /><span className="hidden sm:inline">Manual Check-in</span><span className="sm:hidden">Check-in</span></Button>
-          <Button variant="hero" size="sm"><QrCode className="h-4 w-4 mr-2" /><span className="hidden sm:inline">Scan QR Code</span><span className="sm:hidden">Scan QR</span></Button>
+          <Button variant="outline" size="sm" onClick={() => setIsManualCheckInOpen(true)}>
+            <LogIn className="h-4 w-4 mr-2" /><span className="hidden sm:inline">Manual Check-in</span><span className="sm:hidden">Check-in</span>
+          </Button>
+          <Button variant="hero" size="sm" onClick={() => setIsQrScannerOpen(true)}>
+            <QrCode className="h-4 w-4 mr-2" /><span className="hidden sm:inline">Scan QR Code</span><span className="sm:hidden">Scan QR</span>
+          </Button>
         </div>
       </div>
 
@@ -223,8 +280,26 @@ export default function Attendance() {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="ghost" size="sm" onClick={() => setSelectedStudent(record.student_id ?? null)}><Eye className="h-3 w-3" /></Button>
-                          {!record.check_in_time && <Button variant="soft" size="sm"><LogIn className="h-3 w-3 mr-1" /><span className="hidden sm:inline">In</span></Button>}
-                          {record.check_in_time && !record.check_out_time && <Button variant="outline" size="sm"><LogOut className="h-3 w-3 mr-1" /><span className="hidden sm:inline">Out</span></Button>}
+                          {!record.check_in_time && (
+                            <Button
+                              variant="soft"
+                              size="sm"
+                              disabled={checkInMutation.isPending}
+                              onClick={() => checkInMutation.mutate({ attendanceId: record.id, studentId: record.studentId || record.student_id || "" })}
+                            >
+                              <LogIn className="h-3 w-3 mr-1" /><span className="hidden sm:inline">In</span>
+                            </Button>
+                          )}
+                          {record.check_in_time && !record.check_out_time && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={checkOutMutation.isPending}
+                              onClick={() => checkOutMutation.mutate({ attendanceId: record.id })}
+                            >
+                              <LogOut className="h-3 w-3 mr-1" /><span className="hidden sm:inline">Out</span>
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -306,6 +381,83 @@ export default function Attendance() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedStudent(null)}>Tutup</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* QR Code Scanner Dialog */}
+      <Dialog open={isQrScannerOpen} onOpenChange={setIsQrScannerOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Scan QR Code Kehadiran</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <QRCodeScanner
+              onScanSuccess={(data) => {
+                setIsQrScannerOpen(false);
+                toast({
+                  title: "QR Berhasil Dipindai ✓",
+                  description: `Siswa terverifikasi via QR Code (${data}).`,
+                });
+                queryClient.invalidateQueries({ queryKey: ["attendance-page"] });
+              }}
+              onScanError={(err) => {
+                toast({
+                  title: "Gagal Pindai QR",
+                  description: err,
+                  variant: "destructive",
+                });
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual Check-in Dialog */}
+      <Dialog open={isManualCheckInOpen} onOpenChange={setIsManualCheckInOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manual Check-in Siswa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">
+                Pilih Siswa Terdaftar
+              </label>
+              <select
+                className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm"
+                value={manualStudentId}
+                onChange={(e) => setManualStudentId(e.target.value)}
+              >
+                <option value="">-- Pilih Siswa --</option>
+                {enrollments.map((e) => (
+                  <option key={e.id} value={e.studentId || e.student_id}>
+                    {e.studentName || (e.students as any)?.name} — {e.className || (e.classes as any)?.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsManualCheckInOpen(false)}>
+              Batal
+            </Button>
+            <Button
+              disabled={!manualStudentId || checkInMutation.isPending}
+              onClick={() => {
+                if (manualStudentId) {
+                  const enrollment = enrollments.find(
+                    (e) => (e.studentId || e.student_id) === manualStudentId
+                  );
+                  checkInMutation.mutate({
+                    studentId: manualStudentId,
+                    classId: enrollment?.classId || enrollment?.class_id,
+                  });
+                }
+              }}
+            >
+              {checkInMutation.isPending ? "Menyimpan..." : "Simpan Check-in"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

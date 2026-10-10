@@ -44,9 +44,15 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { submitTrialApplication } from "@/server/actions/trial";
+import { submitTrialApplication, type RegistrationProgramItem } from "@/server/actions/trial";
 
-const programs = [
+const getFutureDate = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+const defaultPrograms = [
   {
     id: "toddler",
     name: "Program Toddler",
@@ -56,10 +62,10 @@ const programs = [
     features: ["Stimulasi motorik", "Musik & gerak", "Bermain sensori"],
     color: "bg-highlight/10 border-highlight/30",
     icon: Baby,
-    // Registration info
+    popular: false,
     quota: 20,
-    enrolled: 15,
-    closingDate: new Date("2025-01-15"),
+    enrolled: 0,
+    closingDate: getFutureDate(14),
     status: "open",
     nextOpenDate: null,
   },
@@ -74,10 +80,10 @@ const programs = [
     icon: Star,
     popular: true,
     quota: 25,
-    enrolled: 25,
-    closingDate: new Date("2025-01-10"),
-    status: "full",
-    nextOpenDate: new Date("2025-02-01"),
+    enrolled: 0,
+    closingDate: getFutureDate(21),
+    status: "open",
+    nextOpenDate: null,
   },
   {
     id: "kindergarten",
@@ -88,26 +94,12 @@ const programs = [
     features: ["Persiapan SD", "Bahasa Inggris", "Ekstrakurikuler"],
     color: "bg-success/10 border-success/30",
     icon: GraduationCap,
+    popular: false,
     quota: 30,
-    enrolled: 22,
-    closingDate: new Date("2025-01-20"),
+    enrolled: 0,
+    closingDate: getFutureDate(30),
     status: "open",
     nextOpenDate: null,
-  },
-  {
-    id: "daycare",
-    name: "Daycare Full Day",
-    age: "1.5 - 6 tahun",
-    price: 3500000,
-    schedule: "Senin - Jumat, 07:00 - 17:00",
-    features: ["Makan 3x + snack", "Tidur siang", "Aktivitas lengkap"],
-    color: "bg-info/10 border-info/30",
-    icon: Heart,
-    quota: 15,
-    enrolled: 15,
-    closingDate: new Date("2024-12-31"),
-    status: "closed",
-    nextOpenDate: new Date("2025-03-01"),
   },
 ];
 
@@ -119,12 +111,29 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export default function ParentRegistration() {
+export interface ParentRegistrationProps {
+  initialPrograms?: RegistrationProgramItem[];
+  dynamicPrograms?: RegistrationProgramItem[];
+}
+
+export default function ParentRegistration({ initialPrograms, dynamicPrograms }: ParentRegistrationProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [selectedProgram, setSelectedProgram] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const rawPrograms = dynamicPrograms || initialPrograms;
+  const programs = rawPrograms && rawPrograms.length > 0
+    ? rawPrograms.map((p, idx) => ({
+        ...p,
+        color: idx % 3 === 0 ? "bg-highlight/10 border-highlight/30" : idx % 3 === 1 ? "bg-primary/10 border-primary/30" : "bg-success/10 border-success/30",
+        icon: idx % 3 === 0 ? Baby : idx % 3 === 1 ? Star : GraduationCap,
+        popular: idx === 1,
+        closingDate: getFutureDate(14),
+        nextOpenDate: null,
+      }))
+    : defaultPrograms;
   
   const [formData, setFormData] = useState({
     // Child Info
@@ -716,9 +725,9 @@ export default function ParentRegistration() {
             <Home className="h-6 w-6" />
             <span className="text-xs">Beranda</span>
           </Link>
-          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-6 w-6" />
-            <span className="text-xs">Katalog</span>
+            <span className="text-xs">Marketplace</span>
           </Link>
           <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <CreditCard className="h-6 w-6" />

@@ -5,7 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookOpen, Mail, Lock, Eye, EyeOff, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { BookOpen, Mail, Lock, Eye, EyeOff, Info, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
 
@@ -13,6 +21,7 @@ export default function TutorAuth() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -79,7 +88,16 @@ export default function TutorAuth() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tutor-password">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="tutor-password">Password</Label>
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotOpen(true)}
+                    className="text-xs text-primary hover:underline font-medium"
+                  >
+                    Lupa password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -115,6 +133,39 @@ export default function TutorAuth() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={isForgotOpen} onOpenChange={setIsForgotOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-info/10 text-info flex items-center justify-center">
+                <HelpCircle className="w-4 h-4" />
+              </div>
+              <DialogTitle>Bantuan Masuk Pengajar</DialogTitle>
+            </div>
+            <DialogDescription className="text-xs">
+              Panduan pemulihan akses akun guru & pendidik MAJIKU.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-xs text-muted-foreground leading-relaxed">
+            <p>
+              Akun dan kata sandi pengajar dikelola secara terpusat oleh administrator lembaga Daycare tempat Anda bertugas.
+            </p>
+            <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-1.5 text-foreground font-medium">
+              <p>Cara Memperbarui Sandi:</p>
+              <p className="text-muted-foreground font-normal">1. Hubungi Admin / Kepala Sekolah Daycare Anda.</p>
+              <p className="text-muted-foreground font-normal">2. Admin dapat mengatur ulang tautan akun Anda di menu Kelola Tutor.</p>
+              <p className="text-muted-foreground font-normal">📧 Bantuan Teknis: support@majiku.web.id</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsForgotOpen(false)} className="w-full sm:w-auto">
+              Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

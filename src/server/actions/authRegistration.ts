@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { user, userRoles, students } from "@/db/schema";
+import { user, userRoles, students, tenants } from "@/db/schema";
 import { auth } from "@/server/auth";
 
 export interface RegisterAdminInput {
@@ -75,6 +75,35 @@ export async function registerDaycareAdminAction(input: RegisterAdminInput) {
       id: crypto.randomUUID(),
       userId: res.user.id,
       role: "admin",
+    })
+    .onConflictDoNothing();
+
+  // Daftarkan lembaga ke tabel tenants
+  const tenantSlug =
+    institutionName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") +
+    "-" +
+    crypto.randomUUID().slice(0, 6);
+
+  const mappedType =
+    input.institutionType === "preschool" || input.institutionType === "bimbel"
+      ? input.institutionType
+      : "daycare";
+
+  await db
+    .insert(tenants)
+    .values({
+      id: crypto.randomUUID(),
+      name: institutionName,
+      slug: tenantSlug,
+      type: mappedType,
+      city: "Jakarta",
+      priceFrom: "2000000",
+      whatsapp: input.phone || null,
+      isVerified: false,
+      isActive: true,
     })
     .onConflictDoNothing();
 

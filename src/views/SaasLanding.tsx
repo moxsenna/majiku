@@ -673,7 +673,7 @@ export default function SaasLanding({
                       </li>
                     ))}
                   </ul>
-                  <Link href="/auth/register">
+                  <Link href="/admin/register">
                     <Button 
                       className={`w-full ${plan.popular ? 'gradient-primary text-primary-foreground' : ''}`}
                       variant={plan.popular ? "default" : "outline"}
@@ -736,7 +736,7 @@ export default function SaasLanding({
                 Bergabung dengan 500+ lembaga pendidikan yang sudah menggunakan MAJIKU. 
                 Gratis 14 hari, tanpa kartu kredit.
               </p>
-              <Link href="/auth/register">
+              <Link href="/admin/register">
                 <Button size="lg" variant="secondary" className="text-lg px-8 h-14">
                   Mulai Sekarang
                   <ArrowRight className="w-5 h-5 ml-2" />

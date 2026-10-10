@@ -1,14 +1,31 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getInvoices, getBillingEnrollments } from "@/server/actions/billing";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getInvoices,
+  getBillingEnrollments,
+  markInvoicePaid,
+  createInvoice,
+  getBillingStudentOptions,
+  type CreateInvoiceInput,
+} from "@/server/actions/billing";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Search, CreditCard, Clock, AlertTriangle, CheckCircle2, Eye, Download, Calendar,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Search, CreditCard, Clock, AlertTriangle, CheckCircle2, Eye, Download, Calendar, Plus, Loader2,
 } from "lucide-react";
 
 const formatCurrency = (amount: number) =>
@@ -22,9 +39,99 @@ const statusConfig: Record<string, { label: string; variant: any; icon: any }> =
 };
 
 export default function Billing() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    studentId: "",
+    amount: "",
+    discount: "0",
+    dueDate: "",
+    notes: "",
+    billingPeriodStart: "",
+    billingPeriodEnd: "",
+  });
+
+  const { data: studentOptions = [] } = useQuery({
+    queryKey: ["billing-student-options"],
+    queryFn: getBillingStudentOptions,
+  });
+
+  const createInvoiceMutation = useMutation({
+    mutationFn: (input: CreateInvoiceInput) => createInvoice(input),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast({
+        title: "Invoice Diterbitkan ✓",
+        description: `Invoice ${res.invoiceNumber} berhasil dibuat.`,
+      });
+      setIsCreateOpen(false);
+      setCreateForm({
+        studentId: "",
+        amount: "",
+        discount: "0",
+        dueDate: "",
+        notes: "",
+        billingPeriodStart: "",
+        billingPeriodEnd: "",
+      });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Gagal Membuat Invoice",
+        description: err?.message || "Terjadi kesalahan.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createForm.studentId) {
+      toast({ title: "Validasi gagal", description: "Pilih siswa terlebih dahulu", variant: "destructive" });
+      return;
+    }
+    if (!createForm.amount || Number(createForm.amount) <= 0) {
+      toast({ title: "Validasi gagal", description: "Nominal tagihan harus lebih dari 0", variant: "destructive" });
+      return;
+    }
+    if (!createForm.dueDate) {
+      toast({ title: "Validasi gagal", description: "Tanggal jatuh tempo wajib diisi", variant: "destructive" });
+      return;
+    }
+    createInvoiceMutation.mutate({
+      studentId: createForm.studentId,
+      amount: Number(createForm.amount),
+      discount: Number(createForm.discount || 0),
+      dueDate: createForm.dueDate,
+      notes: createForm.notes.trim() || undefined,
+      billingPeriodStart: createForm.billingPeriodStart || undefined,
+      billingPeriodEnd: createForm.billingPeriodEnd || undefined,
+    });
+  };
+
+  const markPaidMutation = useMutation({
+    mutationFn: (id: string) => markInvoicePaid(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast({
+        title: "Invoice Lunas ✓",
+        description: `Invoice ${selectedInvoice?.invoice_number || ""} berhasil ditandai lunas.`,
+      });
+      setSelectedInvoice(null);
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Gagal Mengubah Status",
+        description: err?.message || "Terjadi kesalahan saat memproses status invoice.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const { data: invoices = [] } = useQuery({
     queryKey: ["invoices"],
@@ -112,19 +219,25 @@ export default function Billing() {
         </CardContent>
       </Card>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Cari invoice..." className="pl-9" variant="filled" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+      {/* Filters & Action */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+        <div className="flex flex-1 flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Cari invoice..." className="pl-9" variant="filled" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {[{ val: "all", label: "Semua" }, { val: "unpaid", label: "Belum Bayar" }, { val: "overdue", label: "Terlambat" }, { val: "paid", label: "Lunas" }].map((f) => (
+              <Button key={f.val} variant={filterStatus === f.val ? "default" : "outline"} size="sm" onClick={() => setFilterStatus(f.val)} className="whitespace-nowrap">
+                {f.label}
+              </Button>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {[{ val: "all", label: "Semua" }, { val: "unpaid", label: "Belum Bayar" }, { val: "overdue", label: "Terlambat" }, { val: "paid", label: "Lunas" }].map((f) => (
-            <Button key={f.val} variant={filterStatus === f.val ? "default" : "outline"} size="sm" onClick={() => setFilterStatus(f.val)} className="whitespace-nowrap">
-              {f.label}
-            </Button>
-          ))}
-        </div>
+        <Button onClick={() => setIsCreateOpen(true)} className="gap-2 shrink-0">
+          <Plus className="h-4 w-4" />
+          Terbitkan Invoice
+        </Button>
       </div>
 
       {/* Invoice List */}
@@ -190,8 +303,134 @@ export default function Billing() {
           )}
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setSelectedInvoice(null)}>Tutup</Button>
-            {selectedInvoice?.status !== "paid" && <Button>Tandai Lunas</Button>}
+            {selectedInvoice?.status !== "paid" && (
+              <Button
+                disabled={markPaidMutation.isPending}
+                onClick={() => {
+                  if (selectedInvoice?.id) {
+                    markPaidMutation.mutate(selectedInvoice.id);
+                  }
+                }}
+              >
+                {markPaidMutation.isPending ? "Memproses..." : "Tandai Lunas"}
+              </Button>
+            )}
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Terbitkan Invoice Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleCreateSubmit}>
+            <DialogHeader>
+              <DialogTitle>Terbitkan Invoice SPP Baru</DialogTitle>
+              <DialogDescription>
+                Buat tagihan biaya SPP, pendaftaran, atau kegiatan untuk siswa.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="inv-student">Pilih Siswa <span className="text-destructive">*</span></Label>
+                <Select
+                  value={createForm.studentId}
+                  onValueChange={(val) => setCreateForm({ ...createForm, studentId: val })}
+                >
+                  <SelectTrigger id="inv-student">
+                    <SelectValue placeholder="Pilih Siswa" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    {studentOptions.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="inv-amount">Nominal Tagihan (Rp) <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="inv-amount"
+                    type="number"
+                    placeholder="Contoh: 1500000"
+                    value={createForm.amount}
+                    onChange={(e) => setCreateForm({ ...createForm, amount: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="inv-discount">Potongan / Diskon (Rp)</Label>
+                  <Input
+                    id="inv-discount"
+                    type="number"
+                    placeholder="Contoh: 0"
+                    value={createForm.discount}
+                    onChange={(e) => setCreateForm({ ...createForm, discount: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="inv-due-date">Tanggal Jatuh Tempo <span className="text-destructive">*</span></Label>
+                <Input
+                  id="inv-due-date"
+                  type="date"
+                  value={createForm.dueDate}
+                  onChange={(e) => setCreateForm({ ...createForm, dueDate: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="inv-start">Periode Mulai</Label>
+                  <Input
+                    id="inv-start"
+                    type="date"
+                    value={createForm.billingPeriodStart}
+                    onChange={(e) => setCreateForm({ ...createForm, billingPeriodStart: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="inv-end">Periode Selesai</Label>
+                  <Input
+                    id="inv-end"
+                    type="date"
+                    value={createForm.billingPeriodEnd}
+                    onChange={(e) => setCreateForm({ ...createForm, billingPeriodEnd: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="inv-notes">Catatan Tagihan</Label>
+                <Textarea
+                  id="inv-notes"
+                  placeholder="Keterangan tagihan (misal: SPP Bulan November + Biaya Katering)..."
+                  value={createForm.notes}
+                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+                  rows={2}
+                />
+              </div>
+            </div>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCreateOpen(false)}
+                disabled={createInvoiceMutation.isPending}
+              >
+                Batal
+              </Button>
+              <Button type="submit" disabled={createInvoiceMutation.isPending}>
+                {createInvoiceMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Terbitkan Invoice
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

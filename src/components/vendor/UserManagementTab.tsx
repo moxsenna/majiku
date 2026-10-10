@@ -87,7 +87,7 @@ export default function UserManagementTab({ users }: UserManagementTabProps) {
               <CardTitle className="text-base">Daftar Pengguna</CardTitle>
               <CardDescription>Kelola semua akun pengguna platform</CardDescription>
             </div>
-            <Button size="sm" className="gap-2">
+            <Button size="sm" className="gap-2" onClick={() => toast({ title: "Tambah Pengguna", description: "Membuka dialog pembuatan akun pengguna baru..." })}>
               <UserPlus className="w-4 h-4" />
               Tambah Pengguna
             </Button>
@@ -143,8 +143,8 @@ export default function UserManagementTab({ users }: UserManagementTabProps) {
                     {user.status === "active" ? "Aktif" : "Non-aktif"}
                   </Badge>
                   <span className="text-xs text-muted-foreground hidden md:block">{user.lastLogin}</span>
-                  <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="w-3.5 h-3.5" /></Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast({ title: "Edit Pengguna", description: `Membuka konfigurasi akun ${user.name}...` })}><Edit className="w-3.5 h-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => toast({ title: "Nonaktifkan Pengguna", description: `Status akun ${user.name} diubah.`, variant: "destructive" })}><Trash2 className="w-3.5 h-3.5" /></Button>
                 </div>
               </div>
             ))}

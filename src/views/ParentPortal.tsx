@@ -117,10 +117,15 @@ export default function ParentPortal({
     ? childrenList[selectedChildIndex] || childrenList[0]
     : null;
 
-  // Kumpulkan foto aktual dari seluruh laporan harian
-  const allReportPhotos = reports.flatMap((r) => r.photos || []);
+  // Filter laporan harian sesuai anak yang sedang aktif dipilih
+  const displayedReports = activeChild
+    ? reports.filter((r) => r.studentId === activeChild.id)
+    : reports;
+
+  // Kumpulkan foto aktual anak aktif
   const childPhotos = activeChild?.recentPhotos || [];
-  const galleryPhotos = Array.from(new Set([...childPhotos, ...allReportPhotos]));
+  const reportPhotos = displayedReports.flatMap((r) => r.photos || []);
+  const galleryPhotos = Array.from(new Set([...childPhotos, ...reportPhotos]));
 
   return (
     <div className="min-h-screen bg-background">
@@ -327,9 +332,11 @@ export default function ParentPortal({
 
             {/* Daily Reports Feed */}
             <div className="p-4 space-y-4">
-              <h3 className="font-bold text-base text-foreground">Laporan Aktivitas Harian</h3>
+              <h3 className="font-bold text-base text-foreground">
+                Laporan Aktivitas Harian {activeChild ? `— ${activeChild.name}` : ""}
+              </h3>
 
-              {reports.length === 0 ? (
+              {displayedReports.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center text-muted-foreground">
                     <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -340,7 +347,7 @@ export default function ParentPortal({
                   </CardContent>
                 </Card>
               ) : (
-                reports.map((report) => {
+                displayedReports.map((report) => {
                   const dateStr = formatReportDate(report.reportDate);
                   const timeStr = formatReportTime(report.createdAt);
                   const moodDisplay = formatMood(report.mood);
@@ -455,7 +462,7 @@ export default function ParentPortal({
 
         {activeTab === "progress" && (
           <div className="max-w-lg mx-auto p-4 space-y-4">
-            {reports.length === 0 ? (
+            {displayedReports.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center text-muted-foreground">
                   <TrendingUp className="h-10 w-10 mx-auto mb-3 opacity-40 text-primary" />
@@ -472,16 +479,16 @@ export default function ParentPortal({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-xl bg-muted/40 border">
                       <span className="text-xs text-muted-foreground">Total Laporan</span>
-                      <p className="text-xl font-bold text-foreground mt-1">{reports.length}</p>
+                      <p className="text-xl font-bold text-foreground mt-1">{displayedReports.length}</p>
                     </div>
                     <div className="p-3 rounded-xl bg-muted/40 border">
                       <span className="text-xs text-muted-foreground">Dokumentasi Foto</span>
-                      <p className="text-xl font-bold text-foreground mt-1">{allReportPhotos.length}</p>
+                      <p className="text-xl font-bold text-foreground mt-1">{galleryPhotos.length}</p>
                     </div>
                   </div>
                   <div className="space-y-2 pt-2">
                     <span className="text-xs font-semibold text-muted-foreground">Aktivitas Terakhir:</span>
-                    {reports.slice(0, 3).map((r) => (
+                    {displayedReports.slice(0, 3).map((r) => (
                       <div key={r.id} className="p-3 rounded-lg bg-muted/20 border text-xs">
                         <div className="flex justify-between font-medium text-foreground mb-1">
                           <span>{r.studentName}</span>
@@ -537,9 +544,9 @@ export default function ParentPortal({
             <Home className="h-6 w-6" />
             <span className="text-xs">Beranda</span>
           </button>
-          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-6 w-6" />
-            <span className="text-xs">Katalog</span>
+            <span className="text-xs">Marketplace</span>
           </Link>
           <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <CreditCard className="h-6 w-6" />

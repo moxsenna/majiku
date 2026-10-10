@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { invoices, studentEnrollments, students, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -191,4 +191,96 @@ export async function getBillingEnrollments(): Promise<BillingEnrollmentRow[]> {
       classes: { name: r.className, price_per_month: price },
     };
   });
+}
+
+export async function markInvoicePaid(invoiceId: string) {
+  const session = await getSessionSafely();
+  if (!session) throw new Error("Unauthorized");
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  if (!isAdmin) throw new Error("Hanya admin yang dapat menandai invoice lunas");
+
+  await db
+    .update(invoices)
+    .set({
+      status: "paid",
+      paidAt: new Date(),
+    })
+    .where(eq(invoices.id, invoiceId));
+
+  return { success: true };
+}
+
+export interface CreateInvoiceInput {
+  studentId: string;
+  amount: number;
+  discount?: number;
+  dueDate: string;
+  notes?: string;
+  billingPeriodStart?: string;
+  billingPeriodEnd?: string;
+}
+
+export async function createInvoice(input: CreateInvoiceInput) {
+  const session = await getSessionSafely();
+  if (!session) throw new Error("Unauthorized");
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  const isAdmin = roles.includes("admin") || roles.includes("moderator");
+  if (!isAdmin) throw new Error("Hanya admin yang dapat membuat invoice");
+
+  if (!input.studentId) throw new Error("Pilih siswa terlebih dahulu");
+  if (!input.amount || input.amount <= 0) throw new Error("Nominal tagihan harus lebih dari 0");
+  if (!input.dueDate) throw new Error("Tanggal jatuh tempo wajib diisi");
+
+  const [student] = await db
+    .select({ id: students.id })
+    .from(students)
+    .where(eq(students.id, input.studentId))
+    .limit(1);
+
+  if (!student) throw new Error("Data siswa tidak ditemukan");
+
+  const [enrollment] = await db
+    .select({ id: studentEnrollments.id })
+    .from(studentEnrollments)
+    .where(and(eq(studentEnrollments.studentId, input.studentId), eq(studentEnrollments.isActive, true)))
+    .limit(1);
+
+  const discount = input.discount ? Number(input.discount) : 0;
+  const total = Math.max(0, Number(input.amount) - discount);
+  const now = new Date();
+  const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+  const invoiceNumber = `INV-${yearMonth}-${randomSuffix}`;
+  const id = crypto.randomUUID();
+
+  await db.insert(invoices).values({
+    id,
+    invoiceNumber,
+    studentId: input.studentId,
+    enrollmentId: enrollment?.id || null,
+    amount: String(input.amount),
+    discount: String(discount),
+    total: String(total),
+    status: "unpaid",
+    billingPeriodStart: input.billingPeriodStart || null,
+    billingPeriodEnd: input.billingPeriodEnd || null,
+    dueDate: input.dueDate,
+    notes: input.notes || null,
+  });
+
+  return { success: true, id, invoiceNumber };
+}
+
+export async function getBillingStudentOptions(): Promise<Array<{ id: string; name: string }>> {
+  const session = await getSessionSafely();
+  if (!session) return [];
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+
+  return await db
+    .select({ id: students.id, name: students.name })
+    .from(students)
+    .where(eq(students.isActive, true))
+    .orderBy(asc(students.name));
 }

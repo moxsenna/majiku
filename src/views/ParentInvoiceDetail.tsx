@@ -358,9 +358,9 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
             <Home className="h-5 w-5" />
             <span className="text-[11px]">Beranda</span>
           </Link>
-          <Link href="/parent/catalog" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
+          <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
             <ShoppingBag className="h-5 w-5" />
-            <span className="text-[11px]">Katalog</span>
+            <span className="text-[11px]">Marketplace</span>
           </Link>
           <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-primary">
             <CreditCard className="h-5 w-5" />

@@ -10,7 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GraduationCap, Mail, Lock, Building2, User, Phone, Eye, EyeOff } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { GraduationCap, Mail, Lock, Building2, User, Phone, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
 import { registerDaycareAdminAction } from "@/server/actions/authRegistration";
@@ -25,6 +33,7 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
   const [activeTab, setActiveTab] = useState<string>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
 
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
@@ -144,7 +153,16 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="admin-password">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="admin-password">Password</Label>
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotOpen(true)}
+                        className="text-xs text-primary hover:underline font-medium"
+                      >
+                        Lupa password?
+                      </button>
+                    </div>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -297,6 +315,41 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
           </Tabs>
         </Card>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={isForgotOpen} onOpenChange={setIsForgotOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <HelpCircle className="w-4 h-4" />
+              </div>
+              <DialogTitle>Bantuan Masuk & Reset Password</DialogTitle>
+            </div>
+            <DialogDescription className="text-xs">
+              Panduan pemulihan akses akun pengelola Daycare MAJIKU.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-xs text-muted-foreground leading-relaxed">
+            <p>
+              Untuk menjaga integritas dan keamanan data murid serta keuangan lembaga Anda, reset password akun admin daycare dilakukan melalui verifikasi pengelola.
+            </p>
+            <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-1.5 text-foreground font-medium">
+              <p>Tim Bantuan Teknis MAJIKU:</p>
+              <p className="text-muted-foreground font-normal">📧 Email: support@majiku.web.id</p>
+              <p className="text-muted-foreground font-normal">💬 WhatsApp: +62 812-3456-7890 (Hari Kerja 08:00 - 17:00 WIB)</p>
+            </div>
+            <p className="text-[11px] text-muted-foreground/80">
+              Sertakan nama lembaga terdaftar dan alamat email saat mengajukan permintaan pemulihan sandi.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsForgotOpen(false)} className="w-full sm:w-auto">
+              Mengerti
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

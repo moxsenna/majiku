@@ -12,6 +12,7 @@ import {
   attendance,
   invoices,
   dailyReports,
+  tenants,
 } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { isDemoEmail } from "@/lib/demo";
@@ -331,4 +332,49 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
     birthdays: [],
     billingItems: mappedBillingItems,
   };
+}
+
+export async function getTenantProfile() {
+  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
+  if (!session) return null;
+
+  const [t] = await db.select().from(tenants).limit(1);
+  return t || null;
+}
+
+export async function updateTenantProfile(input: {
+  name: string;
+  phone?: string;
+  address?: string;
+}) {
+  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
+  if (!session) throw new Error("Unauthorized");
+
+  const [existingTenant] = await db.select().from(tenants).limit(1);
+  if (existingTenant) {
+    await db
+      .update(tenants)
+      .set({
+        name: input.name,
+        whatsapp: input.phone || null,
+        address: input.address || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(tenants.id, existingTenant.id));
+  } else {
+    const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    await db.insert(tenants).values({
+      id: crypto.randomUUID(),
+      name: input.name,
+      slug: slug || "daycare",
+      whatsapp: input.phone || null,
+      address: input.address || null,
+      city: "Jakarta",
+      priceFrom: "2000000",
+      type: "daycare",
+      isActive: true,
+    });
+  }
+
+  return { success: true };
 }

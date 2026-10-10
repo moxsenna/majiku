@@ -5,7 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Mail, Lock, Eye, EyeOff, ShieldAlert } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Sparkles, Mail, Lock, Eye, EyeOff, ShieldAlert, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
 
@@ -13,6 +21,7 @@ export default function VendorAuth() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -79,7 +88,16 @@ export default function VendorAuth() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="vendor-password" className="text-slate-300">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="vendor-password" className="text-slate-300">Password</Label>
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotOpen(true)}
+                    className="text-xs text-primary hover:underline font-medium"
+                  >
+                    Lupa password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <Input
@@ -115,6 +133,37 @@ export default function VendorAuth() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={isForgotOpen} onOpenChange={setIsForgotOpen}>
+        <DialogContent className="max-w-md bg-slate-900 border-slate-800 text-slate-100">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center">
+                <HelpCircle className="w-4 h-4" />
+              </div>
+              <DialogTitle className="text-white">Akses Pemulihan Super Admin</DialogTitle>
+            </div>
+            <DialogDescription className="text-xs text-slate-400">
+              Prosedur keamanan kredensial root platform MAJIKU SaaS.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-xs text-slate-300 leading-relaxed">
+            <p>
+              Akses akun Super Admin dilindungi kebijakan zero-trust. Pemulihan kunci akses dan sandi hanya dapat dieksekusi melalui CLI/database admin root repository.
+            </p>
+            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1 font-mono text-[11px] text-slate-400">
+              <p>Perintah Reset Kredensial Root:</p>
+              <p className="text-emerald-400">npm run set-demo-passwords</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsForgotOpen(false)} className="w-full sm:w-auto">
+              Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

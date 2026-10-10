@@ -387,3 +387,80 @@ export async function getSchedulingOptions(): Promise<SchedulingOptions> {
     classes: activeClasses,
   };
 }
+
+export interface RegistrationProgramItem {
+  id: string;
+  name: string;
+  age: string;
+  price: number;
+  schedule: string;
+  features: string[];
+  quota: number;
+  enrolled: number;
+  status: "open" | "full" | "closed";
+}
+
+export async function getAvailablePrograms(): Promise<RegistrationProgramItem[]> {
+  const dbClasses = await db
+    .select({
+      id: classes.id,
+      name: classes.name,
+      description: classes.description,
+      capacity: classes.capacity,
+      pricePerMonth: classes.pricePerMonth,
+      schedule: classes.schedule,
+    })
+    .from(classes)
+    .where(eq(classes.isActive, true))
+    .orderBy(asc(classes.name));
+
+  if (dbClasses.length === 0) {
+    return [
+      {
+        id: "toddler",
+        name: "Program Toddler",
+        age: "1.5 - 3 tahun",
+        price: 2000000,
+        schedule: "Senin - Jumat, 08:00 - 12:00",
+        features: ["Stimulasi motorik", "Musik & gerak", "Bermain sensori"],
+        quota: 20,
+        enrolled: 0,
+        status: "open",
+      },
+      {
+        id: "playgroup",
+        name: "Playgroup",
+        age: "3 - 4 tahun",
+        price: 2500000,
+        schedule: "Senin - Jumat, 08:00 - 13:00",
+        features: ["Belajar huruf & angka", "Kegiatan seni", "Bermain kreatif"],
+        quota: 25,
+        enrolled: 0,
+        status: "open",
+      },
+      {
+        id: "kindergarten",
+        name: "TK A & B",
+        age: "4 - 6 tahun",
+        price: 3000000,
+        schedule: "Senin - Jumat, 07:30 - 14:00",
+        features: ["Persiapan SD", "Bahasa Inggris", "Ekstrakurikuler"],
+        quota: 30,
+        enrolled: 0,
+        status: "open",
+      },
+    ];
+  }
+
+  return dbClasses.map((c) => ({
+    id: c.id,
+    name: c.name,
+    age: c.description || "2 - 6 tahun",
+    price: Number(c.pricePerMonth) || 2000000,
+    schedule: c.schedule || "Senin - Jumat, 08:00 - 12:00",
+    features: ["Aktivitas belajar terstruktur", "Laporan harian perkembangan", "Dokumentasi foto kegiatan"],
+    quota: c.capacity || 20,
+    enrolled: 0,
+    status: "open",
+  }));
+}

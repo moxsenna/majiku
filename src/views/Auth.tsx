@@ -14,6 +14,7 @@ import { Sparkles, ArrowLeft, Eye, EyeOff, Mail, Lock, Building2, User, Phone } 
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
 import { getRoleHome } from "@/lib/roleRedirect";
+import { registerDaycareAdminAction } from "@/server/actions/authRegistration";
 
 export default function Auth() {
   const { mode } = useParams<{ mode: string }>();
@@ -91,26 +92,33 @@ export default function Auth() {
       return;
     }
     setIsLoading(true);
-    const { data, error } = await authClient.signUp.email({
-      email: registerForm.email,
-      password: registerForm.password,
-      name: registerForm.name || registerForm.email,
-    });
-    if (error) {
+    try {
+      await registerDaycareAdminAction({
+        institutionName: registerForm.institutionName,
+        institutionType: registerForm.institutionType || "daycare",
+        name: registerForm.name || registerForm.email.split("@")[0],
+        email: registerForm.email,
+        phone: registerForm.phone,
+        password: registerForm.password,
+      });
+
+      // Auto sign-in
+      await authClient.signIn.email({
+        email: registerForm.email.trim().toLowerCase(),
+        password: registerForm.password,
+      });
+
       setIsLoading(false);
-      toast({ title: "Pendaftaran Gagal", description: error.message || "Pendaftaran gagal", variant: "destructive" });
-    } else {
-      setIsLoading(false);
-      toast({ title: "Pendaftaran Berhasil!", description: "Silakan masuk dengan akun baru Anda." });
+      toast({ title: "Pendaftaran Lembaga Berhasil! 🎉", description: "Selamat datang di Portal Admin Daycare" });
       const next = new URLSearchParams(window.location.search).get("next");
       if (next && next.startsWith("/") && !next.startsWith("//")) {
         window.location.href = next;
-      } else if (data?.user) {
-        const home = await getRoleHome(data?.user?.id);
-        window.location.href = home;
       } else {
-        setActiveTab("login");
+        window.location.href = "/dashboard";
       }
+    } catch (err: any) {
+      setIsLoading(false);
+      toast({ title: "Pendaftaran Gagal", description: err?.message || "Terjadi kesalahan", variant: "destructive" });
     }
   };
 

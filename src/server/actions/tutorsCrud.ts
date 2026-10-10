@@ -276,3 +276,26 @@ export async function unlinkTutorUser(tutorId: string): Promise<void> {
     throw new Error("Tutor tidak ditemukan");
   }
 }
+
+export async function assignTutorClass(
+  tutorId: string,
+  classId: string,
+  ratePerSession: number = 50000
+): Promise<void> {
+  await requireAdminOrModerator();
+  if (!tutorId || !classId) throw new Error("ID tutor dan kelas wajib diisi");
+
+  await db.insert(tutorClassAssignments).values({
+    id: randomUUID(),
+    tutorId,
+    classId,
+    ratePerSession: String(ratePerSession),
+    isActive: true,
+  }).onConflictDoNothing();
+}
+
+export async function removeTutorClassAssignment(assignmentId: string): Promise<void> {
+  await requireAdminOrModerator();
+  if (!assignmentId) throw new Error("ID penugasan wajib diisi");
+  await db.delete(tutorClassAssignments).where(eq(tutorClassAssignments.id, assignmentId));
+}
