@@ -29,8 +29,10 @@ import {
 } from "lucide-react";
 import {
   SUBSCRIPTION_PLANS,
-  createSubscriptionCheckoutOrder,
   type SubscriptionPlan,
+} from "@/lib/subscriptionPlans";
+import {
+  createSubscriptionCheckoutOrder,
 } from "@/server/actions/checkout";
 
 const formatCurrency = (amount: number) => {
