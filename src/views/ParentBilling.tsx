@@ -38,6 +38,27 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
+function getInvoicePeriodTitle(inv: ParentInvoiceSummary): string {
+  if (inv.billingPeriodStart) {
+    try {
+      const d = new Date(inv.billingPeriodStart);
+      if (!isNaN(d.getTime())) {
+        return `SPP ${format(d, "MMMM yyyy", { locale: idLocale })}`;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  const match = inv.invoiceNumber?.match(/INV-(\d{4})(\d{2})-/);
+  if (match) {
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const d = new Date(year, month, 1);
+    return `SPP ${format(d, "MMMM yyyy", { locale: idLocale })}`;
+  }
+  return "Tagihan SPP";
+}
+
 interface ParentBillingProps {
   invoices: ParentInvoiceSummary[];
   paymentsEnabled: boolean;
@@ -51,6 +72,7 @@ export default function ParentBilling({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isPayingId, setIsPayingId] = useState<string | null>(null);
+  const [selectedChildFilter, setSelectedChildFilter] = useState<string>("all");
   const [paymentModalData, setPaymentModalData] = useState<{
     open: boolean;
     invoiceId: string;
@@ -60,9 +82,18 @@ export default function ParentBilling({
     qrString?: string | null;
   } | null>(null);
 
-  const activeInvoice = useMemo(() => {
-    return invoices.find((inv) => inv.status === "unpaid" || inv.status === "overdue") || null;
+  const childNames = useMemo(() => {
+    return Array.from(new Set(invoices.map((i) => i.studentName).filter(Boolean)));
   }, [invoices]);
+
+  const filteredInvoices = useMemo(() => {
+    if (selectedChildFilter === "all") return invoices;
+    return invoices.filter((i) => i.studentName === selectedChildFilter);
+  }, [invoices, selectedChildFilter]);
+
+  const activeInvoice = useMemo(() => {
+    return filteredInvoices.find((inv) => inv.status === "unpaid" || inv.status === "overdue") || null;
+  }, [filteredInvoices]);
 
   const mapToInvoiceData = (inv: ParentInvoiceSummary) => {
     const period =
@@ -183,9 +214,13 @@ export default function ParentBilling({
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="text-xs text-muted-foreground">Tagihan Aktif</p>
-                    <p className="text-sm font-semibold">{activeInvoice.studentName}</p>
-                    <p className="text-2xl font-bold text-foreground mt-1">
+                    <span className="text-[11px] font-semibold text-primary uppercase tracking-wide">
+                      Tagihan Aktif • {getInvoicePeriodTitle(activeInvoice)}
+                    </span>
+                    <p className="text-sm font-bold text-foreground mt-0.5">
+                      {activeInvoice.studentName}
+                    </p>
+                    <p className="text-2xl font-extrabold text-foreground mt-1">
                       {formatCurrency(activeInvoice.total)}
                     </p>
                   </div>
@@ -201,6 +236,8 @@ export default function ParentBilling({
                       ? format(new Date(activeInvoice.dueDate), "d MMMM yyyy", { locale: idLocale })
                       : "-"}
                   </span>
+                  <span>•</span>
+                  <span className="font-mono text-[11px]">#{activeInvoice.invoiceNumber}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button
@@ -247,28 +284,60 @@ export default function ParentBilling({
 
           {/* Payment History */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center justify-between">
-                <span>Daftar Tagihan</span>
-                <span className="text-xs font-normal text-muted-foreground">
-                  {invoices.length} tagihan
-                </span>
-              </CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <span>Daftar Tagihan</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    ({filteredInvoices.length} tagihan)
+                  </span>
+                </CardTitle>
+                {childNames.length > 1 && (
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedChildFilter("all")}
+                      className={`text-xs px-2.5 py-1 rounded-full transition-colors whitespace-nowrap ${
+                        selectedChildFilter === "all"
+                          ? "bg-primary text-primary-foreground font-semibold"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      }`}
+                    >
+                      Semua Anak
+                    </button>
+                    {childNames.map((name) => (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => setSelectedChildFilter(name)}
+                        className={`text-xs px-2.5 py-1 rounded-full transition-colors whitespace-nowrap ${
+                          selectedChildFilter === name
+                            ? "bg-primary text-primary-foreground font-semibold"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {name.split(" ")[0]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="p-0">
-              {invoices.length === 0 ? (
+              {filteredInvoices.length === 0 ? (
                 <div className="p-6 text-center text-xs text-muted-foreground">
                   Belum ada data tagihan yang diterbitkan.
                 </div>
               ) : (
-                invoices.map((invoice, index) => {
+                filteredInvoices.map((invoice, index) => {
                   const isPaid = invoice.status === "paid";
                   const isOverdue = invoice.status === "overdue";
+                  const periodTitle = getInvoicePeriodTitle(invoice);
                   return (
                     <div
                       key={invoice.id}
                       className={`flex items-center justify-between p-3.5 ${
-                        index !== invoices.length - 1 ? "border-b border-border" : ""
+                        index !== filteredInvoices.length - 1 ? "border-b border-border" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -286,9 +355,16 @@ export default function ParentBilling({
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="font-medium text-sm truncate">{invoice.invoiceNumber}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {invoice.studentName} ·{" "}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-sm text-foreground">
+                              {periodTitle}
+                            </p>
+                            <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal text-muted-foreground">
+                              {invoice.studentName}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            <span className="font-mono text-[11px]">#{invoice.invoiceNumber}</span> ·{" "}
                             {isPaid
                               ? invoice.paidAt
                                 ? `Lunas: ${format(new Date(invoice.paidAt), "d MMM yyyy", { locale: idLocale })}`
