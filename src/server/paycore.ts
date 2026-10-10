@@ -70,10 +70,13 @@ interface PayCoreOrderResponse {
 
 export interface CreateOrderParams {
   externalOrderId: string;
-  amount: number; // IDR integer, SELALU dari DB — bukan dari frontend
-  invoiceNumber: string;
-  invoiceId: string;
+  amount: number; // IDR integer, SELALU dari DB/Server — bukan dari frontend
+  invoiceNumber?: string;
+  invoiceId?: string;
+  productKey?: string;
+  description?: string;
   customer: { name: string; email: string; phone?: string };
+  fulfillmentData?: Record<string, unknown>;
 }
 
 export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
@@ -102,22 +105,27 @@ export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
   }
 
   const paymentMethod = process.env.PAYMENT_MODE === "live" ? "SP" : "NQ";
+  const productKey = params.productKey || PAYMENT_PRODUCT_KEY;
+  const description =
+    params.description ||
+    (params.invoiceNumber ? `SPP ${params.invoiceNumber}` : "Layanan MAJIKU");
+  const fulfillmentData = params.fulfillmentData || {
+    invoice_id: params.invoiceId,
+    invoice_number: params.invoiceNumber,
+    product_key: productKey,
+  };
 
   const body = JSON.stringify({
     external_order_id: externalOrderId,
     merchant_profile_id: MERCHANT_PROFILE_ID,
-    product_key: PAYMENT_PRODUCT_KEY,
-    description: `SPP ${params.invoiceNumber}`,
+    product_key: productKey,
+    description,
     amount: params.amount,
     currency: "IDR",
     payment_method: paymentMethod,
     customer,
     return_url: returnUrl,
-    fulfillment_data: {
-      invoice_id: params.invoiceId,
-      invoice_number: params.invoiceNumber,
-      product_key: PAYMENT_PRODUCT_KEY,
-    },
+    fulfillment_data: fulfillmentData,
   });
 
   const timestamp = new Date().toISOString();

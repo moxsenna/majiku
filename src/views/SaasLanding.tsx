@@ -75,6 +75,7 @@ const features = [
 
 const pricingPlans = [
   {
+    id: "basic",
     name: "Basic",
     price: "299K",
     period: "/bulan",
@@ -87,9 +88,10 @@ const pricingPlans = [
       "Support via email"
     ],
     popular: false,
-    cta: "Mulai Gratis"
+    cta: "Pilih Paket Basic"
   },
   {
+    id: "pro",
     name: "Pro",
     price: "599K",
     period: "/bulan",
@@ -103,12 +105,13 @@ const pricingPlans = [
       "Priority support"
     ],
     popular: true,
-    cta: "Coba 14 Hari Gratis"
+    cta: "Pilih Paket Pro"
   },
   {
+    id: "enterprise",
     name: "Enterprise",
-    price: "Custom",
-    period: "",
+    price: "1.5M",
+    period: "/bulan",
     description: "Untuk jaringan lembaga & franchise",
     features: [
       "Unlimited siswa",
@@ -119,7 +122,7 @@ const pricingPlans = [
       "Custom integrations"
     ],
     popular: false,
-    cta: "Hubungi Sales"
+    cta: "Pilih Paket Enterprise"
   }
 ];
 
@@ -227,9 +230,9 @@ export default function SaasLanding({
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Link href="/admin/register">
+              <Link href="/checkout?plan=pro">
                 <Button className="gradient-primary text-primary-foreground text-xs sm:text-sm shadow-sm">
-                  Daftar Lembaga
+                  Langganan
                 </Button>
               </Link>
             </div>
@@ -254,9 +257,9 @@ export default function SaasLanding({
               Dari manajemen siswa hingga billing, semua dalam satu tempat.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/admin/register">
+              <Link href="/checkout?plan=pro">
                 <Button size="lg" className="gradient-primary text-primary-foreground text-lg px-8 h-14">
-                  Mulai Gratis 14 Hari
+                  Langganan Sekarang
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
@@ -673,7 +676,7 @@ export default function SaasLanding({
                       </li>
                     ))}
                   </ul>
-                  <Link href="/admin/register">
+                  <Link href={`/checkout?plan=${plan.id}`}>
                     <Button 
                       className={`w-full ${plan.popular ? 'gradient-primary text-primary-foreground' : ''}`}
                       variant={plan.popular ? "default" : "outline"}
@@ -734,11 +737,11 @@ export default function SaasLanding({
               </h2>
               <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
                 Bergabung dengan 500+ lembaga pendidikan yang sudah menggunakan MAJIKU. 
-                Gratis 14 hari, tanpa kartu kredit.
+                Pilih paket dan nikmati aktivasi otomatis dengan PayCore.
               </p>
-              <Link href="/admin/register">
+              <Link href="/checkout?plan=pro">
                 <Button size="lg" variant="secondary" className="text-lg px-8 h-14">
-                  Mulai Sekarang
+                  Langganan Sekarang
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { invoices, paymentOrders, paycoreEvents } from "@/db/schema";
+import { invoices, paymentOrders, paycoreEvents, tenants } from "@/db/schema";
 import { verifyPayCoreEvent } from "@/server/paycore";
 
 // Webhook khusus PayCore (bukan Duitku — Duitku callback hanya ke PayCore).
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
   // 7. Validasi event vs local order (nominal/currency/product dari DB, bukan event)
   const amountMatches = Number(localOrder.amount) === Number(data.amount);
   const currencyMatches = localOrder.currency === (data.currency ?? "IDR");
-  const productMatches = localOrder.productKey === (data.product_key ?? "spp_invoice");
+  const productMatches = localOrder.productKey === (data.product_key ?? localOrder.productKey);
   if (!amountMatches || !currencyMatches || !productMatches) {
     await db
       .update(paymentOrders)
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
 
   try {
     if (eventType === "payment.succeeded") {
-      // 8. Fulfillment: update order + update invoice + catat event dedupe
+      // 8. Fulfillment: update order + update invoice (jika ada) + aktivasi tenant (jika ada) + catat event dedupe
       await db
         .update(paymentOrders)
         .set({
@@ -119,14 +119,26 @@ export async function POST(req: Request) {
         })
         .where(eq(paymentOrders.id, order.id));
 
-      await db
-        .update(invoices)
-        .set({
-          status: "paid",
-          paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(invoices.id, order.invoiceId));
+      if (order.invoiceId) {
+        await db
+          .update(invoices)
+          .set({
+            status: "paid",
+            paidAt: data.paid_at ? new Date(data.paid_at) : new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(invoices.id, order.invoiceId));
+      }
+
+      if (order.tenantId) {
+        await db
+          .update(tenants)
+          .set({
+            isActive: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(tenants.id, order.tenantId));
+      }
 
       await db
         .insert(paycoreEvents)

@@ -40,12 +40,17 @@ export default function PaymentReturnPage() {
           </div>
 
           <div className="pt-2 flex flex-col gap-2">
-            <Link href="/parent/billing" className="w-full">
+            <Link href="/admin/login" className="w-full">
               <Button variant="hero" className="w-full">
-                Lihat Tagihan Saya <ArrowRight className="h-4 w-4 ml-1.5" />
+                Masuk ke Portal Admin Daycare <ArrowRight className="h-4 w-4 ml-1.5" />
               </Button>
             </Link>
-            <Link href="/parent" className="w-full">
+            <Link href="/parent/billing" className="w-full">
+              <Button variant="outline" className="w-full text-xs">
+                Portal Orang Tua (Tagihan SPP)
+              </Button>
+            </Link>
+            <Link href="/" className="w-full">
               <Button variant="ghost" className="w-full text-xs">
                 Kembali ke Beranda
               </Button>

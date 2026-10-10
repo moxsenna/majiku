@@ -4,7 +4,7 @@ import path from "node:path";
 const gate = process.argv[2];
 
 if (!gate) {
-  console.error("Usage: node scripts/verify-fixes-gates.mjs <G1|G2|G3|G4|G5|G6|G7|G8|G9|G10>");
+  console.error("Usage: node scripts/verify-fixes-gates.mjs <G1|G2|G3|G4|G5|G6|G7|G8|G9|G10|G11>");
   process.exit(1);
 }
 
@@ -148,6 +148,21 @@ switch (gate) {
       process.exit(1);
     }
     console.log("G10 passed: parent registration dynamic programs verified");
+    break;
+  }
+
+  case "G11": {
+    const landing = read("src/views/SaasLanding.tsx");
+    const checkoutView = read("src/views/Checkout.tsx");
+    const checkoutAction = read("src/server/actions/checkout.ts");
+    const hasCheckoutLinks = landing.includes("/checkout?plan=");
+    const hasPayCoreIntegration = checkoutAction.includes("createPayCoreOrder");
+    const hasCheckoutForm = checkoutView.includes("PayCore Payment Gateway") && checkoutView.includes("createSubscriptionCheckoutOrder");
+    if (!hasCheckoutLinks || !hasPayCoreIntegration || !hasCheckoutForm) {
+      console.error("G11 failed: CTA LP to checkout page or PayCore integration missing");
+      process.exit(1);
+    }
+    console.log("G11 passed: CTA LP to checkout page and PayCore payment verified");
     break;
   }
 

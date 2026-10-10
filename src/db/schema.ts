@@ -409,8 +409,10 @@ export type LessonPlanRow = typeof lessonPlans.$inferSelect;
 
 export const paymentOrders = pgTable("payment_orders", {
   id: text("id").primaryKey(),
-  invoiceId: text("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  invoiceId: text("invoice_id").references(() => invoices.id, { onDelete: "cascade" }),
   parentUserId: text("parent_user_id").references(() => user.id, { onDelete: "set null" }),
+  tenantId: text("tenant_id").references(() => tenants.id, { onDelete: "set null" }),
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
   externalOrderId: text("external_order_id").notNull().unique(),
   paycoreOrderId: text("paycore_order_id").unique(),
   productKey: text("product_key").notNull().default("spp_invoice"),
@@ -418,6 +420,10 @@ export const paymentOrders = pgTable("payment_orders", {
   currency: text("currency").notNull().default("IDR"),
   paymentStatus: text("payment_status").notNull().default("pending"),
   checkoutUrl: text("checkout_url"),
+  customerName: text("customer_name"),
+  customerEmail: text("customer_email"),
+  customerPhone: text("customer_phone"),
+  planKey: text("plan_key"),
   paidAt: timestamp("paid_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

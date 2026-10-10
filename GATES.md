@@ -53,3 +53,9 @@ Scope: Fix all 10 UI/UX logic errors across Admin, Parent, Tutor, and Vendor rol
   CHECK: node scripts/verify-fixes-gates.mjs G10
   EXPECT: G10 passed: parent registration dynamic programs verified
   EVIDENCE: verified exit 0, matched "G10 passed: parent registration dynamic programs verified"
+
+- [x] G11: Tombol CTA di Landing Page ke Checkout Page & Pembayaran PayCore
+  CHECK: node scripts/verify-fixes-gates.mjs G11
+  EXPECT: G11 passed: CTA LP to checkout page and PayCore payment verified
+  EVIDENCE: verified exit 0, matched "G11 passed: CTA LP to checkout page and PayCore payment verified"
+
