@@ -17,7 +17,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { HeartHandshake, Mail, Lock, User, Phone, Baby, Eye, EyeOff, HelpCircle } from "lucide-react";
+import { HeartHandshake, Mail, Lock, User, Phone, Baby, Eye, EyeOff, HelpCircle, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
 import { registerParentAction } from "@/server/actions/authRegistration";
@@ -75,6 +75,10 @@ export default function ParentAuth({ initialMode = "login" }: ParentAuthProps) {
     e.preventDefault();
     if (!registerForm.name || !registerForm.email || !registerForm.password) {
       toast({ title: "Error", description: "Mohon lengkapi seluruh field wajib", variant: "destructive" });
+      return;
+    }
+    if (registerForm.childName.trim() && !registerForm.childBirthDate) {
+      toast({ title: "Error", description: "Tanggal lahir anak wajib diisi bila nama anak dicantumkan", variant: "destructive" });
       return;
     }
     if (registerForm.password !== registerForm.confirmPassword) {
@@ -221,17 +225,34 @@ export default function ParentAuth({ initialMode = "login" }: ParentAuthProps) {
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="parent-phone">No. WhatsApp</Label>
+                      <Label htmlFor="child-dob">
+                        Tgl Lahir Anak {registerForm.childName.trim() ? "*" : "(Opsional)"}
+                      </Label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
-                          id="parent-phone"
-                          placeholder="08xxxxxxxxxx"
+                          id="child-dob"
+                          type="date"
                           className="pl-10"
-                          value={registerForm.phone}
-                          onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
+                          value={registerForm.childBirthDate}
+                          onChange={(e) => setRegisterForm({ ...registerForm, childBirthDate: e.target.value })}
+                          required={!!registerForm.childName.trim()}
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="parent-phone">No. WhatsApp</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="parent-phone"
+                        placeholder="08xxxxxxxxxx"
+                        className="pl-10"
+                        value={registerForm.phone}
+                        onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
+                      />
                     </div>
                   </div>
 

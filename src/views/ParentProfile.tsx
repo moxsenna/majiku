@@ -8,29 +8,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
-  Settings,
-  Bell,
   Shield,
   HelpCircle,
   LogOut,
-  ChevronRight,
-  Edit2,
   Home,
   ShoppingBag,
   CreditCard,
   MessageCircle,
   User,
-  Phone,
   Mail,
   GraduationCap,
   Plus,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { getMyChildren, type ParentChildData } from "@/server/actions/parentChildren";
 
 export default function ParentProfile() {
-  const { toast } = useToast();
   const { user, signOut } = useAuth();
 
   const { data: children = [] } = useQuery({
@@ -62,9 +55,6 @@ export default function ParentProfile() {
             </Link>
             <h1 className="font-bold text-lg">Profil Orang Tua</h1>
           </div>
-          <Button variant="ghost" size="icon-sm" onClick={() => toast({ title: "Pengaturan Akun", description: "Preferensi akun orang tua tersimpan." })}>
-            <Settings className="h-5 w-5" />
-          </Button>
         </div>
       </header>
 
@@ -141,31 +131,33 @@ export default function ParentProfile() {
           </CardContent>
         </Card>
 
-        {/* Menu Items */}
+        {/* Account Info & Help */}
         <Card>
-          <CardContent className="p-0">
-            {[
-              { icon: Bell, label: "Notifikasi", desc: "Atur preferensi notifikasi", action: "Preferensi notifikasi diperbarui." },
-              { icon: Shield, label: "Keamanan Akun", desc: "Password & perlindungan data", action: "Data keamanan akun dalam status terlindungi." },
-              { icon: HelpCircle, label: "Bantuan & Kontak Daycare", desc: "Hubungi admin sekolah", action: "Menghubungi customer support daycare via WhatsApp..." },
-            ].map((item, index) => (
-              <button
-                key={index}
-                onClick={() => toast({ title: item.label, description: item.action })}
-                className={`w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors ${
-                  index !== 2 ? "border-b border-border" : ""
-                }`}
-              >
-                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                  <item.icon className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-sm">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </button>
-            ))}
+          <CardContent className="p-4 space-y-3">
+            <h3 className="font-semibold text-sm text-foreground">Informasi Layanan & Bantuan</h3>
+
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
+              <HelpCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <div className="text-xs space-y-1">
+                <p className="font-medium text-foreground">Bantuan & Customer Service</p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Hubungi pengelola via menu <Link href="/parent/chat" className="text-primary underline">Chat Tutor/Admin</Link> atau email ke <a href="mailto:support@majiku.id" className="text-primary hover:underline font-mono">support@majiku.id</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
+              <Shield className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="text-xs space-y-0.5">
+                <p className="font-medium text-foreground">Keamanan Akun</p>
+                <p className="text-muted-foreground">Autentikasi sesi terproteksi standar keamanan better-auth</p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground px-1">
+              <span>Versi Aplikasi</span>
+              <span className="font-mono">v1.0.0 (MAJIKU Parent Portal)</span>
+            </div>
           </CardContent>
         </Card>
 

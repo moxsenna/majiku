@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Gift, ShoppingBag, Sparkles, ExternalLink, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 interface CatalogItem {
   id: string;
@@ -132,14 +131,6 @@ export default function ParentCatalog() {
       : item.id !== featuredPromo.id
   );
 
-  const handleItemClick = (item: CatalogItem) => {
-    if (item.ctaLink === "#") {
-      toast.info(`${item.title}`, {
-        description: "Fitur ini akan segera tersedia. Hubungi admin untuk informasi lebih lanjut.",
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background pb-6">
       {/* Header */}
@@ -199,6 +190,14 @@ export default function ParentCatalog() {
       </header>
 
       <main className="p-4 max-w-2xl mx-auto">
+        {/* Partner Notice Banner */}
+        <div className="mb-6 p-3.5 bg-muted/60 border border-border/80 rounded-xl flex items-center gap-3">
+          <Sparkles className="w-5 h-5 text-primary shrink-0" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <strong className="text-foreground font-medium">Katalog partner segera hadir:</strong> Produk edukasi, makanan sehat, dan kebutuhan anak dari partner resmi akan segera dapat dipesan langsung.
+          </p>
+        </div>
+
         {/* Featured Promo - show only when "Semua" or "Promo" */}
         {(activeCategory === "Semua" || activeCategory === "Promo") && !searchQuery && (
           <div className="mb-6">
@@ -232,16 +231,7 @@ export default function ParentCatalog() {
                     </div>
                     <h3 className="font-bold text-xl text-white mb-1">{featuredPromo.title}</h3>
                     <p className="text-sm text-white/90 mb-4 line-clamp-2">{featuredPromo.subtitle}</p>
-                    {featuredPromo.ctaLink === "#" ? (
-                      <Button 
-                        size="sm" 
-                        className="bg-white text-foreground hover:bg-white/90"
-                        onClick={() => handleItemClick(featuredPromo)}
-                      >
-                        {featuredPromo.ctaText}
-                        <ExternalLink className="w-3.5 h-3.5 ml-2" />
-                      </Button>
-                    ) : (
+                    {featuredPromo.ctaLink && featuredPromo.ctaLink !== "#" && (
                       <Link href={featuredPromo.ctaLink}>
                         <Button size="sm" className="bg-white text-foreground hover:bg-white/90">
                           {featuredPromo.ctaText}
@@ -288,8 +278,7 @@ export default function ParentCatalog() {
               {gridItems.map((item) => (
                 <Card
                   key={item.id}
-                  className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => handleItemClick(item)}
+                  className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow"
                 >
                   <CardContent className="p-0">
                     <div className="relative h-28">
@@ -315,17 +304,13 @@ export default function ParentCatalog() {
                       {item.price && (
                         <p className="text-xs font-semibold text-primary mb-2">{item.price}</p>
                       )}
-                      {item.ctaLink === "#" ? (
-                        <Button size="sm" variant="outline" className="w-full h-8 text-xs">
-                          {item.ctaText}
-                        </Button>
-                      ) : (
-                        <Link href={item.ctaLink} onClick={(e) => e.stopPropagation()}>
+                      {item.ctaLink && item.ctaLink !== "#" ? (
+                        <Link href={item.ctaLink}>
                           <Button size="sm" variant="outline" className="w-full h-8 text-xs">
                             {item.ctaText}
                           </Button>
                         </Link>
-                      )}
+                      ) : null}
                     </div>
                   </CardContent>
                 </Card>

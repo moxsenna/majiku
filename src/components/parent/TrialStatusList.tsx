@@ -27,7 +27,7 @@ const statusBadgeConfig: Record<
   awaiting_review: { label: "Menunggu Review Tutor", variant: "warning" },
   recommended: { label: "Direkomendasikan", variant: "default" },
   admitted: { label: "Diterima", variant: "success" },
-  repeat_trial: { label: "Tidak Lanjut", variant: "destructive" },
+  repeat_trial: { label: "Perlu Trial Ulang", variant: "warning" },
   not_suitable: { label: "Tidak Lanjut", variant: "destructive" },
 };
 
@@ -80,8 +80,12 @@ export function TrialStatusList({ applications }: TrialStatusListProps) {
   return (
     <div className="space-y-3">
       {applications.map((app) => {
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const programName =
-          (app.programKey && programLabels[app.programKey]) || app.programKey || "Program Trial";
+          app.className ||
+          (app.programKey && !isUUID.test(app.programKey)
+            ? programLabels[app.programKey] || app.programKey
+            : "Program Trial");
         const badgeInfo = statusBadgeConfig[app.status] || {
           label: app.status,
           variant: "secondary" as const,

@@ -8,5 +8,11 @@ export default async function ParentMarketplacePage({
   searchParams: SearchParams;
 }) {
   const sp = await searchParams;
-  return <MarketplaceContent searchParams={sp} action="/parent/marketplace" />;
+  return (
+    <MarketplaceContent
+      searchParams={sp}
+      action="/parent/marketplace"
+      portalNav={true}
+    />
+  );
 }

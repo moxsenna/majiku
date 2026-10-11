@@ -28,8 +28,6 @@ import {
   Sparkles,
   ChevronDown,
 } from "lucide-react";
-import { PromoBanner } from "@/components/promo/PromoBanner";
-import { ParentActivityWidget } from "@/components/dashboard/ParentActivityWidget";
 import { ProgramInfoBanner } from "@/components/parent/ProgramInfoBanner";
 import { TrialStatusList } from "@/components/parent/TrialStatusList";
 import { AnnouncementsCard } from "@/components/parent/AnnouncementsCard";
@@ -283,7 +281,7 @@ export default function ParentPortal({
                 <div className="flex-shrink-0 w-24 h-20 rounded-xl bg-highlight/10 flex flex-col items-center justify-center p-2 border border-border/50">
                   <span className="text-[11px] text-muted-foreground">Laporan</span>
                   <span className="text-xs font-bold text-foreground mt-1">
-                    {reports.length} Catatan
+                    {displayedReports.length} Catatan
                   </span>
                 </div>
                 <div className="flex-shrink-0 w-24 h-20 rounded-xl bg-success/10 flex flex-col items-center justify-center p-2 border border-border/50">

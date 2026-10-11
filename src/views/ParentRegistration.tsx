@@ -37,20 +37,13 @@ import {
   MessageCircle,
   User,
   AlertCircle,
-  Timer,
   XCircle,
   CalendarCheck,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format, differenceInDays, differenceInHours } from "date-fns";
+import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { submitTrialApplication, type RegistrationProgramItem } from "@/server/actions/trial";
-
-const getFutureDate = (days: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d;
-};
 
 const defaultPrograms = [
   {
@@ -64,8 +57,6 @@ const defaultPrograms = [
     icon: Baby,
     popular: false,
     quota: 20,
-    enrolled: 0,
-    closingDate: getFutureDate(14),
     status: "open",
     nextOpenDate: null,
   },
@@ -80,8 +71,6 @@ const defaultPrograms = [
     icon: Star,
     popular: true,
     quota: 25,
-    enrolled: 0,
-    closingDate: getFutureDate(21),
     status: "open",
     nextOpenDate: null,
   },
@@ -96,8 +85,6 @@ const defaultPrograms = [
     icon: GraduationCap,
     popular: false,
     quota: 30,
-    enrolled: 0,
-    closingDate: getFutureDate(30),
     status: "open",
     nextOpenDate: null,
   },
@@ -130,11 +117,12 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
         color: idx % 3 === 0 ? "bg-highlight/10 border-highlight/30" : idx % 3 === 1 ? "bg-primary/10 border-primary/30" : "bg-success/10 border-success/30",
         icon: idx % 3 === 0 ? Baby : idx % 3 === 1 ? Star : GraduationCap,
         popular: idx === 1,
-        closingDate: getFutureDate(14),
         nextOpenDate: null,
       }))
     : defaultPrograms;
   
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const [formData, setFormData] = useState({
     // Child Info
     childName: "",
@@ -160,6 +148,13 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
 
   const updateForm = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[field];
+        return copy;
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -219,6 +214,56 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
       });
       return;
     }
+
+    if (step === 2) {
+      const step2Errors: Record<string, string> = {};
+      if (!formData.childName.trim()) {
+        step2Errors.childName = "Nama lengkap anak wajib diisi";
+      }
+      if (!formData.birthDate) {
+        step2Errors.birthDate = "Tanggal lahir anak wajib diisi";
+      }
+      if (!formData.gender) {
+        step2Errors.gender = "Jenis kelamin anak wajib dipilih";
+      }
+
+      if (Object.keys(step2Errors).length > 0) {
+        setErrors(step2Errors);
+        toast({
+          title: "Data Belum Lengkap",
+          description: "Mohon lengkapi seluruh field wajib data anak (*)",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    if (step === 3) {
+      const step3Errors: Record<string, string> = {};
+      if (!formData.parentName.trim()) {
+        step3Errors.parentName = "Nama orang tua/wali wajib diisi";
+      }
+      if (!formData.parentPhone.trim()) {
+        step3Errors.parentPhone = "Nomor telepon wajib diisi";
+      } else {
+        const phoneDigits = formData.parentPhone.replace(/\D/g, "");
+        if (phoneDigits.length < 9) {
+          step3Errors.parentPhone = "Nomor telepon minimal 9 digit angka";
+        }
+      }
+
+      if (Object.keys(step3Errors).length > 0) {
+        setErrors(step3Errors);
+        toast({
+          title: "Data Belum Lengkap",
+          description: "Mohon lengkapi nama orang tua dan nomor telepon valid (*)",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    setErrors({});
     if (step < 4) setStep(step + 1);
   };
 
@@ -271,10 +316,6 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
 
             <div className="space-y-3">
               {programs.map((program) => {
-                const remainingQuota = program.quota - program.enrolled;
-                const quotaPercentage = (program.enrolled / program.quota) * 100;
-                const daysRemaining = differenceInDays(program.closingDate, new Date());
-                const hoursRemaining = differenceInHours(program.closingDate, new Date());
                 const isOpen = program.status === "open";
                 const isFull = program.status === "full";
                 const isClosed = program.status === "closed";
@@ -332,47 +373,29 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                         <span>{program.schedule}</span>
                       </div>
 
-                      {/* Quota & Countdown Info */}
-                      <div className="bg-muted/50 rounded-lg p-3 mb-3 space-y-2">
-                        {/* Quota */}
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1.5">
-                            <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="text-muted-foreground">Sisa Kuota:</span>
+                      {/* Quota & Status Info */}
+                      <div className="bg-muted/50 rounded-lg p-3 mb-3 space-y-1.5">
+                        {program.quota ? (
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-muted-foreground">Kapasitas Kelas:</span>
+                            </div>
+                            <span className="font-semibold text-foreground">
+                              {program.quota} anak / kelas
+                            </span>
                           </div>
-                          <span className={`font-bold ${remainingQuota <= 3 ? "text-red-600" : "text-green-600"}`}>
-                            {remainingQuota} / {program.quota}
+                        ) : null}
+
+                        <div className="flex items-center justify-between text-xs pt-1 border-t border-border/50">
+                          <div className="flex items-center gap-1.5">
+                            <CalendarCheck className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-muted-foreground">Status Pendaftaran:</span>
+                          </div>
+                          <span className={`font-medium ${isOpen ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600"}`}>
+                            {isOpen ? "Dibuka untuk sesi trial" : isFull ? "Kuota Penuh" : "Ditutup"}
                           </span>
                         </div>
-                        <Progress 
-                          value={quotaPercentage} 
-                          className={`h-1.5 ${quotaPercentage >= 90 ? "[&>div]:bg-destructive" : quotaPercentage >= 70 ? "[&>div]:bg-highlight" : ""}`} 
-                        />
-
-                        {/* Countdown or Status */}
-                        {isOpen && daysRemaining >= 0 && (
-                          <div className="flex items-center justify-between text-xs pt-1">
-                            <div className="flex items-center gap-1.5">
-                              <Timer className="h-3.5 w-3.5 text-highlight" />
-                              <span className="text-muted-foreground">Pendaftaran ditutup:</span>
-                            </div>
-                            <span className={`font-bold ${daysRemaining <= 3 ? "text-red-600" : "text-amber-600"}`}>
-                              {daysRemaining > 0
-                                ? `${daysRemaining} hari lagi`
-                                : `${hoursRemaining} jam lagi`
-                              }
-                            </span>
-                          </div>
-                        )}
-
-                        {(isFull || isClosed) && program.nextOpenDate && (
-                          <div className="flex items-center gap-2 text-xs pt-1 bg-blue-50 dark:bg-blue-950/30 rounded-md p-2 -mx-1">
-                            <CalendarCheck className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                            <span className="text-blue-700 dark:text-blue-300">
-                              Dibuka kembali: <strong>{format(program.nextOpenDate, "d MMMM yyyy", { locale: idLocale })}</strong>
-                            </span>
-                          </div>
-                        )}
                       </div>
 
                       <div className="flex flex-wrap gap-1 mb-3">
@@ -415,8 +438,12 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                       id="childName"
                       placeholder="Contoh: Aisyah Putri Ramadhani"
                       value={formData.childName}
+                      className={errors.childName ? "border-destructive focus-visible:ring-destructive" : ""}
                       onChange={(e) => updateForm("childName", e.target.value)}
                     />
+                    {errors.childName && (
+                      <p className="text-xs text-destructive font-medium">{errors.childName}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -436,8 +463,12 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                         id="birthDate"
                         type="date"
                         value={formData.birthDate}
+                        className={errors.birthDate ? "border-destructive focus-visible:ring-destructive" : ""}
                         onChange={(e) => updateForm("birthDate", e.target.value)}
                       />
+                      {errors.birthDate && (
+                        <p className="text-xs text-destructive font-medium">{errors.birthDate}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label>Jenis Kelamin *</Label>
@@ -445,7 +476,7 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                         value={formData.gender}
                         onValueChange={(value) => updateForm("gender", value)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className={errors.gender ? "border-destructive focus:ring-destructive" : ""}>
                           <SelectValue placeholder="Pilih" />
                         </SelectTrigger>
                         <SelectContent>
@@ -453,6 +484,9 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                           <SelectItem value="female">Perempuan</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors.gender && (
+                        <p className="text-xs text-destructive font-medium">{errors.gender}</p>
+                      )}
                     </div>
                   </div>
 
@@ -504,8 +538,12 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                     id="parentName"
                     placeholder="Nama lengkap"
                     value={formData.parentName}
+                    className={errors.parentName ? "border-destructive focus-visible:ring-destructive" : ""}
                     onChange={(e) => updateForm("parentName", e.target.value)}
                   />
+                  {errors.parentName && (
+                    <p className="text-xs text-destructive font-medium">{errors.parentName}</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -514,10 +552,14 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                     <Input
                       id="parentPhone"
                       type="tel"
-                      placeholder="08xxx"
+                      placeholder="08xxx (minimal 9 digit)"
                       value={formData.parentPhone}
+                      className={errors.parentPhone ? "border-destructive focus-visible:ring-destructive" : ""}
                       onChange={(e) => updateForm("parentPhone", e.target.value)}
                     />
+                    {errors.parentPhone && (
+                      <p className="text-xs text-destructive font-medium">{errors.parentPhone}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="parentEmail">Email *</Label>
