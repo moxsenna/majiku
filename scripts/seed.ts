@@ -62,6 +62,7 @@ async function main() {
     .insert(classes)
     .values([
       {
+        tenantId: "tnt_1",
         id: "cls_1",
         name: "Baby Bee",
         description: "Sensory & stimulasi motorik untuk usia 6-12 bulan",
@@ -73,6 +74,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "cls_2",
         name: "Little Explorer",
         description: "Eksplorasi sensorik, bahasa, dan motorik kasar usia 1-2 tahun",
@@ -84,6 +86,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "cls_3",
         name: "Smart Kids",
         description: "Pra-calistung, sosialisasi, dan kemandirian usia 3-4 tahun",
@@ -95,6 +98,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "cls_4",
         name: "Creative Junior",
         description: "Seni lukis, kriya tangan, musik, & sains dasar usia 5-6 tahun",
@@ -113,6 +117,7 @@ async function main() {
     .insert(tutors)
     .values([
       {
+        tenantId: "tnt_1",
         id: "tut_1",
         userId: "usr_tutor",
         name: "Rina Wulandari, S.Pd.",
@@ -121,6 +126,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "tut_2",
         userId: null,
         name: "Budi Santoso, M.Pd.",
@@ -129,6 +135,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "tut_3",
         userId: null,
         name: "Siti Nurhaliza, S.Psi.",
@@ -202,6 +209,7 @@ async function main() {
     .insert(students)
     .values([
       {
+        tenantId: "tnt_1",
         id: "stu_1",
         name: "Ahmad Rizky Pratama",
         dateOfBirth: "2024-05-10",
@@ -213,6 +221,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "stu_2",
         name: "Aisyah Putri Azzahra",
         dateOfBirth: "2024-08-15",
@@ -224,6 +233,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "stu_3",
         name: "Bilal Al-Fatih",
         dateOfBirth: "2023-03-20",
@@ -235,6 +245,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "stu_4",
         name: "Chantika Dewi",
         dateOfBirth: "2023-11-12",
@@ -246,6 +257,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "stu_5",
         name: "Danendra Rayyan",
         dateOfBirth: "2022-07-08",
@@ -257,6 +269,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "stu_6",
         name: "Elvira Kirana",
         dateOfBirth: "2022-09-25",
@@ -268,6 +281,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "stu_7",
         name: "Fathan Maulana",
         dateOfBirth: "2021-04-14",
@@ -279,6 +293,7 @@ async function main() {
         isActive: true,
       },
       {
+        tenantId: "tnt_1",
         id: "stu_8",
         name: "Giselle Anastasya",
         dateOfBirth: "2021-12-02",
@@ -616,6 +631,7 @@ async function main() {
     .insert(waitingList)
     .values([
       {
+        tenantId: "tnt_1",
         id: "wl_1",
         studentName: "Kenzo Alfarizi",
         parentName: "Orang Tua Demo",
@@ -628,6 +644,7 @@ async function main() {
         notes: "Antrean utama kelas Baby Bee",
       },
       {
+        tenantId: "tnt_1",
         id: "wl_2",
         studentName: "Lavinia Quinn",
         parentName: "Maya Indah",
@@ -642,6 +659,7 @@ async function main() {
         notes: "Sudah dikirim notifikasi ketersediaan slot",
       },
       {
+        tenantId: "tnt_1",
         id: "wl_3",
         studentName: "Muhammad Rafa",
         parentName: "Rudi Hartono",
