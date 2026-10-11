@@ -16,6 +16,7 @@ async function main() {
     .insert(trialApplications)
     .values([
       {
+        tenantId: "tnt_1",
         id: "trialsub1",
         parentUserId: "usr_parent",
         childName: "Budi Santoso Jr",
@@ -25,6 +26,7 @@ async function main() {
         status: "submitted",
       },
       {
+        tenantId: "tnt_1",
         id: "trialsch1",
         childName: "Siti Aminah Jr",
         programKey: "daycare",
@@ -36,6 +38,7 @@ async function main() {
         status: "scheduled",
       },
       {
+        tenantId: "tnt_1",
         id: "trialrec1",
         childName: "Raka Pratama Jr",
         programKey: "toddler",

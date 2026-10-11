@@ -34,6 +34,7 @@ async function main() {
 
   const now = Date.now();
   const rows = demoAnnouncements.map((a) => ({
+    tenantId: "tnt_1",
     id: a.id,
     title: a.title,
     body: a.body,
