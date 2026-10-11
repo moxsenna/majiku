@@ -1,11 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, desc, eq, gte, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, lte, or, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { attendance, studentEnrollments, students, classes, tutors, tutorAttendance } from "@/db/schema";
+import { attendance, studentEnrollments, students, classes, tutors, tutorAttendance, tutorClassAssignments } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireRoles, resolveTenantIdForUser } from "@/server/authz";
 import { todayInWib, timeInWib } from "@/lib/datetime";
 
 export interface AttendanceRow {
@@ -42,6 +43,35 @@ async function getSessionSafely() {
   }
 }
 
+/**
+ * Kondisi scope tenant untuk staff (admin/tutor):
+ * admin -> seluruh siswa lembaganya; tutor -> hanya kelas penugasannya di lembaganya.
+ * Dipanggil dengan drizzle `inArray` pada kolom classId/tenantId terkait.
+ */
+async function tenantScopeConditions(
+  session: NonNullable<Awaited<ReturnType<typeof getSessionSafely>>>,
+  role: "admin" | "tutor"
+): Promise<{ tenantCondition: ReturnType<typeof eq>; assignedClassIds: string[] | null } | null> {
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) return null; // akun staff tanpa lembaga -> tidak melihat apa pun
+
+  if (role === "admin") {
+    return { tenantCondition: eq(students.tenantId, tenantId), assignedClassIds: null };
+  }
+
+  const assignedClassIds = await db
+    .select({ id: classes.id })
+    .from(tutorClassAssignments)
+    .innerJoin(tutors, eq(tutors.id, tutorClassAssignments.tutorId))
+    .innerJoin(classes, eq(classes.id, tutorClassAssignments.classId))
+    .where(and(eq(tutors.userId, session.user.id), eq(classes.tenantId, tenantId)));
+
+  return {
+    tenantCondition: eq(students.tenantId, tenantId),
+    assignedClassIds: assignedClassIds.map((c) => c.id),
+  };
+}
+
 export async function getTodayAttendance(): Promise<AttendanceRow[]> {
   const session = await getSessionSafely();
   if (!session) return [];
@@ -55,12 +85,21 @@ export async function getTodayAttendance(): Promise<AttendanceRow[]> {
   const today = todayInWib();
   const conditions = [eq(attendance.date, today)];
 
-  if (!isAdmin && isParent) {
+  if (!isAdmin && !isTutor && isParent) {
     conditions.push(
       session.user.email
         ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
         : eq(students.parentUserId, session.user.id)
     );
+  } else if (!isParent) {
+    // Isolasi tenant staff: admin lembaga -> lembaganya; tutor -> kelas penugasannya saja
+    const scope = await tenantScopeConditions(session, isTutor && !isAdmin ? "tutor" : "admin");
+    if (!scope) return [];
+    conditions.push(scope.tenantCondition);
+    if (scope.assignedClassIds) {
+      if (scope.assignedClassIds.length === 0) return [];
+      conditions.push(inArray(attendance.classId, scope.assignedClassIds));
+    }
   }
 
   const rows = await db
@@ -117,12 +156,20 @@ export async function getMonthlyAttendance(year: number, month: number): Promise
     lte(attendance.date, endDate),
   ];
 
-  if (!isAdmin && isParent) {
+  if (!isAdmin && !isTutor && isParent) {
     conditions.push(
       session.user.email
         ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
         : eq(students.parentUserId, session.user.id)
     );
+  } else if (!isParent) {
+    const scope = await tenantScopeConditions(session, isTutor && !isAdmin ? "tutor" : "admin");
+    if (!scope) return [];
+    conditions.push(scope.tenantCondition);
+    if (scope.assignedClassIds) {
+      if (scope.assignedClassIds.length === 0) return [];
+      conditions.push(inArray(attendance.classId, scope.assignedClassIds));
+    }
   }
 
   const rows = await db
@@ -194,12 +241,20 @@ export async function getAttendanceEnrollments(): Promise<AttendanceEnrollmentRo
 
   const conditions = [eq(studentEnrollments.isActive, true)];
 
-  if (!isAdmin && isParent) {
+  if (!isAdmin && !isTutor && isParent) {
     conditions.push(
       session.user.email
         ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
         : eq(students.parentUserId, session.user.id)
     );
+  } else if (!isParent) {
+    const scope = await tenantScopeConditions(session, isTutor && !isAdmin ? "tutor" : "admin");
+    if (!scope) return [];
+    conditions.push(scope.tenantCondition);
+    if (scope.assignedClassIds) {
+      if (scope.assignedClassIds.length === 0) return [];
+      conditions.push(inArray(studentEnrollments.classId, scope.assignedClassIds));
+    }
   }
 
   const rows = await db
@@ -245,13 +300,35 @@ export async function recordStudentCheckIn(input: {
   studentId: string;
   classId?: string;
 }) {
-  const session = await getSessionSafely();
-  if (!session) throw new Error("Unauthorized");
+  const session = await requireRoles("admin", "tutor", "moderator");
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
+
+  // Guard tenant: siswa wajib milik lembaga pemanggil
+  const [student] = await db
+    .select({ id: students.id, tenantId: students.tenantId })
+    .from(students)
+    .where(eq(students.id, input.studentId))
+    .limit(1);
+  if (!student || student.tenantId !== tenantId) {
+    throw new Error("Forbidden: siswa bukan milik lembaga Anda");
+  }
+
   const now = new Date();
   const timeStr = timeInWib(now);
   const today = todayInWib(now);
 
   if (input.attendanceId) {
+    // Pastikan record absensi yang diupdate milik lembaga yang sama
+    const [record] = await db
+      .select({ tenantId: students.tenantId })
+      .from(attendance)
+      .innerJoin(students, eq(students.id, attendance.studentId))
+      .where(eq(attendance.id, input.attendanceId))
+      .limit(1);
+    if (!record || record.tenantId !== tenantId) {
+      throw new Error("Not found: record absensi tidak ditemukan");
+    }
     await db
       .update(attendance)
       .set({
@@ -264,7 +341,8 @@ export async function recordStudentCheckIn(input: {
     return { success: true, time: timeStr };
   }
 
-  // Create new attendance record
+  // Create new attendance record — kelas diambil dari enrollment aktif siswa.
+  // Tidak ada lagi fallback kelas acak: siswa tanpa kelas ditolak dengan pesan jelas.
   let classId = input.classId;
   if (!classId) {
     const [enrollment] = await db
@@ -276,12 +354,17 @@ export async function recordStudentCheckIn(input: {
   }
 
   if (!classId) {
-    const [firstClass] = await db.select({ id: classes.id }).from(classes).limit(1);
-    classId = firstClass?.id;
+    throw new Error("Siswa belum terdaftar di kelas mana pun — daftarkan kelas terlebih dahulu");
   }
 
-  if (!classId) {
-    throw new Error("Kelas untuk siswa tidak ditemukan");
+  // Kelas wajib milik lembaga yang sama
+  const [classRow] = await db
+    .select({ tenantId: classes.tenantId })
+    .from(classes)
+    .where(eq(classes.id, classId))
+    .limit(1);
+  if (!classRow || classRow.tenantId !== tenantId) {
+    throw new Error("Forbidden: kelas bukan milik lembaga Anda");
   }
 
   const id = crypto.randomUUID();
@@ -299,8 +382,20 @@ export async function recordStudentCheckIn(input: {
 }
 
 export async function recordStudentCheckOut(input: { attendanceId: string }) {
-  const session = await getSessionSafely();
-  if (!session) throw new Error("Unauthorized");
+  const session = await requireRoles("admin", "tutor", "moderator");
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
+
+  const [record] = await db
+    .select({ id: attendance.id, tenantId: students.tenantId })
+    .from(attendance)
+    .innerJoin(students, eq(students.id, attendance.studentId))
+    .where(eq(attendance.id, input.attendanceId))
+    .limit(1);
+  if (!record || record.tenantId !== tenantId) {
+    throw new Error("Not found: record absensi tidak ditemukan");
+  }
+
   const now = new Date();
   const timeStr = timeInWib(now);
 
@@ -324,7 +419,8 @@ export async function recordTutorAttendance(input: {
   const session = await getSessionSafely();
   if (!session) throw new Error("Unauthorized");
   const now = new Date();
-  const timeStr = input.time || timeInWib(now);
+  // Waktu selalu dari server (WIB) — jangan percaya jam perangkat klien
+  const timeStr = timeInWib(now);
   const today = todayInWib(now);
 
   // Cari profil tutor berdasarkan user_id

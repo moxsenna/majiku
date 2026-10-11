@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { sql, eq, ne, desc, asc } from "drizzle-orm";
+import { sql, eq, ne, desc, asc, and } from "drizzle-orm";
 import { db } from "@/db";
 import {
   students,
@@ -15,6 +15,7 @@ import {
   tenants,
 } from "@/db/schema";
 import { auth } from "@/server/auth";
+import { requireTenantContext } from "@/server/authz";
 import { isDemoEmail } from "@/lib/demo";
 import { todayInWib } from "@/lib/datetime";
 import {
@@ -128,13 +129,16 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
   }
 
   // --- QUERY REAL DATABASE UNTUK AKUN NON-DEMO (PRODUKSI) ---
+  // Isolasi tenant: admin hanya melihat data lembaganya sendiri.
+  const ctx = await requireTenantContext();
+  const tenantId = ctx.tenantId;
   const todayDate = todayInWib();
 
   // 1. Total Siswa Aktif
   const [studentsResult] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(students)
-    .where(eq(students.isActive, true));
+    .where(and(eq(students.isActive, true), eq(students.tenantId, tenantId)));
   const totalStudents = studentsResult?.count || 0;
 
   // 2. Kelas & Total Kapasitas
@@ -146,7 +150,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
       schedule: classes.schedule,
     })
     .from(classes)
-    .where(eq(classes.isActive, true))
+    .where(and(eq(classes.isActive, true), eq(classes.tenantId, tenantId)))
     .orderBy(asc(classes.name));
 
   const totalCapacity = dbClasses.reduce(
@@ -154,14 +158,15 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
     0
   );
 
-  // Ambil count enrollment per kelas
+  // Ambil count enrollment per kelas (hanya kelas milik tenant)
   const enrollmentCounts = await db
     .select({
       classId: studentEnrollments.classId,
       count: sql<number>`count(*)::int`,
     })
     .from(studentEnrollments)
-    .where(eq(studentEnrollments.isActive, true))
+    .innerJoin(classes, eq(classes.id, studentEnrollments.classId))
+    .where(and(eq(studentEnrollments.isActive, true), eq(classes.tenantId, tenantId)))
     .groupBy(studentEnrollments.classId);
 
   const enrollmentMap = new Map<string, number>();
@@ -186,7 +191,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
       phone: tutors.phone,
     })
     .from(tutors)
-    .where(eq(tutors.isActive, true))
+    .where(and(eq(tutors.isActive, true), eq(tutors.tenantId, tenantId)))
     .orderBy(asc(tutors.name));
 
   // Ambil penugasan kelas tutor
@@ -197,7 +202,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
     })
     .from(tutorClassAssignments)
     .innerJoin(classes, eq(classes.id, tutorClassAssignments.classId))
-    .where(eq(tutorClassAssignments.isActive, true));
+    .where(and(eq(tutorClassAssignments.isActive, true), eq(classes.tenantId, tenantId)));
 
   const tutorClassMap = new Map<string, string>();
   for (const ta of tutorAssignments) {
@@ -224,7 +229,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
     .from(attendance)
     .innerJoin(students, eq(students.id, attendance.studentId))
     .leftJoin(classes, eq(classes.id, attendance.classId))
-    .where(eq(attendance.date, todayDate))
+    .where(and(eq(attendance.date, todayDate), eq(students.tenantId, tenantId)))
     .limit(20);
 
   const todayPresentCount = todayRecords.filter(
@@ -239,13 +244,22 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
   const [unpaidResult] = await db
     .select({ sum: sql<number>`coalesce(sum(${invoices.total}::numeric), 0)::int` })
     .from(invoices)
-    .where(ne(invoices.status, "paid"));
+    .innerJoin(students, eq(students.id, invoices.studentId))
+    .where(and(ne(invoices.status, "paid"), eq(students.tenantId, tenantId)));
   const unpaidInvoicesSum = unpaidResult?.sum || 0;
 
+  // Pendapatan bulan berjalan (WIB), bukan akumulasi historis seluruh invoice lunas
   const [paidResult] = await db
     .select({ sum: sql<number>`coalesce(sum(${invoices.total}::numeric), 0)::int` })
     .from(invoices)
-    .where(eq(invoices.status, "paid"));
+    .innerJoin(students, eq(students.id, invoices.studentId))
+    .where(
+      and(
+        eq(invoices.status, "paid"),
+        eq(students.tenantId, tenantId),
+        sql`date_trunc('month', ${invoices.paidAt} AT TIME ZONE 'Asia/Jakarta') = date_trunc('month', now() AT TIME ZONE 'Asia/Jakarta')`
+      )
+    );
   const monthlyRevenue = paidResult?.sum || 0;
 
   const recentInvoices = await db
@@ -258,6 +272,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
     })
     .from(invoices)
     .innerJoin(students, eq(students.id, invoices.studentId))
+    .where(eq(students.tenantId, tenantId))
     .orderBy(desc(invoices.createdAt))
     .limit(5);
 
@@ -274,7 +289,8 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
   const [draftReportsResult] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(dailyReports)
-    .where(eq(dailyReports.status, "draft"));
+    .innerJoin(students, eq(students.id, dailyReports.studentId))
+    .where(and(eq(dailyReports.status, "draft"), eq(students.tenantId, tenantId)));
   const pendingReportsCount = draftReportsResult?.count || 0;
 
   const recentReports = await db
@@ -290,6 +306,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
     .from(dailyReports)
     .innerJoin(students, eq(students.id, dailyReports.studentId))
     .leftJoin(classes, eq(classes.id, dailyReports.classId))
+    .where(eq(students.tenantId, tenantId))
     .orderBy(desc(dailyReports.createdAt))
     .limit(5);
 
@@ -335,11 +352,8 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
 }
 
 export async function getTenantProfile() {
-  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
-  if (!session) return null;
-
-  const [t] = await db.select().from(tenants).limit(1);
-  return t || null;
+  const ctx = await requireTenantContext();
+  return ctx.tenant || null;
 }
 
 export async function updateTenantProfile(input: {
@@ -347,34 +361,23 @@ export async function updateTenantProfile(input: {
   phone?: string;
   address?: string;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
-  if (!session) throw new Error("Unauthorized");
+  const ctx = await requireTenantContext();
 
-  const [existingTenant] = await db.select().from(tenants).limit(1);
-  if (existingTenant) {
-    await db
-      .update(tenants)
-      .set({
-        name: input.name,
-        whatsapp: input.phone || null,
-        address: input.address || null,
-        updatedAt: new Date(),
-      })
-      .where(eq(tenants.id, existingTenant.id));
-  } else {
-    const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    await db.insert(tenants).values({
-      id: crypto.randomUUID(),
+  // Akun demo tidak boleh mengubah data lembaga operasional nyata
+  if (ctx.isDemo) {
+    return { success: true, demo: true };
+  }
+
+  await db
+    .update(tenants)
+    .set({
       name: input.name,
-      slug: slug || "daycare",
       whatsapp: input.phone || null,
       address: input.address || null,
-      city: "Jakarta",
-      priceFrom: "2000000",
-      type: "daycare",
-      isActive: true,
-    });
-  }
+      updatedAt: new Date(),
+    })
+    // WAJIB scope ke tenant milik admin — bukan baris pertama tabel
+    .where(eq(tenants.id, ctx.tenantId));
 
   return { success: true };
 }

@@ -98,12 +98,16 @@ export async function POST(req: Request) {
   const amountMatches = Number(localOrder.amount) === Number(data.amount);
   const currencyMatches = localOrder.currency === (data.currency ?? "IDR");
   const productMatches = localOrder.productKey === (data.product_key ?? localOrder.productKey);
-  if (!amountMatches || !currencyMatches || !productMatches) {
+  if ((!amountMatches || !currencyMatches || !productMatches) && order.paymentStatus !== "paid") {
     await db
       .update(paymentOrders)
       .set({ paymentStatus: "failed", updatedAt: new Date() })
       .where(eq(paymentOrders.id, order.id));
     return Response.json({ error: "Data order tidak cocok" }, { status: 400 });
+  }
+  if ((!amountMatches || !currencyMatches || !productMatches) && order.paymentStatus === "paid") {
+    // Order sudah lunas — jangan pernah menimpa status valid karena data event menyimpang
+    return Response.json({ ok: true, note: "order already paid; mismatch ignored" });
   }
 
   try {
@@ -154,6 +158,20 @@ export async function POST(req: Request) {
     }
 
     if (eventType === "payment.failed" || eventType === "payment.expired") {
+      // Guard status akhir: order yang sudah lunas TIDAK boleh ditimpa failed/expired
+      // (webhook bisa tiba tidak berurutan / terlambat).
+      if (order.paymentStatus === "paid") {
+        await db
+          .insert(paycoreEvents)
+          .values({
+            eventId,
+            paycoreOrderId: data.order_id,
+            eventType,
+            rawPayload: body as unknown as Record<string, unknown>,
+          })
+          .onConflictDoNothing();
+        return Response.json({ ok: true, note: "order already paid; status preserved" });
+      }
       const status = eventType === "payment.failed" ? "failed" : "expired";
       await db
         .update(paymentOrders)

@@ -33,9 +33,11 @@ export default function PaymentReturnPage() {
               <span>Verifikasi Otomatis</span>
             </div>
             <p className="text-muted-foreground text-[11px] leading-normal">
-              Status tagihan SPP Anda akan berubah menjadi <strong>Lunas</strong> dalam 1–3 menit
-              setelah sistem perbankan / e-wallet menyelesaikan transaksi. Anda tidak perlu
-              mengunggah bukti transfer.
+              Status pembayaran Anda akan diperbarui otomatis dalam 1–3 menit setelah
+              sistem perbankan / e-wallet menyelesaikan transaksi — baik untuk tagihan
+              SPP maupun langganan platform MAJIKU. Anda tidak perlu mengunggah bukti
+              transfer. Untuk langganan SaaS, portal lembaga Anda akan aktif setelah
+              pembayaran terkonfirmasi.
             </p>
           </div>
 

@@ -15,10 +15,9 @@ import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { QRCodeScanner } from "@/components/attendance/QRCodeScanner";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Search, QrCode, LogIn, LogOut, Clock, Users,
+  Search, LogIn, LogOut, Clock, Users,
   CheckCircle2, XCircle, AlertCircle, ShieldAlert, Eye,
 } from "lucide-react";
 import { todayInWib } from "@/lib/datetime";
@@ -31,7 +30,6 @@ export default function Attendance() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
-  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
   const [isManualCheckInOpen, setIsManualCheckInOpen] = useState(false);
   const [manualStudentId, setManualStudentId] = useState("");
 
@@ -186,9 +184,6 @@ export default function Attendance() {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setIsManualCheckInOpen(true)}>
             <LogIn className="h-4 w-4 mr-2" /><span className="hidden sm:inline">Manual Check-in</span><span className="sm:hidden">Check-in</span>
-          </Button>
-          <Button variant="hero" size="sm" onClick={() => setIsQrScannerOpen(true)}>
-            <QrCode className="h-4 w-4 mr-2" /><span className="hidden sm:inline">Scan QR Code</span><span className="sm:hidden">Scan QR</span>
           </Button>
         </div>
       </div>
@@ -385,33 +380,8 @@ export default function Attendance() {
         </DialogContent>
       </Dialog>
 
-      {/* QR Code Scanner Dialog */}
-      <Dialog open={isQrScannerOpen} onOpenChange={setIsQrScannerOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Scan QR Code Kehadiran</DialogTitle>
-          </DialogHeader>
-          <div className="py-2">
-            <QRCodeScanner
-              onScanSuccess={(data) => {
-                setIsQrScannerOpen(false);
-                toast({
-                  title: "QR Berhasil Dipindai ✓",
-                  description: `Siswa terverifikasi via QR Code (${data}).`,
-                });
-                queryClient.invalidateQueries({ queryKey: ["attendance-page"] });
-              }}
-              onScanError={(err) => {
-                toast({
-                  title: "Gagal Pindai QR",
-                  description: err,
-                  variant: "destructive",
-                });
-              }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* QR Code Scanner Dialog — dihapus: scanner QR belum terhubung ke pencatatan
+          kehadiran nyata; presensi memakai Manual Check-in yang persist ke DB */}
 
       {/* Manual Check-in Dialog */}
       <Dialog open={isManualCheckInOpen} onOpenChange={setIsManualCheckInOpen}>

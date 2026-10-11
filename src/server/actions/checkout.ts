@@ -66,40 +66,27 @@ export async function createSubscriptionCheckoutOrder(
     userId = existingUser.id;
   } else if (input.password && input.password.length >= 8) {
     // Daftarkan user baru via BetterAuth jika ada password
-    try {
-      const signUpRes = await auth.api.signUpEmail({
-        body: {
-          name: adminName,
-          email,
-          password: input.password,
-        },
-      });
-      if (signUpRes?.user?.id) {
-        userId = signUpRes.user.id;
-        await db
-          .insert(userRoles)
-          .values({
-            id: randomUUID(),
-            userId: signUpRes.user.id,
-            role: "admin",
-          })
-          .onConflictDoNothing();
-      }
-    } catch {
-      // Fallback: insert manual record
-      const newUserId = randomUUID();
-      await db.insert(user).values({
-        id: newUserId,
+    const signUpRes = await auth.api.signUpEmail({
+      body: {
         name: adminName,
         email,
-      }).onConflictDoNothing();
-      await db.insert(userRoles).values({
-        id: randomUUID(),
-        userId: newUserId,
-        role: "admin",
-      }).onConflictDoNothing();
-      userId = newUserId;
+        password: input.password,
+      },
+    });
+    if (signUpRes?.user?.id) {
+      userId = signUpRes.user.id;
+      await db
+        .insert(userRoles)
+        .values({
+          id: randomUUID(),
+          userId: signUpRes.user.id,
+          role: "admin",
+        })
+        .onConflictDoNothing();
     }
+  } else {
+    // Jangan pernah membuat akun admin tanpa kredensial login
+    throw new Error("Kata sandi wajib diisi (minimal 8 karakter) untuk pendaftaran akun baru");
   }
 
   // 2. Buat / ambil tenant lembaga
@@ -128,8 +115,11 @@ export async function createSubscriptionCheckoutOrder(
       city: "Jakarta",
       priceFrom: String(amount),
       whatsapp: phone || null,
-      isActive: true,
+      // Lembaga BARU non-aktif sampai pembayaran terkonfirmasi webhook PayCore.
+      // Aktivasi hanya terjadi di event payment.succeeded (lihat api/webhooks/paycore).
+      isActive: false,
       isVerified: false,
+      adminUserId: userId,
     })
     .onConflictDoNothing();
   tenantId = newTenantId;
