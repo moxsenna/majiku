@@ -1,94 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   CreditCard, CheckCircle2, Clock, AlertTriangle, Search,
-  Send, Download, TrendingUp, Wallet, Bell, FileText
+  Send, Wallet
 } from "lucide-react";
-
-interface PaymentRecord {
-  id: string;
-  parentName: string;
-  studentName: string;
-  amount: number;
-  dueDate: string;
-  paidDate?: string;
-  status: "paid" | "pending" | "overdue";
-  method?: string;
-  avatar?: string;
-}
-
-const demoPayments: PaymentRecord[] = [
-  {
-    id: "1",
-    parentName: "Ibu Sari Dewi",
-    studentName: "Aisyah",
-    amount: 2500000,
-    dueDate: "2024-01-15",
-    paidDate: "2024-01-10",
-    status: "paid",
-    method: "Transfer Bank",
-  },
-  {
-    id: "2",
-    parentName: "Bapak Andi",
-    studentName: "Budi",
-    amount: 3000000,
-    dueDate: "2024-01-15",
-    paidDate: "2024-01-14",
-    status: "paid",
-    method: "QRIS",
-  },
-  {
-    id: "3",
-    parentName: "Ibu Maya",
-    studentName: "Citra",
-    amount: 2800000,
-    dueDate: "2024-01-20",
-    status: "pending",
-  },
-  {
-    id: "4",
-    parentName: "Ibu Fitri",
-    studentName: "Dimas",
-    amount: 3500000,
-    dueDate: "2024-01-10",
-    status: "overdue",
-  },
-  {
-    id: "5",
-    parentName: "Bapak Hendra",
-    studentName: "Elsa",
-    amount: 2500000,
-    dueDate: "2024-01-25",
-    status: "pending",
-  },
-  {
-    id: "6",
-    parentName: "Ibu Rina",
-    studentName: "Farhan",
-    amount: 3000000,
-    dueDate: "2024-01-05",
-    status: "overdue",
-  },
-  {
-    id: "7",
-    parentName: "Ibu Wati",
-    studentName: "Gita",
-    amount: 2800000,
-    dueDate: "2024-01-12",
-    paidDate: "2024-01-11",
-    status: "paid",
-    method: "Transfer Bank",
-  },
-];
+import { getInvoices, type InvoiceRow } from "@/server/actions/billing";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -100,54 +25,91 @@ const formatCurrency = (amount: number) => {
 
 const statusConfig = {
   paid: { label: "Lunas", color: "bg-success/10 text-success border-success/20", icon: CheckCircle2 },
-  pending: { label: "Pending", color: "bg-warning/10 text-warning border-warning/20", icon: Clock },
+  pending: { label: "Belum Bayar", color: "bg-warning/10 text-warning border-warning/20", icon: Clock },
   overdue: { label: "Terlambat", color: "bg-destructive/10 text-destructive border-destructive/20", icon: AlertTriangle },
+  cancelled: { label: "Dibatalkan", color: "bg-muted text-muted-foreground border-border", icon: Clock },
 };
+
+function normalizePhone(phone: string): string {
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.startsWith("0")) {
+    return "62" + cleaned.slice(1);
+  }
+  if (cleaned.startsWith("62")) {
+    return cleaned;
+  }
+  return "62" + cleaned;
+}
 
 interface RevenueDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  data?: InvoiceRow[];
 }
 
-export function RevenueDetailModal({ open, onOpenChange }: RevenueDetailModalProps) {
+export function RevenueDetailModal({ open, onOpenChange, data: initialData }: RevenueDetailModalProps) {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
 
-  const paidPayments = demoPayments.filter((p) => p.status === "paid");
-  const pendingPayments = demoPayments.filter((p) => p.status === "pending");
-  const overduePayments = demoPayments.filter((p) => p.status === "overdue");
+  const { data: invoices = [] } = useQuery({
+    queryKey: ["invoices"],
+    queryFn: () => getInvoices(),
+    enabled: open,
+    initialData,
+  });
 
-  const totalPaid = paidPayments.reduce((sum, p) => sum + p.amount, 0);
-  const totalPending = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
-  const totalOverdue = overduePayments.reduce((sum, p) => sum + p.amount, 0);
+  const parsedInvoices = useMemo(() => {
+    return invoices.map((inv) => {
+      let mappedStatus: "paid" | "pending" | "overdue" | "cancelled" = "pending";
+      if (inv.status === "paid") mappedStatus = "paid";
+      else if (inv.status === "overdue") mappedStatus = "overdue";
+      else if (inv.status === "cancelled") mappedStatus = "cancelled";
+      else mappedStatus = "pending";
 
-  const filteredPayments = demoPayments.filter(
-    (p) =>
-      p.parentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.studentName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSendReminder = (payment: PaymentRecord) => {
-    toast({
-      title: "Notifikasi Terkirim",
-      description: `Pengingat tagihan berhasil dikirim ke ${payment.parentName}`,
+      return {
+        id: inv.id,
+        parentName: inv.parentName || "Orang Tua",
+        studentName: inv.studentName || "Siswa",
+        parentPhone: inv.parentPhone || null,
+        amount: Number(inv.total ?? inv.amount ?? 0),
+        dueDate: inv.dueDate || "-",
+        status: mappedStatus,
+      };
     });
-  };
+  }, [invoices]);
 
-  const handleBulkReminder = () => {
-    const unpaidPayments = [...pendingPayments, ...overduePayments];
-    toast({
-      title: "Notifikasi Massal Terkirim",
-      description: `Pengingat tagihan dikirim ke ${unpaidPayments.length} orang tua`,
-    });
-  };
+  const paidPayments = useMemo(() => parsedInvoices.filter((p) => p.status === "paid"), [parsedInvoices]);
+  const pendingPayments = useMemo(() => parsedInvoices.filter((p) => p.status === "pending"), [parsedInvoices]);
+  const overduePayments = useMemo(() => parsedInvoices.filter((p) => p.status === "overdue"), [parsedInvoices]);
 
-  const handleExportReport = () => {
-    toast({
-      title: "Laporan Diunduh",
-      description: "Laporan pembayaran berhasil diunduh",
-    });
+  const totalPaid = useMemo(() => paidPayments.reduce((sum, p) => sum + p.amount, 0), [paidPayments]);
+  const totalPending = useMemo(() => pendingPayments.reduce((sum, p) => sum + p.amount, 0), [pendingPayments]);
+  const totalOverdue = useMemo(() => overduePayments.reduce((sum, p) => sum + p.amount, 0), [overduePayments]);
+
+  const filteredPayments = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return parsedInvoices;
+    return parsedInvoices.filter(
+      (p) =>
+        p.parentName.toLowerCase().includes(q) ||
+        p.studentName.toLowerCase().includes(q)
+    );
+  }, [parsedInvoices, searchQuery]);
+
+  const handleSendReminder = (payment: (typeof parsedInvoices)[number]) => {
+    if (!payment.parentPhone) {
+      toast({
+        title: "Nomor WhatsApp Tidak Ditemukan",
+        description: `Tidak ada nomor kontak tersimpan untuk ${payment.parentName}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const phone = normalizePhone(payment.parentPhone);
+    const message = `Halo ${payment.parentName}, mengingatkan tagihan SPP untuk ananda ${payment.studentName} sebesar ${formatCurrency(payment.amount)} dengan tanggal jatuh tempo ${payment.dueDate}. Terima kasih.`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
   };
 
   return (
@@ -156,7 +118,7 @@ export function RevenueDetailModal({ open, onOpenChange }: RevenueDetailModalPro
         <DialogHeader className="p-3 sm:p-4 pb-0">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            Rekap Pendapatan Bulan Ini
+            Rekap Pendapatan & Tagihan
           </DialogTitle>
         </DialogHeader>
 
@@ -167,12 +129,12 @@ export function RevenueDetailModal({ open, onOpenChange }: RevenueDetailModalPro
               <CardContent className="p-2 sm:p-3">
                 <div className="flex items-center gap-1 mb-1">
                   <Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
-                  <span className="text-[10px] sm:text-xs text-muted-foreground">Sudah Bayar</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground">Lunas</span>
                 </div>
                 <p className="text-sm sm:text-lg font-bold text-success">
                   {formatCurrency(totalPaid)}
                 </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">{paidPayments.length} pembayaran</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{paidPayments.length} tagihan</p>
               </CardContent>
             </Card>
             <Card className="bg-warning/5 border-warning/20">
@@ -184,7 +146,7 @@ export function RevenueDetailModal({ open, onOpenChange }: RevenueDetailModalPro
                 <p className="text-sm sm:text-lg font-bold text-warning">
                   {formatCurrency(totalPending)}
                 </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">{pendingPayments.length} pembayaran</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{pendingPayments.length} tagihan</p>
               </CardContent>
             </Card>
             <Card className="bg-destructive/5 border-destructive/20">
@@ -196,21 +158,9 @@ export function RevenueDetailModal({ open, onOpenChange }: RevenueDetailModalPro
                 <p className="text-sm sm:text-lg font-bold text-destructive">
                   {formatCurrency(totalOverdue)}
                 </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">{overduePayments.length} pembayaran</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{overduePayments.length} tagihan</p>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2">
-            <Button onClick={handleBulkReminder} className="flex-1 gap-2 text-xs sm:text-sm h-9 sm:h-10">
-              <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
-              Kirim Semua
-            </Button>
-            <Button variant="outline" onClick={handleExportReport} className="gap-2 text-xs sm:text-sm h-9 sm:h-10">
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              Download
-            </Button>
           </div>
 
           {/* Search */}
@@ -239,33 +189,45 @@ export function RevenueDetailModal({ open, onOpenChange }: RevenueDetailModalPro
 
             <ScrollArea className="h-[35vh] sm:h-[40vh] mt-3">
               <TabsContent value="all" className="mt-0 space-y-2">
-                {filteredPayments.map((payment) => (
-                  <PaymentCard
-                    key={payment.id}
-                    payment={payment}
-                    onSendReminder={handleSendReminder}
-                  />
-                ))}
+                {filteredPayments.length === 0 ? (
+                  <div className="text-center py-8 text-xs text-muted-foreground">Tidak ada data tagihan</div>
+                ) : (
+                  filteredPayments.map((payment) => (
+                    <PaymentCard
+                      key={payment.id}
+                      payment={payment}
+                      onSendReminder={handleSendReminder}
+                    />
+                  ))
+                )}
               </TabsContent>
 
               <TabsContent value="pending" className="mt-0 space-y-2">
-                {[...overduePayments, ...pendingPayments].map((payment) => (
-                  <PaymentCard
-                    key={payment.id}
-                    payment={payment}
-                    onSendReminder={handleSendReminder}
-                  />
-                ))}
+                {overduePayments.length === 0 && pendingPayments.length === 0 ? (
+                  <div className="text-center py-8 text-xs text-muted-foreground">Tidak ada tagihan tertunggak</div>
+                ) : (
+                  [...overduePayments, ...pendingPayments].map((payment) => (
+                    <PaymentCard
+                      key={payment.id}
+                      payment={payment}
+                      onSendReminder={handleSendReminder}
+                    />
+                  ))
+                )}
               </TabsContent>
 
               <TabsContent value="paid" className="mt-0 space-y-2">
-                {paidPayments.map((payment) => (
-                  <PaymentCard
-                    key={payment.id}
-                    payment={payment}
-                    onSendReminder={handleSendReminder}
-                  />
-                ))}
+                {paidPayments.length === 0 ? (
+                  <div className="text-center py-8 text-xs text-muted-foreground">Belum ada tagihan lunas</div>
+                ) : (
+                  paidPayments.map((payment) => (
+                    <PaymentCard
+                      key={payment.id}
+                      payment={payment}
+                      onSendReminder={handleSendReminder}
+                    />
+                  ))
+                )}
               </TabsContent>
             </ScrollArea>
           </Tabs>
@@ -279,10 +241,26 @@ function PaymentCard({
   payment,
   onSendReminder,
 }: {
-  payment: PaymentRecord;
-  onSendReminder: (payment: PaymentRecord) => void;
+  payment: {
+    id: string;
+    parentName: string;
+    studentName: string;
+    parentPhone: string | null;
+    amount: number;
+    dueDate: string;
+    status: "paid" | "pending" | "overdue" | "cancelled";
+  };
+  onSendReminder: (payment: {
+    id: string;
+    parentName: string;
+    studentName: string;
+    parentPhone: string | null;
+    amount: number;
+    dueDate: string;
+    status: "paid" | "pending" | "overdue" | "cancelled";
+  }) => void;
 }) {
-  const config = statusConfig[payment.status];
+  const config = statusConfig[payment.status] || statusConfig.pending;
   const StatusIcon = config.icon;
 
   return (
@@ -290,8 +268,9 @@ function PaymentCard({
       <CardContent className="p-2 sm:p-3">
         <div className="flex items-center gap-2 sm:gap-3">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
-            <AvatarImage src={payment.avatar} />
-            <AvatarFallback className="text-xs">{payment.parentName.slice(0, 2)}</AvatarFallback>
+            <AvatarFallback className="text-xs">
+              {payment.parentName.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="font-medium text-sm truncate">{payment.parentName}</p>
@@ -312,7 +291,8 @@ function PaymentCard({
                 size="icon"
                 variant="ghost"
                 onClick={() => onSendReminder(payment)}
-                className="h-8 w-8 shrink-0"
+                className="h-8 w-8 shrink-0 text-success hover:text-success hover:bg-success/10"
+                title="Kirim pengingat WhatsApp"
               >
                 <Send className="h-3.5 w-3.5" />
               </Button>

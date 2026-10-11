@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
   PartyPopper,
 } from "lucide-react";
 import type { BirthdayEntry } from "@/server/actions/birthdays";
+import { getTenantProfile } from "@/server/actions/adminDashboard";
 
 interface BirthdaysProps {
   entries: BirthdayEntry[];
@@ -70,6 +72,12 @@ function getCountdownBadge(daysUntil: number): {
 }
 
 export default function Birthdays({ entries }: BirthdaysProps) {
+  const { data: tenantProfile } = useQuery({
+    queryKey: ["tenant-profile"],
+    queryFn: () => getTenantProfile(),
+  });
+  const daycareName = tenantProfile?.name || "Lembaga Daycare";
+
   const todayBirthdays = entries.filter((b) => b.daysUntil === 0);
   const weekBirthdays = entries.filter((b) => b.daysUntil <= 7);
 
@@ -193,7 +201,9 @@ export default function Birthdays({ entries }: BirthdaysProps) {
                         className="w-full sm:w-auto"
                       >
                         <a
-                          href={`https://wa.me/${waPhone}`}
+                          href={`https://wa.me/${waPhone}?text=${encodeURIComponent(
+                            `Halo Ayah/Bunda ${student.parentName || ""}, segenap keluarga besar ${daycareName} mengucapkan Selamat Ulang Tahun yang ke-${student.turningAge} untuk ananda ${student.name}! Semoga sehat, ceria, dan tumbuh optimal selalu! 🎂🎉`
+                          )}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -286,7 +296,9 @@ export default function Birthdays({ entries }: BirthdaysProps) {
                       {waPhone ? (
                         <Button asChild variant="soft" size="sm">
                           <a
-                            href={`https://wa.me/${waPhone}`}
+                            href={`https://wa.me/${waPhone}?text=${encodeURIComponent(
+                              `Halo Ayah/Bunda ${student.parentName || ""}, segenap keluarga besar ${daycareName} mengucapkan Selamat Menyambut Ulang Tahun yang ke-${student.turningAge} untuk ananda ${student.name}! Semoga senantiasa sehat dan ceria selalu! 🎂🎉`
+                            )}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >

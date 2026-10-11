@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,6 +44,9 @@ import {
   Loader2,
   Clock,
   Sparkles,
+  Camera,
+  Upload,
+  X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { todayInWib } from "@/lib/datetime";
@@ -99,6 +102,9 @@ export default function DailyReports({
   const [nap, setNap] = useState("");
   const [activities, setActivities] = useState("");
   const [notes, setNotes] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const today = todayInWib();
 
@@ -110,6 +116,84 @@ export default function DailyReports({
     setNap("");
     setActivities("");
     setNotes("");
+    setPhotos([]);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+
+    const files = Array.from(fileList);
+    e.target.value = "";
+
+    if (photos.length + files.length > 6) {
+      toast({
+        title: "Batas foto tercapai",
+        description: `Maksimal 6 foto per laporan (tersisa kuota ${6 - photos.length})`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Format tidak didukung",
+          description: `Format file "${file.name}" harus JPG/PNG/WebP`,
+          variant: "destructive",
+        });
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Ukuran terlalu besar",
+          description: `Ukuran file "${file.name}" melebihi batas 5MB`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("prefix", "reports");
+      for (const file of files) {
+        formData.append("files", file);
+      }
+
+      const res = await fetch("/api/photos", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal mengunggah foto");
+      }
+
+      if (Array.isArray(data.keys)) {
+        setPhotos((prev) => [...prev, ...data.keys]);
+        toast({
+          title: "Foto terunggah",
+          description: `${data.keys.length} foto berhasil diunggah`,
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah foto";
+      toast({
+        title: "Gagal mengunggah foto",
+        description: msg,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removePhoto = (indexToRemove: number) => {
+    setPhotos((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleCreateSubmit = (e: React.FormEvent) => {
@@ -149,6 +233,7 @@ export default function DailyReports({
           nap: nap.trim() || null,
           activities: activities.trim() || null,
           notes: notes.trim() || null,
+          photos: photos.length > 0 ? photos : null,
         });
 
         toast({
@@ -557,6 +642,73 @@ export default function DailyReports({
                   disabled={isPending}
                   rows={2}
                 />
+              </div>
+
+              {/* Upload Foto */}
+              <div className="space-y-2 pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-primary" />
+                    Foto Dokumentasi Kegiatan
+                  </Label>
+                  <span className="text-xs text-muted-foreground">
+                    {photos.length}/6 foto
+                  </span>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  className="hidden"
+                  disabled={isPending || isUploading || photos.length >= 6}
+                />
+
+                {photos.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {photos.map((key, idx) => (
+                      <div
+                        key={key}
+                        className="relative aspect-square rounded-lg overflow-hidden border border-border group bg-muted"
+                      >
+                        <img
+                          src={`/api/photos/${key}`}
+                          alt={`Foto kegiatan ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(idx)}
+                          disabled={isPending || isUploading}
+                          aria-label="Hapus foto"
+                          className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-black/80 text-white rounded-full transition-opacity shadow-sm"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {photos.length < 6 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2 border-dashed"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isPending || isUploading}
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    {isUploading ? "Mengunggah..." : "Tambah Foto Kegiatan"}
+                  </Button>
+                )}
               </div>
             </div>
 

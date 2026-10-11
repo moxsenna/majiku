@@ -32,14 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { AutoFollowUpWidget } from "@/components/crm/AutoFollowUpWidget";
-import { ScheduledMessagesWidget } from "@/components/crm/ScheduledMessagesWidget";
-import { MarketingCampaignWidget } from "@/components/crm/MarketingCampaignWidget";
-import { TicketSystemWidget } from "@/components/crm/TicketSystemWidget";
-import { IntegrationWidget } from "@/components/crm/IntegrationWidget";
 import { ScheduleTrialDialog } from "@/components/crm/ScheduleTrialDialog";
 import { admitTrial } from "@/server/actions/trialProcedures";
 import type {
@@ -54,25 +47,17 @@ import {
   MessageSquare,
   ChevronRight,
   Clock,
-  Zap,
   TrendingUp,
   Users,
   CheckCircle2,
   XCircle,
-  Megaphone,
-  Ticket,
-  Link2,
   LayoutGrid,
   List,
   GraduationCap,
   UserCheck,
   Loader2,
-  Package,
-  Truck,
-  CreditCard,
-  Send,
-  AlertTriangle,
   User,
+  AlertTriangle,
   Heart,
 } from "lucide-react";
 
@@ -185,7 +170,6 @@ export default function CRM({ pipeline = [], schedulingOptions }: CRMProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStageFilter, setSelectedStageFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"pipeline" | "list">("pipeline");
-  const [activeTab, setActiveTab] = useState("pipeline");
 
   // Dialog states
   const [selectedTrial, setSelectedTrial] = useState<TrialPipelineRow | null>(null);
@@ -356,90 +340,59 @@ export default function CRM({ pipeline = [], schedulingOptions }: CRMProps) {
           </Card>
         </div>
 
-        {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
-          {/* Search and Tabs Row */}
-          <div className="space-y-3">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari nama anak, program, ortu, telepon, tutor..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Tabs - Horizontal Scroll on Mobile */}
-            <ScrollArea className="w-full">
-              <TabsList className="inline-flex w-max min-w-full sm:w-auto bg-muted/50 p-1">
-                <TabsTrigger value="pipeline" className="gap-1.5 text-xs sm:text-sm px-2.5 sm:px-3">
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">Pipeline Trial</span>
-                </TabsTrigger>
-                <TabsTrigger value="automation" className="gap-1.5 text-xs sm:text-sm px-2.5 sm:px-3">
-                  <Zap className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">Auto</span>
-                </TabsTrigger>
-                <TabsTrigger value="marketing" className="gap-1.5 text-xs sm:text-sm px-2.5 sm:px-3">
-                  <Megaphone className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">Marketing</span>
-                </TabsTrigger>
-                <TabsTrigger value="tickets" className="gap-1.5 text-xs sm:text-sm px-2.5 sm:px-3">
-                  <Ticket className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">Tickets</span>
-                </TabsTrigger>
-                <TabsTrigger value="integrations" className="gap-1.5 text-xs sm:text-sm px-2.5 sm:px-3">
-                  <Link2 className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">Integrasi</span>
-                </TabsTrigger>
-              </TabsList>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-
-            {/* View Toggle and Filter for Pipeline */}
-            {activeTab === "pipeline" && (
-              <div className="flex items-center justify-between gap-2">
-                <Select value={selectedStageFilter} onValueChange={setSelectedStageFilter}>
-                  <SelectTrigger className="w-[140px] sm:w-[160px] h-8 text-xs">
-                    <SelectValue placeholder="Semua Tahap" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Tahap</SelectItem>
-                    {PIPELINE_STAGES.map((stage) => (
-                      <SelectItem key={stage.id} value={stage.id}>
-                        {stage.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="flex gap-1">
-                  <Button
-                    variant={viewMode === "pipeline" ? "default" : "outline"}
-                    size="icon"
-                    className="w-8 h-8"
-                    onClick={() => setViewMode("pipeline")}
-                    title="Tampilan Kanban"
-                  >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "outline"}
-                    size="icon"
-                    className="w-8 h-8"
-                    onClick={() => setViewMode("list")}
-                    title="Tampilan Daftar"
-                  >
-                    <List className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-            )}
+        {/* Search and Filters */}
+        <div className="space-y-3">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Cari nama anak, program, ortu, telepon, tutor..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
 
-          {/* Pipeline Tab */}
-          <TabsContent value="pipeline" className="mt-0">
+          {/* View Toggle and Filter for Pipeline */}
+          <div className="flex items-center justify-between gap-2">
+            <Select value={selectedStageFilter} onValueChange={setSelectedStageFilter}>
+              <SelectTrigger className="w-[140px] sm:w-[160px] h-8 text-xs">
+                <SelectValue placeholder="Semua Tahap" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Tahap</SelectItem>
+                {PIPELINE_STAGES.map((stage) => (
+                  <SelectItem key={stage.id} value={stage.id}>
+                    {stage.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex gap-1">
+              <Button
+                variant={viewMode === "pipeline" ? "default" : "outline"}
+                size="icon"
+                className="w-8 h-8"
+                onClick={() => setViewMode("pipeline")}
+                title="Tampilan Kanban"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                className="w-8 h-8"
+                onClick={() => setViewMode("list")}
+                title="Tampilan Daftar"
+              >
+                <List className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Pipeline Content */}
+        <div className="mt-0">
             {viewMode === "pipeline" ? (
               <>
                 {/* Mobile: Vertical Accordion Cards View */}
@@ -989,253 +942,8 @@ export default function CRM({ pipeline = [], schedulingOptions }: CRMProps) {
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
 
-          {/* Automation Tab (Mock - untouched) */}
-          <TabsContent value="automation" className="mt-0 space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <AutoFollowUpWidget />
-              <ScheduledMessagesWidget />
-            </div>
-          </TabsContent>
-
-          {/* Marketing Tab (Mock - untouched) */}
-          <TabsContent value="marketing" className="mt-0 space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <MarketingCampaignWidget />
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Send className="w-4 h-4 text-primary" />
-                    Personalisasi Marketing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="p-3 rounded-lg border bg-card">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 rounded-lg bg-pink-500/10 shrink-0">
-                        <span className="text-lg">🎂</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm">Birthday Greetings</p>
-                        <p className="text-xs text-muted-foreground">Kirim ucapan otomatis</p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="bg-success/10 text-success border-success/20 text-[10px] shrink-0"
-                      >
-                        Aktif
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      12 ucapan terkirim bulan ini
-                    </p>
-                  </div>
-
-                  <div className="p-3 rounded-lg border bg-card">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 rounded-lg bg-blue-500/10 shrink-0">
-                        <span className="text-lg">📍</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm">Geo-Targeting</p>
-                        <p className="text-xs text-muted-foreground">Campaign berdasarkan lokasi</p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="bg-success/10 text-success border-success/20 text-[10px] shrink-0"
-                      >
-                        Aktif
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      5 area: Jaksel, Jakbar, Jakpus, Tangerang, Depok
-                    </p>
-                  </div>
-
-                  <div className="p-3 rounded-lg border bg-card">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 rounded-lg bg-purple-500/10 shrink-0">
-                        <span className="text-lg">🛒</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm">Transaction History</p>
-                        <p className="text-xs text-muted-foreground">Segmentasi berdasarkan histori</p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="bg-success/10 text-success border-success/20 text-[10px] shrink-0"
-                      >
-                        Aktif
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      3 segmen: New, Returning, VIP
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Tickets Tab (Mock - untouched) */}
-          <TabsContent value="tickets" className="mt-0 space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <TicketSystemWidget />
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    Analisis Komplain
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2.5 sm:p-3 bg-muted/30 rounded-lg">
-                      <p className="text-xl sm:text-2xl font-bold text-primary">24</p>
-                      <p className="text-[10px] text-muted-foreground">Total</p>
-                    </div>
-                    <div className="p-2.5 sm:p-3 bg-muted/30 rounded-lg">
-                      <p className="text-xl sm:text-2xl font-bold text-success">2.5h</p>
-                      <p className="text-[10px] text-muted-foreground">Avg Resp</p>
-                    </div>
-                    <div className="p-2.5 sm:p-3 bg-muted/30 rounded-lg">
-                      <p className="text-xl sm:text-2xl font-bold">92%</p>
-                      <p className="text-[10px] text-muted-foreground">Resolved</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">TOP KATEGORI</p>
-                    {[
-                      { category: "Billing", count: 8, percent: 33 },
-                      { category: "Informasi", count: 6, percent: 25 },
-                      { category: "Komplain", count: 5, percent: 21 },
-                      { category: "Request", count: 5, percent: 21 },
-                    ].map((item) => (
-                      <div key={item.category} className="flex items-center gap-2">
-                        <span className="text-xs w-16 sm:w-20 truncate">{item.category}</span>
-                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full"
-                            style={{ width: `${item.percent}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-muted-foreground w-6">{item.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Integrations Tab (Mock - untouched) */}
-          <TabsContent value="integrations" className="mt-0 space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <IntegrationWidget />
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <MessageSquare className="w-4 h-4 text-primary" />
-                    WhatsApp Multi-Sender
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="p-3 rounded-lg bg-success/5 border border-success/20">
-                    <p className="text-xs text-muted-foreground mb-2">Sender Aktif</p>
-                    <div className="space-y-2">
-                      {[
-                        { name: "Admin Utama", number: "08123xxxx890", status: "online" },
-                        { name: "CS Marketing", number: "08234xxxx901", status: "online" },
-                        { name: "Backup Sender", number: "08345xxxx012", status: "offline" },
-                      ].map((sender, i) => (
-                        <div key={i} className="flex items-center justify-between p-2 bg-card rounded-lg gap-2">
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{sender.name}</p>
-                            <p className="text-xs text-muted-foreground">{sender.number}</p>
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] shrink-0 ${
-                              sender.status === "online"
-                                ? "bg-success/10 text-success border-success/20"
-                                : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {sender.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <Button variant="outline" className="w-full gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    Tambah Sender
-                  </Button>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Kirim pesan tanpa batas dengan multiple sender
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Additional Integration Cards */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-orange-500/10">
-                      <Truck className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Tracking Ekspedisi</p>
-                      <p className="text-xs text-muted-foreground">Auto update status</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <Badge variant="outline" className="text-[10px]">JNE</Badge>
-                    <Badge variant="outline" className="text-[10px]">J&T</Badge>
-                    <Badge variant="outline" className="text-[10px]">SiCepat</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-green-500/10">
-                      <CreditCard className="w-5 h-5 text-green-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Payment Gateway</p>
-                      <p className="text-xs text-muted-foreground">Terima pembayaran</p>
-                    </div>
-                  </div>
-                  <Button size="sm" className="w-full">Connect</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-blue-500/10">
-                      <Package className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Marketplace</p>
-                      <p className="text-xs text-muted-foreground">Sync order</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <Badge variant="outline" className="text-[10px]">Tokopedia</Badge>
-                    <Badge variant="outline" className="text-[10px]">Shopee</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+        </div>
 
         {/* Trial Detail Dialog */}
         <Dialog open={!!selectedTrial} onOpenChange={() => setSelectedTrial(null)}>

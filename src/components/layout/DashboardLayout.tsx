@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, createContext, useContext, useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -52,11 +53,22 @@ function RootDashboardLayout({
   initialSubtitle?: string;
   initialHideActions?: boolean;
 }) {
+  const router = useRouter();
+  const [searchVal, setSearchVal] = useState("");
   const [headerInfo, setHeaderInfo] = useState<HeaderInfo>({
     title: initialTitle,
     subtitle: initialSubtitle,
     hideNavbarActions: initialHideActions,
   });
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const q = searchVal.trim();
+      if (q) {
+        router.push(`/students?q=${encodeURIComponent(q)}`);
+      }
+    }
+  };
 
   const displayTitle = headerInfo.title ?? initialTitle;
   const displaySubtitle = headerInfo.subtitle ?? initialSubtitle;
@@ -88,7 +100,10 @@ function RootDashboardLayout({
                 <div className="relative hidden md:block">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Cari siswa, staf..."
+                    placeholder="Cari siswa, staf... (Enter)"
+                    value={searchVal}
+                    onChange={(e) => setSearchVal(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
                     className="w-48 lg:w-64 pl-9"
                     variant="filled"
                   />

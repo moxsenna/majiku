@@ -150,8 +150,14 @@ export default function TutorPayout() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
-          { icon: Wallet, label: "Total Gaji", value: formatCurrency(stats.totalPayout), color: "primary" },
-          { icon: TrendingUp, label: "Total Sesi", value: formatCurrency(stats.totalSessions), color: "success" },
+          { icon: Wallet, label: "Total Estimasi Gaji", value: formatCurrency(stats.totalPayout), color: "primary" },
+          {
+            icon: TrendingUp,
+            label: "Estimasi Honor (kuota bulanan)",
+            value: formatCurrency(stats.totalSessions),
+            color: "success",
+            note: "Bukan akumulasi sesi nyata",
+          },
           { icon: Award, label: "Total Bonus", value: formatCurrency(stats.totalBonuses), color: "warning" },
           { icon: Calendar, label: "Jumlah Tutor", value: stats.totalTutors.toString(), color: "info" },
         ].map((s, i) => {
@@ -166,6 +172,9 @@ export default function TutorPayout() {
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                     <p className="text-sm sm:text-lg font-bold truncate">{s.value}</p>
+                    {s.note && (
+                      <p className="text-[10px] text-muted-foreground truncate">{s.note}</p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -241,16 +250,19 @@ export default function TutorPayout() {
                 {/* Summary */}
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border">
                   <div className="text-center p-2 rounded-lg bg-muted/30">
-                    <p className="text-xs text-muted-foreground">Sesi</p>
+                    <p className="text-xs text-muted-foreground">Estimasi Sesi</p>
                     <p className="text-sm font-semibold">{formatCurrency(tutor.sessionEarnings)}</p>
+                    <p className="text-[10px] text-muted-foreground">Kuota bulanan</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-muted/30">
                     <p className="text-xs text-muted-foreground">Bonus</p>
                     <p className="text-sm font-semibold text-success">{formatCurrency(tutor.totalBonuses)}</p>
+                    <p className="text-[10px] text-muted-foreground">Bulan ini</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-primary/10">
-                    <p className="text-xs text-primary">Total</p>
+                    <p className="text-xs text-primary">Estimasi Total</p>
                     <p className="text-sm font-bold text-primary">{formatCurrency(tutor.totalEarnings)}</p>
+                    <p className="text-[10px] text-primary/70">Bukan sesi nyata</p>
                   </div>
                 </div>
               </div>
