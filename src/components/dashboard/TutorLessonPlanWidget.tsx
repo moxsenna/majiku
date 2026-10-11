@@ -1,9 +1,8 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
@@ -11,164 +10,40 @@ import {
   Play, Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+import { listLessonPlans, type LessonPlanRow } from "@/server/actions/lessonPlans";
 
-interface Activity {
-  id: string;
+interface ParsedActivity {
+  id?: string;
   title: string;
-  duration: number;
-  description: string;
-  materials: string[];
-  completed: boolean;
+  durationMinutes: number;
+  description?: string;
+  completed?: boolean;
 }
-
-interface LessonPlan {
-  id: string;
-  title: string;
-  subject: string;
-  className: string;
-  date: string;
-  time: string;
-  status: "upcoming" | "in-progress" | "completed";
-  objectives: string[];
-  activities: Activity[];
-  materials: string[];
-}
-
-const todayLessonPlans: LessonPlan[] = [
-  {
-    id: "1",
-    title: "Montessori - Berhitung 1-10",
-    subject: "Matematika",
-    className: "Kelas Bunga Matahari",
-    date: "23 Desember 2024",
-    time: "08:00 - 10:00",
-    status: "in-progress",
-    objectives: [
-      "Anak mampu mengenal angka 1-10",
-      "Anak mampu menghitung benda konkrit",
-      "Anak mampu menulis angka 1-5"
-    ],
-    activities: [
-      { 
-        id: "1", 
-        title: "Circle Time - Bernyanyi Angka", 
-        duration: 10, 
-        description: "Bernyanyi lagu angka 1-10 bersama sambil tepuk tangan.", 
-        materials: ["Speaker", "Lirik lagu angka"],
-        completed: true 
-      },
-      { 
-        id: "2", 
-        title: "Menghitung Manik-manik", 
-        duration: 20, 
-        description: "Anak menghitung manik-manik dan memasukkan ke wadah sesuai angka.", 
-        materials: ["Manik-manik warna", "Wadah angka 1-10", "Kartu angka"],
-        completed: true 
-      },
-      { 
-        id: "3", 
-        title: "Menulis Angka di Pasir", 
-        duration: 15, 
-        description: "Anak menelusuri angka di nampan pasir mengikuti kartu contoh.", 
-        materials: ["Nampan pasir", "Kartu angka 1-5", "Pensil dummy"],
-        completed: false 
-      },
-      { 
-        id: "4", 
-        title: "Games Tebak Angka", 
-        duration: 15, 
-        description: "Permainan interaktif menebak jumlah benda di kartu gambar.", 
-        materials: ["Kartu gambar benda", "Stiker reward", "Papan skor"],
-        completed: false 
-      },
-    ],
-    materials: [
-      "Speaker", "Manik-manik warna", "Wadah angka 1-10", 
-      "Kartu angka", "Nampan pasir", "Kartu gambar", "Stiker reward"
-    ],
-  },
-  {
-    id: "2",
-    title: "Sensori - Mengenal Tekstur",
-    subject: "Sensori",
-    className: "Kelas Bunga Matahari",
-    date: "23 Desember 2024",
-    time: "10:30 - 11:30",
-    status: "upcoming",
-    objectives: [
-      "Anak mengenal berbagai tekstur",
-      "Anak dapat membedakan halus dan kasar",
-    ],
-    activities: [
-      { 
-        id: "1", 
-        title: "Meraba Kotak Misteri", 
-        duration: 15, 
-        description: "Anak meraba benda dalam kotak tanpa melihat.", 
-        materials: ["Kotak misteri", "Benda tekstur berbeda"],
-        completed: false 
-      },
-      { 
-        id: "2", 
-        title: "Sorting Tekstur", 
-        duration: 20, 
-        description: "Mengelompokkan benda berdasarkan tekstur.", 
-        materials: ["Papan sorting", "Kartu tekstur"],
-        completed: false 
-      },
-    ],
-    materials: ["Kotak misteri", "Benda tekstur", "Papan sorting"],
-  },
-];
 
 export function TutorLessonPlanWidget() {
-  const { toast } = useToast();
-  const [lessonPlans, setLessonPlans] = useState(todayLessonPlans);
-  const [selectedPlan, setSelectedPlan] = useState<LessonPlan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<LessonPlanRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  const toggleActivityComplete = (planId: string, activityId: string) => {
-    setLessonPlans(prev => prev.map(plan => {
-      if (plan.id === planId) {
-        const updatedActivities = plan.activities.map(a => 
-          a.id === activityId ? { ...a, completed: !a.completed } : a
-        );
-        return { ...plan, activities: updatedActivities };
-      }
-      return plan;
-    }));
+  const { data: dbPlans = [] } = useQuery({
+    queryKey: ["tutor-lesson-plans-widget"],
+    queryFn: () => listLessonPlans().catch(() => []),
+  });
 
-    if (selectedPlan?.id === planId) {
-      setSelectedPlan(prev => {
-        if (!prev) return null;
-        const updatedActivities = prev.activities.map(a => 
-          a.id === activityId ? { ...a, completed: !a.completed } : a
-        );
-        return { ...prev, activities: updatedActivities };
-      });
-    }
-
-    toast({
-      title: "Kegiatan diperbarui",
-      description: "Status kegiatan telah disimpan",
-    });
-  };
-
-  const openDetail = (plan: LessonPlan) => {
-    const currentPlan = lessonPlans.find(p => p.id === plan.id);
-    setSelectedPlan(currentPlan || plan);
+  const openDetail = (plan: LessonPlanRow) => {
+    setSelectedPlan(plan);
     setDetailOpen(true);
   };
 
-  const getStatusBadge = (status: LessonPlan["status"]) => {
+  const getStatusBadge = (status: string | null | undefined) => {
     switch (status) {
-      case "in-progress":
-        return <Badge className="bg-success text-success-foreground text-xs px-2 py-0.5 whitespace-nowrap">Hari Ini</Badge>;
+      case "in_progress":
+        return <Badge className="bg-green-500 text-white text-xs px-2 py-0.5 whitespace-nowrap">Hari Ini</Badge>;
       case "upcoming":
         return <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5 whitespace-nowrap">Akan Datang</Badge>;
       case "completed":
         return <Badge className="bg-muted text-muted-foreground text-xs px-2 py-0.5 whitespace-nowrap">Selesai</Badge>;
+      default:
+        return <Badge variant="outline" className="text-xs px-2 py-0.5 whitespace-nowrap">Rencana</Badge>;
     }
   };
 
@@ -178,74 +53,84 @@ export function TutorLessonPlanWidget() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-              Lesson Plan Hari Ini
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              Lesson Plan (RPP)
             </CardTitle>
-            <Badge variant="outline" className="text-xs">{lessonPlans.length} sesi</Badge>
+            <Badge variant="outline" className="text-xs">{dbPlans.length} sesi</Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {lessonPlans.map((plan) => {
-            const completedCount = plan.activities.filter(a => a.completed).length;
-            const progressPercent = (completedCount / plan.activities.length) * 100;
-            
-            return (
-              <div 
-                key={plan.id}
-                className={cn(
-                  "p-3 sm:p-4 rounded-xl border transition-all",
-                  plan.status === "in-progress" 
-                    ? "bg-primary/5 border-primary/20" 
-                    : "bg-muted/30"
-                )}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      {getStatusBadge(plan.status)}
-                      <Badge variant="outline" className="text-xs">
-                        {plan.subject}
-                      </Badge>
+          {dbPlans.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-xl">
+              <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-40" />
+              <p className="text-sm font-medium text-foreground">Belum Ada RPP Terjadwal</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+                Rencana Pelaksanaan Pembelajaran dari kurikulum akan otomatis ditampilkan di sini jika sudah dibuat oleh koordinator.
+              </p>
+            </div>
+          ) : (
+            dbPlans.slice(0, 3).map((plan) => {
+              const activities = Array.isArray(plan.activities) 
+                ? (plan.activities as ParsedActivity[]) 
+                : [];
+
+              return (
+                <div 
+                  key={plan.id}
+                  className={cn(
+                    "p-3 sm:p-4 rounded-xl border transition-all",
+                    plan.status === "in_progress" 
+                      ? "bg-primary/5 border-primary/20" 
+                      : "bg-muted/30"
+                  )}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {getStatusBadge(plan.status)}
+                        {plan.subject && (
+                          <Badge variant="outline" className="text-xs">
+                            {plan.subject}
+                          </Badge>
+                        )}
+                        {plan.className && (
+                          <Badge variant="secondary" className="text-xs">
+                            {plan.className}
+                          </Badge>
+                        )}
+                      </div>
+                      <h4 className="font-semibold text-sm sm:text-base truncate">{plan.title}</h4>
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-1 flex-wrap">
+                        {plan.timeRange && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {plan.timeRange}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Target className="w-3 h-3" />
+                          {activities.length} aktivitas
+                        </span>
+                      </div>
                     </div>
-                    <h4 className="font-semibold text-sm sm:text-base truncate">{plan.title}</h4>
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-1 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {plan.time}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Target className="w-3 h-3" />
-                        {plan.activities.length} kegiatan
-                      </span>
-                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => openDetail(plan)}
+                      className="w-full sm:w-auto flex items-center justify-center gap-1"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Detail RPP</span>
+                    </Button>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => openDetail(plan)}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>Detail</span>
-                  </Button>
                 </div>
-                
-                {plan.status === "in-progress" && (
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">{completedCount}/{plan.activities.length}</span>
-                    </div>
-                    <Progress value={progressPercent} className="h-2" />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </CardContent>
       </Card>
 
-      {/* Detail Dialog - Responsive */}
+      {/* Detail Dialog Read-Only */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] p-0 gap-0">
           {selectedPlan && (
@@ -254,11 +139,13 @@ export function TutorLessonPlanWidget() {
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     {getStatusBadge(selectedPlan.status)}
-                    <Badge variant="outline" className="text-xs">{selectedPlan.subject}</Badge>
+                    {selectedPlan.subject && (
+                      <Badge variant="outline" className="text-xs">{selectedPlan.subject}</Badge>
+                    )}
                   </div>
                   <DialogTitle className="text-lg sm:text-xl">{selectedPlan.title}</DialogTitle>
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    {selectedPlan.className} • {selectedPlan.date} • {selectedPlan.time}
+                    {selectedPlan.className || "Kelas Daycare"} • {selectedPlan.planDate} {selectedPlan.timeRange ? `• ${selectedPlan.timeRange}` : ""}
                   </p>
                 </div>
               </DialogHeader>
@@ -266,100 +153,85 @@ export function TutorLessonPlanWidget() {
               <ScrollArea className="max-h-[calc(90vh-140px)] px-4 sm:px-6 pb-4 sm:pb-6">
                 <div className="space-y-5 mt-4">
                   {/* Objectives */}
-                  <div>
-                    <h4 className="font-semibold text-sm sm:text-base flex items-center gap-2 mb-3">
-                      <Target className="w-4 h-4 text-primary" />
-                      Tujuan Pembelajaran
-                    </h4>
-                    <ul className="space-y-2">
-                      {selectedPlan.objectives.map((obj, index) => (
-                        <li key={index} className="flex items-start gap-2 text-xs sm:text-sm">
-                          <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
-                          <span>{obj}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {Array.isArray(selectedPlan.objectives) && (selectedPlan.objectives as string[]).length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-sm sm:text-base flex items-center gap-2 mb-3">
+                        <Target className="w-4 h-4 text-primary" />
+                        Tujuan Pembelajaran
+                      </h4>
+                      <ul className="space-y-2">
+                        {(selectedPlan.objectives as string[]).map((obj, index) => (
+                          <li key={index} className="flex items-start gap-2 text-xs sm:text-sm">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                            <span>{obj}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {/* Materials */}
-                  <div>
-                    <h4 className="font-semibold text-sm sm:text-base flex items-center gap-2 mb-3">
-                      <Package className="w-4 h-4 text-primary" />
-                      Alat & Material
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedPlan.materials.map((material, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {material}
-                        </Badge>
-                      ))}
+                  {Array.isArray(selectedPlan.materials) && (selectedPlan.materials as string[]).length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-sm sm:text-base flex items-center gap-2 mb-3">
+                        <Package className="w-4 h-4 text-primary" />
+                        Alat & Material
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(selectedPlan.materials as string[]).map((material, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {material}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Activities */}
+                  {/* Activities Read-only */}
                   <div>
                     <h4 className="font-semibold text-sm sm:text-base flex items-center gap-2 mb-3">
                       <Play className="w-4 h-4 text-primary" />
-                      Daftar Kegiatan
+                      Daftar Kegiatan & Pembelajaran
                     </h4>
-                    <div className="space-y-3">
-                      {selectedPlan.activities.map((activity, index) => (
-                        <div 
-                          key={activity.id}
-                          className={cn(
-                            "p-3 sm:p-4 rounded-xl border transition-all cursor-pointer",
-                            activity.completed 
-                              ? "bg-success/5 border-success/20" 
-                              : "bg-muted/30 hover:bg-muted/50"
-                          )}
-                          onClick={() => toggleActivityComplete(selectedPlan.id, activity.id)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <Checkbox 
-                              checked={activity.completed}
-                              onCheckedChange={() => toggleActivityComplete(selectedPlan.id, activity.id)}
-                              className="mt-0.5"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className={cn(
-                                  "w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0",
-                                  activity.completed 
-                                    ? "bg-success text-success-foreground" 
-                                    : "bg-primary/10 text-primary"
-                                )}>
-                                  {activity.completed ? <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" /> : index + 1}
-                                </span>
-                                <h5 className={cn(
-                                  "font-medium text-sm",
-                                  activity.completed && "line-through text-muted-foreground"
-                                )}>
-                                  {activity.title}
-                                </h5>
-                                <Badge variant="outline" className="text-xs">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  {activity.duration}m
-                                </Badge>
+                    {Array.isArray(selectedPlan.activities) && (selectedPlan.activities as ParsedActivity[]).length > 0 ? (
+                      <div className="space-y-3">
+                        {(selectedPlan.activities as ParsedActivity[]).map((activity, index) => (
+                          <div 
+                            key={activity.id || index}
+                            className="p-3 sm:p-4 rounded-xl border bg-muted/30"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold shrink-0 mt-0.5">
+                                {index + 1}
                               </div>
-                              <p className="text-xs sm:text-sm text-muted-foreground mb-2">
-                                {activity.description}
-                              </p>
-                              {activity.materials.length > 0 && (
-                                <div className="flex flex-wrap gap-1 items-center">
-                                  <Package className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                                  {activity.materials.map((material, idx) => (
-                                    <Badge key={idx} variant="secondary" className="text-xs">
-                                      {material}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <h5 className="font-medium text-sm">
+                                    {activity.title}
+                                  </h5>
+                                  <Badge variant="outline" className="text-xs">
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    {activity.durationMinutes || 15}m
+                                  </Badge>
+                                  {activity.completed && (
+                                    <Badge variant="secondary" className="text-xs text-green-600 bg-green-50 dark:bg-green-950/20">
+                                      Selesai
                                     </Badge>
-                                  ))}
+                                  )}
                                 </div>
-                              )}
+                                {activity.description && (
+                                  <p className="text-xs sm:text-sm text-muted-foreground">
+                                    {activity.description}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Tidak ada rincian aktivitas khusus.</p>
+                    )}
                   </div>
                 </div>
               </ScrollArea>

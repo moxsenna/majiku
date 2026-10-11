@@ -30,18 +30,6 @@ interface TutorDashboardProps {
   initialData?: TutorDashboardData;
 }
 
-const defaultNotifications = [
-  { 
-    id: "1", 
-    type: "approval" as const, 
-    title: "Laporan Disetujui", 
-    message: "Laporan harian siswa telah dipublish ke orang tua",
-    studentName: "Siswa",
-    time: "Hari ini",
-    isRead: true,
-  },
-];
-
 const earningsData = {
   baseSalary: 3000000,
   sessionEarnings: 2000000,
@@ -55,7 +43,6 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState(defaultNotifications);
 
   const { data: dashboardData } = useQuery({
     queryKey: ["tutor-dashboard-overview"],
@@ -67,18 +54,31 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
   const isDemo = data?.isDemo ?? true;
   const isAssigned = data?.isAssigned ?? isDemo;
 
-  const handleReviseReport = (notifId: string) => {
-    const notif = notifications.find(n => n.id === notifId);
-    toast({
-      title: "Buka Editor Laporan",
-      description: `Merevisi laporan ${notif?.studentName}`,
-    });
-    router.push("/tutor/progress");
-  };
-
   const displayName = data?.tutorName || user?.name || "Guru Pengajar";
   const studentsList = data?.todayStudents || [];
   const schedulesList = data?.schedules || [];
+
+  // Sumber jujur: tugas pembuatan laporan harian siswa yang pending
+  const honestNotifications = studentsList
+    .filter((s) => s.needsReport)
+    .map((s) => ({
+      id: `report-pending-${s.id}`,
+      type: "reminder" as const,
+      title: "Laporan Belum Dibuat",
+      message: `Laporan perkembangan untuk ${s.name} (${s.class}) belum dibuat hari ini.`,
+      studentName: s.name,
+      time: "Hari ini",
+      isRead: false,
+    }));
+
+  const handleReviseReport = (notifId: string) => {
+    const notif = honestNotifications.find(n => n.id === notifId);
+    toast({
+      title: "Buka Editor Laporan",
+      description: `Mengisi laporan harian ${notif?.studentName || "siswa"}`,
+    });
+    router.push("/tutor/progress");
+  };
 
   return (
     <div className="p-4 lg:p-6 pb-20 lg:pb-6 space-y-6">
@@ -299,7 +299,7 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
 
         {/* Notifications */}
         <TutorNotificationsWidget 
-          notifications={notifications} 
+          notifications={honestNotifications} 
           onReviseReport={handleReviseReport}
         />
 

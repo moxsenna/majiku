@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bell, AlertTriangle, CheckCircle2, FileEdit, ChevronRight } from "lucide-react";
+import { Bell, AlertTriangle, CheckCircle2, FileEdit } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -44,7 +44,6 @@ const typeConfig = {
 export function TutorNotificationsWidget({ 
   notifications, 
   onReviseReport,
-  onMarkRead 
 }: TutorNotificationsWidgetProps) {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -54,21 +53,22 @@ export function TutorNotificationsWidget({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Bell className="w-5 h-5 text-primary" />
-            Notifikasi
+            Notifikasi & Tugas
           </CardTitle>
           {unreadCount > 0 && (
-            <Badge variant="destructive">{unreadCount} baru</Badge>
+            <Badge variant="destructive">{unreadCount} pending</Badge>
           )}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {notifications.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Bell className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">Tidak ada notifikasi</p>
+          <div className="text-center py-6 text-muted-foreground bg-muted/20 rounded-xl">
+            <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-500/70" />
+            <p className="text-sm font-medium text-foreground">Semua Laporan Terpenuhi</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Tidak ada laporan siswa yang tertunda untuk hari ini.</p>
           </div>
         ) : (
-          notifications.slice(0, 4).map((notif) => {
+          notifications.slice(0, 5).map((notif) => {
             const config = typeConfig[notif.type];
             const Icon = config.icon;
             return (
@@ -76,7 +76,7 @@ export function TutorNotificationsWidget({
                 key={notif.id}
                 className={`p-3 rounded-xl border ${
                   !notif.isRead 
-                    ? "border-primary/30 bg-primary/5" 
+                    ? "border-amber-500/30 bg-amber-500/5 dark:bg-amber-950/20" 
                     : "border-transparent bg-muted/50"
                 }`}
               >
@@ -89,7 +89,7 @@ export function TutorNotificationsWidget({
                       <p className="font-medium text-sm">{notif.title}</p>
                       <span className="text-xs text-muted-foreground whitespace-nowrap">{notif.time}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{notif.message}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{notif.message}</p>
                     
                     {notif.type === "rejection" && notif.rejectionReason && (
                       <div className="mt-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
@@ -98,15 +98,15 @@ export function TutorNotificationsWidget({
                       </div>
                     )}
                     
-                    {notif.type === "rejection" && onReviseReport && (
+                    {onReviseReport && (
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="mt-2"
+                        className="mt-2 text-xs h-7"
                         onClick={() => onReviseReport(notif.id)}
                       >
                         <FileEdit className="w-3 h-3 mr-1" />
-                        Revisi Laporan
+                        {notif.type === "rejection" ? "Revisi Laporan" : "Buat Laporan"}
                       </Button>
                     )}
                   </div>
@@ -114,13 +114,6 @@ export function TutorNotificationsWidget({
               </div>
             );
           })
-        )}
-        
-        {notifications.length > 4 && (
-          <Button variant="outline" className="w-full text-sm">
-            Lihat Semua Notifikasi
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
         )}
       </CardContent>
     </Card>
