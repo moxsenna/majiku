@@ -16,6 +16,7 @@ import {
 import { BookOpen, Mail, Lock, Eye, EyeOff, Info, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
+import { getMyRoles, type AppRole } from "@/server/actions/roles";
 
 export default function TutorAuth() {
   const { toast } = useToast();
@@ -41,8 +42,31 @@ export default function TutorAuth() {
         setIsLoading(false);
         return;
       }
+
+      // Verifikasi peran pengajar
+      const roles: AppRole[] = await getMyRoles().catch(() => []);
+      if (!roles.includes("tutor") && !roles.includes("admin")) {
+        toast({
+          title: "Akses Ditolak",
+          description: "Akun ini bukan akun pengajar",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Hormati parameter ?next= untuk rute internal /tutor/*
+      let targetUrl = "/tutor";
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        const nextParam = searchParams.get("next");
+        if (nextParam && nextParam.startsWith("/tutor") && !nextParam.startsWith("//")) {
+          targetUrl = nextParam;
+        }
+      }
+
       toast({ title: "Login Berhasil", description: "Selamat datang di Portal Pengajar / Tutor" });
-      window.location.href = "/tutor";
+      window.location.href = targetUrl;
     } catch (err: any) {
       toast({ title: "Login Gagal", description: err?.message || "Terjadi kesalahan", variant: "destructive" });
       setIsLoading(false);

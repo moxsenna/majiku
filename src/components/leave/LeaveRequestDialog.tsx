@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar, Send } from "lucide-react";
 import { toast } from "sonner";
+import { getAvailableReplacementTutors } from "@/server/actions/leave";
 
 interface LeaveRequestDialogProps {
   children: React.ReactNode;
@@ -40,12 +42,6 @@ const leaveTypes = [
   { value: "emergency", label: "Darurat" },
 ];
 
-const substituteTutors = [
-  { id: "sub1", name: "Ibu Rina (Pengganti)" },
-  { id: "sub2", name: "Pak Budi (Pengganti)" },
-  { id: "admin", name: "Dialihkan ke Admin" },
-];
-
 export function LeaveRequestDialog({ children, onSubmit }: LeaveRequestDialogProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<LeaveRequestData>({
@@ -56,16 +52,23 @@ export function LeaveRequestDialog({ children, onSubmit }: LeaveRequestDialogPro
     substituteId: "admin",
   });
 
+  const { data: replacementTutors = [] } = useQuery({
+    queryKey: ["tutor-available-replacements"],
+    queryFn: getAvailableReplacementTutors,
+  });
+
   const handleSubmit = () => {
-    if (!formData.startDate || !formData.endDate || !formData.reason) {
+    if (!formData.startDate || !formData.endDate || !formData.reason.trim()) {
       toast.error("Mohon lengkapi semua data");
       return;
     }
 
+    if (formData.startDate > formData.endDate) {
+      toast.error("Tanggal mulai tidak boleh lebih besar dari tanggal selesai");
+      return;
+    }
+
     onSubmit?.(formData);
-    toast.success("Pengajuan cuti berhasil dikirim", {
-      description: "Chat Anda akan dialihkan ke Admin selama periode cuti",
-    });
     setOpen(false);
     setFormData({
       type: "sick",
@@ -155,9 +158,10 @@ export function LeaveRequestDialog({ children, onSubmit }: LeaveRequestDialogPro
                 <SelectValue placeholder="Pilih pengganti" />
               </SelectTrigger>
               <SelectContent className="bg-background border shadow-lg z-50">
-                {substituteTutors.map((tutor) => (
+                <SelectItem value="admin">Dialihkan ke Admin</SelectItem>
+                {replacementTutors.map((tutor) => (
                   <SelectItem key={tutor.id} value={tutor.id}>
-                    {tutor.name}
+                    {tutor.name} (Pengganti)
                   </SelectItem>
                 ))}
               </SelectContent>

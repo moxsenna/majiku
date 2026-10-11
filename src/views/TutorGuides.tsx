@@ -2,8 +2,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { 
   ArrowLeft, BookOpen, Play, FileText, CheckCircle2,
-  Clock, Star, ChevronRight, Search, Filter,
-  Video, Download, Award, Bookmark
+  Clock, Search, Video, Award
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -201,14 +200,14 @@ export default function TutorGuides() {
             <Card 
               key={guide.id} 
               className={cn(
-                "cursor-pointer hover:shadow-md transition-shadow",
+                "border",
                 guide.completed && "bg-muted/30"
               )}
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center",
+                    "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
                     guide.type === "video" 
                       ? "bg-red-500/10 text-red-500" 
                       : "bg-blue-500/10 text-blue-500"
@@ -247,7 +246,6 @@ export default function TutorGuides() {
                       )}
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                 </div>
               </CardContent>
             </Card>
@@ -266,42 +264,41 @@ export default function TutorGuides() {
           </Card>
         )}
 
-        {/* Quick Actions */}
+        {/* Informasi Dokumen SOP */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Akses Cepat</CardTitle>
+            <CardTitle className="text-base">Informasi Materi & Dokumen</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full justify-start">
-              <Download className="w-4 h-4 mr-2" />
-              Download Semua Materi (PDF)
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Bookmark className="w-4 h-4 mr-2" />
-              Materi yang Disimpan
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Star className="w-4 h-4 mr-2" />
-              Sertifikat Pelatihan
-            </Button>
+          <CardContent className="space-y-2.5 text-xs text-muted-foreground leading-relaxed">
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-muted/40 border">
+              <FileText className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-foreground">Dokumen Fisik & Kurikulum</p>
+                <p>Buku saku dan berkas standar operasional prosedur fisik tersimpan di ruang administrasi daycare.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-muted/40 border">
+              <Award className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-foreground">Sertifikasi & Pelatihan Berkala</p>
+                <p>Sertifikat orientasi pengajar diterbitkan dan diverifikasi oleh manajemen setelah evaluasi kinerja triwulan.</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Help Card */}
+        {/* Bantuan & Supervisi */}
         <Card className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/30 dark:to-blue-950/30 border-green-200 dark:border-green-800">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
                 <BookOpen className="w-5 h-5 text-green-500" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Butuh Bantuan?</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Hubungi tim pelatihan jika ada pertanyaan tentang materi pembelajaran.
+                <h4 className="font-semibold text-sm mb-1">Pusat Informasi & Supervisi</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Untuk bimbingan teknis mengajar dan klarifikasi implementasi SOP daycare, silakan berkonsultasi langsung dengan Koordinator Pengajar atau Administrator Lembaga.
                 </p>
-                <Button size="sm" variant="outline">
-                  Hubungi Tim Pelatihan
-                </Button>
               </div>
             </div>
           </CardContent>
