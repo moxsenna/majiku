@@ -1,11 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
-import { asc, eq, and } from "drizzle-orm";
+import { asc, eq, and, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { classSchedules, classes } from "@/db/schema";
-import { auth } from "@/server/auth";
-import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 
 export type ScheduleRow = typeof classSchedules.$inferSelect & {
   className: string | null;
@@ -15,19 +13,6 @@ const SCHEDULE_TYPES = ["class", "activity", "event", "holiday"] as const;
 type ScheduleType = (typeof SCHEDULE_TYPES)[number];
 
 const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-async function getSessionSafely() {
-  try {
-    const h = await headers();
-    return await auth.api.getSession({ headers: h });
-  } catch {
-    return null;
-  }
-}
-
-function isAdminOrModerator(roles: AppRole[]): boolean {
-  return roles.includes("admin") || roles.includes("moderator");
-}
 
 function validateScheduleInput(input: {
   title: string;
@@ -56,12 +41,21 @@ function validateScheduleInput(input: {
   return { title };
 }
 
-export async function listSchedules(): Promise<ScheduleRow[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
+async function assertClassExists(classId: string | null | undefined, tenantId: string) {
+  if (classId === null || classId === undefined || classId === "") return null;
+  const rows = await db
+    .select({ id: classes.id })
+    .from(classes)
+    .where(and(eq(classes.id, classId), eq(classes.tenantId, tenantId)))
+    .limit(1);
+  if (rows.length === 0) {
+    throw new Error("Kelas tidak ditemukan");
+  }
+  return classId;
+}
 
-  const roles = await getMyRoles().catch(() => [] as AppRole[]);
-  if (!isAdminOrModerator(roles)) return [];
+export async function listSchedules(): Promise<ScheduleRow[]> {
+  const ctx = await requireTenantContext();
 
   const rows = await db
     .select({
@@ -79,7 +73,8 @@ export async function listSchedules(): Promise<ScheduleRow[]> {
       className: classes.name,
     })
     .from(classSchedules)
-    .leftJoin(classes, eq(classSchedules.classId, classes.id))
+    .innerJoin(classes, eq(classSchedules.classId, classes.id))
+    .where(eq(classes.tenantId, ctx.tenantId))
     .orderBy(asc(classSchedules.dayOfWeek), asc(classSchedules.startTime));
 
   return rows;
@@ -95,37 +90,12 @@ export interface CreateScheduleInput {
   type: string;
 }
 
-async function requireAdminOrModerator() {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login");
-  }
-  const roles = await getMyRoles().catch(() => [] as AppRole[]);
-  if (!isAdminOrModerator(roles)) {
-    throw new Error("Hanya admin yang dapat mengelola jadwal");
-  }
-  return session;
-}
-
-async function assertClassExists(classId?: string | null) {
-  if (classId === null || classId === undefined || classId === "") return null;
-  const rows = await db
-    .select({ id: classes.id })
-    .from(classes)
-    .where(eq(classes.id, classId))
-    .limit(1);
-  if (rows.length === 0) {
-    throw new Error("Kelas tidak ditemukan");
-  }
-  return classId;
-}
-
 export async function createClassSchedule(
   input: CreateScheduleInput
 ): Promise<{ id: string }> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
   const { title } = validateScheduleInput(input);
-  const classId = await assertClassExists(input.classId);
+  const classId = await assertClassExists(input.classId, ctx.tenantId);
 
   const [row] = await db
     .insert(classSchedules)
@@ -148,18 +118,28 @@ export async function updateClassSchedule(
   id: string,
   partial: Partial<CreateScheduleInput> & { isActive?: boolean }
 ): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   const existing = await db
-    .select()
+    .select({
+      id: classSchedules.id,
+      dayOfWeek: classSchedules.dayOfWeek,
+      startTime: classSchedules.startTime,
+      durationMinutes: classSchedules.durationMinutes,
+      type: classSchedules.type,
+    })
     .from(classSchedules)
-    .where(eq(classSchedules.id, id))
+    .innerJoin(classes, eq(classSchedules.classId, classes.id))
+    .where(and(eq(classSchedules.id, id), eq(classes.tenantId, ctx.tenantId)))
     .limit(1);
+
   if (existing.length === 0) {
     throw new Error("Jadwal tidak ditemukan");
   }
 
-  const updateValues: Record<string, unknown> = {};
+  const updateValues: Record<string, unknown> = {
+    updatedAt: new Date(),
+  };
 
   if (partial.title !== undefined) {
     const { title } = validateScheduleInput({
@@ -172,7 +152,7 @@ export async function updateClassSchedule(
     updateValues.title = title;
   }
   if (partial.classId !== undefined) {
-    updateValues.classId = await assertClassExists(partial.classId);
+    updateValues.classId = await assertClassExists(partial.classId, ctx.tenantId);
   }
   if (partial.dayOfWeek !== undefined) {
     if (!Number.isInteger(partial.dayOfWeek) || partial.dayOfWeek < 1 || partial.dayOfWeek > 6) {
@@ -209,20 +189,35 @@ export async function updateClassSchedule(
     updateValues.isActive = partial.isActive;
   }
 
-  if (Object.keys(updateValues).length === 0) return;
+  const scopedSchedules = db
+    .select({ id: classSchedules.id })
+    .from(classSchedules)
+    .innerJoin(classes, eq(classSchedules.classId, classes.id))
+    .where(and(eq(classSchedules.id, id), eq(classes.tenantId, ctx.tenantId)));
 
-  await db
+  const updated = await db
     .update(classSchedules)
     .set(updateValues)
-    .where(and(eq(classSchedules.id, id)));
+    .where(inArray(classSchedules.id, scopedSchedules))
+    .returning({ id: classSchedules.id });
+
+  if (updated.length === 0) {
+    throw new Error("Jadwal tidak ditemukan");
+  }
 }
 
 export async function deleteClassSchedule(id: string): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
+
+  const scopedSchedules = db
+    .select({ id: classSchedules.id })
+    .from(classSchedules)
+    .innerJoin(classes, eq(classSchedules.classId, classes.id))
+    .where(and(eq(classSchedules.id, id), eq(classes.tenantId, ctx.tenantId)));
 
   const deleted = await db
     .delete(classSchedules)
-    .where(eq(classSchedules.id, id))
+    .where(inArray(classSchedules.id, scopedSchedules))
     .returning({ id: classSchedules.id });
 
   if (deleted.length === 0) {
@@ -234,12 +229,18 @@ export async function toggleClassScheduleActive(
   id: string,
   isActive: boolean
 ): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
+
+  const scopedSchedules = db
+    .select({ id: classSchedules.id })
+    .from(classSchedules)
+    .innerJoin(classes, eq(classSchedules.classId, classes.id))
+    .where(and(eq(classSchedules.id, id), eq(classes.tenantId, ctx.tenantId)));
 
   const updated = await db
     .update(classSchedules)
-    .set({ isActive })
-    .where(eq(classSchedules.id, id))
+    .set({ isActive, updatedAt: new Date() })
+    .where(inArray(classSchedules.id, scopedSchedules))
     .returning({ id: classSchedules.id });
 
   if (updated.length === 0) {

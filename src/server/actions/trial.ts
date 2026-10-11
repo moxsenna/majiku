@@ -4,9 +4,11 @@ import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { trialApplications, tutors, classes } from "@/db/schema";
+import { trialApplications, tutors, classes, students, studentEnrollments, tenants, tutorClassAssignments } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
+import { todayInWib } from "@/lib/datetime";
 
 export interface SubmitTrialApplicationInput {
   programKey: string;
@@ -87,6 +89,30 @@ export async function submitTrialApplication(
     throw new Error("Nama anak wajib diisi");
   }
 
+  let tenantId: string | null = null;
+  const [matchedClass] = await db
+    .select({ tenantId: classes.tenantId })
+    .from(classes)
+    .where(eq(classes.id, input.programKey.trim()))
+    .limit(1);
+
+  if (matchedClass) {
+    tenantId = matchedClass.tenantId;
+  } else {
+    const [firstTenant] = await db
+      .select({ id: tenants.id })
+      .from(tenants)
+      .orderBy(asc(tenants.createdAt))
+      .limit(1);
+    if (firstTenant) {
+      tenantId = firstTenant.id;
+    }
+  }
+
+  if (!tenantId) {
+    throw new Error("Lembaga daycare tidak ditemukan");
+  }
+
   const parentName = input.parentName?.trim() || session.user.name || null;
   const parentEmail = input.parentEmail?.trim() || session.user.email || null;
   const parentPhone = input.parentPhone?.trim() || null;
@@ -95,6 +121,7 @@ export async function submitTrialApplication(
     .insert(trialApplications)
     .values({
       id: randomUUID(),
+      tenantId,
       parentUserId: session.user.id,
       programKey: input.programKey.trim(),
       childName: input.childName.trim(),
@@ -122,21 +149,31 @@ export async function scheduleTrial(
   trialId: string,
   input: ScheduleTrialInput
 ): Promise<void> {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login untuk menjadwalkan trial");
-  }
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) {
-    throw new Error("Hanya admin atau moderator yang dapat menjadwalkan trial");
-  }
+  const ctx = await requireTenantContext();
 
   if (!trialId) {
     throw new Error("ID pengajuan trial wajib diisi");
   }
   if (!input.scheduledAt || !input.tutorId || !input.classId) {
     throw new Error("Jadwal trial, tutor, dan kelas wajib dipilih");
+  }
+
+  const [tutor] = await db
+    .select({ id: tutors.id })
+    .from(tutors)
+    .where(and(eq(tutors.id, input.tutorId), eq(tutors.tenantId, ctx.tenantId)))
+    .limit(1);
+  if (!tutor) {
+    throw new Error("Tutor tidak ditemukan");
+  }
+
+  const [cls] = await db
+    .select({ id: classes.id })
+    .from(classes)
+    .where(and(eq(classes.id, input.classId), eq(classes.tenantId, ctx.tenantId)))
+    .limit(1);
+  if (!cls) {
+    throw new Error("Kelas tidak ditemukan");
   }
 
   const scheduledDate = new Date(input.scheduledAt);
@@ -156,6 +193,7 @@ export async function scheduleTrial(
     .where(
       and(
         eq(trialApplications.id, trialId),
+        eq(trialApplications.tenantId, ctx.tenantId),
         inArray(trialApplications.status, ["submitted", "scheduled"])
       )
     )
@@ -173,9 +211,16 @@ export async function markTrialAwaitingReview(trialId: string): Promise<void> {
   }
 
   const tutorRows = await db
-    .select({ id: tutors.id })
+    .select({ id: tutors.id, tenantId: tutors.tenantId })
     .from(tutors)
-    .where(eq(tutors.userId, session.user.id))
+    .where(
+      and(
+        session.user.email
+          ? or(eq(tutors.userId, session.user.id), eq(tutors.email, session.user.email))
+          : eq(tutors.userId, session.user.id),
+        eq(tutors.isActive, true)
+      )
+    )
     .limit(1);
 
   const myTutor = tutorRows[0];
@@ -192,6 +237,7 @@ export async function markTrialAwaitingReview(trialId: string): Promise<void> {
     .where(
       and(
         eq(trialApplications.id, trialId),
+        eq(trialApplications.tenantId, myTutor.tenantId),
         eq(trialApplications.tutorId, myTutor.id),
         eq(trialApplications.status, "scheduled")
       )
@@ -204,15 +250,12 @@ export async function markTrialAwaitingReview(trialId: string): Promise<void> {
 }
 
 export async function getTrialPipeline(): Promise<TrialPipelineRow[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   const rows = await db
     .select({
       id: trialApplications.id,
+      tenantId: trialApplications.tenantId,
       parentUserId: trialApplications.parentUserId,
       programKey: trialApplications.programKey,
       classId: trialApplications.classId,
@@ -247,6 +290,7 @@ export async function getTrialPipeline(): Promise<TrialPipelineRow[]> {
     .from(trialApplications)
     .leftJoin(classes, eq(trialApplications.classId, classes.id))
     .leftJoin(tutors, eq(trialApplications.tutorId, tutors.id))
+    .where(eq(trialApplications.tenantId, ctx.tenantId))
     .orderBy(desc(trialApplications.createdAt));
 
   return rows;
@@ -257,17 +301,51 @@ export async function getMyTrialQueue(): Promise<TrialQueueRow[]> {
   if (!session) return [];
 
   const tutorRows = await db
-    .select({ id: tutors.id })
+    .select({ id: tutors.id, tenantId: tutors.tenantId })
     .from(tutors)
-    .where(eq(tutors.userId, session.user.id))
+    .where(
+      and(
+        session.user.email
+          ? or(eq(tutors.userId, session.user.id), eq(tutors.email, session.user.email))
+          : eq(tutors.userId, session.user.id),
+        eq(tutors.isActive, true)
+      )
+    )
     .limit(1);
 
   const myTutor = tutorRows[0];
   if (!myTutor) return [];
 
+  const assignedClasses = await db
+    .select({ classId: tutorClassAssignments.classId })
+    .from(tutorClassAssignments)
+    .innerJoin(classes, eq(classes.id, tutorClassAssignments.classId))
+    .where(
+      and(
+        eq(tutorClassAssignments.tutorId, myTutor.id),
+        eq(tutorClassAssignments.isActive, true),
+        eq(classes.tenantId, myTutor.tenantId)
+      )
+    );
+
+  const classIds = assignedClasses.map((ac) => ac.classId);
+
+  const filterConditions = [
+    eq(trialApplications.tenantId, myTutor.tenantId),
+    eq(trialApplications.tutorId, myTutor.id),
+    inArray(trialApplications.status, ["scheduled", "awaiting_review", "repeat_trial"]),
+  ];
+
+  if (classIds.length > 0) {
+    filterConditions.push(
+      or(inArray(trialApplications.classId, classIds), sql`${trialApplications.classId} IS NULL`)!
+    );
+  }
+
   const rows = await db
     .select({
       id: trialApplications.id,
+      tenantId: trialApplications.tenantId,
       parentUserId: trialApplications.parentUserId,
       programKey: trialApplications.programKey,
       classId: trialApplications.classId,
@@ -302,12 +380,7 @@ export async function getMyTrialQueue(): Promise<TrialQueueRow[]> {
     .from(trialApplications)
     .leftJoin(classes, eq(trialApplications.classId, classes.id))
     .leftJoin(tutors, eq(trialApplications.tutorId, tutors.id))
-    .where(
-      and(
-        eq(trialApplications.tutorId, myTutor.id),
-        inArray(trialApplications.status, ["scheduled", "awaiting_review", "repeat_trial"])
-      )
-    )
+    .where(and(...filterConditions))
     .orderBy(sql`${trialApplications.trialScheduledAt} ASC NULLS LAST`);
 
   return rows;
@@ -320,6 +393,7 @@ export async function getMyTrialApplications(): Promise<TrialApplicationRow[]> {
   const rows = await db
     .select({
       id: trialApplications.id,
+      tenantId: trialApplications.tenantId,
       parentUserId: trialApplications.parentUserId,
       programKey: trialApplications.programKey,
       classId: trialApplications.classId,
@@ -367,25 +441,109 @@ export async function getMyTrialApplications(): Promise<TrialApplicationRow[]> {
   return rows;
 }
 
-export async function getSchedulingOptions(): Promise<SchedulingOptions> {
-  const session = await getSessionSafely();
-  if (!session) return { tutors: [], classes: [] };
+export async function admitTrial(trialId: string): Promise<{ success: boolean; studentId: string }> {
+  const ctx = await requireTenantContext();
+  if (!trialId) throw new Error("ID pengajuan trial wajib diisi");
 
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) {
-    return { tutors: [], classes: [] };
+  const [trial] = await db
+    .select()
+    .from(trialApplications)
+    .where(
+      and(
+        eq(trialApplications.id, trialId),
+        eq(trialApplications.tenantId, ctx.tenantId)
+      )
+    )
+    .limit(1);
+
+  if (!trial) {
+    throw new Error("Pengajuan trial tidak ditemukan");
   }
+
+  if (trial.status === "admitted" && trial.admittedStudentId) {
+    return { success: true, studentId: trial.admittedStudentId };
+  }
+
+  if (
+    trial.status !== "recommended" ||
+    trial.recommendation !== "suitable" ||
+    !trial.reviewedAt ||
+    !trial.trialCompletedAt
+  ) {
+    throw new Error("Calon murid belum menyelesaikan trial dan mendapat rekomendasi cocok");
+  }
+
+  if (!trial.classId) {
+    throw new Error("Kelas tujuan belum dipilih");
+  }
+
+  const [targetClass] = await db
+    .select({ id: classes.id, tenantId: classes.tenantId })
+    .from(classes)
+    .where(and(eq(classes.id, trial.classId), eq(classes.tenantId, ctx.tenantId)))
+    .limit(1);
+
+  if (!targetClass) {
+    throw new Error("Kelas tujuan tidak ditemukan di lembaga ini");
+  }
+
+  const studentId = randomUUID();
+  const today = todayInWib();
+
+  await db.insert(students).values({
+    id: studentId,
+    tenantId: ctx.tenantId,
+    name: trial.childName,
+    dateOfBirth: trial.childBirthDate || null,
+    parentUserId: trial.parentUserId || null,
+    parentName: trial.parentName || null,
+    parentPhone: trial.parentPhone || null,
+    parentEmail: trial.parentEmail || null,
+    registrationDate: today,
+    isActive: true,
+  });
+
+  await db.insert(studentEnrollments).values({
+    id: randomUUID(),
+    studentId,
+    classId: targetClass.id,
+    sessionsQuota: 12,
+    sessionsUsed: 0,
+    enrollmentDate: today,
+    isActive: true,
+  });
+
+  await db
+    .update(trialApplications)
+    .set({
+      status: "admitted",
+      admittedAt: new Date(),
+      admittedStudentId: studentId,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(trialApplications.id, trialId),
+        eq(trialApplications.tenantId, ctx.tenantId)
+      )
+    );
+
+  return { success: true, studentId };
+}
+
+export async function getSchedulingOptions(): Promise<SchedulingOptions> {
+  const ctx = await requireTenantContext();
 
   const [activeTutors, activeClasses] = await Promise.all([
     db
       .select({ id: tutors.id, name: tutors.name })
       .from(tutors)
-      .where(eq(tutors.isActive, true))
+      .where(and(eq(tutors.tenantId, ctx.tenantId), eq(tutors.isActive, true)))
       .orderBy(asc(tutors.name)),
     db
       .select({ id: classes.id, name: classes.name })
       .from(classes)
-      .where(eq(classes.isActive, true))
+      .where(and(eq(classes.tenantId, ctx.tenantId), eq(classes.isActive, true)))
       .orderBy(asc(classes.name)),
   ]);
 

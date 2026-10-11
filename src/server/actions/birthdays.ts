@@ -1,11 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { students, studentEnrollments, classes } from "@/db/schema";
-import { auth } from "@/server/auth";
-import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 import { todayInWib, isValidDateString } from "@/lib/datetime";
 
 export interface BirthdayEntry {
@@ -68,21 +66,8 @@ function computeBirthdayDetails(
   };
 }
 
-async function getSessionSafely() {
-  try {
-    const h = await headers();
-    return await auth.api.getSession({ headers: h });
-  } catch {
-    return null;
-  }
-}
-
 export async function getUpcomingBirthdays(refDateStr?: string): Promise<BirthdayEntry[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   const todayStr =
     refDateStr && isValidDateString(refDateStr) ? refDateStr : todayInWib();
@@ -111,7 +96,12 @@ export async function getUpcomingBirthdays(refDateStr?: string): Promise<Birthda
         eq(classes.isActive, true)
       )
     )
-    .where(eq(students.isActive, true));
+    .where(
+      and(
+        eq(students.tenantId, ctx.tenantId),
+        eq(students.isActive, true)
+      )
+    );
 
   interface AggregatedStudent {
     id: string;

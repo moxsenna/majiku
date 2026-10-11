@@ -1,11 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, asc, desc, eq, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import { db } from "@/db";
 import { invoices, studentEnrollments, students, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 
 export interface InvoiceRow {
   id: string;
@@ -62,7 +63,10 @@ export async function getInvoices(): Promise<InvoiceRow[]> {
   if (!isAdmin && !isParent) return [];
 
   const conditions = [];
-  if (!isAdmin && isParent) {
+  if (isAdmin) {
+    const ctx = await requireTenantContext();
+    conditions.push(eq(students.tenantId, ctx.tenantId));
+  } else if (isParent) {
     conditions.push(
       session.user.email
         ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
@@ -159,7 +163,10 @@ export async function getBillingEnrollments(): Promise<BillingEnrollmentRow[]> {
   if (!isAdmin && !isParent) return [];
 
   const conditions = [eq(studentEnrollments.isActive, true)];
-  if (!isAdmin && isParent) {
+  if (isAdmin) {
+    const ctx = await requireTenantContext();
+    conditions.push(eq(students.tenantId, ctx.tenantId));
+  } else if (isParent) {
     conditions.push(
       session.user.email
         ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
@@ -202,19 +209,27 @@ export async function getBillingEnrollments(): Promise<BillingEnrollmentRow[]> {
 }
 
 export async function markInvoicePaid(invoiceId: string) {
-  const session = await getSessionSafely();
-  if (!session) throw new Error("Unauthorized");
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  const isAdmin = roles.includes("admin") || roles.includes("moderator");
-  if (!isAdmin) throw new Error("Hanya admin yang dapat menandai invoice lunas");
+  const ctx = await requireTenantContext();
+  if (!invoiceId) throw new Error("ID invoice wajib diisi");
 
-  await db
+  const scopedInvoices = db
+    .select({ id: invoices.id })
+    .from(invoices)
+    .innerJoin(students, eq(invoices.studentId, students.id))
+    .where(and(eq(invoices.id, invoiceId), eq(students.tenantId, ctx.tenantId)));
+
+  const result = await db
     .update(invoices)
     .set({
       status: "paid",
       paidAt: new Date(),
     })
-    .where(eq(invoices.id, invoiceId));
+    .where(inArray(invoices.id, scopedInvoices))
+    .returning({ id: invoices.id });
+
+  if (result.length === 0) {
+    throw new Error("Invoice tidak ditemukan");
+  }
 
   return { success: true };
 }
@@ -230,11 +245,7 @@ export interface CreateInvoiceInput {
 }
 
 export async function createInvoice(input: CreateInvoiceInput) {
-  const session = await getSessionSafely();
-  if (!session) throw new Error("Unauthorized");
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  const isAdmin = roles.includes("admin") || roles.includes("moderator");
-  if (!isAdmin) throw new Error("Hanya admin yang dapat membuat invoice");
+  const ctx = await requireTenantContext();
 
   if (!input.studentId) throw new Error("Pilih siswa terlebih dahulu");
   if (!input.amount || input.amount <= 0) throw new Error("Nominal tagihan harus lebih dari 0");
@@ -243,7 +254,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
   const [student] = await db
     .select({ id: students.id })
     .from(students)
-    .where(eq(students.id, input.studentId))
+    .where(and(eq(students.id, input.studentId), eq(students.tenantId, ctx.tenantId)))
     .limit(1);
 
   if (!student) throw new Error("Data siswa tidak ditemukan");
@@ -281,14 +292,11 @@ export async function createInvoice(input: CreateInvoiceInput) {
 }
 
 export async function getBillingStudentOptions(): Promise<Array<{ id: string; name: string }>> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   return await db
     .select({ id: students.id, name: students.name })
     .from(students)
-    .where(eq(students.isActive, true))
+    .where(and(eq(students.tenantId, ctx.tenantId), eq(students.isActive, true)))
     .orderBy(asc(students.name));
 }

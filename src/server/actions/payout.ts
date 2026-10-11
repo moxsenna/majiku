@@ -2,11 +2,12 @@
 
 import { headers } from "next/headers";
 import { randomUUID } from "node:crypto";
-import { and, eq, or } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 import { db } from "@/db";
 import { tutors, tutorClassAssignments, tutorBonuses, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 
 export interface TutorItem {
   id: string;
@@ -64,9 +65,9 @@ async function getSessionSafely() {
   }
 }
 
-async function getCallerTutorId(userId: string, email?: string | null): Promise<string | null> {
+async function getCallerTutor(userId: string, email?: string | null) {
   const row = await db
-    .select({ id: tutors.id })
+    .select({ id: tutors.id, tenantId: tutors.tenantId })
     .from(tutors)
     .where(
       and(
@@ -77,7 +78,7 @@ async function getCallerTutorId(userId: string, email?: string | null): Promise<
       )
     )
     .limit(1);
-  return row[0]?.id ?? null;
+  return row[0] ?? null;
 }
 
 export async function getTutors(): Promise<TutorItem[]> {
@@ -90,7 +91,10 @@ export async function getTutors(): Promise<TutorItem[]> {
   if (!isAdmin && !isTutor) return [];
 
   const conditions = [eq(tutors.isActive, true)];
-  if (!isAdmin && isTutor) {
+  if (isAdmin) {
+    const ctx = await requireTenantContext();
+    conditions.push(eq(tutors.tenantId, ctx.tenantId));
+  } else if (isTutor) {
     conditions.push(
       session.user.email
         ? or(eq(tutors.userId, session.user.id), eq(tutors.email, session.user.email))!
@@ -120,10 +124,13 @@ export async function getTutorAssignments(): Promise<TutorAssignmentItem[]> {
   if (!isAdmin && !isTutor) return [];
 
   const conditions = [eq(tutorClassAssignments.isActive, true)];
-  if (!isAdmin && isTutor) {
-    const tutorId = await getCallerTutorId(session.user.id, session.user.email);
-    if (!tutorId) return [];
-    conditions.push(eq(tutorClassAssignments.tutorId, tutorId));
+  if (isAdmin) {
+    const ctx = await requireTenantContext();
+    conditions.push(eq(tutors.tenantId, ctx.tenantId));
+  } else if (isTutor) {
+    const callerTutor = await getCallerTutor(session.user.id, session.user.email);
+    if (!callerTutor) return [];
+    conditions.push(eq(tutorClassAssignments.tutorId, callerTutor.id));
   }
 
   const rows = await db
@@ -138,6 +145,7 @@ export async function getTutorAssignments(): Promise<TutorAssignmentItem[]> {
     })
     .from(tutorClassAssignments)
     .innerJoin(classes, eq(tutorClassAssignments.classId, classes.id))
+    .innerJoin(tutors, eq(tutorClassAssignments.tutorId, tutors.id))
     .where(and(...conditions));
 
   return rows.map((r) => {
@@ -177,13 +185,28 @@ export async function getTutorBonuses(month?: number, year?: number): Promise<Tu
     eq(tutorBonuses.year, targetYear),
   ];
 
-  if (!isAdmin && isTutor) {
-    const tutorId = await getCallerTutorId(session.user.id);
-    if (!tutorId) return [];
-    conditions.push(eq(tutorBonuses.tutorId, tutorId));
+  if (isAdmin) {
+    const ctx = await requireTenantContext();
+    conditions.push(eq(tutors.tenantId, ctx.tenantId));
+  } else if (isTutor) {
+    const callerTutor = await getCallerTutor(session.user.id);
+    if (!callerTutor) return [];
+    conditions.push(eq(tutorBonuses.tutorId, callerTutor.id));
   }
 
-  const rows = await db.select().from(tutorBonuses).where(and(...conditions));
+  const rows = await db
+    .select({
+      id: tutorBonuses.id,
+      tutorId: tutorBonuses.tutorId,
+      amount: tutorBonuses.amount,
+      description: tutorBonuses.description,
+      month: tutorBonuses.month,
+      year: tutorBonuses.year,
+    })
+    .from(tutorBonuses)
+    .innerJoin(tutors, eq(tutorBonuses.tutorId, tutors.id))
+    .where(and(...conditions));
+
   return rows.map((r) => {
     const amount = Number(r.amount ?? 0);
     return {
@@ -207,7 +230,17 @@ export async function getClasses(): Promise<ClassItem[]> {
 
   if (!isAdmin && !isTutor) return [];
 
-  const rows = await db.select().from(classes).where(eq(classes.isActive, true));
+  const conditions = [eq(classes.isActive, true)];
+  if (isAdmin) {
+    const ctx = await requireTenantContext();
+    conditions.push(eq(classes.tenantId, ctx.tenantId));
+  } else if (isTutor) {
+    const callerTutor = await getCallerTutor(session.user.id, session.user.email);
+    if (!callerTutor) return [];
+    conditions.push(eq(classes.tenantId, callerTutor.tenantId));
+  }
+
+  const rows = await db.select().from(classes).where(and(...conditions));
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -243,28 +276,52 @@ export async function updateTutorRate(params: {
   classId: string;
   rate: number;
 }) {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login untuk mengubah tarif tutor");
+  const ctx = await requireTenantContext();
+
+  const [tutor] = await db
+    .select({ id: tutors.id })
+    .from(tutors)
+    .where(and(eq(tutors.id, params.tutorId), eq(tutors.tenantId, ctx.tenantId)))
+    .limit(1);
+
+  if (!tutor) {
+    throw new Error("Tutor tidak ditemukan");
   }
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) {
-    throw new Error("Hanya admin yang dapat mengubah tarif tutor");
+
+  const [cls] = await db
+    .select({ id: classes.id })
+    .from(classes)
+    .where(and(eq(classes.id, params.classId), eq(classes.tenantId, ctx.tenantId)))
+    .limit(1);
+
+  if (!cls) {
+    throw new Error("Kelas tidak ditemukan");
   }
 
   if (params.assignmentId) {
-    await db
+    const result = await db
       .update(tutorClassAssignments)
       .set({
         ratePerSession: String(params.rate),
         updatedAt: new Date(),
       })
-      .where(eq(tutorClassAssignments.id, params.assignmentId));
+      .where(
+        and(
+          eq(tutorClassAssignments.id, params.assignmentId),
+          eq(tutorClassAssignments.tutorId, tutor.id),
+          eq(tutorClassAssignments.classId, cls.id)
+        )
+      )
+      .returning({ id: tutorClassAssignments.id });
+
+    if (result.length === 0) {
+      throw new Error("Penugasan tidak ditemukan");
+    }
   } else {
     await db.insert(tutorClassAssignments).values({
       id: "tca_" + randomUUID().replace(/-/g, "").slice(0, 12),
-      tutorId: params.tutorId,
-      classId: params.classId,
+      tutorId: tutor.id,
+      classId: cls.id,
       ratePerSession: String(params.rate),
       isActive: true,
     });
@@ -278,13 +335,16 @@ export async function addTutorBonus(params: {
   month?: number;
   year?: number;
 }) {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login untuk menambahkan bonus tutor");
-  }
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) {
-    throw new Error("Hanya admin yang dapat menambahkan bonus tutor");
+  const ctx = await requireTenantContext();
+
+  const [tutor] = await db
+    .select({ id: tutors.id })
+    .from(tutors)
+    .where(and(eq(tutors.id, params.tutorId), eq(tutors.tenantId, ctx.tenantId)))
+    .limit(1);
+
+  if (!tutor) {
+    throw new Error("Tutor tidak ditemukan");
   }
 
   const now = new Date();
@@ -293,7 +353,7 @@ export async function addTutorBonus(params: {
 
   await db.insert(tutorBonuses).values({
     id: "tb_" + randomUUID().replace(/-/g, "").slice(0, 12),
-    tutorId: params.tutorId,
+    tutorId: tutor.id,
     amount: String(params.amount),
     description: params.description,
     month: m,
