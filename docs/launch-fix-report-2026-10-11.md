@@ -81,3 +81,20 @@ diperbaiki (lihat §4).
 4. Verifikasi `PAYCORE_*` di dashboard Cloudflare: `PAYCORE_RETURN_URL` harus
    `https://majiku.moxsenna.workers.dev/payment/return` (atau domain produksi) — bukan
    `parent.majiku.web.id/billing`.
+
+## 7. HASIL DEPLOY PRODUKSI (2026-10-11)
+
+- **Commit** 7 kelompok logis (`ec6e1dc`..`650cf86`) di atas `c07ce87` — working tree bersih.
+- **Deploy Cloudflare sukses**: versi worker `f02b54f0-6402-4b9b-844f-345f85ee118d`, 6 custom
+  domain aktif — termasuk `www.majiku.web.id` yang baru terprovision.
+- **Sweep produksi**: `majiku.web.id` → `/`, `/terms`, `/privacy`, `/checkout`, `/marketplace`,
+  `/marketplace/majiku-kids`, `/auth/login`, `/payment/return`, `/site/daycare` semua **200**;
+  subdomain `admin/parent/tutor/vendor.` menormalisasi `/x/login` → `/login?next=/x/login` → 200
+  (perilaku `?next=` dari perbaikan bekerja); `www.majiku.web.id` → 200.
+- **Konten landing produksi terverifikasi**: CTA pricing → `/checkout?plan=basic|pro|enterprise`
+  (sinkron master plan), link `/terms` + `/privacy`, meta OG hadir.
+- **Nit tersisa**: `og:url` masih menunjuk `majiku.moxsenna.workers.dev` karena
+  `NEXT_PUBLIC_SITE_URL` (var CF) belum diubah ke `https://majiku.web.id` — ubah var tersebut
+  di dashboard Cloudflare lalu redeploy agar OG url benar.
+- **Verifikasi manual yang tersisa untuk pemilik**: nilai `PAYCORE_RETURN_URL` di dashboard
+  Cloudflare (secrets tidak bisa dibaca via wrangler) harus menunjuk `/payment/return`.
