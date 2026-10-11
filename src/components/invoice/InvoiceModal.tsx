@@ -193,11 +193,18 @@ export function InvoiceModal({ invoice, open, onOpenChange }: InvoiceModalProps)
           </div>
 
           {invoice.status !== "paid" && (
-            <Link href="/parent/payment">
-              <Button variant="hero" className="w-full">
-                Bayar Sekarang
-              </Button>
-            </Link>
+            <div className="space-y-2 pt-2">
+              <Link href={`/parent/invoice/${invoice.id}`} className="block">
+                <Button variant="hero" className="w-full">
+                  Bayar Sekarang
+                </Button>
+              </Link>
+              <Link href={`/parent/payment?invoice=${invoice.id}`} className="block">
+                <Button variant="outline" className="w-full text-xs">
+                  Konfirmasi Transfer Manual
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       </DialogContent>

@@ -61,9 +61,9 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
   const config = statusConfig[invoice.status] || statusConfig.unpaid;
   const StatusIcon = config.icon;
 
-  const schoolName = "MAJIKU Daycare & Preschool";
-  const schoolAddress = "Jl. Pendidikan No. 123, Jakarta Selatan";
-  const schoolPhone = "(021) 1234-5678";
+  const schoolName = "Sesuai lembaga terdaftar";
+  const schoolAddress = "Alamat dan kontak sesuai unit/cabang terdaftar";
+  const schoolPhone = "-";
 
   const periodLabel =
     invoice.billingPeriodStart && invoice.billingPeriodEnd
@@ -332,7 +332,7 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
                   </p>
                 )}
                 <div className="flex items-center gap-2 pt-2">
-                  <Link href="/parent/payment" className="w-full">
+                  <Link href={`/parent/payment?invoice=${invoice.id}`} className="w-full">
                     <Button variant="outline" className="w-full text-xs">
                       Konfirmasi Transfer Manual
                     </Button>
@@ -345,7 +345,7 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
           {/* Footer */}
           <div className="p-4 bg-muted/30 border-t border-border text-center">
             <p className="text-xs text-muted-foreground">
-              Terima kasih telah mempercayakan pendidikan putra/putri Anda kepada {schoolName}
+              Terima kasih telah mempercayakan pendidikan putra/putri Anda kepada lembaga terdaftar
             </p>
           </div>
         </div>
