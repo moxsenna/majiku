@@ -116,3 +116,18 @@ diperbaiki (lihat §4).
   `npx wrangler d1 execute paycore-production --remote --env production --file migrations/0017_app_majiku_custom_domain.sql`
 - Catatan: allowlist return_url PayCore hanya divalidasi saat redirect (`returns.ts`), bukan saat
   pembuatan order — mengganti secret return_url tidak memblokir order baru.
+
+## 9. Migrasi PayCore diterapkan (2026-10-11 malam) — rantai pembayaran lengkap
+
+- Login wrangler akun PayCore (`06738739…`) dilakukan pemilik; migrasi
+  `0017_app_majiku_custom_domain.sql` dieksekusi ke D1 `paycore-production` — **1 baris ditulis**.
+- Verifikasi baris `apps` (app_id `majiku`, status active):
+  - `webhook_url` = `https://majiku.web.id/api/webhooks/paycore` ✅
+  - `allowed_return_urls` = majiku.web.id + workers.dev lama + localhost ✅
+- Endpoint webhook MAJIKU produksi terverifikasi reachable & aman: POST tanpa signature → **401
+  "Invalid signature"**.
+- Sesi wrangler multi-akun dipulihkan & disimpan: `akun1.toml` (PayCore), `akun2.toml`
+  (majiku/cuanmox), `default.toml` aktif = akun majiku.
+- Rantai pembayaran kini utuh: checkout (HMAC) → PayCore → webhook ke majiku.web.id (signature
+  terverifikasi, idempoten, guard status paid) → invoice lunas / tenant aktif; redirect return
+  allowlisted ke `/payment/return`.
