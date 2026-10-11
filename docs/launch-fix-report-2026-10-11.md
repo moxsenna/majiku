@@ -98,3 +98,21 @@ diperbaiki (lihat §4).
   di dashboard Cloudflare lalu redeploy agar OG url benar.
 - **Verifikasi manual yang tersisa untuk pemilik**: nilai `PAYCORE_RETURN_URL` di dashboard
   Cloudflare (secrets tidak bisa dibaca via wrangler) harus menunjuk `/payment/return`.
+
+## 8. Tindak lanjut domain & PayCore (2026-10-11 malam)
+
+- **Akun terverifikasi**: wrangler login = cuanmox@gmail.com, akun `5fec9965…` — sama dengan
+  dashboard Cloudflare (6 custom domains Production) dan `account_id` di wrangler.jsonc.
+- **Secret worker diperbarui**: `PAYCORE_RETURN_URL` → `https://majiku.web.id/payment/return`,
+  `NEXT_PUBLIC_SITE_URL` → `https://majiku.web.id`; `.env.local`/`.env.example` disinkronkan;
+  redeploy versi `752eccf1` — `og:url` live kini `https://majiku.web.id` (nilai NEXT_PUBLIC
+  di-bake saat build untuk halaman prerender, jadi rebuild diperlukan).
+- **TEMUAN KRITIKAL di sisi PayCore** (repo `D:\Coding\paycore`, D1 `paycore-production` akun CF
+  `06738739…`): baris `apps` MAJIKU masih `webhook_url` = `https://majiku.moxsenna.workers.dev/...`
+  dan allowlist return belum memuat `majiku.web.id` — workers.dev DISABLED, jadi **event
+  pembayaran tidak akan terkirim** dan redirect return akan 403. Migrasi siap di-commit
+  `migrations/0017_app_majiku_custom_domain.sql` (idempoten). Eksekusi butuh login wrangler
+  dengan akun pemilik PayCore:
+  `npx wrangler d1 execute paycore-production --remote --env production --file migrations/0017_app_majiku_custom_domain.sql`
+- Catatan: allowlist return_url PayCore hanya divalidasi saat redirect (`returns.ts`), bukan saat
+  pembuatan order — mengganti secret return_url tidak memblokir order baru.
