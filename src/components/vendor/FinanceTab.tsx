@@ -1,10 +1,10 @@
+"use client";
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { DollarSign, CreditCard, FileText, TrendingUp, Search, Send, Download, Clock, CheckCircle2 } from "lucide-react";
+import { DollarSign, Search, Clock, CheckCircle2, TrendingUp } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const monthlyRevenue = [
@@ -36,15 +36,16 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 };
 
 export default function FinanceTab() {
-  const { toast } = useToast();
   const [search, setSearch] = useState("");
 
   const totalIncome = 365505000;
   const totalPending = 27000000;
   const totalPaid = 338505000;
 
-  const filtered = invoices.filter(inv =>
-    inv.daycare.toLowerCase().includes(search.toLowerCase()) || inv.id.toLowerCase().includes(search.toLowerCase())
+  const filtered = invoices.filter(
+    (inv) =>
+      inv.daycare.toLowerCase().includes(search.toLowerCase()) ||
+      inv.id.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -75,50 +76,72 @@ export default function FinanceTab() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="month" className="text-xs" />
-                <YAxis tickFormatter={v => formatCurrency(v)} className="text-xs" />
-                <Tooltip formatter={(v: number) => [formatCurrency(v), ""]} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                <Area type="monotone" dataKey="income" stroke="hsl(var(--success))" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
+                <YAxis tickFormatter={(v) => formatCurrency(v)} className="text-xs" />
+                <Tooltip
+                  formatter={(v: number) => [formatCurrency(v), ""]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="income"
+                  stroke="hsl(var(--success))"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorIncome)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
 
-      {/* Invoices */}
+      {/* Invoices (Read-only) */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-base">Faktur & Invoice</CardTitle>
-              <CardDescription>Kelola tagihan dari vendor</CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2"><Download className="w-4 h-4" />Export</Button>
-              <Button size="sm" className="gap-2"><FileText className="w-4 h-4" />Buat Invoice</Button>
+              <CardDescription>Catatan tagihan transaksi dari vendor (read-only)</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Cari invoice..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+            <Input
+              placeholder="Cari invoice..."
+              className="pl-9"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
-            {filtered.map(inv => (
-              <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+            {filtered.map((inv) => (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+              >
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-sm">{inv.id}</p>
-                    <Badge variant={statusConfig[inv.status]?.variant}>{statusConfig[inv.status]?.label}</Badge>
+                    <Badge variant={statusConfig[inv.status]?.variant}>
+                      {statusConfig[inv.status]?.label}
+                    </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">{inv.daycare} • {inv.plan} • Jatuh tempo: {inv.dueDate}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {inv.daycare} • {inv.plan} • Jatuh tempo: {inv.dueDate}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <p className="font-medium text-sm">{formatCurrency(inv.amount)}</p>
-                  {inv.status !== "paid" && (
-                    <Button variant="outline" size="sm" onClick={() => toast({ title: "Reminder terkirim", description: `Invoice ${inv.id} reminder dikirim ke ${inv.daycare}` })}>
-                      <Send className="w-3.5 h-3.5" />
-                    </Button>
+                  {inv.paidDate && (
+                    <span className="text-xs text-muted-foreground hidden sm:inline">
+                      Dibayar: {inv.paidDate}
+                    </span>
                   )}
                 </div>
               </div>

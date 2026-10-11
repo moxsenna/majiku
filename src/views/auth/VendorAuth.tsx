@@ -150,11 +150,18 @@ export default function VendorAuth() {
           </DialogHeader>
           <div className="space-y-3 py-2 text-xs text-slate-300 leading-relaxed">
             <p>
-              Akses akun Super Admin dilindungi kebijakan zero-trust. Pemulihan kunci akses dan sandi hanya dapat dieksekusi melalui CLI/database admin root repository.
+              Akses akun Super Admin dilindungi kebijakan zero-trust. Pemulihan kunci akses dan sandi hanya dapat dilakukan melalui verifikasi manual oleh administrator platform.
             </p>
-            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1 font-mono text-[11px] text-slate-400">
-              <p>Perintah Reset Kredensial Root:</p>
-              <p className="text-emerald-400">npm run set-demo-passwords</p>
+            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1 text-slate-300">
+              <p className="font-semibold text-white">Hubungi Administrator Platform:</p>
+              <p className="text-emerald-400">
+                <a href="mailto:support@majiku.web.id" className="underline hover:text-emerald-300">
+                  support@majiku.web.id
+                </a>
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Sertakan bukti identitas resmi pengelola sistem untuk verifikasi kredensial root.
+              </p>
             </div>
           </div>
           <DialogFooter>

@@ -39,6 +39,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SUBSCRIPTION_PLANS } from "@/lib/subscriptionPlans";
 
 const features = [
   {
@@ -73,58 +74,22 @@ const features = [
   }
 ];
 
-const pricingPlans = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: "299K",
-    period: "/bulan",
-    description: "Untuk lembaga kecil yang baru mulai",
-    features: [
-      "Hingga 50 siswa",
-      "2 kelas aktif",
-      "Laporan dasar",
-      "Chat dengan orang tua",
-      "Support via email"
-    ],
-    popular: false,
-    cta: "Pilih Paket Basic"
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "599K",
-    period: "/bulan",
-    description: "Untuk lembaga yang sedang berkembang",
-    features: [
-      "Hingga 200 siswa",
-      "10 kelas aktif",
-      "Analytics lengkap",
-      "Billing otomatis",
-      "Manajemen tutor",
-      "Priority support"
-    ],
-    popular: true,
-    cta: "Pilih Paket Pro"
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "1.5M",
-    period: "/bulan",
-    description: "Untuk jaringan lembaga & franchise",
-    features: [
-      "Unlimited siswa",
-      "Multi-cabang",
-      "White-label branding",
-      "API access",
-      "Dedicated support",
-      "Custom integrations"
-    ],
-    popular: false,
-    cta: "Pilih Paket Enterprise"
-  }
-];
+const formatPriceShort = (amount: number) => {
+  if (amount >= 1000000) return `${(amount / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+  return `${Math.round(amount / 1000)}K`;
+};
+
+const pricingPlans = Object.values(SUBSCRIPTION_PLANS).map((plan) => ({
+  id: plan.id,
+  name: plan.name,
+  price: formatPriceShort(plan.priceMonthly),
+  period: "/bulan",
+  description: plan.description,
+  features: plan.features,
+  popular: Boolean(plan.popular),
+  badge: plan.badge,
+  cta: `Pilih ${plan.name}`,
+}));
 
 const testimonials = [
   {
@@ -654,9 +619,9 @@ export default function SaasLanding({
                 key={i} 
                 className={`relative ${plan.popular ? 'border-primary border-2 shadow-lg scale-105' : ''}`}
               >
-                {plan.popular && (
+                {(plan.popular || plan.badge) && (
                   <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gradient-primary text-primary-foreground">
-                    Paling Populer
+                    {plan.badge || "Paling Populer"}
                   </Badge>
                 )}
                 <CardHeader className="text-center pb-4">
@@ -761,9 +726,9 @@ export default function SaasLanding({
               <span className="font-bold">MAJIKU</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground">Syarat & Ketentuan</a>
-              <a href="#" className="hover:text-foreground">Kebijakan Privasi</a>
-              <a href="#" className="hover:text-foreground">Kontak</a>
+              <Link href="/terms" className="hover:text-foreground">Syarat & Ketentuan</Link>
+              <Link href="/privacy" className="hover:text-foreground">Kebijakan Privasi</Link>
+              <a href="mailto:support@majiku.web.id" className="hover:text-foreground">Kontak</a>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2024 MAJIKU. All rights reserved.

@@ -7,11 +7,28 @@ import { TenantCard } from "@/components/marketplace/TenantCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://majiku.web.id";
+
 export const metadata: Metadata = {
+  title: "MAJIKU — Solusi Manajemen Daycare, Preschool, Bimbel & Marketplace Lembaga",
   description:
-    "Platform all-in-one manajemen daycare, PAUD, preschool, dan bimbingan belajar. Dilengkapi direktori dan marketplace lembaga terverifikasi.",
+    "Platform all-in-one manajemen daycare, PAUD, preschool, dan bimbingan belajar. Dilengkapi direktori dan marketplace lembaga terverifikasi di seluruh Indonesia.",
   alternates: {
     canonical: "/",
+  },
+  openGraph: {
+    title: "MAJIKU — Solusi Manajemen Daycare, Preschool, Bimbel & Marketplace Lembaga",
+    description:
+      "Platform all-in-one manajemen daycare, PAUD, preschool, dan bimbingan belajar. Dilengkapi direktori dan marketplace lembaga terverifikasi di seluruh Indonesia.",
+    url: siteUrl,
+    type: "website",
+    siteName: "MAJIKU",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MAJIKU — Solusi Manajemen Daycare, Preschool, Bimbel & Marketplace Lembaga",
+    description:
+      "Platform all-in-one manajemen daycare, PAUD, preschool, dan bimbingan belajar. Dilengkapi direktori dan marketplace lembaga terverifikasi di seluruh Indonesia.",
   },
 };
 
