@@ -14,6 +14,7 @@ import {
 } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext, resolveTenantIdForUser } from "@/server/authz";
 import { isValidDateString, todayInWib } from "@/lib/datetime";
 import { deletePhoto } from "@/server/r2";
 
@@ -105,6 +106,10 @@ export async function listDailyReports(reportDate: string): Promise<DailyReportI
   const isAuthorized = roles.some((r) => ["admin", "moderator", "tutor"].includes(r));
   if (!isAuthorized) return [];
 
+  // Isolasi tenant: hanya laporan siswa lembaga pemanggil
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) return [];
+
   const rows = await db
     .select({
       id: dailyReports.id,
@@ -128,7 +133,7 @@ export async function listDailyReports(reportDate: string): Promise<DailyReportI
     .from(dailyReports)
     .innerJoin(students, eq(dailyReports.studentId, students.id))
     .leftJoin(classes, eq(dailyReports.classId, classes.id))
-    .where(eq(dailyReports.reportDate, reportDate))
+    .where(and(eq(dailyReports.reportDate, reportDate), eq(students.tenantId, tenantId)))
     .orderBy(desc(dailyReports.createdAt));
 
   return rows;
@@ -202,7 +207,50 @@ export async function createDailyReport(
     }
   }
 
-  const rowsToInsert = studentIds.map((studentId) => ({
+  // Otorisasi tenant: semua siswa wajib milik lembaga pemanggil
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) {
+    throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
+  }
+  const studentRows = await db
+    .select({ id: students.id, tenantId: students.tenantId })
+    .from(students)
+    .where(inArray(students.id, studentIds));
+  const foreignStudents = studentRows.filter((s) => s.tenantId !== tenantId);
+  if (studentRows.length !== studentIds.length || foreignStudents.length > 0) {
+    throw new Error("Forbidden: ada siswa yang bukan milik lembaga Anda");
+  }
+
+  // Otorisasi tutor: tutor hanya boleh membuat laporan siswa di kelas penugasannya
+  const roles: AppRole[] = await getMyRoles().catch(() => []);
+  if (roles.includes("tutor") && !roles.includes("admin") && !roles.includes("moderator")) {
+    const assignedRows = await db
+      .select({ classId: tutorClassAssignments.classId })
+      .from(tutors)
+      .innerJoin(tutorClassAssignments, eq(tutorClassAssignments.tutorId, tutors.id))
+      .where(and(eq(tutors.userId, session.user.id), eq(tutorClassAssignments.isActive, true)));
+    const assigned = new Set(assignedRows.map((r) => r.classId));
+    const unassigned = studentIds.filter((sid) => {
+      const cid = studentClassMap.get(sid);
+      return !cid || !assigned.has(cid);
+    });
+    if (unassigned.length > 0) {
+      throw new Error("Forbidden: ada siswa di luar kelas yang Anda ampu");
+    }
+  }
+
+  // Cegah duplikasi: siswa yang sudah punya laporan pada tanggal sama dilewati
+  const existingForDate = await db
+    .select({ studentId: dailyReports.studentId })
+    .from(dailyReports)
+    .where(and(inArray(dailyReports.studentId, studentIds), eq(dailyReports.reportDate, reportDate)));
+  const alreadyReported = new Set(existingForDate.map((r) => r.studentId));
+  const pendingStudentIds = studentIds.filter((sid) => !alreadyReported.has(sid));
+  if (pendingStudentIds.length === 0) {
+    throw new Error("Semua siswa terpilih sudah memiliki laporan pada tanggal ini");
+  }
+
+  const rowsToInsert = pendingStudentIds.map((studentId) => ({
     id: randomUUID(),
     studentId,
     classId: studentClassMap.get(studentId) || null,
@@ -219,7 +267,7 @@ export async function createDailyReport(
 
   await db.insert(dailyReports).values(rowsToInsert);
 
-  return { created: studentIds.length };
+  return { created: pendingStudentIds.length };
 }
 
 export async function getMyStudents(): Promise<MyStudentItem[]> {
@@ -230,6 +278,8 @@ export async function getMyStudents(): Promise<MyStudentItem[]> {
   const today = todayInWib();
 
   if (roles.includes("admin") || roles.includes("moderator")) {
+    const tenantId = await resolveTenantIdForUser(session.user.id);
+    if (!tenantId) return [];
     const rows = await db
       .select({
         id: students.id,
@@ -259,7 +309,7 @@ export async function getMyStudents(): Promise<MyStudentItem[]> {
           eq(dailyReports.reportDate, today)
         )
       )
-      .where(eq(students.isActive, true))
+      .where(and(eq(students.isActive, true), eq(students.tenantId, tenantId)))
       .orderBy(asc(students.name));
 
     const map = new Map<string, MyStudentItem>();
@@ -366,10 +416,23 @@ export async function getMyStudents(): Promise<MyStudentItem[]> {
 }
 
 export async function deleteDailyReport(id: string): Promise<void> {
-  await requireAdminOrModerator();
+  const session = await requireAdminOrModerator();
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
 
   if (!id) {
     throw new Error("ID laporan wajib diisi");
+  }
+
+  // Guard tenant: hanya laporan siswa lembaga pemanggil yang boleh dihapus
+  const [target] = await db
+    .select({ id: dailyReports.id, tenantId: students.tenantId })
+    .from(dailyReports)
+    .innerJoin(students, eq(students.id, dailyReports.studentId))
+    .where(eq(dailyReports.id, id))
+    .limit(1);
+  if (!target || target.tenantId !== tenantId) {
+    throw new Error("Laporan tidak ditemukan");
   }
 
   const result = await db
@@ -456,12 +519,15 @@ export async function getStudentOptions(): Promise<StudentOption[]> {
   const isAuthorized = roles.some((r) => ["admin", "moderator", "tutor"].includes(r));
   if (!isAuthorized) return [];
 
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) return [];
+
   return db
     .select({
       id: students.id,
       name: students.name,
     })
     .from(students)
-    .where(eq(students.isActive, true))
+    .where(and(eq(students.isActive, true), eq(students.tenantId, tenantId)))
     .orderBy(asc(students.name));
 }

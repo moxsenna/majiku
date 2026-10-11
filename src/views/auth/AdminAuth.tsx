@@ -42,6 +42,7 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
     name: "",
     email: "",
     phone: "",
+    city: "",
     password: "",
     confirmPassword: "",
     agreeTerms: false,
@@ -94,6 +95,7 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
         name: registerForm.name,
         email: registerForm.email,
         phone: registerForm.phone,
+        city: registerForm.city || undefined,
         password: registerForm.password,
       });
 
@@ -222,6 +224,16 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
                         <SelectItem value="bimbel">Bimbingan Belajar / Les</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="inst-city">Kota Lembaga</Label>
+                    <Input
+                      id="inst-city"
+                      placeholder="Contoh: Tangerang Selatan"
+                      value={registerForm.city}
+                      onChange={(e) => setRegisterForm({ ...registerForm, city: e.target.value })}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

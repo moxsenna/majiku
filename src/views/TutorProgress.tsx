@@ -233,6 +233,7 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
                               <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                                 {student.name
                                   .split(" ")
+                                  .filter(Boolean)
                                   .map((n) => n[0])
                                   .slice(0, 2)
                                   .join("")

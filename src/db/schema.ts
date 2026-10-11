@@ -46,6 +46,7 @@ export const tenants = pgTable("tenants", {
   programs: jsonb("programs").$type<TenantProgram[]>().default([]),
   photos: jsonb("photos").$type<string[]>().default([]),
   whatsapp: text("whatsapp"),
+  adminUserId: text("admin_user_id").references(() => user.id, { onDelete: "set null" }),
   isVerified: boolean("is_verified").default(false),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -111,6 +112,7 @@ export const userRoles = pgTable("user_roles", {
 
 export const classes = pgTable("classes", {
   id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   capacity: integer("capacity"),
@@ -125,6 +127,7 @@ export const classes = pgTable("classes", {
 
 export const tutors = pgTable("tutors", {
   id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }).unique(),
   name: text("name").notNull(),
   email: text("email"),
@@ -171,6 +174,7 @@ export const tutorAttendance = pgTable("tutor_attendance", {
 
 export const students = pgTable("students", {
   id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   dateOfBirth: date("date_of_birth"),
   parentUserId: text("parent_user_id").references(() => user.id, { onDelete: "set null" }),
@@ -236,6 +240,7 @@ export const invoices = pgTable("invoices", {
 
 export const waitingList = pgTable("waiting_list", {
   id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
   studentName: text("student_name").notNull(),
   parentName: text("parent_name"),
   parentPhone: text("parent_phone"),
@@ -254,6 +259,7 @@ export const waitingList = pgTable("waiting_list", {
 
 export const trialApplications = pgTable("trial_applications", {
   id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
   parentUserId: text("parent_user_id").references(() => user.id, { onDelete: "set null" }),
   programKey: text("program_key"),
   classId: text("class_id").references(() => classes.id, { onDelete: "set null" }),
@@ -341,6 +347,7 @@ export type ChatMessageRow = typeof messages.$inferSelect;
 
 export const announcements = pgTable("announcements", {
   id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   body: text("body").notNull(),
   sentByUserId: text("sent_by_user_id").references(() => user.id, { onDelete: "set null" }),
@@ -407,6 +414,23 @@ export const lessonPlans = pgTable("lesson_plans", {
 
 export type LessonPlanRow = typeof lessonPlans.$inferSelect;
 
+export const tutorLeaveRequests = pgTable("tutor_leave_requests", {
+  id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+  tutorId: text("tutor_id").references(() => tutors.id, { onDelete: "cascade" }),
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  leaveType: text("leave_type").notNull(),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  reason: text("reason"),
+  replacementTutorId: text("replacement_tutor_id").references(() => tutors.id, { onDelete: "set null" }),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type TutorLeaveRequestRow = typeof tutorLeaveRequests.$inferSelect;
+
 export const paymentOrders = pgTable("payment_orders", {
   id: text("id").primaryKey(),
   invoiceId: text("invoice_id").references(() => invoices.id, { onDelete: "cascade" }),
@@ -431,7 +455,7 @@ export const paymentOrders = pgTable("payment_orders", {
 
 export const paycoreEvents = pgTable("paycore_events", {
   eventId: text("event_id").primaryKey(),
-  paycoreOrderId: text("paycore_order_id").notNull().unique(),
+  paycoreOrderId: text("paycore_order_id").notNull(),
   eventType: text("event_type").notNull(),
   processedAt: timestamp("processed_at", { withTimezone: true }).defaultNow(),
   rawPayload: jsonb("raw_payload"),

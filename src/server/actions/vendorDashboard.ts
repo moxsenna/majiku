@@ -5,6 +5,8 @@ import { sql, eq, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { tenants, user, userRoles, paymentOrders } from "@/db/schema";
 import { auth } from "@/server/auth";
+import { getMyRoles } from "@/server/authz";
+import type { AppRole } from "@/server/actions/roles";
 import { isDemoEmail } from "@/lib/demo";
 
 export interface DaycareItem {
@@ -55,8 +57,17 @@ export async function getVendorPlatformOverview(): Promise<VendorPlatformData> {
     // fallback
   }
 
+  // Otorisasi: overview platform hanya untuk superadmin (atau akun demo vendor)
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const roles: AppRole[] = await getMyRoles(session.user.id).catch(() => []);
+  const isDemo = isDemoEmail(session.user?.email);
+  if (!roles.includes("superadmin") && !isDemo) {
+    throw new Error("Forbidden: halaman ini hanya untuk admin platform");
+  }
+
   const userEmail = session?.user?.email;
-  const isDemo = isDemoEmail(userEmail);
 
   if (isDemo) {
     return {
