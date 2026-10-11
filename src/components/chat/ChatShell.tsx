@@ -139,10 +139,10 @@ export function ChatShell({
 
   const partnerSubtitle = selectedConversation?.studentName
     ? role === "parent"
-      ? `Siswa: ${selectedConversation.studentName}`
-      : `Orang tua dari ${selectedConversation.studentName}`
+      ? `Anak: ${selectedConversation.studentName}`
+      : `Siswa: ${selectedConversation.studentName}`
     : selectedPartner?.contextName ||
-      (role === "parent" ? "Tutor" : "Orang Tua");
+      (role === "parent" ? "Tutor Lembaga" : "Wali Murid");
 
   const filteredConversations = conversationList.filter((c) => {
     if (!searchQuery.trim()) return true;
@@ -301,11 +301,15 @@ export function ChatShell({
                         )}
                       </div>
 
-                      {conv.studentName && (
+                      {conv.studentName ? (
                         <p className="text-xs text-primary font-medium truncate mb-0.5">
                           {role === "parent"
-                            ? conv.studentName
+                            ? `Anak: ${conv.studentName}`
                             : `Siswa: ${conv.studentName}`}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground/70 truncate mb-0.5">
+                          {role === "parent" ? "Tutor Lembaga" : "Wali Murid"}
                         </p>
                       )}
 

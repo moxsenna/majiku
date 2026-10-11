@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,19 +8,44 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  BarChart3, Users, Building2, CreditCard, TrendingUp, TrendingDown,
-  Bell, Settings, LogOut, ChevronDown, ArrowUpRight, AlertTriangle,
-  CheckCircle2, Clock, DollarSign, Activity, Sparkles,
-  Shield, HelpCircle, FileText, Eye
+  BarChart3,
+  Users,
+  Building2,
+  CreditCard,
+  Bell,
+  Settings,
+  LogOut,
+  ChevronDown,
+  Sparkles,
+  Shield,
+  HelpCircle,
+  FileText,
+  DollarSign,
+  Activity,
+  CalendarClock,
 } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+} from "recharts";
 
 import UserManagementTab from "@/components/vendor/UserManagementTab";
 import DaycareManagementTab from "@/components/vendor/DaycareManagementTab";
@@ -29,52 +56,12 @@ import NotificationsTab from "@/components/vendor/NotificationsTab";
 import SecurityTab from "@/components/vendor/SecurityTab";
 import HelpCenterTab from "@/components/vendor/HelpCenterTab";
 import ReportsTab from "@/components/vendor/ReportsTab";
-import FeedbackWidget from "@/components/vendor/FeedbackWidget";
 
 import { useQuery } from "@tanstack/react-query";
 import {
   getVendorPlatformOverview,
   type VendorPlatformData,
 } from "@/server/actions/vendorDashboard";
-
-// Demo data
-const revenueData = [
-  { month: "Jan", revenue: 45000000 }, { month: "Feb", revenue: 52000000 },
-  { month: "Mar", revenue: 48000000 }, { month: "Apr", revenue: 61000000 },
-  { month: "May", revenue: 55000000 }, { month: "Jun", revenue: 67000000 },
-  { month: "Jul", revenue: 72000000 }, { month: "Aug", revenue: 69000000 },
-  { month: "Sep", revenue: 78000000 }, { month: "Oct", revenue: 82000000 },
-  { month: "Nov", revenue: 89000000 }, { month: "Des", revenue: 95000000 },
-];
-
-const vendorTypeData = [
-  { name: "Daycare", value: 245, color: "hsl(var(--primary))" },
-  { name: "TK/PAUD", value: 180, color: "hsl(var(--info))" },
-  { name: "Bimbel", value: 120, color: "hsl(var(--chart-3))" },
-  { name: "Kursus", value: 38, color: "hsl(var(--success))" },
-];
-
-const userActivityData = [
-  { day: "Sen", admin: 85, staff: 220, parent: 450 },
-  { day: "Sel", admin: 90, staff: 235, parent: 480 },
-  { day: "Rab", admin: 78, staff: 210, parent: 420 },
-  { day: "Kam", admin: 95, staff: 240, parent: 490 },
-  { day: "Jum", admin: 70, staff: 200, parent: 380 },
-  { day: "Sab", admin: 40, staff: 120, parent: 250 },
-  { day: "Min", admin: 25, staff: 80, parent: 180 },
-];
-
-const expiringSubscriptions = [
-  { id: 1, name: "TK Pelita Hati", daysLeft: 3, plan: "Pro", revenue: 599000 },
-  { id: 2, name: "Daycare Sunshine", daysLeft: 5, plan: "Basic", revenue: 299000 },
-  { id: 3, name: "Bimbel Cerdas Bangsa", daysLeft: 7, plan: "Pro", revenue: 599000 },
-];
-
-const subscriptionData = [
-  { plan: "Basic", count: 210, revenue: 62790000 },
-  { plan: "Pro", count: 285, revenue: 170715000 },
-  { plan: "Enterprise", count: 88, revenue: 132000000 },
-];
 
 const formatCurrency = (amount: number) => {
   if (amount >= 1000000000) return `Rp ${(amount / 1000000000).toFixed(1)}B`;
@@ -87,7 +74,6 @@ interface VendorDashboardProps {
 }
 
 export default function VendorDashboard({ initialData }: VendorDashboardProps) {
-  const { toast } = useToast();
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -98,7 +84,7 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
   });
 
   const data = platformData || initialData;
-  const isDemo = data?.isDemo ?? true;
+  const isDemo = data?.isDemo ?? false;
 
   const handleLogout = async () => {
     await signOut();
@@ -108,53 +94,107 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
   const displayName = user?.name || "Super Admin";
   const displayEmail = user?.email || "admin@majiku.web.id";
 
-  const totalUsersCount = data ? data.totalUsers : 1247;
-  const totalDaycaresCount = data ? data.totalDaycares : 583;
-  const activeDaycaresCount = data ? data.activeDaycaresCount : 548;
-  const totalRevenueAmount = data ? data.totalRevenue : 365505000;
+  const totalUsersCount = data?.totalUsers ?? 0;
+  const totalDaycaresCount = data?.totalDaycares ?? 0;
+  const activeDaycaresCount = data?.activeDaycaresCount ?? 0;
+  const totalRevenueAmount = data?.totalRevenue ?? 0;
+
+  // Hitung distribusi tipe tenant dari data overview secara riil
+  const calculatedTypeDistribution = (() => {
+    if (data?.typeDistribution && data.typeDistribution.length > 0) {
+      const colors = [
+        "hsl(var(--primary))",
+        "hsl(var(--info))",
+        "hsl(var(--chart-3))",
+        "hsl(var(--success))",
+      ];
+      return data.typeDistribution
+        .filter((t) => t.value > 0)
+        .map((t, idx) => ({
+          name: t.name,
+          value: t.value,
+          color: colors[idx % colors.length],
+        }));
+    }
+    if (data?.daycares && data.daycares.length > 0) {
+      const counts: Record<string, number> = {};
+      for (const d of data.daycares) {
+        counts[d.type] = (counts[d.type] || 0) + 1;
+      }
+      const colors = [
+        "hsl(var(--primary))",
+        "hsl(var(--info))",
+        "hsl(var(--chart-3))",
+        "hsl(var(--success))",
+      ];
+      return Object.entries(counts).map(([name, value], idx) => ({
+        name,
+        value,
+        color: colors[idx % colors.length],
+      }));
+    }
+    return [];
+  })();
+
+  // Hitung distribusi peranan pengguna dari data overview secara riil
+  const roleDistributionData = [
+    { role: "Super Admin", count: data?.roleDistribution?.superAdmin ?? 0, fill: "hsl(var(--destructive))" },
+    { role: "Admin Lembaga", count: data?.roleDistribution?.adminDaycare ?? 0, fill: "hsl(var(--primary))" },
+    { role: "Staf / Tutor", count: data?.roleDistribution?.staff ?? 0, fill: "hsl(var(--info))" },
+    { role: "Wali / Parent", count: data?.roleDistribution?.parent ?? 0, fill: "hsl(var(--success))" },
+  ];
+
+  // Hitung distribusi paket langganan dari data daycares
+  const calculatedSubscriptionDistribution = (() => {
+    if (!data?.daycares || data.daycares.length === 0) return [];
+    const counts: Record<string, number> = { Basic: 0, Pro: 0, Enterprise: 0 };
+    for (const d of data.daycares) {
+      const planKey = d.plan === "Enterprise" ? "Enterprise" : d.plan === "Basic" ? "Basic" : "Pro";
+      counts[planKey] = (counts[planKey] || 0) + 1;
+    }
+    const total = Object.values(counts).reduce((s, c) => s + c, 0);
+    return Object.entries(counts).map(([plan, count]) => {
+      const revenue =
+        plan === "Enterprise"
+          ? count * 1500000
+          : plan === "Pro"
+          ? count * 599000
+          : count * 299000;
+      const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+      return { plan, count, revenue, percentage };
+    });
+  })();
 
   const stats = [
     {
       title: "Total Pengguna",
       value: totalUsersCount.toLocaleString("id-ID"),
-      sub: "Admin, Staf, Orang Tua",
-      change: isDemo ? "+8%" : "",
-      isPositive: true,
+      sub: "Super Admin, Pengelola, Staf, Wali Murid",
       icon: Users,
       color: "primary",
     },
     {
-      title: "Daycare Terdaftar",
+      title: "Lembaga Terdaftar",
       value: totalDaycaresCount.toLocaleString("id-ID"),
-      sub: `Aktif: ${activeDaycaresCount}`,
-      change: isDemo ? "+12%" : "",
-      isPositive: true,
+      sub: `Lembaga Aktif: ${activeDaycaresCount}`,
       icon: Building2,
       color: "info",
     },
     {
-      title: "MRR / Revenue",
+      title: "Volume Transaksi (Lunas)",
       value: formatCurrency(totalRevenueAmount),
-      sub: isDemo ? "Dari subscription vendor" : "Total volume transaksi",
-      change: isDemo ? "+15%" : "",
-      isPositive: true,
+      sub: isDemo ? "Data demonstrasi platform" : "Total volume terverifikasi",
       icon: DollarSign,
       color: "success",
     },
     {
-      title: "Status Sistem",
+      title: "Kesehatan Platform",
       value: "Normal",
-      sub: "Workers Edge 99.9%",
-      change: "",
-      isPositive: true,
+      sub: "Cloudflare Edge Global",
       icon: Activity,
       color: "success",
     },
   ];
-
-  const handleSendReminder = (vendorName: string) => {
-    toast({ title: "Reminder Terkirim", description: `Email reminder telah dikirim ke ${vendorName}` });
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,17 +209,20 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
                 </div>
                 <span className="font-bold text-lg hidden sm:block">MAJIKU</span>
               </Link>
-              <Badge variant="secondary" className="hidden sm:flex">Super Admin</Badge>
+              <Badge variant="secondary" className="hidden sm:flex">
+                Super Admin
+              </Badge>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">7</span>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2">
-                    <Avatar className="w-8 h-8"><AvatarFallback className="bg-primary/10 text-primary">SA</AvatarFallback></Avatar>
+                    <Avatar className="w-8 h-8">
+                      <AvatarFallback className="bg-primary/10 text-primary">SA</AvatarFallback>
+                    </Avatar>
                     <span className="hidden sm:block text-sm font-medium">{displayName}</span>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
@@ -190,8 +233,14 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
                     <p className="text-[10px] text-muted-foreground">{displayEmail}</p>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setActiveTab("settings")}><Settings className="w-4 h-4 mr-2" />Pengaturan</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleLogout}><LogOut className="w-4 h-4 mr-2" />Keluar</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab("settings")}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Pengaturan
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleLogout}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Keluar
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -220,8 +269,12 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
                 { value: "security", icon: Shield, label: "Keamanan" },
                 { value: "help", icon: HelpCircle, label: "Bantuan" },
                 { value: "reports", icon: FileText, label: "Laporan" },
-              ].map(tab => (
-                <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-1.5 text-xs px-3 py-2 whitespace-nowrap">
+              ].map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="flex items-center gap-1.5 text-xs px-3 py-2 whitespace-nowrap"
+                >
                   <tab.icon className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>{tab.label}</span>
                 </TabsTrigger>
@@ -231,39 +284,6 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Alert */}
-            {expiringSubscriptions.length > 0 && (
-              <Card className="border-warning/50 bg-warning/5">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <AlertTriangle className="w-5 h-5 text-warning" />
-                      Langganan Akan Berakhir
-                    </CardTitle>
-                    <Badge variant="outline" className="border-warning text-warning-foreground">{expiringSubscriptions.length} vendor</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {expiringSubscriptions.map(v => (
-                      <div key={v.id} className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${v.daysLeft <= 3 ? 'bg-destructive/10' : 'bg-warning/10'}`}>
-                            <Clock className={`w-5 h-5 ${v.daysLeft <= 3 ? 'text-destructive' : 'text-warning'}`} />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm">{v.name}</p>
-                            <p className="text-xs text-muted-foreground">{v.plan} • Berakhir dalam {v.daysLeft} hari</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline" onClick={() => handleSendReminder(v.name)}>Kirim Reminder</Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {stats.map((s, i) => (
@@ -274,12 +294,6 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
                         <p className="text-xs sm:text-sm text-muted-foreground">{s.title}</p>
                         <p className="text-xl sm:text-2xl font-bold mt-1">{s.value}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">{s.sub}</p>
-                        {s.change && (
-                          <div className={`flex items-center gap-1 mt-1 text-xs ${s.isPositive ? 'text-success' : 'text-destructive'}`}>
-                            {s.isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                            {s.change} dari bulan lalu
-                          </div>
-                        )}
                       </div>
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-${s.color}/10`}>
                         <s.icon className={`w-5 h-5 text-${s.color}`} />
@@ -290,80 +304,108 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
               ))}
             </div>
 
-            {/* Charts */}
+            {/* Charts: Pendapatan & Distribusi Lembaga */}
             <div className="grid lg:grid-cols-3 gap-6">
+              {/* Panel Pendapatan: Tidak menampilkan grafik palsu jika data time-series belum ada di action */}
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-base">Pendapatan Bulanan</CardTitle>
-                  <CardDescription>Revenue dari subscription vendor</CardDescription>
+                  <CardTitle className="text-base">Pendapatan Platform</CardTitle>
+                  <CardDescription>Ringkasan akumulasi transaksi langganan dan tagihan</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={revenueData}>
-                        <defs>
-                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="month" className="text-xs" />
-                        <YAxis tickFormatter={v => formatCurrency(v)} className="text-xs" />
-                        <Tooltip formatter={(v: number) => [formatCurrency(v), "Revenue"]} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                        <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                  <div className="h-[280px] rounded-lg border border-dashed border-border flex flex-col items-center justify-center p-6 text-center bg-muted/20">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                      <CalendarClock className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-base mb-1">Riwayat Tren Bulanan Segera Hadir</h3>
+                    <p className="text-xs text-muted-foreground max-w-md mb-4">
+                      Grafik time-series historis per bulan sedang dalam tahap pengembangan agregasi data.
+                      Total pendapatan lunas tercatat saat ini adalah:
+                    </p>
+                    <div className="bg-card border border-border px-4 py-2 rounded-lg">
+                      <span className="text-xl font-bold text-success">
+                        {formatCurrency(totalRevenueAmount)}
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Distribusi Lembaga Riil (Dihitung dari overview) */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Distribusi Vendor</CardTitle>
-                  <CardDescription>Berdasarkan jenis lembaga</CardDescription>
+                  <CardTitle className="text-base">Distribusi Jenis Lembaga</CardTitle>
+                  <CardDescription>Berdasarkan data lembaga terdaftar di platform</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={vendorTypeData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={5} dataKey="value">
-                          {vendorTypeData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mt-4">
-                    {vendorTypeData.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                        <span className="text-xs">{item.name}: {item.value}</span>
+                  {calculatedTypeDistribution.length > 0 ? (
+                    <>
+                      <div className="h-[180px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={calculatedTypeDistribution}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={45}
+                              outerRadius={75}
+                              paddingAngle={4}
+                              dataKey="value"
+                            >
+                              {calculatedTypeDistribution.map((entry, index) => (
+                                <Cell key={index} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
                       </div>
-                    ))}
-                  </div>
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        {calculatedTypeDistribution.map((item, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                            <span className="text-xs truncate">
+                              {item.name}: {item.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="h-[200px] flex items-center justify-center text-xs text-muted-foreground">
+                      Belum ada data lembaga terdaftar
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Activity Chart + Subscription Plans */}
+            {/* Distribusi Pengguna Riil & Paket Berlangganan */}
             <div className="grid lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Aktivitas Pengguna</CardTitle>
-                  <CardDescription>Jumlah login harian per jenis pengguna</CardDescription>
+                  <CardTitle className="text-base">Distribusi Pengguna Riil</CardTitle>
+                  <CardDescription>Jumlah akun per peranan dalam sistem platform</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={userActivityData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="day" className="text-xs" />
-                        <YAxis className="text-xs" />
-                        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                        <Bar dataKey="admin" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} name="Admin" stackId="a" />
-                        <Bar dataKey="staff" fill="hsl(var(--info))" radius={[2, 2, 0, 0]} name="Staf" stackId="a" />
-                        <Bar dataKey="parent" fill="hsl(var(--success))" radius={[2, 2, 0, 0]} name="Orang Tua" stackId="a" />
+                      <BarChart data={roleDistributionData} layout="vertical" margin={{ left: 20, right: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                        <XAxis type="number" className="text-xs" />
+                        <YAxis dataKey="role" type="category" className="text-xs" width={90} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                          }}
+                        />
+                        <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Total Akun">
+                          {roleDistributionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -372,42 +414,74 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Distribusi Paket</CardTitle>
-                  <CardDescription>Vendor berdasarkan subscription plan</CardDescription>
+                  <CardTitle className="text-base">Distribusi Paket Mitra</CardTitle>
+                  <CardDescription>Proporsi paket langganan lembaga aktif</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {subscriptionData.map((plan, i) => {
-                      const totalVendors = subscriptionData.reduce((sum, p) => sum + p.count, 0);
-                      const percentage = Math.round((plan.count / totalVendors) * 100);
-                      return (
+                  {calculatedSubscriptionDistribution.length > 0 ? (
+                    <div className="space-y-4">
+                      {calculatedSubscriptionDistribution.map((plan, i) => (
                         <div key={i} className="space-y-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Badge variant={plan.plan === "Enterprise" ? "default" : plan.plan === "Pro" ? "default" : "secondary"}>{plan.plan}</Badge>
-                              <span className="text-sm text-muted-foreground">{plan.count} vendor ({percentage}%)</span>
+                              <Badge
+                                variant={
+                                  plan.plan === "Enterprise"
+                                    ? "default"
+                                    : plan.plan === "Pro"
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {plan.plan}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {plan.count} lembaga ({plan.percentage}%)
+                              </span>
                             </div>
                             <span className="text-sm font-medium">{formatCurrency(plan.revenue)}</span>
                           </div>
-                          <Progress value={percentage} className="h-2" />
+                          <Progress value={plan.percentage} className="h-2" />
                         </div>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="h-[200px] flex items-center justify-center text-xs text-muted-foreground">
+                      Belum ada paket aktif
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="users"><UserManagementTab users={data?.users} /></TabsContent>
-          <TabsContent value="daycares"><DaycareManagementTab daycares={data?.daycares} /></TabsContent>
-          <TabsContent value="finance"><FinanceTab /></TabsContent>
-          <TabsContent value="settings"><PlatformSettingsTab /></TabsContent>
-          <TabsContent value="monitoring"><MonitoringTab /></TabsContent>
-          <TabsContent value="notifications"><NotificationsTab /></TabsContent>
-          <TabsContent value="security"><SecurityTab /></TabsContent>
-          <TabsContent value="help"><HelpCenterTab /></TabsContent>
-          <TabsContent value="reports"><ReportsTab /></TabsContent>
+          <TabsContent value="users">
+            <UserManagementTab users={data?.users} />
+          </TabsContent>
+          <TabsContent value="daycares">
+            <DaycareManagementTab daycares={data?.daycares} />
+          </TabsContent>
+          <TabsContent value="finance">
+            <FinanceTab />
+          </TabsContent>
+          <TabsContent value="settings">
+            <PlatformSettingsTab />
+          </TabsContent>
+          <TabsContent value="monitoring">
+            <MonitoringTab />
+          </TabsContent>
+          <TabsContent value="notifications">
+            <NotificationsTab />
+          </TabsContent>
+          <TabsContent value="security">
+            <SecurityTab />
+          </TabsContent>
+          <TabsContent value="help">
+            <HelpCenterTab />
+          </TabsContent>
+          <TabsContent value="reports">
+            <ReportsTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
