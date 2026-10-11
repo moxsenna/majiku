@@ -1,12 +1,10 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { headers } from "next/headers";
-import { and, asc, desc, eq, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { tutors, tutorClassAssignments, classes, user } from "@/db/schema";
-import { auth } from "@/server/auth";
-import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 
 export type TutorRecord = typeof tutors.$inferSelect;
 
@@ -34,33 +32,8 @@ export interface UpdateTutorInput {
   phone?: string | null;
 }
 
-async function getSessionSafely() {
-  try {
-    const h = await headers();
-    return await auth.api.getSession({ headers: h });
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdminOrModerator() {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login");
-  }
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) {
-    throw new Error("Hanya admin atau moderator yang memiliki akses");
-  }
-  return session;
-}
-
 export async function listTutorsWithAssignments(): Promise<TutorWithAssignments[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   const rows = await db
     .select({
@@ -73,6 +46,7 @@ export async function listTutorsWithAssignments(): Promise<TutorWithAssignments[
     .from(tutors)
     .leftJoin(tutorClassAssignments, eq(tutors.id, tutorClassAssignments.tutorId))
     .leftJoin(classes, eq(tutorClassAssignments.classId, classes.id))
+    .where(eq(tutors.tenantId, ctx.tenantId))
     .orderBy(desc(tutors.createdAt), asc(tutors.name));
 
   const map = new Map<string, TutorWithAssignments>();
@@ -96,7 +70,7 @@ export async function listTutorsWithAssignments(): Promise<TutorWithAssignments[
 }
 
 export async function createTutor(input: CreateTutorInput): Promise<{ id: string }> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!input.name || !input.name.trim()) {
     throw new Error("Nama tutor wajib diisi");
@@ -120,6 +94,7 @@ export async function createTutor(input: CreateTutorInput): Promise<{ id: string
 
   await db.insert(tutors).values({
     id,
+    tenantId: ctx.tenantId,
     name: input.name.trim(),
     email,
     phone: input.phone?.trim() || null,
@@ -134,7 +109,7 @@ export async function updateTutor(
   id: string,
   partial: UpdateTutorInput
 ): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!id) {
     throw new Error("ID tutor wajib diisi");
@@ -171,7 +146,7 @@ export async function updateTutor(
   const result = await db
     .update(tutors)
     .set(updateValues)
-    .where(eq(tutors.id, id))
+    .where(and(eq(tutors.id, id), eq(tutors.tenantId, ctx.tenantId)))
     .returning({ id: tutors.id });
 
   if (result.length === 0) {
@@ -180,7 +155,7 @@ export async function updateTutor(
 }
 
 export async function toggleTutorActive(id: string, isActive: boolean): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!id) {
     throw new Error("ID tutor wajib diisi");
@@ -192,7 +167,7 @@ export async function toggleTutorActive(id: string, isActive: boolean): Promise<
       isActive,
       updatedAt: new Date(),
     })
-    .where(eq(tutors.id, id))
+    .where(and(eq(tutors.id, id), eq(tutors.tenantId, ctx.tenantId)))
     .returning({ id: tutors.id });
 
   if (result.length === 0) {
@@ -208,11 +183,7 @@ export interface LinkableUser {
 }
 
 export async function listLinkableUsers(): Promise<LinkableUser[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   const rows = await db
     .select({
@@ -222,14 +193,17 @@ export async function listLinkableUsers(): Promise<LinkableUser[]> {
       linkedTutorName: tutors.name,
     })
     .from(user)
-    .leftJoin(tutors, eq(tutors.userId, user.id))
+    .leftJoin(
+      tutors,
+      and(eq(tutors.userId, user.id), eq(tutors.tenantId, ctx.tenantId))
+    )
     .orderBy(asc(user.name));
 
   return rows;
 }
 
 export async function linkTutorUser(tutorId: string, userId: string): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!tutorId) {
     throw new Error("ID tutor wajib diisi");
@@ -241,7 +215,7 @@ export async function linkTutorUser(tutorId: string, userId: string): Promise<vo
   const [targetTutor] = await db
     .select({ id: tutors.id })
     .from(tutors)
-    .where(eq(tutors.id, tutorId))
+    .where(and(eq(tutors.id, tutorId), eq(tutors.tenantId, ctx.tenantId)))
     .limit(1);
 
   if (!targetTutor) {
@@ -261,7 +235,13 @@ export async function linkTutorUser(tutorId: string, userId: string): Promise<vo
   const [alreadyLinked] = await db
     .select({ id: tutors.id })
     .from(tutors)
-    .where(and(eq(tutors.userId, userId), ne(tutors.id, tutorId)))
+    .where(
+      and(
+        eq(tutors.userId, userId),
+        eq(tutors.tenantId, ctx.tenantId),
+        ne(tutors.id, tutorId)
+      )
+    )
     .limit(1);
 
   if (alreadyLinked) {
@@ -274,7 +254,7 @@ export async function linkTutorUser(tutorId: string, userId: string): Promise<vo
       userId,
       updatedAt: new Date(),
     })
-    .where(eq(tutors.id, tutorId))
+    .where(and(eq(tutors.id, tutorId), eq(tutors.tenantId, ctx.tenantId)))
     .returning({ id: tutors.id });
 
   if (result.length === 0) {
@@ -283,7 +263,7 @@ export async function linkTutorUser(tutorId: string, userId: string): Promise<vo
 }
 
 export async function unlinkTutorUser(tutorId: string): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!tutorId) {
     throw new Error("ID tutor wajib diisi");
@@ -295,7 +275,7 @@ export async function unlinkTutorUser(tutorId: string): Promise<void> {
       userId: null,
       updatedAt: new Date(),
     })
-    .where(eq(tutors.id, tutorId))
+    .where(and(eq(tutors.id, tutorId), eq(tutors.tenantId, ctx.tenantId)))
     .returning({ id: tutors.id });
 
   if (result.length === 0) {
@@ -308,8 +288,22 @@ export async function assignTutorClass(
   classId: string,
   ratePerSession: number = 50000
 ): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
   if (!tutorId || !classId) throw new Error("ID tutor dan kelas wajib diisi");
+
+  const [tutor] = await db
+    .select({ id: tutors.id })
+    .from(tutors)
+    .where(and(eq(tutors.id, tutorId), eq(tutors.tenantId, ctx.tenantId)))
+    .limit(1);
+  if (!tutor) throw new Error("Tutor tidak ditemukan");
+
+  const [cls] = await db
+    .select({ id: classes.id })
+    .from(classes)
+    .where(and(eq(classes.id, classId), eq(classes.tenantId, ctx.tenantId)))
+    .limit(1);
+  if (!cls) throw new Error("Kelas tidak ditemukan");
 
   await db.insert(tutorClassAssignments).values({
     id: randomUUID(),
@@ -321,7 +315,21 @@ export async function assignTutorClass(
 }
 
 export async function removeTutorClassAssignment(assignmentId: string): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
   if (!assignmentId) throw new Error("ID penugasan wajib diisi");
-  await db.delete(tutorClassAssignments).where(eq(tutorClassAssignments.id, assignmentId));
+
+  const scopedAssignments = db
+    .select({ id: tutorClassAssignments.id })
+    .from(tutorClassAssignments)
+    .innerJoin(tutors, eq(tutors.id, tutorClassAssignments.tutorId))
+    .where(and(eq(tutorClassAssignments.id, assignmentId), eq(tutors.tenantId, ctx.tenantId)));
+
+  const result = await db
+    .delete(tutorClassAssignments)
+    .where(inArray(tutorClassAssignments.id, scopedAssignments))
+    .returning({ id: tutorClassAssignments.id });
+
+  if (result.length === 0) {
+    throw new Error("Penugasan tidak ditemukan");
+  }
 }

@@ -1,12 +1,10 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { headers } from "next/headers";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { classes, tutorClassAssignments, tutors } from "@/db/schema";
-import { auth } from "@/server/auth";
-import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 
 export type ClassRecord = typeof classes.$inferSelect;
 
@@ -37,39 +35,17 @@ export interface UpdateClassInput {
   tutorId?: string | null;
 }
 
-async function getSessionSafely() {
-  try {
-    const h = await headers();
-    return await auth.api.getSession({ headers: h });
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdminOrModerator() {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login");
-  }
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) {
-    throw new Error("Hanya admin atau moderator yang memiliki akses");
-  }
-  return session;
-}
-
 export async function listClasses(): Promise<ClassRecord[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
-
-  return await db.select().from(classes).orderBy(asc(classes.name));
+  const ctx = await requireTenantContext();
+  return await db
+    .select()
+    .from(classes)
+    .where(eq(classes.tenantId, ctx.tenantId))
+    .orderBy(asc(classes.name));
 }
 
 export async function createClass(input: CreateClassInput): Promise<{ id: string }> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!input.name || !input.name.trim()) {
     throw new Error("Nama kelas wajib diisi");
@@ -83,6 +59,7 @@ export async function createClass(input: CreateClassInput): Promise<{ id: string
 
   await db.insert(classes).values({
     id,
+    tenantId: ctx.tenantId,
     name: input.name.trim(),
     description: input.description?.trim() || null,
     capacity:
@@ -100,20 +77,28 @@ export async function createClass(input: CreateClassInput): Promise<{ id: string
   });
 
   if (input.tutorId && input.tutorId.trim() && input.tutorId !== "none") {
-    await db.insert(tutorClassAssignments).values({
-      id: randomUUID(),
-      tutorId: input.tutorId.trim(),
-      classId: id,
-      ratePerSession: "50000",
-      isActive: true,
-    }).onConflictDoNothing();
+    const [tutor] = await db
+      .select({ id: tutors.id })
+      .from(tutors)
+      .where(and(eq(tutors.id, input.tutorId.trim()), eq(tutors.tenantId, ctx.tenantId)))
+      .limit(1);
+
+    if (tutor) {
+      await db.insert(tutorClassAssignments).values({
+        id: randomUUID(),
+        tutorId: tutor.id,
+        classId: id,
+        ratePerSession: "50000",
+        isActive: true,
+      }).onConflictDoNothing();
+    }
   }
 
   return { id };
 }
 
 export async function updateClass(id: string, partial: UpdateClassInput): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!id) {
     throw new Error("ID kelas wajib diisi");
@@ -160,7 +145,7 @@ export async function updateClass(id: string, partial: UpdateClassInput): Promis
   const result = await db
     .update(classes)
     .set(updateValues)
-    .where(eq(classes.id, id))
+    .where(and(eq(classes.id, id), eq(classes.tenantId, ctx.tenantId)))
     .returning({ id: classes.id });
 
   if (result.length === 0) {
@@ -170,26 +155,52 @@ export async function updateClass(id: string, partial: UpdateClassInput): Promis
   if (partial.tutorId !== undefined) {
     await db.delete(tutorClassAssignments).where(eq(tutorClassAssignments.classId, id));
     if (partial.tutorId && partial.tutorId.trim() && partial.tutorId !== "none") {
-      await db.insert(tutorClassAssignments).values({
-        id: randomUUID(),
-        tutorId: partial.tutorId.trim(),
-        classId: id,
-        ratePerSession: "50000",
-        isActive: true,
-      }).onConflictDoNothing();
+      const [tutor] = await db
+        .select({ id: tutors.id })
+        .from(tutors)
+        .where(and(eq(tutors.id, partial.tutorId.trim()), eq(tutors.tenantId, ctx.tenantId)))
+        .limit(1);
+
+      if (tutor) {
+        await db.insert(tutorClassAssignments).values({
+          id: randomUUID(),
+          tutorId: tutor.id,
+          classId: id,
+          ratePerSession: "50000",
+          isActive: true,
+        }).onConflictDoNothing();
+      }
     }
   }
 }
 
 export async function assignTutorToClass(classId: string, tutorId: string | null): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
   if (!classId) throw new Error("ID kelas wajib diisi");
+
+  const [cls] = await db
+    .select({ id: classes.id })
+    .from(classes)
+    .where(and(eq(classes.id, classId), eq(classes.tenantId, ctx.tenantId)))
+    .limit(1);
+
+  if (!cls) {
+    throw new Error("Kelas tidak ditemukan");
+  }
 
   await db.delete(tutorClassAssignments).where(eq(tutorClassAssignments.classId, classId));
   if (tutorId && tutorId.trim() && tutorId !== "none") {
+    const [tutor] = await db
+      .select({ id: tutors.id })
+      .from(tutors)
+      .where(and(eq(tutors.id, tutorId.trim()), eq(tutors.tenantId, ctx.tenantId)))
+      .limit(1);
+
+    if (!tutor) throw new Error("Tutor tidak ditemukan");
+
     await db.insert(tutorClassAssignments).values({
       id: randomUUID(),
-      tutorId: tutorId.trim(),
+      tutorId: tutor.id,
       classId,
       ratePerSession: "50000",
       isActive: true,
@@ -198,11 +209,7 @@ export async function assignTutorToClass(classId: string, tutorId: string | null
 }
 
 export async function listClassesWithTutor(): Promise<ClassWithTutorRecord[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   const rows = await db
     .select({
@@ -216,6 +223,7 @@ export async function listClassesWithTutor(): Promise<ClassWithTutorRecord[]> {
       and(eq(tutorClassAssignments.classId, classes.id), eq(tutorClassAssignments.isActive, true))
     )
     .leftJoin(tutors, eq(tutors.id, tutorClassAssignments.tutorId))
+    .where(eq(classes.tenantId, ctx.tenantId))
     .orderBy(asc(classes.name));
 
   return rows.map((r) => ({
@@ -226,20 +234,17 @@ export async function listClassesWithTutor(): Promise<ClassWithTutorRecord[]> {
 }
 
 export async function listTutorOptions(): Promise<Array<{ id: string; name: string }>> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   return await db
     .select({ id: tutors.id, name: tutors.name })
     .from(tutors)
-    .where(eq(tutors.isActive, true))
+    .where(and(eq(tutors.tenantId, ctx.tenantId), eq(tutors.isActive, true)))
     .orderBy(asc(tutors.name));
 }
 
 export async function toggleClassActive(id: string, isActive: boolean): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!id) {
     throw new Error("ID kelas wajib diisi");
@@ -251,7 +256,7 @@ export async function toggleClassActive(id: string, isActive: boolean): Promise<
       isActive,
       updatedAt: new Date(),
     })
-    .where(eq(classes.id, id))
+    .where(and(eq(classes.id, id), eq(classes.tenantId, ctx.tenantId)))
     .returning({ id: classes.id });
 
   if (result.length === 0) {

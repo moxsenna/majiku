@@ -1,12 +1,10 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { headers } from "next/headers";
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { students, studentEnrollments, classes, user, userRoles } from "@/db/schema";
-import { auth } from "@/server/auth";
-import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 
 export type StudentRecord = typeof students.$inferSelect;
 
@@ -44,33 +42,8 @@ export interface UpdateStudentInput {
   parentUserId?: string | null;
 }
 
-async function getSessionSafely() {
-  try {
-    const h = await headers();
-    return await auth.api.getSession({ headers: h });
-  } catch {
-    return null;
-  }
-}
-
-async function requireAdminOrModerator() {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login");
-  }
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) {
-    throw new Error("Hanya admin atau moderator yang memiliki akses");
-  }
-  return session;
-}
-
 export async function listStudentsWithEnrollments(): Promise<StudentWithEnrollments[]> {
-  const session = await getSessionSafely();
-  if (!session) return [];
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  if (!roles.includes("admin") && !roles.includes("moderator")) return [];
+  const ctx = await requireTenantContext();
 
   const rows = await db
     .select({
@@ -84,6 +57,7 @@ export async function listStudentsWithEnrollments(): Promise<StudentWithEnrollme
     .from(students)
     .leftJoin(studentEnrollments, eq(students.id, studentEnrollments.studentId))
     .leftJoin(classes, eq(studentEnrollments.classId, classes.id))
+    .where(eq(students.tenantId, ctx.tenantId))
     .orderBy(desc(students.createdAt), asc(students.name));
 
   const map = new Map<string, StudentWithEnrollments>();
@@ -108,7 +82,7 @@ export async function listStudentsWithEnrollments(): Promise<StudentWithEnrollme
 }
 
 export async function createStudent(input: CreateStudentInput): Promise<{ id: string }> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!input.name || !input.name.trim()) {
     throw new Error("Nama siswa wajib diisi");
@@ -132,6 +106,7 @@ export async function createStudent(input: CreateStudentInput): Promise<{ id: st
 
   await db.insert(students).values({
     id: studentId,
+    tenantId: ctx.tenantId,
     name: input.name.trim(),
     dateOfBirth: input.dateOfBirth?.trim() || null,
     parentUserId,
@@ -143,10 +118,19 @@ export async function createStudent(input: CreateStudentInput): Promise<{ id: st
   });
 
   if (input.classId?.trim()) {
+    const [targetClass] = await db
+      .select({ id: classes.id })
+      .from(classes)
+      .where(and(eq(classes.id, input.classId.trim()), eq(classes.tenantId, ctx.tenantId)))
+      .limit(1);
+    if (!targetClass) {
+      throw new Error("Kelas tidak ditemukan");
+    }
+
     await db.insert(studentEnrollments).values({
       id: randomUUID(),
       studentId,
-      classId: input.classId.trim(),
+      classId: targetClass.id,
       sessionsQuota:
         input.sessionsQuota !== undefined && !isNaN(Number(input.sessionsQuota))
           ? Number(input.sessionsQuota)
@@ -168,7 +152,7 @@ export async function updateStudent(
   id: string,
   partial: UpdateStudentInput
 ): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!id) {
     throw new Error("ID siswa wajib diisi");
@@ -217,7 +201,7 @@ export async function updateStudent(
   const result = await db
     .update(students)
     .set(updateValues)
-    .where(eq(students.id, id))
+    .where(and(eq(students.id, id), eq(students.tenantId, ctx.tenantId)))
     .returning({ id: students.id });
 
   if (result.length === 0) {
@@ -229,22 +213,27 @@ export async function linkStudentParent(
   studentId: string,
   parentUserId: string | null
 ): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
   if (!studentId) throw new Error("ID siswa wajib diisi");
 
-  await db
+  const result = await db
     .update(students)
     .set({
       parentUserId: parentUserId || null,
       updatedAt: new Date(),
     })
-    .where(eq(students.id, studentId));
+    .where(and(eq(students.id, studentId), eq(students.tenantId, ctx.tenantId)))
+    .returning({ id: students.id });
+
+  if (result.length === 0) {
+    throw new Error("Siswa tidak ditemukan");
+  }
 }
 
 export async function getLinkableParents(): Promise<
   Array<{ id: string; name: string; email: string }>
 > {
-  await requireAdminOrModerator();
+  await requireTenantContext();
   const rows = await db
     .select({
       id: user.id,
@@ -260,7 +249,7 @@ export async function getLinkableParents(): Promise<
 }
 
 export async function toggleStudentActive(id: string, isActive: boolean): Promise<void> {
-  await requireAdminOrModerator();
+  const ctx = await requireTenantContext();
 
   if (!id) {
     throw new Error("ID siswa wajib diisi");
@@ -272,7 +261,7 @@ export async function toggleStudentActive(id: string, isActive: boolean): Promis
       isActive,
       updatedAt: new Date(),
     })
-    .where(eq(students.id, id))
+    .where(and(eq(students.id, id), eq(students.tenantId, ctx.tenantId)))
     .returning({ id: students.id });
 
   if (result.length === 0) {

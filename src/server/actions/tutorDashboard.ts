@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { sql, eq, and, or, desc, isNull, ne } from "drizzle-orm";
+import { sql, eq, and, or, desc, isNull, ne, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import {
   tutors,
@@ -93,6 +93,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     .select({
       id: tutors.id,
       name: tutors.name,
+      tenantId: tutors.tenantId,
     })
     .from(tutors)
     .where(
@@ -141,7 +142,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     };
   }
 
-  // 2. Cari kelas yang ditugaskan kepada tutor ini
+  // 2. Cari kelas yang ditugaskan kepada tutor ini (terisolasi per tenant)
   const assignedClasses = await db
     .select({
       id: classes.id,
@@ -154,6 +155,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
       and(
         eq(tutorClassAssignments.tutorId, tutorRecord.id),
         eq(tutorClassAssignments.isActive, true),
+        eq(classes.tenantId, tutorRecord.tenantId),
         eq(classes.isActive, true)
       )
     );
@@ -196,7 +198,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
 
   const classIds = assignedClasses.map((c) => c.id);
 
-  // 3. Cari siswa yang aktif terdaftar di kelas-kelas tutor ini
+  // 3. Cari siswa yang aktif terdaftar di kelas-kelas tutor ini (terisolasi per tenant)
   const enrolledStudents = await db
     .select({
       id: students.id,
@@ -210,8 +212,10 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     .innerJoin(classes, eq(classes.id, studentEnrollments.classId))
     .where(
       and(
-        sql`${studentEnrollments.classId} IN ${classIds}`,
+        inArray(studentEnrollments.classId, classIds),
         eq(studentEnrollments.isActive, true),
+        eq(students.tenantId, tutorRecord.tenantId),
+        eq(classes.tenantId, tutorRecord.tenantId),
         eq(students.isActive, true)
       )
     );
@@ -229,7 +233,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
         .where(
           and(
             eq(attendance.date, todayDate),
-            sql`${attendance.studentId} IN ${studentIds}`
+            inArray(attendance.studentId, studentIds)
           )
         )
     : [];
@@ -249,7 +253,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
         .where(
           and(
             eq(dailyReports.reportDate, todayDate),
-            sql`${dailyReports.studentId} IN ${studentIds}`
+            inArray(dailyReports.studentId, studentIds)
           )
         )
     : [];
@@ -274,7 +278,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
 
   const todayPresentCount = mappedStudents.filter((s) => s.status === "hadir").length;
 
-  // 6. Ambil jadwal dari classSchedules
+  // 6. Ambil jadwal dari classSchedules (terisolasi per tenant)
   const schedulesList = await db
     .select({
       id: classSchedules.id,
@@ -289,7 +293,8 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     .innerJoin(classes, eq(classes.id, classSchedules.classId))
     .where(
       and(
-        sql`${classSchedules.classId} IN ${classIds}`,
+        inArray(classSchedules.classId, classIds),
+        eq(classes.tenantId, tutorRecord.tenantId),
         eq(classSchedules.isActive, true)
       )
     )

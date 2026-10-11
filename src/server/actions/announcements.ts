@@ -1,11 +1,11 @@
 "use server";
 
 import { headers } from "next/headers";
-import { desc, eq, and } from "drizzle-orm";
+import { desc, eq, and, or, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { announcements, userRoles } from "@/db/schema";
+import { announcements, students } from "@/db/schema";
 import { auth } from "@/server/auth";
-import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 
 export type AnnouncementRow = typeof announcements.$inferSelect;
 
@@ -18,10 +18,6 @@ async function getSessionSafely() {
   }
 }
 
-function isAdminOrModerator(roles: AppRole[]): boolean {
-  return roles.includes("admin") || roles.includes("moderator");
-}
-
 export interface CreateAnnouncementInput {
   title: string;
   body: string;
@@ -30,15 +26,7 @@ export interface CreateAnnouncementInput {
 export async function createAnnouncement(
   input: CreateAnnouncementInput
 ): Promise<{ id: string; recipientCount: number }> {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login untuk mengirim pengumuman");
-  }
-
-  const roles = await getMyRoles().catch(() => [] as AppRole[]);
-  if (!isAdminOrModerator(roles)) {
-    throw new Error("Hanya admin yang dapat mengirim pengumuman");
-  }
+  const ctx = await requireTenantContext();
 
   const title = (input.title ?? "").trim();
   const body = (input.body ?? "").trim();
@@ -50,18 +38,19 @@ export async function createAnnouncement(
   }
 
   const parentRows = await db
-    .select({ userId: userRoles.userId })
-    .from(userRoles)
-    .where(eq(userRoles.role, "parent"));
-  const recipientCount = parentRows.length;
+    .selectDistinct({ parentUserId: students.parentUserId })
+    .from(students)
+    .where(and(eq(students.tenantId, ctx.tenantId), eq(students.isActive, true)));
+  const recipientCount = parentRows.filter((r) => r.parentUserId !== null).length;
 
   const [row] = await db
     .insert(announcements)
     .values({
       id: crypto.randomUUID(),
+      tenantId: ctx.tenantId,
       title,
       body,
-      sentByUserId: session.user.id,
+      sentByUserId: ctx.session.user.id,
       recipientCount,
     })
     .returning({ id: announcements.id });
@@ -70,17 +59,32 @@ export async function createAnnouncement(
 }
 
 export async function listAnnouncements() {
-  const session = await getSessionSafely();
-  if (!session) return [];
-  const roles = await getMyRoles().catch(() => [] as AppRole[]);
-  if (!isAdminOrModerator(roles)) return [];
-
-  return db.select().from(announcements).orderBy(desc(announcements.createdAt));
+  const ctx = await requireTenantContext();
+  return db
+    .select()
+    .from(announcements)
+    .where(eq(announcements.tenantId, ctx.tenantId))
+    .orderBy(desc(announcements.createdAt));
 }
 
 export async function getLatestAnnouncementsForParent() {
   const session = await getSessionSafely();
   if (!session) return [];
+
+  const myStudents = await db
+    .selectDistinct({ tenantId: students.tenantId })
+    .from(students)
+    .where(
+      and(
+        session.user.email
+          ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))
+          : eq(students.parentUserId, session.user.id),
+        eq(students.isActive, true)
+      )
+    );
+
+  const tenantIds = myStudents.map((s) => s.tenantId);
+  if (tenantIds.length === 0) return [];
 
   const rows = await db
     .select({
@@ -90,25 +94,19 @@ export async function getLatestAnnouncementsForParent() {
       createdAt: announcements.createdAt,
     })
     .from(announcements)
+    .where(inArray(announcements.tenantId, tenantIds))
     .orderBy(desc(announcements.createdAt))
     .limit(5);
+
   return rows;
 }
 
 export async function deleteAnnouncement(id: string): Promise<void> {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login untuk menghapus pengumuman");
-  }
-
-  const roles = await getMyRoles().catch(() => [] as AppRole[]);
-  if (!isAdminOrModerator(roles)) {
-    throw new Error("Hanya admin yang dapat menghapus pengumuman");
-  }
+  const ctx = await requireTenantContext();
 
   const deleted = await db
     .delete(announcements)
-    .where(and(eq(announcements.id, id)))
+    .where(and(eq(announcements.id, id), eq(announcements.tenantId, ctx.tenantId)))
     .returning({ id: announcements.id });
 
   if (deleted.length === 0) {

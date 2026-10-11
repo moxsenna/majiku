@@ -2,11 +2,12 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { desc, eq, asc } from "drizzle-orm";
+import { desc, eq, asc, and, or, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { galleryPhotos, students, classes, user } from "@/db/schema";
+import { galleryPhotos, students, classes, user, tutors } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 import { deletePhoto } from "@/server/r2";
 
 export interface GalleryPhotoRow {
@@ -46,13 +47,39 @@ async function getSessionSafely() {
   }
 }
 
-export async function listGalleryPhotos(): Promise<GalleryPhotoRow[]> {
+async function getTenantIdForGallery(): Promise<{ tenantId: string; userId: string }> {
   const session = await getSessionSafely();
-  if (!session) return [];
-
+  if (!session) throw new Error("Unauthorized: Anda harus login");
   const roles: AppRole[] = await getMyRoles().catch(() => []);
-  const allowed = roles.includes("admin") || roles.includes("moderator") || roles.includes("tutor");
-  if (!allowed) return [];
+  if (roles.includes("admin") || roles.includes("moderator")) {
+    const ctx = await requireTenantContext();
+    return { tenantId: ctx.tenantId, userId: ctx.session.user.id };
+  }
+  if (roles.includes("tutor")) {
+    const [tutor] = await db
+      .select({ tenantId: tutors.tenantId })
+      .from(tutors)
+      .where(
+        and(
+          session.user.email
+            ? or(eq(tutors.userId, session.user.id), eq(tutors.email, session.user.email))
+            : eq(tutors.userId, session.user.id),
+          eq(tutors.isActive, true)
+        )
+      )
+      .limit(1);
+    if (tutor) return { tenantId: tutor.tenantId, userId: session.user.id };
+  }
+  throw new Error("Unauthorized: Akses galeri ditolak");
+}
+
+export async function listGalleryPhotos(): Promise<GalleryPhotoRow[]> {
+  let authContext: { tenantId: string; userId: string };
+  try {
+    authContext = await getTenantIdForGallery();
+  } catch {
+    return [];
+  }
 
   const rows = await db
     .select({
@@ -72,6 +99,12 @@ export async function listGalleryPhotos(): Promise<GalleryPhotoRow[]> {
     .leftJoin(students, eq(galleryPhotos.studentId, students.id))
     .leftJoin(classes, eq(galleryPhotos.classId, classes.id))
     .leftJoin(user, eq(galleryPhotos.uploadedByUserId, user.id))
+    .where(
+      or(
+        eq(students.tenantId, authContext.tenantId),
+        eq(classes.tenantId, authContext.tenantId)
+      )
+    )
     .orderBy(desc(galleryPhotos.createdAt));
 
   return rows;
@@ -80,16 +113,7 @@ export async function listGalleryPhotos(): Promise<GalleryPhotoRow[]> {
 export async function uploadGalleryPhotos(
   input: UploadGalleryPhotosInput
 ): Promise<{ created: number }> {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login");
-  }
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  const allowed = roles.includes("admin") || roles.includes("moderator") || roles.includes("tutor");
-  if (!allowed) {
-    throw new Error("Unauthorized: Hanya admin, moderator, atau tutor yang dapat mengunggah foto galeri");
-  }
+  const { tenantId, userId } = await getTenantIdForGallery();
 
   const { photoKeys } = input;
   if (!Array.isArray(photoKeys) || photoKeys.length === 0) {
@@ -105,10 +129,30 @@ export async function uploadGalleryPhotos(
     }
   }
 
-  const classId = input.classId?.trim() || null;
-  const caption = input.caption?.trim() || null;
-  const validStudentIds = (input.studentIds || []).filter(Boolean);
+  let classId: string | null = null;
+  if (input.classId?.trim()) {
+    const [targetClass] = await db
+      .select({ id: classes.id })
+      .from(classes)
+      .where(and(eq(classes.id, input.classId.trim()), eq(classes.tenantId, tenantId)))
+      .limit(1);
+    if (!targetClass) {
+      throw new Error("Kelas tidak ditemukan");
+    }
+    classId = targetClass.id;
+  }
 
+  const rawStudentIds = (input.studentIds || []).filter(Boolean);
+  let validStudentIds: string[] = [];
+  if (rawStudentIds.length > 0) {
+    const targetStudents = await db
+      .select({ id: students.id })
+      .from(students)
+      .where(and(inArray(students.id, rawStudentIds), eq(students.tenantId, tenantId)));
+    validStudentIds = targetStudents.map((s) => s.id);
+  }
+
+  const caption = input.caption?.trim() || null;
   let createdCount = 0;
 
   for (const key of photoKeys) {
@@ -120,7 +164,7 @@ export async function uploadGalleryPhotos(
           classId,
           photoKey: key,
           caption,
-          uploadedByUserId: session.user.id,
+          uploadedByUserId: userId,
         });
         createdCount++;
       }
@@ -131,7 +175,7 @@ export async function uploadGalleryPhotos(
         classId,
         photoKey: key,
         caption,
-        uploadedByUserId: session.user.id,
+        uploadedByUserId: userId,
       });
       createdCount++;
     }
@@ -141,16 +185,7 @@ export async function uploadGalleryPhotos(
 }
 
 export async function deleteGalleryPhoto(id: string): Promise<void> {
-  const session = await getSessionSafely();
-  if (!session) {
-    throw new Error("Unauthorized: Anda harus login");
-  }
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  const allowed = roles.includes("admin") || roles.includes("moderator");
-  if (!allowed) {
-    throw new Error("Hanya admin atau moderator yang dapat menghapus foto galeri");
-  }
+  const ctx = await requireTenantContext();
 
   const [photo] = await db
     .select({
@@ -158,7 +193,17 @@ export async function deleteGalleryPhoto(id: string): Promise<void> {
       photoKey: galleryPhotos.photoKey,
     })
     .from(galleryPhotos)
-    .where(eq(galleryPhotos.id, id))
+    .leftJoin(students, eq(galleryPhotos.studentId, students.id))
+    .leftJoin(classes, eq(galleryPhotos.classId, classes.id))
+    .where(
+      and(
+        eq(galleryPhotos.id, id),
+        or(
+          eq(students.tenantId, ctx.tenantId),
+          eq(classes.tenantId, ctx.tenantId)
+        )
+      )
+    )
     .limit(1);
 
   if (!photo) {
@@ -184,14 +229,10 @@ export async function listGalleryOptions(): Promise<{
   students: GalleryOptionItem[];
   classes: GalleryOptionItem[];
 }> {
-  const session = await getSessionSafely();
-  if (!session) {
-    return { students: [], classes: [] };
-  }
-
-  const roles: AppRole[] = await getMyRoles().catch(() => []);
-  const allowed = roles.includes("admin") || roles.includes("moderator") || roles.includes("tutor");
-  if (!allowed) {
+  let authContext: { tenantId: string; userId: string };
+  try {
+    authContext = await getTenantIdForGallery();
+  } catch {
     return { students: [], classes: [] };
   }
 
@@ -199,12 +240,12 @@ export async function listGalleryOptions(): Promise<{
     db
       .select({ id: students.id, name: students.name })
       .from(students)
-      .where(eq(students.isActive, true))
+      .where(and(eq(students.tenantId, authContext.tenantId), eq(students.isActive, true)))
       .orderBy(asc(students.name)),
     db
       .select({ id: classes.id, name: classes.name })
       .from(classes)
-      .where(eq(classes.isActive, true))
+      .where(and(eq(classes.tenantId, authContext.tenantId), eq(classes.isActive, true)))
       .orderBy(asc(classes.name)),
   ]);
 
