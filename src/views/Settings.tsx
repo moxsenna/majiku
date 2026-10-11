@@ -12,12 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Building2,
   Users,
-  Bell,
-  Shield,
-  Palette,
   CreditCard,
   ChevronRight,
-  Camera,
   CheckCircle2,
   Loader2,
 } from "lucide-react";
@@ -35,19 +31,10 @@ interface SettingsSection {
   title: string;
   description: string;
   color: string;
-  actionRoute?: string;
-  toastNote?: string;
+  actionRoute: string;
 }
 
 const settingsSections: SettingsSection[] = [
-  {
-    id: "school",
-    icon: Building2,
-    title: "Profil Sekolah",
-    description: "Nama, alamat, dan informasi dasar daycare",
-    color: "bg-primary/10 text-primary",
-    toastNote: "Perbarui informasi nama dan kontak sekolah pada form di sisi kiri.",
-  },
   {
     id: "users",
     icon: Users,
@@ -57,28 +44,12 @@ const settingsSections: SettingsSection[] = [
     actionRoute: "/tutors",
   },
   {
-    id: "notifications",
-    icon: Bell,
-    title: "Notifikasi & Pengingat",
-    description: "Atur saluran broadcast dan reminder tagihan SPP",
-    color: "bg-highlight/10 text-highlight",
-    toastNote: "Pengingat otomatis WhatsApp dan Broadcast terpusat telah aktif.",
-  },
-  {
-    id: "security",
-    icon: Shield,
-    title: "Keamanan Akun",
-    description: "Pengaturan kata sandi dan proteksi sesi",
-    color: "bg-success/10 text-success",
-    toastNote: "Sesi admin terlindungi dengan cookie HTTP-only dan rate limiter.",
-  },
-  {
-    id: "appearance",
-    icon: Palette,
-    title: "Tampilan & Tema",
-    description: "Kustomisasi warna antarmuka dan mode kontras",
-    color: "bg-secondary text-secondary-foreground",
-    toastNote: "Tema otomatis menyesuaikan preferensi sistem perangkat Anda.",
+    id: "classes",
+    icon: Building2,
+    title: "Manajemen Ruang Kelas",
+    description: "Atur kapasitas, ruang kelas, dan jadwal",
+    color: "bg-primary/10 text-primary",
+    actionRoute: "/classes",
   },
   {
     id: "billing",
@@ -156,11 +127,6 @@ export default function Settings() {
   const handleSectionClick = (section: SettingsSection) => {
     if (section.actionRoute) {
       router.push(section.actionRoute);
-    } else if (section.toastNote) {
-      toast({
-        title: section.title,
-        description: section.toastNote,
-      });
     }
   };
 
@@ -177,18 +143,10 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-col items-center">
-              <div className="relative">
+              <div>
                 <div className="h-24 w-24 rounded-2xl gradient-primary flex items-center justify-center text-3xl font-bold text-primary-foreground shadow-md">
                   {initials}
                 </div>
-                <Button
-                  variant="secondary"
-                  size="icon-sm"
-                  className="absolute -bottom-2 -right-2 rounded-full shadow-sm"
-                  onClick={() => toast({ title: "Ganti Logo", description: "Membuka media picker untuk logo sekolah..." })}
-                >
-                  <Camera className="h-4 w-4" />
-                </Button>
               </div>
               <h3 className="mt-4 font-bold text-lg text-foreground text-center">{daycareName}</h3>
               <p className="text-sm text-muted-foreground">{address}</p>
@@ -206,14 +164,15 @@ export default function Settings() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Email Operasional</label>
+                <label className="text-xs font-medium text-muted-foreground">Email Akun Admin (Read-only)</label>
                 <Input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1"
-                  required
+                  readOnly
+                  disabled
+                  className="mt-1 bg-muted/50 cursor-not-allowed"
                 />
+                <p className="text-[11px] text-muted-foreground mt-1">Dikelola melalui akun autentikasi admin</p>
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Nomor Telepon / WhatsApp</label>

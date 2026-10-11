@@ -20,9 +20,21 @@ interface PendingPayment {
   id: string;
   parentName: string;
   studentName: string;
+  parentPhone?: string | null;
   amount: number;
   dueDate: string;
   daysLeft: number;
+}
+
+function normalizePhone(phone: string): string {
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.startsWith("0")) {
+    return "62" + cleaned.slice(1);
+  }
+  if (cleaned.startsWith("62")) {
+    return cleaned;
+  }
+  return "62" + cleaned;
 }
 
 interface TeacherSalary {
@@ -77,7 +89,8 @@ export function AdminNavbarActions() {
           id: inv.id,
           parentName: inv.parentName || "Orang Tua Siswa",
           studentName: inv.studentName,
-          amount: inv.total,
+          parentPhone: inv.parentPhone || null,
+          amount: Number(inv.total ?? inv.amount ?? 0),
           dueDate: inv.dueDate || "Hari ini",
           daysLeft: 3,
         }));
@@ -100,9 +113,46 @@ export function AdminNavbarActions() {
   const readySalaries = teacherSalaries.filter((t) => t.status === "ready").length;
 
   const handleSendReminder = (payment: PendingPayment) => {
+    if (!payment.parentPhone) {
+      toast({
+        title: "Nomor WhatsApp Tidak Ditemukan",
+        description: `Tidak ada nomor kontak tersimpan untuk ${payment.parentName}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const phone = normalizePhone(payment.parentPhone);
+    const message = `Halo ${payment.parentName}, mengingatkan tagihan SPP untuk ananda ${payment.studentName} sebesar ${formatCurrency(payment.amount)} dengan jatuh tempo ${payment.dueDate}. Terima kasih.`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
     toast({
-      title: "Reminder Terkirim",
-      description: `Pengingat pembayaran dikirim ke ${payment.parentName}`,
+      title: "Membuka WhatsApp",
+      description: `Menyiapkan pengingat untuk ${payment.parentName}`,
+    });
+  };
+
+  const handleSendAllReminders = () => {
+    const withPhone = pendingPayments.filter((p) => Boolean(p.parentPhone));
+    const withoutPhone = pendingPayments.length - withPhone.length;
+
+    if (withPhone.length === 0) {
+      toast({
+        title: "Tidak Dapat Mengirim",
+        description: "Tidak ada tagihan dengan nomor telepon orang tua tersimpan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const first = withPhone[0];
+    const phone = normalizePhone(first.parentPhone!);
+    const message = `Halo ${first.parentName}, mengingatkan tagihan SPP untuk ananda ${first.studentName} sebesar ${formatCurrency(first.amount)} dengan jatuh tempo ${first.dueDate}. Terima kasih.`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+
+    toast({
+      title: "Pengingat Disiapkan",
+      description: `Membuka WhatsApp untuk ${first.parentName}. (${withPhone.length} kontak terdata${withoutPhone > 0 ? `, ${withoutPhone} tanpa nomor dilewati` : ""}).`,
     });
   };
 
@@ -121,10 +171,18 @@ export function AdminNavbarActions() {
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" />
-              Tagihan Akan Jatuh Tempo
-            </DialogTitle>
+            <div className="flex items-center justify-between pr-4">
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                Tagihan Akan Jatuh Tempo
+              </DialogTitle>
+              {pendingPayments.length > 0 && (
+                <Button size="sm" variant="outline" onClick={handleSendAllReminders}>
+                  <Send className="h-3 w-3 mr-1" />
+                  Ingatkan Semua
+                </Button>
+              )}
+            </div>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh]">
             <div className="space-y-3 pr-2">

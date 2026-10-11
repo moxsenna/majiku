@@ -218,10 +218,17 @@ export default function LessonPlans({ plans, classOptions, today }: LessonPlansP
       };
       if (form.id) {
         await updateLessonPlan(form.id, {
+          title: payload.title,
+          subject: payload.subject,
+          classId: payload.classId,
+          planDate: payload.planDate,
+          timeRange: payload.timeRange,
+          objectives: payload.objectives,
+          materials: payload.materials,
           activities: payload.activities,
           status: form.activitiesStatus,
         });
-        toast({ title: "Progress RPP diperbarui" });
+        toast({ title: "RPP berhasil diperbarui" });
       } else {
         await createLessonPlan(payload);
         toast({ title: "RPP berhasil dibuat", description: payload.title });

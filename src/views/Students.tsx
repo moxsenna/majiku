@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,7 @@ import {
   type CreateStudentInput,
   type UpdateStudentInput,
 } from "@/server/actions/studentsCrud";
+import { moveStudentClass } from "@/server/actions/enrollments";
 import type { ClassRecord } from "@/server/actions/classesCrud";
 
 interface StudentsProps {
@@ -91,16 +92,19 @@ function formatDate(dateStr: string | null | undefined): string {
 
 export default function Students({ initialData, availableClasses, linkableParents = [] }: StudentsProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const qParam = searchParams.get("q") || "";
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
   const [dataList, setDataList] = useState<StudentWithEnrollments[]>(initialData);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(qParam);
   const [selectedClassFilter, setSelectedClassFilter] = useState("all");
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
+  const [editingStudentOldClassId, setEditingStudentOldClassId] = useState<string>("none");
 
   const [isLinkOpen, setIsLinkOpen] = useState(false);
   const [linkingStudent, setLinkingStudent] = useState<StudentRecord | null>(null);
@@ -123,11 +127,18 @@ export default function Students({ initialData, availableClasses, linkableParent
     parentName: "",
     parentPhone: "",
     parentEmail: "",
+    classId: "none",
   });
 
   useEffect(() => {
     setDataList(initialData);
   }, [initialData]);
+
+  useEffect(() => {
+    if (qParam) {
+      setSearchQuery(qParam);
+    }
+  }, [qParam]);
 
   const filteredData = dataList.filter(({ student, enrollments }) => {
     const q = searchQuery.toLowerCase();
@@ -164,13 +175,17 @@ export default function Students({ initialData, availableClasses, linkableParent
   };
 
   const openEditDialog = (student: StudentRecord) => {
+    const entry = dataList.find((d) => d.student.id === student.id);
+    const existingClassId = entry?.enrollments[0]?.classId || "none";
     setEditingStudent(student);
+    setEditingStudentOldClassId(existingClassId);
     setEditForm({
       name: student.name || "",
       dateOfBirth: student.dateOfBirth ? String(student.dateOfBirth).slice(0, 10) : "",
       parentName: student.parentName || "",
       parentPhone: student.parentPhone || "",
       parentEmail: student.parentEmail || "",
+      classId: existingClassId,
     });
     setIsEditOpen(true);
   };
@@ -246,6 +261,15 @@ export default function Students({ initialData, availableClasses, linkableParent
         };
 
         await updateStudent(editingStudent.id, partial);
+
+        if (editForm.classId && editForm.classId !== "none" && editForm.classId !== editingStudentOldClassId) {
+          await moveStudentClass({
+            studentId: editingStudent.id,
+            fromClassId: editingStudentOldClassId !== "none" ? editingStudentOldClassId : null,
+            toClassId: editForm.classId,
+          });
+        }
+
         toast({
           title: "Berhasil",
           description: `Data siswa "${editForm.name}" berhasil diperbarui`,
@@ -801,6 +825,31 @@ export default function Students({ initialData, availableClasses, linkableParent
                     }
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t">
+                <Label htmlFor="edit-student-class">Pindah / Tetapkan Kelas</Label>
+                <Select
+                  value={editForm.classId}
+                  onValueChange={(val) =>
+                    setEditForm({ ...editForm, classId: val })
+                  }
+                >
+                  <SelectTrigger id="edit-student-class">
+                    <SelectValue placeholder="Pilih kelas" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectItem value="none">-- Tanpa Kelas --</SelectItem>
+                    {availableClasses.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>
+                        {cls.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Mengubah kelas akan memindahkan pendaftaran aktif siswa ke kelas baru.
+                </p>
               </div>
             </div>
             <DialogFooter>

@@ -1,11 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { lessonPlans, classes, user } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { requireTenantContext } from "@/server/authz";
 import { isValidDateString } from "@/lib/datetime";
 
 export type LessonPlanRecord = typeof lessonPlans.$inferSelect;
@@ -203,26 +204,83 @@ export async function createLessonPlan(
   return { id: row.id };
 }
 
+export interface UpdateLessonPlanInput {
+  title?: string;
+  subject?: string | null;
+  classId?: string | null;
+  planDate?: string;
+  timeRange?: string | null;
+  objectives?: string[];
+  activities?: ActivityInput[];
+  materials?: string[];
+  status?: string;
+}
+
 export async function updateLessonPlan(
   id: string,
-  partial: {
-    status?: string;
-    activities?: ActivityInput[];
-  }
+  partial: UpdateLessonPlanInput
 ): Promise<void> {
-  await requireAdminOrModerator();
+  const { tenantId } = await requireTenantContext();
 
   const existing = await db
-    .select()
+    .select({
+      id: lessonPlans.id,
+      classId: lessonPlans.classId,
+      classTenantId: classes.tenantId,
+    })
     .from(lessonPlans)
+    .leftJoin(classes, eq(lessonPlans.classId, classes.id))
     .where(eq(lessonPlans.id, id))
     .limit(1);
+
   if (existing.length === 0) {
     throw new Error("RPP tidak ditemukan");
   }
 
+  const current = existing[0];
+  if (current.classTenantId && current.classTenantId !== tenantId) {
+    throw new Error("Forbidden: RPP bukan milik lembaga Anda");
+  }
+
   const updateValues: Record<string, unknown> = {};
 
+  if (partial.title !== undefined) {
+    updateValues.title = validateTitle(partial.title);
+  }
+  if (partial.subject !== undefined) {
+    updateValues.subject = partial.subject?.trim() || null;
+  }
+  if (partial.classId !== undefined) {
+    if (partial.classId) {
+      const [targetClass] = await db
+        .select({ id: classes.id, tenantId: classes.tenantId })
+        .from(classes)
+        .where(and(eq(classes.id, partial.classId), eq(classes.tenantId, tenantId)))
+        .limit(1);
+      if (!targetClass) {
+        throw new Error("Kelas target tidak valid atau bukan milik lembaga Anda");
+      }
+      updateValues.classId = targetClass.id;
+    } else {
+      updateValues.classId = null;
+    }
+  }
+  if (partial.planDate !== undefined) {
+    updateValues.planDate = validatePlanDate(partial.planDate);
+  }
+  if (partial.timeRange !== undefined) {
+    const tr = partial.timeRange?.trim();
+    if (tr && !TIME_RANGE_REGEX.test(tr)) {
+      throw new Error("Format rentang waktu tidak valid (HH:mm - HH:mm)");
+    }
+    updateValues.timeRange = tr || null;
+  }
+  if (partial.objectives !== undefined) {
+    updateValues.objectives = validateObjectives(partial.objectives);
+  }
+  if (partial.materials !== undefined) {
+    updateValues.materials = validateMaterials(partial.materials);
+  }
   if (partial.status !== undefined) {
     if (!PLAN_STATUSES.includes(partial.status as PlanStatus)) {
       throw new Error("Status RPP tidak valid");
