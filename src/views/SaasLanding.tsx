@@ -346,38 +346,15 @@ export default function SaasLanding({
                   </div>
                   <div className="flex-1 flex justify-center">
                     <div className="bg-muted rounded px-3 py-0.5 text-xs text-muted-foreground">
-                      majiku.app/dashboard
+                      admin.majiku.web.id
                     </div>
                   </div>
                 </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
-                  alt="Dashboard Preview"
+                <img
+                  src="/previews/dashboard-admin-real.webp"
+                  alt="Dashboard Admin MAJIKU — data siswa, kehadiran, dan pendapatan nyata"
                   className="w-full h-auto"
                 />
-                {/* Overlay Cards */}
-                <div className="absolute top-1/4 left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border animate-float">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-success/20 flex items-center justify-center">
-                      <ClipboardCheck className="h-4 w-4 text-success" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold">Kehadiran Hari Ini</p>
-                      <p className="text-sm font-bold text-success">156/160 siswa</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute bottom-1/4 right-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border animate-float" style={{ animationDelay: "1s" }}>
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-highlight/20 flex items-center justify-center">
-                      <CreditCard className="h-4 w-4 text-highlight" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold">Pendapatan Bulan Ini</p>
-                      <p className="text-sm font-bold text-highlight">Rp 245 juta</p>
-                    </div>
-                  </div>
-                </div>
               </Card>
             </div>
           </div>
@@ -393,9 +370,9 @@ export default function SaasLanding({
                     <div className="bg-background rounded-[2.5rem] overflow-hidden">
                       {/* Phone Notch */}
                       <div className="bg-foreground h-6 rounded-b-2xl mx-16"></div>
-                      <img 
-                        src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80"
-                        alt="Parent App Preview"
+                      <img
+                        src="/previews/parent-app-real.webp"
+                        alt="Portal Orang Tua MAJIKU — laporan aktivitas harian anak"
                         className="w-full h-auto"
                       />
                     </div>
@@ -492,27 +469,15 @@ export default function SaasLanding({
                   </div>
                   <div className="flex-1 flex justify-center">
                     <div className="bg-muted rounded px-3 py-0.5 text-xs text-muted-foreground">
-                      majiku.app/tutor
+                      tutor.majiku.web.id
                     </div>
                   </div>
                 </div>
-                <img 
-                  src="https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=800&q=80"
-                  alt="Tutor Dashboard Preview"
+                <img
+                  src="/previews/dashboard-tutor-real.webp"
+                  alt="Dashboard Tutor MAJIKU — jadwal, siswa, dan KPI mengajar"
                   className="w-full h-auto"
                 />
-                {/* Overlay Cards */}
-                <div className="absolute top-1/4 right-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border animate-float">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-info/20 flex items-center justify-center">
-                      <Calendar className="h-4 w-4 text-info" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold">Jadwal Hari Ini</p>
-                      <p className="text-sm font-bold text-info">4 Kelas</p>
-                    </div>
-                  </div>
-                </div>
               </Card>
             </div>
           </div>
