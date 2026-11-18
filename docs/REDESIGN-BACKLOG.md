@@ -14,13 +14,18 @@ Bagian berikut ada di desain tetapi datanya/backend-nya belum ada. Tidak dibangu
 | A4 / A5 | Alasan tidak lanjut | Kolom alasan di `trial_applications` | GRW-05 | Disembunyikan |
 | A6 / G1 / P1 | Undangan token sekali pakai, status Diundang/Aktif, OTP WA | Tabel undangan + OTP | RBAC-06, PAR-01 | Hanya tautan `wa.me` + tautan daftar |
 | D1 | Paket & item biaya, tanggal mulai tagihan | Tabel paket/item | BIL-01..03, BIL-05 | Nominal bawaan dari harga kelas |
-| K1 | Aging, per kelas, settlement | Query agregasi + data settlement PayCore | BIL-16, BIL-18 | Disembunyikan |
-| K2 | Ledger, invoice gabungan keluarga | Tabel ledger / invoice keluarga | BIL-13, BIL-19 | Daftar invoice per keluarga saja |
-| K3 | Bayar sebagian, bukti foto | Tabel pembayaran parsial + upload | BIL-08, BIL-19 | Hanya "tandai lunas" |
+| K1 | Settlement/pencairan (panel "Pencairan ke rekening") | Data settlement PayCore | BIL-18 | Disembunyikan; aging & per kelas sudah ditampilkan (2026-11-18) |
+| K2 | Ledger bayar sebagian + kredit lebih bayar | Tabel pembayaran parsial | BIL-13 | Ledger invoice-granular (tagihan/bayar/saldo, bayar = nominal penuh); invoice gabungan keluarga (family_invoices) belum — P1 menerbitkan per anak |
+| K3 | Bayar sebagian, bukti foto, metode pembayaran, audit "dicatat oleh" | Tabel pembayaran + kolom metode/catat-oleh | BIL-08, BIL-19, RBAC-05 | Tombol "Catat pembayaran" = Lunas penuh (action lama `markInvoicePaid`) |
 | K5 | Paket, item biaya, kuota sesi | Tabel paket | BIL-01..03, BIL-11 | Read-only dari kelas |
 | K6 | Seluruh pengaturan penagihan | Tabel pengaturan tenant | BIL-04..10, BIL-21 | Disembunyikan |
 | K7 | Settlement | Data settlement PayCore | BIL-17, BIL-18 | Disembunyikan |
 | K8 | Sesi nyata dari absen guru | Relasi absen guru ↔ sesi | STF-05 | Label jujur / disembunyikan |
+| K1/P1 | Pecahan metode QRIS vs Virtual Account | Kolom metode di `payment_orders` | BIL-17 | Cara bayar hanya Online vs dicatat admin |
+| P1 | Pengingat otomatis + riwayat pengingat ("WA 17 Nov · dibuka") | Tabel pengingat + status kirim/baca | BIL-06, BIL-09, N25 | Ingatkan manual via `wa.me`; kolom Pengingat disembunyikan |
+| P1 | Jadwal terbit bulanan ("terlewat 2 hari") | Pengaturan jadwal penagihan (K6) | BIL-04, BIL-06, N24 | Tanpa catatan jadwal; daftar Perlu Ditagih ditampilkan apa adanya |
+| P1 | Satu tagihan gabungan per keluarga | `family_invoices` + `invoice_items` | BIL-05 | Terbitkan per anak; dicatat di bawah tabel |
+| P1/K7 | Ekspor resmi (CSV per header desain) | Format ekspor disepakati | BIL-16 | CSV sederhana dari data tabel aktif |
 | O2 | Sesi konkret, deteksi tanpa guru | Tabel sesi | SCH-07, SCH-08 | Jadwal mingguan saja |
 | O3 | Matriks cakupan, saran pengganti | Sesi + ketersediaan | SCH-09 | Disembunyikan |
 | O4 | Dampak libur ke sesi/kuota/tagihan | Sesi + penagihan | CTR-04 | Disembunyikan |

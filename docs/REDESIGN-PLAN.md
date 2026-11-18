@@ -238,3 +238,22 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Keamanan | wali hanya dari lembaga sendiri | `getLinkableParents` dibatasi ke wali yang terkait siswa/trial lembaga (disetujui 2026-11-18) |
 
 **DB uji**: Neon `ep-late-dawn-*`, URL di `.env.test.local` (tidak di-commit). Jalankan dev dengan `export $(grep -v '^#' .env.test.local | xargs -d '\n') && npm run dev`. Akun `admin.uji@ / guru.uji@ / wali.uji@bunayo-uji.test`, sandi `UjiBunayo123!`. Skema: `drizzle-kit migrate` + `push` (tabel `tutor_attendance`, `tutor_leave_requests` belum ada di folder migrasi — catatan untuk rilis).
+
+### Fase 3 · Keuangan — P1 Penagihan, K1 Ringkasan, K2 Detail+ledger, K3 Catat bayar (2026-11-18)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Satu sumber angka | K1 dan P1 selaras | Keduanya dari `src/server/actions/keuangan.ts` (baca-saja, `requireTenantContext`); definisi di komentar kepala file (Ditagihkan/Diterima/Menunggu/Terlambat/Perlu Ditagih/Cara bayar/Uang masuk/Keluarga) |
+| P1 4 tab | Perlu Ditagih / Menunggu / Terlambat / Lunas | Tab dengan hitungan; kartu angka mengklik ke tab sumbernya. Terbitkan = action lama `createInvoice` per anak, jatuh tempo +7 hari; sudah diuji: 1 anak uji (Oki) diterbitkan → Menunggu bertambah, angka selaras |
+| Aksi massal | bilah gelap + total | Centang baris → "Terbitkan 1 tagihan · Rp 750.000"; baris terpilih Biru lembut |
+| Ingatkan | tautan wa.me, jujur | Tombol Ingatkan membuka wa.me bila wali punya nomor; tanpa nomor → "Tanpa nomor WA"; riwayat pengingat disembunyikan (BARU) |
+| K2 | rincian + ledger buku kas | `/billing/[id]`: status, jatuh tempo, diskon, anak+kelas; ledger tagihan/bayar/saldo dari invoice keluarga (bayar = nominal penuh; parsial BARU) |
+| K3 | catat Lunas penuh | Tombol "Catat pembayaran" → `markInvoicePaid`; diuji: UJI-0020 Lunas, ledger bertambah baris bayar, saldo 0; K1/P1 ikut berubah |
+| K1 | stabilo Diterima + grafik + per kelas + tunggakan + cara bayar | Grafik 6 bulan (bulan berjalan s.d. hari ini); per kelas dengan ProgressBar; aging 1–30/31–60/>60; Online vs dicatat admin |
+| Kosong | mengajari langkah | Tanpa tagihan → EmptyState "Daftarkan anak" (P1), "Belum ada uang masuk" (K1) |
+| Demo | terbaca bukan data nyata | Akun `demo@majiku.id` (DB uji): InfoBox "Mode demo", angka contoh desain; mutasi dinonaktifkan |
+| Responsif | 1440/834/390 | 834: kartu angka 2×2 (perbaikan `StatCard`); 390: kartu + tabs; screenshot tersimpan |
+| Lint/build | lulus | `npm run lint` 0, `npm run build` sukses |
+| Perbaikan menyelinap | — | `waLink`/aging dipindah ke `src/lib/keuangan.ts` (ekspor "use server" wajib async); `any(array)` diganti `inArray` (getTagihanDetail 404); `TabsContent` inactive kini benar-benar tersembunyi; StatCard min-w 46% ≤1000 |
+
+**Belum diverifikasi**: state galat refetch di P1/K1 (pola sama dengan A1 yang sudah diuji); K4 (tagihan sekali), K5 (paket), K6 (pengaturan penagihan), K7 (pembayaran masuk), K8 (honor) masih tampilan lama atau belum dibuat — urutan berikutnya.

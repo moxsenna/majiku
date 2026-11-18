@@ -58,6 +58,7 @@ export function adminNav(istilah: Istilah): NavEntry[] {
       href: "/billing",
       icon: Wallet,
       sub: [
+        { label: "Ringkasan", href: "/billing/ringkasan" },
         { label: "Tagihan", href: "/billing", exact: true },
         { label: istilah.honor, href: "/billing/honor" },
       ],

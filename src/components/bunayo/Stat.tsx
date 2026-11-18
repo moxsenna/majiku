@@ -36,6 +36,8 @@ export function StatCard({ label, periode, value, suffix, href, linkLabel, onCli
     <div
       className={cn(
         "flex min-w-[150px] flex-1 flex-col gap-[3px] border-b border-r border-border px-[18px] py-3.5 last:border-r-0",
+        // ≤1000: 2×2 agar angka penuh tidak terpotong di kolom sempit (rail 834).
+        "max-[1000px]:min-w-[46%]",
         "max-[560px]:min-w-[50%]",
         className,
       )}
