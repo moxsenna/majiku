@@ -83,7 +83,7 @@ export async function getVendorPlatformOverview(): Promise<VendorPlatformData> {
         { id: 4, name: "PAUD Tunas Harapan", type: "TK/PAUD", plan: "Basic", students: 35, staff: 4, revenue: 2100000, status: "trial", joinDate: "Des 2024" },
       ],
       users: [
-        { id: 1, name: "Budi Santoso", email: "budi@daycare-a.com", role: "super_admin", status: "active", daycare: "Platform MAJIKU", lastLogin: "2 jam lalu" },
+        { id: 1, name: "Budi Santoso", email: "budi@daycare-a.com", role: "super_admin", status: "active", daycare: "Platform Bunayo", lastLogin: "2 jam lalu" },
         { id: 2, name: "Siti Nurhaliza", email: "siti@tkceria.com", role: "admin_daycare", status: "active", daycare: "TK Ceria Mandiri", lastLogin: "5 jam lalu" },
       ],
       roleDistribution: {
@@ -158,7 +158,7 @@ export async function getVendorPlatformOverview(): Promise<VendorPlatformData> {
       email: u.email,
       role: mappedRole,
       status: "active",
-      daycare: "MAJIKU Platform",
+      daycare: "Bunayo Platform",
       lastLogin: "Aktif",
     };
   });

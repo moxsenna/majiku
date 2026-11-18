@@ -66,7 +66,7 @@ export default function Auth() {
       toast({ title: "Login Gagal", description: error.message || "Email atau password salah", variant: "destructive" });
     } else {
       setIsLoading(false);
-      toast({ title: "Login Berhasil!", description: "Selamat datang kembali di MAJIKU" });
+      toast({ title: "Login Berhasil!", description: "Selamat datang kembali di Bunayo" });
       const next = new URLSearchParams(window.location.search).get("next");
       if (next && next.startsWith("/") && !next.startsWith("//")) {
         window.location.href = next;
@@ -138,7 +138,7 @@ export default function Auth() {
               <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="font-bold text-2xl">MAJIKU</span>
+              <span className="font-bold text-2xl">Bunayo</span>
             </Link>
           </div>
 

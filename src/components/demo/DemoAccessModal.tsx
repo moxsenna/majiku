@@ -121,7 +121,7 @@ export function DemoAccessModal({
             </div>
             <div>
               <DialogTitle className="text-xl font-bold">
-                Jelajahi Demo Interaktif MAJIKU
+                Jelajahi Demo Interaktif Bunayo
               </DialogTitle>
               <DialogDescription className="text-xs sm:text-sm mt-0.5">
                 Pilih peran untuk langsung merasakan pengalaman aplikasi dengan data simulasi lengkap tanpa perlu registrasi.

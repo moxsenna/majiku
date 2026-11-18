@@ -169,7 +169,7 @@ export default function TutorAttendance() {
             
             <div className="flex items-center justify-center gap-2 text-white/80 text-sm mb-4">
               <MapPin className="w-4 h-4" />
-              <span>MAJIKU Daycare - Presensi Pengajar</span>
+              <span>Bunayo Daycare - Presensi Pengajar</span>
             </div>
 
             {isCheckedIn ? (

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Clock, ArrowRight, ShieldCheck } from "lucide-react";
 
 export const metadata = {
-  title: "Status Pembayaran | MAJIKU",
+  title: "Status Pembayaran | Bunayo",
   robots: { index: false, follow: false },
 };
 
@@ -35,7 +35,7 @@ export default function PaymentReturnPage() {
             <p className="text-muted-foreground text-[11px] leading-normal">
               Status pembayaran Anda akan diperbarui otomatis dalam 1–3 menit setelah
               sistem perbankan / e-wallet menyelesaikan transaksi — baik untuk tagihan
-              SPP maupun langganan platform MAJIKU. Anda tidak perlu mengunggah bukti
+              SPP maupun langganan platform Bunayo. Anda tidak perlu mengunggah bukti
               transfer. Untuk langganan SaaS, portal lembaga Anda akan aktif setelah
               pembayaran terkonfirmasi.
             </p>

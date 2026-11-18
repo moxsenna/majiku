@@ -121,7 +121,7 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
             <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground shadow-md">
               <GraduationCap className="w-7 h-7" />
             </div>
-            <span className="font-bold text-2xl tracking-tight">MAJIKU</span>
+            <span className="font-bold text-2xl tracking-tight">Bunayo</span>
           </div>
           <p className="text-sm text-muted-foreground font-medium">Portal Admin Lembaga & Daycare</p>
         </div>
@@ -314,7 +314,7 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
                       onCheckedChange={(c) => setRegisterForm({ ...registerForm, agreeTerms: Boolean(c) })}
                     />
                     <label htmlFor="admin-terms" className="text-xs text-muted-foreground leading-snug cursor-pointer">
-                      Saya menyetujui Syarat & Ketentuan pengelolaan platform MAJIKU
+                      Saya menyetujui Syarat & Ketentuan pengelolaan platform Bunayo
                     </label>
                   </div>
 
@@ -339,7 +339,7 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
               <DialogTitle>Bantuan Masuk & Reset Password</DialogTitle>
             </div>
             <DialogDescription className="text-xs">
-              Panduan pemulihan akses akun pengelola Daycare MAJIKU.
+              Panduan pemulihan akses akun pengelola Daycare Bunayo.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2 text-xs text-muted-foreground leading-relaxed">
@@ -347,7 +347,7 @@ export default function AdminAuth({ initialMode = "login" }: AdminAuthProps) {
               Untuk menjaga integritas dan keamanan data murid serta keuangan lembaga Anda, reset password akun admin daycare dilakukan melalui verifikasi pengelola.
             </p>
             <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-1.5 text-foreground font-medium">
-              <p>Tim Bantuan Teknis MAJIKU:</p>
+              <p>Tim Bantuan Teknis Bunayo:</p>
               <p className="text-muted-foreground font-normal">📧 Email: support@majiku.web.id</p>
               <p className="text-muted-foreground font-normal">💬 WhatsApp: +62 812-3456-7890 (Hari Kerja 08:00 - 17:00 WIB)</p>
             </div>

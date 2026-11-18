@@ -714,7 +714,7 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                   />
                   <Label htmlFor="terms" className="text-sm leading-relaxed">
                     Saya menyetujui <span className="text-primary font-medium">Syarat & Ketentuan</span> serta{" "}
-                    <span className="text-primary font-medium">Kebijakan Privasi</span> MAJIKU Daycare
+                    <span className="text-primary font-medium">Kebijakan Privasi</span> Bunayo Daycare
                   </Label>
                 </div>
               </CardContent>

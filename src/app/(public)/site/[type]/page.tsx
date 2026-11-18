@@ -28,7 +28,7 @@ const TYPE_CONFIGS: Record<string, TypeConfig> = {
   daycare: {
     mappedType: "daycare",
     title: "Daycare di Indonesia — Temukan TPA Terverifikasi",
-    metaTitle: "Daycare di Indonesia — Temukan TPA Terverifikasi | MAJIKU",
+    metaTitle: "Daycare di Indonesia — Temukan TPA Terverifikasi | Bunayo",
     metaDescription:
       "Temukan TPA & daycare terverifikasi di Indonesia untuk perawatan, penitipan, dan tumbuh kembang anak terbaik dengan fasilitas lengkap dan pengasuh berpengalaman.",
     badge: "Daycare & TPA Terverifikasi",
@@ -39,7 +39,7 @@ const TYPE_CONFIGS: Record<string, TypeConfig> = {
   preschool: {
     mappedType: "preschool",
     title: "Preschool & TK — Temukan PAUD & TK Terverifikasi",
-    metaTitle: "Preschool & TK — Temukan PAUD & TK Terverifikasi | MAJIKU",
+    metaTitle: "Preschool & TK — Temukan PAUD & TK Terverifikasi | Bunayo",
     metaDescription:
       "Daftar preschool, PAUD, dan taman kanak-kanak terpercaya di Indonesia dengan kurikulum berkualitas dan lingkungan stimulasi usia dini.",
     badge: "Preschool & TK",
@@ -50,7 +50,7 @@ const TYPE_CONFIGS: Record<string, TypeConfig> = {
   tk: {
     mappedType: "preschool",
     title: "Preschool & TK — Temukan PAUD & TK Terverifikasi",
-    metaTitle: "Preschool & TK — Temukan PAUD & TK Terverifikasi | MAJIKU",
+    metaTitle: "Preschool & TK — Temukan PAUD & TK Terverifikasi | Bunayo",
     metaDescription:
       "Daftar preschool, PAUD, dan taman kanak-kanak terpercaya di Indonesia dengan kurikulum berkualitas dan lingkungan stimulasi usia dini.",
     badge: "TK & PAUD",
@@ -61,7 +61,7 @@ const TYPE_CONFIGS: Record<string, TypeConfig> = {
   bimbel: {
     mappedType: "bimbel",
     title: "Bimbel & Les Privat — Kursus & Bimbel Terbaik",
-    metaTitle: "Bimbel & Les Privat — Kursus & Bimbel Terbaik | MAJIKU",
+    metaTitle: "Bimbel & Les Privat — Kursus & Bimbel Terbaik | Bunayo",
     metaDescription:
       "Cari bimbingan belajar, les privat, dan kursus terbaik di Indonesia untuk meningkatkan prestasi akademik dan kemampuan anak.",
     badge: "Bimbel & Les Privat",
@@ -122,7 +122,7 @@ export default async function SiteTypePage({ params }: SiteTypePageProps) {
             <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-xl">MAJIKU</span>
+            <span className="font-bold text-xl">Bunayo</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link
@@ -249,7 +249,7 @@ export default async function SiteTypePage({ params }: SiteTypePageProps) {
               Pemilik {config.badge}?
             </h2>
             <p className="text-primary-foreground/80 max-w-xl text-sm">
-              Daftarkan lembaga Anda di MAJIKU untuk meningkatkan visibilitas dan mengelola pendaftaran siswa baru secara otomatis.
+              Daftarkan lembaga Anda di Bunayo untuk meningkatkan visibilitas dan mengelola pendaftaran siswa baru secara otomatis.
             </p>
           </div>
           <Link href="/admin/register" className="shrink-0">
@@ -266,10 +266,10 @@ export default async function SiteTypePage({ params }: SiteTypePageProps) {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-foreground">MAJIKU</span>
+            <span className="font-semibold text-foreground">Bunayo</span>
             <span>— Platform Manajemen Lembaga &amp; Direktori Anak</span>
           </div>
-          <p>© {new Date().getFullYear()} MAJIKU. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Bunayo. All rights reserved.</p>
         </div>
       </footer>
     </div>

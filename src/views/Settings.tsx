@@ -77,10 +77,10 @@ export default function Settings() {
     queryFn: getTenantProfile,
   });
 
-  const [daycareName, setDaycareName] = useState("MAJIKU Daycare");
-  const [email, setEmail] = useState(user?.email || "admin@daycare.com");
-  const [phone, setPhone] = useState("+62 812-3456-7890");
-  const [address, setAddress] = useState("Jakarta Selatan");
+  const [daycareName, setDaycareName] = useState("");
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
 
   useEffect(() => {
     if (tenantData) {

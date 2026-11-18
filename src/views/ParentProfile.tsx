@@ -156,7 +156,7 @@ export default function ParentProfile() {
 
             <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground px-1">
               <span>Versi Aplikasi</span>
-              <span className="font-mono">v1.0.0 (MAJIKU Parent Portal)</span>
+              <span className="font-mono">v1.0.0 (Bunayo Parent Portal)</span>
             </div>
           </CardContent>
         </Card>

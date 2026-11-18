@@ -1,7 +1,7 @@
 import ParentAuth from "@/views/auth/ParentAuth";
 
 export const metadata = {
-  title: "Masuk Portal Orang Tua | MAJIKU",
+  title: "Masuk Portal Orang Tua | Bunayo",
   robots: { index: false, follow: false },
 };
 

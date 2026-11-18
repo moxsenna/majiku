@@ -153,7 +153,7 @@ export async function createSubscriptionCheckoutOrder(
         externalOrderId,
         amount,
         productKey: "saas_subscription",
-        description: `Langganan MAJIKU ${plan.name} (${cycleText}) - ${institutionName}`,
+        description: `Langganan Bunayo ${plan.name} (${cycleText}) - ${institutionName}`,
         customer: {
           name: adminName,
           email,

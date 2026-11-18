@@ -22,7 +22,7 @@ export async function generateMetadata({
   if (!tenant) {
     return {
       title: "Tenant Tidak Ditemukan",
-      description: "Tenant yang Anda cari tidak ditemukan di MAJIKU.",
+      description: "Tenant yang Anda cari tidak ditemukan di Bunayo.",
     };
   }
 
@@ -82,7 +82,7 @@ export default async function TenantDetailPage({ params }: TenantPageProps) {
     : null;
   const waUrl = cleanWhatsapp
     ? `https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(
-        `Halo ${tenant.name}, saya melihat profil Anda di MAJIKU dan tertarik untuk informasi lebih lanjut.`
+        `Halo ${tenant.name}, saya melihat profil Anda di Bunayo dan tertarik untuk informasi lebih lanjut.`
       )}`
     : null;
 

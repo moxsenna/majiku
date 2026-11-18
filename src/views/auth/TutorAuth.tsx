@@ -81,7 +81,7 @@ export default function TutorAuth() {
             <div className="w-12 h-12 rounded-xl bg-info/10 text-info flex items-center justify-center shadow-sm">
               <BookOpen className="w-7 h-7" />
             </div>
-            <span className="font-bold text-2xl tracking-tight text-foreground">MAJIKU Tutor</span>
+            <span className="font-bold text-2xl tracking-tight text-foreground">Bunayo Tutor</span>
           </div>
           <p className="text-sm text-muted-foreground font-medium">Portal Khusus Guru & Pendidik</p>
         </div>
@@ -169,7 +169,7 @@ export default function TutorAuth() {
               <DialogTitle>Bantuan Masuk Pengajar</DialogTitle>
             </div>
             <DialogDescription className="text-xs">
-              Panduan pemulihan akses akun guru & pendidik MAJIKU.
+              Panduan pemulihan akses akun guru & pendidik Bunayo.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2 text-xs text-muted-foreground leading-relaxed">

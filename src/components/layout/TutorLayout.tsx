@@ -51,7 +51,7 @@ function TutorSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <GraduationCap className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="font-bold text-foreground text-base tracking-tight">MAJIKU Tutor</h1>
+          <h1 className="font-bold text-foreground text-base tracking-tight">Bunayo Tutor</h1>
           <p className="text-xs text-muted-foreground">Portal Pengajar</p>
         </div>
       </div>

@@ -96,7 +96,7 @@ const testimonials = [
     name: "Ibu Ratna Sari",
     role: "Pemilik TK Ceria Mandiri",
     avatar: "RS",
-    content: "MAJIKU membantu kami mengelola 150+ siswa dengan lebih efisien. Orang tua sangat senang dengan update harian!",
+    content: "Bunayo membantu kami mengelola 150+ siswa dengan lebih efisien. Orang tua sangat senang dengan update harian!",
     rating: 5
   },
   {
@@ -136,7 +136,7 @@ export default function SaasLanding({
               <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-xl">MAJIKU</span>
+              <span className="font-bold text-xl">Bunayo</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Fitur</a>
@@ -218,7 +218,7 @@ export default function SaasLanding({
               <span className="text-gradient">Lebih Mudah</span>
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              MAJIKU adalah platform all-in-one untuk daycare, TK, PAUD, dan lembaga bimbingan belajar. 
+              Bunayo adalah platform all-in-one untuk daycare, TK, PAUD, dan lembaga bimbingan belajar. 
               Dari manajemen siswa hingga billing, semua dalam satu tempat.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -301,7 +301,7 @@ export default function SaasLanding({
               Tampilan Aplikasi yang <span className="text-gradient">Mudah Digunakan</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Interface yang intuitif untuk admin, tutor, dan orang tua. Lihat bagaimana MAJIKU mempermudah operasional lembaga Anda.
+              Interface yang intuitif untuk admin, tutor, dan orang tua. Lihat bagaimana Bunayo mempermudah operasional lembaga Anda.
             </p>
           </div>
 
@@ -352,7 +352,7 @@ export default function SaasLanding({
                 </div>
                 <img
                   src="/previews/dashboard-admin-real.webp"
-                  alt="Dashboard Admin MAJIKU — data siswa, kehadiran, dan pendapatan nyata"
+                  alt="Dashboard Admin Bunayo — data siswa, kehadiran, dan pendapatan nyata"
                   className="w-full h-auto"
                 />
               </Card>
@@ -372,7 +372,7 @@ export default function SaasLanding({
                       <div className="bg-foreground h-6 rounded-b-2xl mx-16"></div>
                       <img
                         src="/previews/parent-app-real.webp"
-                        alt="Portal Orang Tua MAJIKU — laporan aktivitas harian anak"
+                        alt="Portal Orang Tua Bunayo — laporan aktivitas harian anak"
                         className="w-full h-auto"
                       />
                     </div>
@@ -475,7 +475,7 @@ export default function SaasLanding({
                 </div>
                 <img
                   src="/previews/dashboard-tutor-real.webp"
-                  alt="Dashboard Tutor MAJIKU — jadwal, siswa, dan KPI mengajar"
+                  alt="Dashboard Tutor Bunayo — jadwal, siswa, dan KPI mengajar"
                   className="w-full h-auto"
                 />
               </Card>
@@ -666,7 +666,7 @@ export default function SaasLanding({
                 Siap Mengelola Lembaga Anda dengan Lebih Baik?
               </h2>
               <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-                Bergabung dengan 500+ lembaga pendidikan yang sudah menggunakan MAJIKU. 
+                Bergabung dengan 500+ lembaga pendidikan yang sudah menggunakan Bunayo. 
                 Pilih paket dan nikmati aktivasi otomatis dengan PayCore.
               </p>
               <Link href="/checkout?plan=pro">
@@ -688,7 +688,7 @@ export default function SaasLanding({
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-bold">MAJIKU</span>
+              <span className="font-bold">Bunayo</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <Link href="/terms" className="hover:text-foreground">Syarat & Ketentuan</Link>
@@ -696,7 +696,7 @@ export default function SaasLanding({
               <a href="mailto:support@majiku.web.id" className="hover:text-foreground">Kontak</a>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 MAJIKU. All rights reserved.
+              © 2024 Bunayo. All rights reserved.
             </p>
           </div>
         </div>

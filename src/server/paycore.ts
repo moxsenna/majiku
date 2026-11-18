@@ -108,7 +108,7 @@ export async function createPayCoreOrder(params: CreateOrderParams): Promise<{
   const productKey = params.productKey || PAYMENT_PRODUCT_KEY;
   const description =
     params.description ||
-    (params.invoiceNumber ? `SPP ${params.invoiceNumber}` : "Layanan MAJIKU");
+    (params.invoiceNumber ? `SPP ${params.invoiceNumber}` : "Layanan Bunayo");
   const fulfillmentData = params.fulfillmentData || {
     invoice_id: params.invoiceId,
     invoice_number: params.invoiceNumber,

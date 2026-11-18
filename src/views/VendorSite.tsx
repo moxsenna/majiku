@@ -1011,7 +1011,7 @@ export default function VendorSite() {
               </div>
             </div>
             <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center md:text-right">
-              © 2024 {vendor.name}. Powered by <Link href="/saas" className="text-primary font-semibold hover:underline">MAJIKU</Link>
+              © 2024 {vendor.name}. Powered by <Link href="/saas" className="text-primary font-semibold hover:underline">Bunayo</Link>
             </p>
           </div>
         </div>

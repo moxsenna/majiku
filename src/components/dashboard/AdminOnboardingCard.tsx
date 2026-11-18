@@ -44,7 +44,7 @@ export function AdminOnboardingCard() {
           <div>
             <CardTitle className="text-lg font-bold">Mulai Operasional Daycare Anda</CardTitle>
             <CardDescription>
-              Selamat datang di portal admin MAJIKU! Ikuti 3 langkah awal berikut untuk mulai mengelola daycare secara digital.
+              Selamat datang di portal admin Bunayo! Ikuti 3 langkah awal berikut untuk mulai mengelola daycare secara digital.
             </CardDescription>
           </div>
         </div>

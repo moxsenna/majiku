@@ -6,25 +6,25 @@ import { Button } from "@/components/ui/button";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://majiku.web.id";
 
 export const metadata: Metadata = {
-  title: "Kebijakan Privasi — MAJIKU",
+  title: "Kebijakan Privasi — Bunayo",
   description:
-    "Kebijakan privasi dan perlindungan data anak pada platform SaaS MAJIKU.",
+    "Kebijakan privasi dan perlindungan data anak pada platform SaaS Bunayo.",
   alternates: {
     canonical: "/privacy",
   },
   openGraph: {
-    title: "Kebijakan Privasi — MAJIKU",
+    title: "Kebijakan Privasi — Bunayo",
     description:
-      "Kebijakan privasi dan perlindungan data anak pada platform SaaS MAJIKU.",
+      "Kebijakan privasi dan perlindungan data anak pada platform SaaS Bunayo.",
     url: `${siteUrl}/privacy`,
     type: "website",
-    siteName: "MAJIKU",
+    siteName: "Bunayo",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kebijakan Privasi — MAJIKU",
+    title: "Kebijakan Privasi — Bunayo",
     description:
-      "Kebijakan privasi dan perlindungan data anak pada platform SaaS MAJIKU.",
+      "Kebijakan privasi dan perlindungan data anak pada platform SaaS Bunayo.",
   },
 };
 
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">MAJIKU</span>
+            <span className="font-bold text-lg">Bunayo</span>
           </Link>
           <Button variant="ghost" size="sm" asChild className="gap-1.5 text-xs">
             <Link href="/">
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">1. Komitmen Privasi Kami</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              MAJIKU menghargai dan melindungi privasi seluruh pengguna platform kami, termasuk pengelola
+              Bunayo menghargai dan melindungi privasi seluruh pengguna platform kami, termasuk pengelola
               daycare, guru/tutor, orang tua/wali murid, dan data sensitif anak-anak yang dipercayakan kepada
               lembaga mitra. Kebijakan ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda.
             </p>
@@ -125,7 +125,7 @@ export default function PrivacyPage() {
       </main>
 
       <footer className="border-t border-border/50 py-6 text-center text-xs text-muted-foreground">
-        © 2026 MAJIKU. Seluruh hak cipta dilindungi.
+        © 2026 Bunayo. Seluruh hak cipta dilindungi.
       </footer>
     </div>
   );

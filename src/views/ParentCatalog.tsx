@@ -67,7 +67,7 @@ const catalogItems: CatalogItem[] = [
     type: "internal",
     category: "Event",
     title: "Family Day Event",
-    subtitle: "Ikuti acara Family Day MAJIKU! Games seru, hadiah menarik, dan keseruan bersama keluarga.",
+    subtitle: "Ikuti acara Family Day Bunayo! Games seru, hadiah menarik, dan keseruan bersama keluarga.",
     image: "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=400",
     ctaText: "Daftar Event",
     ctaLink: "#",

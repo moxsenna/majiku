@@ -96,7 +96,7 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
             </div>
             <div className="hidden md:block">
               <div className="text-right">
-                <p className="text-xs text-primary-foreground/70">Portal Tutor MAJIKU</p>
+                <p className="text-xs text-primary-foreground/70">Portal Tutor Bunayo</p>
                 <Badge
                   variant="outline"
                   className="border-primary-foreground/40 text-primary-foreground text-xs mt-1"

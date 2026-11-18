@@ -206,7 +206,7 @@ export function PaymentModal({
                   Pembayaran Berhasil! 🎉
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-xs">
-                  Tagihan <strong>{invoiceNumber}</strong> telah lunas. Data otomatis terverifikasi di sistem MAJIKU.
+                  Tagihan <strong>{invoiceNumber}</strong> telah lunas. Data otomatis terverifikasi di sistem Bunayo.
                 </p>
               </div>
 
@@ -251,7 +251,7 @@ export function PaymentModal({
 
                 <div className="text-center">
                   <p className="text-xs font-bold text-zinc-800 tracking-tight">
-                    MAJIKU Daycare & Preschool
+                    Bunayo Daycare & Preschool
                   </p>
                   <p className="text-[10px] text-zinc-500">
                     Tagihan #{invoiceNumber}

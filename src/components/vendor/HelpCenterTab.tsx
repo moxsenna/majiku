@@ -16,7 +16,7 @@ const tickets = [
 ];
 
 const guides = [
-  { title: "Panduan Memulai MAJIKU", category: "Getting Started", views: 1250 },
+  { title: "Panduan Memulai Bunayo", category: "Getting Started", views: 1250 },
   { title: "Cara Setup Absensi QR Code", category: "Fitur", views: 890 },
   { title: "Manajemen Billing & Invoice", category: "Billing", views: 750 },
   { title: "Mengelola Staf dan Hak Akses", category: "Admin", views: 620 },

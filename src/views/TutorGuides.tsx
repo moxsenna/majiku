@@ -24,7 +24,7 @@ const guides = [
   {
     id: 1,
     title: "Panduan Orientasi Tutor Baru",
-    description: "Pelajari dasar-dasar menjadi tutor di MAJIKU",
+    description: "Pelajari dasar-dasar menjadi tutor di Bunayo",
     category: "onboarding",
     type: "video",
     duration: "15 menit",
@@ -33,7 +33,7 @@ const guides = [
   },
   {
     id: 2,
-    title: "Cara Menggunakan Aplikasi MAJIKU",
+    title: "Cara Menggunakan Aplikasi Bunayo",
     description: "Tutorial lengkap fitur aplikasi untuk tutor",
     category: "onboarding",
     type: "video",

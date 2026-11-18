@@ -12,7 +12,7 @@ interface QRCodeScannerProps {
  * @deprecated Fitur QR Scanner telah digantikan dengan Absensi Manual terverifikasi.
  * Komponen ini dipertahankan sebagai placeholder non-aktif.
  */
-export function QRCodeScanner({ locationName = "MAJIKU Daycare" }: QRCodeScannerProps) {
+export function QRCodeScanner({ locationName = "Lokasi lembaga" }: QRCodeScannerProps) {
   return (
     <div className="space-y-4">
       <Card className="border-dashed border-2">

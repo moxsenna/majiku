@@ -134,7 +134,7 @@ export default function ParentPortal({
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
               <GraduationCap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">MAJIKU</span>
+            <span className="font-bold text-lg">Bunayo</span>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/parent/chat">
@@ -196,7 +196,7 @@ export default function ParentPortal({
           <div className="px-4 py-3 border-b border-border bg-primary/5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="font-semibold text-foreground text-sm">Selamat Datang di MAJIKU</h2>
+                <h2 className="font-semibold text-foreground text-sm">Selamat Datang di Bunayo</h2>
                 <p className="text-xs text-muted-foreground">Akun Anda belum memiliki anak yang terdaftar di kelas.</p>
               </div>
               <Link href="/parent/registration" className="shrink-0">
@@ -299,7 +299,7 @@ export default function ParentPortal({
                     <Sparkles className="h-10 w-10 text-primary mx-auto mb-3" />
                     <h3 className="font-bold text-base text-foreground mb-1">Mulai Petualangan Anak Anda</h3>
                     <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
-                      Daftarkan anak Anda untuk mengikuti trial session di daycare MAJIKU. Tutor profesional kami siap membimbing tumbuh kembang buah hati.
+                      Daftarkan anak Anda untuk mengikuti trial session di daycare Bunayo. Tutor profesional kami siap membimbing tumbuh kembang buah hati.
                     </p>
                     <Link href="/parent/registration">
                       <Button className="w-full text-xs">Daftar Trial Sekarang</Button>

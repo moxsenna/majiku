@@ -6,25 +6,25 @@ import { Button } from "@/components/ui/button";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://majiku.web.id";
 
 export const metadata: Metadata = {
-  title: "Syarat dan Ketentuan Layanan — MAJIKU",
+  title: "Syarat dan Ketentuan Layanan — Bunayo",
   description:
-    "Ketentuan penggunaan platform SaaS MAJIKU untuk manajemen daycare, PAUD, preschool, dan bimbingan belajar.",
+    "Ketentuan penggunaan platform SaaS Bunayo untuk manajemen daycare, PAUD, preschool, dan bimbingan belajar.",
   alternates: {
     canonical: "/terms",
   },
   openGraph: {
-    title: "Syarat dan Ketentuan Layanan — MAJIKU",
+    title: "Syarat dan Ketentuan Layanan — Bunayo",
     description:
-      "Ketentuan penggunaan platform SaaS MAJIKU untuk manajemen daycare, PAUD, preschool, dan bimbingan belajar.",
+      "Ketentuan penggunaan platform SaaS Bunayo untuk manajemen daycare, PAUD, preschool, dan bimbingan belajar.",
     url: `${siteUrl}/terms`,
     type: "website",
-    siteName: "MAJIKU",
+    siteName: "Bunayo",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Syarat dan Ketentuan Layanan — MAJIKU",
+    title: "Syarat dan Ketentuan Layanan — Bunayo",
     description:
-      "Ketentuan penggunaan platform SaaS MAJIKU untuk manajemen daycare, PAUD, preschool, dan bimbingan belajar.",
+      "Ketentuan penggunaan platform SaaS Bunayo untuk manajemen daycare, PAUD, preschool, dan bimbingan belajar.",
   },
 };
 
@@ -37,7 +37,7 @@ export default function TermsPage() {
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">MAJIKU</span>
+            <span className="font-bold text-lg">Bunayo</span>
           </Link>
           <Button variant="ghost" size="sm" asChild className="gap-1.5 text-xs">
             <Link href="/">
@@ -60,8 +60,8 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">1. Pendahuluan & Penerimaan Layanan</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Selamat datang di MAJIKU. Dokumen ini mengatur penggunaan platform SaaS manajemen daycare,
-              preschool, PAUD, dan bimbingan belajar yang dioperasikan oleh MAJIKU (&ldquo;Kami&rdquo;).
+              Selamat datang di Bunayo. Dokumen ini mengatur penggunaan platform SaaS manajemen daycare,
+              preschool, PAUD, dan bimbingan belajar yang dioperasikan oleh Bunayo (&ldquo;Kami&rdquo;).
               Dengan mendaftar, mengakses, atau menggunakan layanan Kami, Anda menyatakan telah membaca,
               memahami, dan menyetujui seluruh ketentuan ini.
             </p>
@@ -79,7 +79,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">3. Paket Berlangganan & Pembayaran</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Layanan MAJIKU disediakan berdasarkan paket langganan (Basic, Pro, Enterprise) dengan siklus
+              Layanan Bunayo disediakan berdasarkan paket langganan (Basic, Pro, Enterprise) dengan siklus
               penagihan bulanan atau tahunan. Pembayaran diproses secara aman melalui gerbang pembayaran resmi
               PayCore (QRIS dan Virtual Account). Lembaga diaktifkan secara otomatis setelah pembayaran lunas
               dikonfirmasi oleh sistem.
@@ -90,7 +90,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold">4. Data Anak & Kerahasiaan Informasi</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Data absensi, laporan kegiatan harian, catatan perkembangan, dan dokumentasi foto anak adalah
-              milik sah lembaga dan wali murid terkait. MAJIKU mengenkripsi transmisi data dan menerapkan
+              milik sah lembaga dan wali murid terkait. Bunayo mengenkripsi transmisi data dan menerapkan
               kebijakan isolasi multi-tenant yang ketat untuk mencegah akses tanpa hak antar-lembaga.
             </p>
           </section>
@@ -98,7 +98,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">5. Pembatasan Tanggung Jawab</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              MAJIKU berkomitmen menjaga ketersediaan layanan dengan standar keandalan tinggi. Namun, Kami
+              Bunayo berkomitmen menjaga ketersediaan layanan dengan standar keandalan tinggi. Namun, Kami
               tidak bertanggung jawab atas kerugian tidak langsung atau gangguan operasional yang timbul akibat
               kesalahan konfigurasi pengguna, gangguan koneksi internet pihak ketiga, atau kondisi force majeure.
             </p>
@@ -118,7 +118,7 @@ export default function TermsPage() {
       </main>
 
       <footer className="border-t border-border/50 py-6 text-center text-xs text-muted-foreground">
-        © 2026 MAJIKU. Seluruh hak cipta dilindungi.
+        © 2026 Bunayo. Seluruh hak cipta dilindungi.
       </footer>
     </div>
   );

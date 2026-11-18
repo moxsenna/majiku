@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Users, Search, Shield } from "lucide-react";
 
 const demoUsers = [
-  { id: 1, name: "Budi Santoso", email: "budi@daycare-a.com", role: "super_admin", status: "active", daycare: "Platform MAJIKU", lastLogin: "2 jam lalu" },
+  { id: 1, name: "Budi Santoso", email: "budi@daycare-a.com", role: "super_admin", status: "active", daycare: "Platform Bunayo", lastLogin: "2 jam lalu" },
   { id: 2, name: "Siti Nurhaliza", email: "siti@tkceria.com", role: "admin_daycare", status: "active", daycare: "TK Ceria Mandiri", lastLogin: "5 jam lalu" },
   { id: 3, name: "Ahmad Fauzi", email: "ahmad@bimbelprestasi.com", role: "admin_daycare", status: "active", daycare: "Bimbel Prestasi", lastLogin: "1 hari lalu" },
   { id: 4, name: "Dewi Lestari", email: "dewi@happykids.com", role: "staff", status: "active", daycare: "Daycare Happy Kids", lastLogin: "3 jam lalu" },

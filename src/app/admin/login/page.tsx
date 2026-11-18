@@ -1,7 +1,7 @@
 import AdminAuth from "@/views/auth/AdminAuth";
 
 export const metadata = {
-  title: "Masuk Admin Daycare | MAJIKU",
+  title: "Masuk Admin Daycare | Bunayo",
   robots: { index: false, follow: false },
 };
 

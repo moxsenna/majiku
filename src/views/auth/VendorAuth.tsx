@@ -57,7 +57,7 @@ export default function VendorAuth() {
             <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground shadow-lg">
               <Sparkles className="w-7 h-7" />
             </div>
-            <span className="font-bold text-2xl tracking-tight text-white">MAJIKU Platform</span>
+            <span className="font-bold text-2xl tracking-tight text-white">Bunayo Platform</span>
           </div>
           <p className="text-sm text-slate-400 font-medium">Portal Khusus Super Admin & Vendor SaaS</p>
         </div>
@@ -66,7 +66,7 @@ export default function VendorAuth() {
           <CardHeader className="pb-3 pt-6 px-6">
             <CardTitle className="text-lg text-white">Super Admin Access</CardTitle>
             <CardDescription className="text-xs text-slate-400">
-              Akses terbatas hanya untuk tim operasional dan teknis MAJIKU SaaS.
+              Akses terbatas hanya untuk tim operasional dan teknis Bunayo SaaS.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 px-6 pb-6">
@@ -145,7 +145,7 @@ export default function VendorAuth() {
               <DialogTitle className="text-white">Akses Pemulihan Super Admin</DialogTitle>
             </div>
             <DialogDescription className="text-xs text-slate-400">
-              Prosedur keamanan kredensial root platform MAJIKU SaaS.
+              Prosedur keamanan kredensial root platform Bunayo SaaS.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2 text-xs text-slate-300 leading-relaxed">

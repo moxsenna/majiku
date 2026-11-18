@@ -71,7 +71,7 @@ function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               <GraduationCap className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-bold text-sidebar-foreground text-lg">MAJIKU</h1>
+              <h1 className="font-bold text-sidebar-foreground text-lg">Bunayo</h1>
               <p className="text-xs text-sidebar-foreground/60">
                 Admin Daycare
               </p>

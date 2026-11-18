@@ -33,12 +33,12 @@ export default function PlatformSettingsTab() {
               <Settings className="w-4 h-4" />
               Pengaturan Umum
             </CardTitle>
-            <CardDescription>Konfigurasi dasar platform MAJIKU (read-only)</CardDescription>
+            <CardDescription>Konfigurasi dasar platform Bunayo (read-only)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Nama Platform</Label>
-              <Input defaultValue="MAJIKU" disabled className="bg-muted/50" />
+              <Input defaultValue="Bunayo" disabled className="bg-muted/50" />
             </div>
             <div className="space-y-2">
               <Label>Email Support</Label>

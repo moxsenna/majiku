@@ -122,7 +122,7 @@ export default function ParentAuth({ initialMode = "login" }: ParentAuthProps) {
             <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-sm">
               <HeartHandshake className="w-7 h-7" />
             </div>
-            <span className="font-bold text-2xl tracking-tight text-foreground">MAJIKU Parent</span>
+            <span className="font-bold text-2xl tracking-tight text-foreground">Bunayo Parent</span>
           </div>
           <p className="text-sm text-muted-foreground font-medium">Portal Orang Tua & Wali Murid</p>
         </div>
@@ -304,7 +304,7 @@ export default function ParentAuth({ initialMode = "login" }: ParentAuthProps) {
                       onCheckedChange={(c) => setRegisterForm({ ...registerForm, agreeTerms: Boolean(c) })}
                     />
                     <label htmlFor="parent-terms" className="text-xs text-muted-foreground leading-snug cursor-pointer">
-                      Saya menyetujui Syarat & Ketentuan akun orang tua MAJIKU
+                      Saya menyetujui Syarat & Ketentuan akun orang tua Bunayo
                     </label>
                   </div>
 
@@ -334,7 +334,7 @@ export default function ParentAuth({ initialMode = "login" }: ParentAuthProps) {
           </DialogHeader>
           <div className="space-y-3 py-2 text-xs text-muted-foreground leading-relaxed">
             <p>
-              Jika Anda lupa password akun orang tua, Anda dapat meminta bantuan pihak administrasi Daycare tempat anak Anda terdaftar atau menghubungi tim support MAJIKU.
+              Jika Anda lupa password akun orang tua, Anda dapat meminta bantuan pihak administrasi Daycare tempat anak Anda terdaftar atau menghubungi tim support Bunayo.
             </p>
             <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-1.5 text-foreground font-medium">
               <p>Layanan Bantuan Pengguna:</p>

@@ -2,9 +2,9 @@ import { Suspense } from "react";
 import CheckoutView from "@/views/Checkout";
 
 export const metadata = {
-  title: "Checkout Berlangganan | MAJIKU",
+  title: "Checkout Berlangganan | Bunayo",
   description:
-    "Aktifkan paket langganan MAJIKU untuk daycare, preschool, dan bimbel Anda dengan pembayaran aman PayCore.",
+    "Aktifkan paket langganan Bunayo untuk daycare, preschool, dan bimbel Anda dengan pembayaran aman PayCore.",
 };
 
 export const dynamic = "force-dynamic";

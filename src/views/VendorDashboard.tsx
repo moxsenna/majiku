@@ -207,7 +207,7 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
                 <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-primary-foreground" />
                 </div>
-                <span className="font-bold text-lg hidden sm:block">MAJIKU</span>
+                <span className="font-bold text-lg hidden sm:block">Bunayo</span>
               </Link>
               <Badge variant="secondary" className="hidden sm:flex">
                 Super Admin
@@ -252,7 +252,7 @@ export default function VendorDashboard({ initialData }: VendorDashboardProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Dashboard Super Admin</h1>
-          <p className="text-muted-foreground">Kelola seluruh platform MAJIKU dari satu tempat</p>
+          <p className="text-muted-foreground">Kelola seluruh platform Bunayo dari satu tempat</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

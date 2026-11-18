@@ -181,7 +181,7 @@ export default function CheckoutView() {
             Checkout Berlangganan
           </Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            Langkah Terakhir Mengaktifkan <span className="text-primary">MAJIKU</span>
+            Langkah Terakhir Mengaktifkan <span className="text-primary">Bunayo</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
             Lengkapi data lembaga Anda untuk mengaktifkan portal admin, portal guru, dan portal orang tua secara otomatis.

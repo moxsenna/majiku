@@ -1,5 +1,12 @@
 import type { Config } from "tailwindcss";
 
+// Token Bunayo · Arah B "Papan Kelas". Nilai ada di src/app/globals.css (ekspor dari design/_kit/kit.css).
+const krayon = (name: string) => ({
+  DEFAULT: `hsl(var(--${name}))`,
+  soft: `hsl(var(--${name}-soft))`,
+  ink: `hsl(var(--${name}-ink))`,
+});
+
 export default {
   darkMode: ["class"],
   content: ["./src/**/*.{ts,tsx}"],
@@ -14,36 +21,48 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
-        display: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+        display: ["var(--font-display)"],
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
       },
       colors: {
-        border: "hsl(var(--border))",
+        border: {
+          DEFAULT: "hsl(var(--border))",
+          subtle: "hsl(var(--border-subtle))",
+        },
         input: "hsl(var(--input))",
+        placeholder: "hsl(var(--placeholder))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        surface: "hsl(var(--surface))",
+        kanvas: "hsl(var(--kanvas))",
+        foreground: {
+          DEFAULT: "hsl(var(--foreground))",
+          2: "hsl(var(--foreground-2))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           hover: "hsl(var(--primary-hover))",
-          glow: "hsl(var(--primary-glow))",
+          soft: "hsl(var(--primary-soft))",
         },
+        // Nama shadcn lama tanpa padanan di Arah B → nada netral kit (dibersihkan per layar)
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--foreground))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+          soft: "hsl(var(--destructive-soft))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
         highlight: {
           DEFAULT: "hsl(var(--highlight))",
@@ -51,15 +70,20 @@ export default {
         },
         success: {
           DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
+          ring: "hsl(var(--success-ring))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         warning: {
           DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         info: {
           DEFAULT: "hsl(var(--info))",
-          foreground: "hsl(var(--info-foreground))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        "nav-active": {
+          DEFAULT: "hsl(var(--nav-active))",
+          foreground: "hsl(var(--nav-active-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -72,28 +96,72 @@ export default {
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+          // alias lama
+          primary: "hsl(var(--nav-active))",
+          "primary-foreground": "hsl(var(--nav-active-foreground))",
+          accent: "hsl(var(--muted))",
+          "accent-foreground": "hsl(var(--foreground))",
+          ring: "hsl(var(--ring))",
         },
+        "brand-blue": "hsl(var(--brand-blue))",
+        "brand-yellow": "hsl(var(--brand-yellow))",
+        "brand-green": "hsl(var(--brand-green))",
+        "brand-leaf": "hsl(var(--brand-leaf))",
+        tomat: krayon("tomat"),
+        matahari: krayon("matahari"),
+        daun: krayon("daun"),
+        langit: krayon("langit"),
+        anggur: krayon("anggur"),
+        permen: krayon("permen"),
       },
       borderRadius: {
+        xs: "var(--radius-xs)",
+        input: "var(--radius-input)",
+        DEFAULT: "var(--radius)",
+        sheet: "var(--radius-sheet)",
+        full: "var(--radius-full)",
+        // Alias kelas shadcn lama → token terdekat (dibersihkan per layar)
+        sm: "var(--radius-input)",
+        md: "var(--radius-input)",
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-        xl: "calc(var(--radius) + 4px)",
-        "2xl": "calc(var(--radius) + 8px)",
+        xl: "var(--radius)",
+        "2xl": "var(--radius-sheet)",
+        "3xl": "var(--radius-sheet)",
+      },
+      height: {
+        btn: "var(--btn-h)",
+        "btn-sm": "var(--btn-h-sm)",
+        "btn-lg": "var(--btn-h-lg)",
+        input: "var(--input-h)",
+        chip: "var(--chip-h)",
+        touch: "var(--touch)",
+      },
+      minHeight: {
+        touch: "var(--touch)",
+        btn: "var(--btn-h)",
+      },
+      minWidth: {
+        touch: "var(--touch)",
+      },
+      width: {
+        btn: "var(--btn-h)",
+        "btn-sm": "var(--btn-h-sm)",
+        touch: "var(--touch)",
+        sidebar: "232px",
+        rail: "76px",
       },
       boxShadow: {
-        sm: "var(--shadow-sm)",
-        md: "var(--shadow-md)",
-        lg: "var(--shadow-lg)",
-        xl: "var(--shadow-xl)",
-        glow: "var(--shadow-glow)",
-        card: "var(--shadow-card)",
+        float: "var(--shadow-float)",
+        sheet: "var(--shadow-sheet)",
+        soft: "var(--shadow-soft)",
+        // alias lama: kartu di halaman memakai garis, bukan bayangan
+        sm: "var(--shadow-soft)",
+        md: "var(--shadow-soft)",
+        lg: "var(--shadow-float)",
+        xl: "var(--shadow-float)",
+        "2xl": "var(--shadow-float)",
+        card: "var(--shadow-soft)",
       },
       keyframes: {
         "accordion-down": {
@@ -104,20 +172,14 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        "bounce-gentle": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-5px)" },
+        "sk-pulse": {
+          "50%": { opacity: ".55" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        shimmer: "shimmer 2s linear infinite",
-        "bounce-gentle": "bounce-gentle 2s ease-in-out infinite",
+        "sk-pulse": "sk-pulse 1.6s ease-in-out infinite",
       },
     },
   },
