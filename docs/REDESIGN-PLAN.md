@@ -205,3 +205,18 @@ Catatan utang: ukuran huruf di komponen memakai nilai arbitrer `text-[13px]` dst
 | `npm run lint` / `npm run build` | lulus | lulus |
 
 Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, akun admin non-demo nyata.
+
+### Fase 3 · A1 Hari Ini (2026-11-18)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber angka | satu definisi, berlabel periode, bisa diklik ke daftar | `src/server/actions/hariIni.ts` (baca-saja, `requireTenantContext`); definisi di komentar kepala file. Tiba·hari ini → `/attendance`, Diterima·Nov 2026 dari Terbit → `/billing`, Terlambat·semua periode → `/billing` |
+| Stabilo | satu per layar | hanya "N hal mendesak" di judul |
+| Aksi utama biru | satu | hanya aksi pertama di Mendesak |
+| Terisi | 3 kolom 1440 / 2 kolom 834 / 1 kolom 390 | screenshot akun demo pada 1440, 834, 390 |
+| Kosong | mengajari langkah berikut | lembaga tanpa kelas & anak → EmptyState "Buat kelas pertama" / "Daftarkan anak" |
+| Memuat | skeleton per bagian | tanpa data awal → StatRowSkeleton + 3 panel skeleton |
+| Galat | banner + data lama redup | galat saat refetch → ErrorBanner + `Stale`; galat tanpa data → banner + Coba lagi (terlihat pada akun admin yang tidak tertaut lembaga) |
+| Data nyata | query jalan pada tenant nyata | dijalankan baca-saja pada lembaga produksi-dev (8 anak): tanpa galat, angka konsisten |
+| Akun demo | jelas bukan data nyata | InfoBox "Mode demo"; jalur demo tidak membaca DB |
+| Bersih-bersih | — | `views/Dashboard.tsx` + 20 widget dashboard yatim dihapus (termasuk `WaitingListManagement` berarray statis, notifikasi demo) |

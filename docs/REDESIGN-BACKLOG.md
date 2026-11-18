@@ -43,3 +43,9 @@ Bagian berikut ada di desain tetapi datanya/backend-nya belum ada. Tidak dibangu
 | U2 | Filter umur, harga, jarak | Data lokasi/umur terstruktur | GRW-01 | Filter yang ada saja |
 | U3 | Booking trial tanpa akun | Endpoint publik → CRM | GRW-04, STU-04 | CTA WhatsApp tetap |
 | Shell admin | Lonceng notifikasi | Sumber notifikasi admin (izin guru, tagihan terlambat, pesan) + status baca | — | Disembunyikan (versi lama berisi notifikasi demo statis) |
+| A1 Hari Ini | Pesan > 4 jam (stat + item Mendesak) | Kotak masuk admin ↔ orang tua + waktu balas | BRF-01 | Disembunyikan |
+| A1 Hari Ini | Kelas tanpa guru / Pilih pengganti | Sesi konkret per tanggal + penugasan pengganti | STF-04, SCH-06 | Disembunyikan |
+| A1 Hari Ini | Tombol "Tunda" pada item Mendesak | Status tunda per item (tabel baru) | BRF-02 | Disembunyikan |
+| A1 Hari Ini | Mode scan QR | Alur scan QR kehadiran (N27) | ATT-02 | Disembunyikan |
+| A1 Hari Ini | Setujui izin guru dari Hari Ini | Action approve/reject `tutor_leave_requests` | STF-04 | Status izin tampil (Izin · menunggu), tombol Setujui disembunyikan |
+| A1 Hari Ini | "Kirim pengingat" tagihan / "Ingatkan guru" laporan | Pengiriman WA/notifikasi | BIL-09 | Diganti tautan ke daftar sumber |

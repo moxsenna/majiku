@@ -51,7 +51,7 @@ export function StatCard({ label, periode, value, suffix, href, linkLabel, onCli
         )}
       >
         <span className={cn(stabilo && "hl")}>{value}</span>
-        {suffix && <small className="text-[13px] text-muted-foreground">{suffix}</small>}
+        {suffix && <small className="whitespace-nowrap text-[13px] text-muted-foreground">{suffix}</small>}
       </span>
       {linkLabel &&
         (href ? (
