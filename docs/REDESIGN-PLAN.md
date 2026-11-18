@@ -88,8 +88,8 @@ Server actions yang ada: lihat `src/server/actions/*` (27 file). Schema: 26 tabe
 | `/schedule` · `Schedule.tsx` | **O2** Kalender sesi | ⚠️ | Jadwal mingguan `class_schedules` ✅. ❌ sesi konkret, deteksi tanpa guru |
 | ↳ | **O3** Jadwal guru & pengganti | ⚠️ | Penugasan + `tutor_leave_requests` ✅. ❌ matriks cakupan, saran pengganti |
 | ↳ | **O4** Libur | ⚠️ | `class_schedules.type='holiday'` ✅. ❌ dampak ke sesi/kuota/tagihan |
-| `/attendance` · `Attendance.tsx` | **O5** Kehadiran siswa | ⚠️ | Check-in/out, status ✅. ❌ koreksi dengan audit, scan QR (N27 placeholder) |
-| ↳ | **O6** Kehadiran guru | ⚠️ | `getTodayTutorAttendanceList` ✅. ❌ GPS, persetujuan izin (izin ada tapi tanpa action approve) |
+| `/attendance` + `/attendance/guru` · `views/kehadiran/` | **O5** Kehadiran siswa | ⚠️ | Action baca `getKehadiranSiswa` + tab per kelas, filter, tiba/pulang hari ini (action lama), tanggal lalu baca-saja, belum check-out 7 hari. ❌ koreksi dengan audit, scan QR (N27 placeholder) |
+| ↳ | **O6** Kehadiran guru | ⚠️ | Action baca `getKehadiranGuru` (jadwal sesi awal, izin, hadir bulan ini) + `getTodayTutorAttendanceList` kini terisolasi tenant. ❌ GPS, penilaian tepat waktu, persetujuan izin (izin ada tapi tanpa action approve) |
 | `/daily-reports` + `/gallery` | **O7** Laporan harian & foto | ✅/⚠️ | `dailyReports`, `galleryPhotos` ✅. ❌ feed event berwaktu, ringkasan otomatis 16.00. `/gallery` → redirect ke O7 tab Foto |
 | `/lesson-plans` · `LessonPlans.tsx` | **O8** RPP | ✅ | |
 | — | **O9** Perkembangan | ❌ | Seluruh modul BARU → tidak dibuat |
@@ -271,4 +271,23 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | State | isi/kosong/memuat/galat | Isi (DB uji), kosong (`?bulan=2026-07` → EmptyState + Buka Penagihan, Ekspor nonaktif), skeleton & ErrorBanner+Stale (pola sama P1) |
 | Demo | baca-saja | InfoBox Mode demo; klik baris dimatikan di demo (juga di P1 — sebelumnya mengarah ke `/billing/demo-*` 404) |
 | Responsif | 1440/834/390 | 1440 tabel penuh; 834 kartu 2×2 + tabel, nomor tidak terlipat; 390 mode kartu |
+
+### Fase 3 · Kehadiran — O5 siswa + O6 guru (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | data nyata, baca-saja | `kehadiran.ts` (O5+O6, definisi angka selaras A1 di kepala file): baris per enrollment aktif, absen dicocokkan per anak+kelas, sesi = `sessions_used/quota`, belum check-out = 7 hari tanpa jam pulang; guru: jadwal sesi awal hari itu, izin non-rejected, hadir = tanggal unik check-in bulan berjalan |
+| Tanggal lalu | baca-saja jujur | `?tanggal=` divalidasi (masa depan → hari ini); InfoBox "Melihat … Kembali ke hari ini"; eyebrow berganti tanggal; tombol Tiba/Pulang hanya saat `bisaCatat` (hari ini & bukan demo) |
+| Alur catat | Tiba → Pulang hari ini | Action lama `recordStudentCheckIn/Out`; uji klik nyata di DB uji: toast jam, angka tab & ikon avatar berubah, baris hilang dari filter "Belum tiba" |
+| Pemilih tanggal | native + bergaya kit | `<input type="date">` transparan di atas tombol "Hari ini · 19 Nov"; maksimal hari ini |
+| Navigasi guru | terjangkau di semua lebar | Sub-menu rail "Siswa/Guru" (adminNav); di ≤1000 (rail tanpa sub) tautan "Kehadiran Guru" di header O5 |
+| Belum check-out | InfoBox History | Maks 4 nama + "dan N lainnya", ikon `h-4 w-4 shrink-0` (ukuran tetap — sebelumnya mengecil saat teks panjang menekan) |
+| Tenant | tanpa bocor | `getTodayTutorAttendanceList` (dipakai portal guru) kini difilter tenant — sebelumnya mengembalikan guru semua lembaga (bug nyata, ditemukan saat membaca kode) |
+| BARU disembunyikan | scan QR, penjemput, sumber pencatatan, koreksi+audit; GPS, tepat waktu, persetujuan izin, aturan | Tidak dirender; catatan jujur di bawah tabel & InfoBox; backlog O5/O6 |
+| Demo | baca-saja | InfoBox Mode demo di O5 (pencatatan dinonaktifkan) & O6; data contoh frame desain (bukan lembaga mana pun) |
+| State | isi/kosong/memuat/galat | Isi (DB uji), kosong (EmptyState → Daftarkan anak / Staf & Peran), skeleton, ErrorBanner + Stale "data terakhir pukul HH.MM" |
+| Responsif | 1440/834/390 | 1440 tabel + InfoBox; 390 mode kartu, filter melipat, bottom nav Kehadiran aktif; screenshot tersimpan |
+| Lint/build | lulus | `npm run lint` 0, `npm run build` sukses |
+
+**Belum diverifikasi**: alur izin guru (action approve belum ada); O1/O2 Kelas & Jadwal masih tampilan lama — urutan berikutnya sesuai Fase 3.
 

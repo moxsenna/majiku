@@ -22,7 +22,17 @@ export function adminNav(istilah: Istilah): NavEntry[] {
   return [
     { key: "hari", label: "Hari Ini", href: "/dashboard", icon: House },
     { group: "Harian" },
-    { key: "hadir", label: "Kehadiran", short: "Hadir", href: "/attendance", icon: ClipboardCheck },
+    {
+      key: "hadir",
+      label: "Kehadiran",
+      short: "Hadir",
+      href: "/attendance",
+      icon: ClipboardCheck,
+      sub: [
+        { label: "Siswa", href: "/attendance", exact: true },
+        { label: istilah.guru, href: "/attendance/guru" },
+      ],
+    },
     {
       key: "belajar",
       label: "Pembelajaran",

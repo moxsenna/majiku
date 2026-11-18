@@ -546,6 +546,9 @@ export async function getMyTutorAttendanceHistory(limit = 10) {
 export async function getTodayTutorAttendanceList() {
   const session = await getSessionSafely();
   if (!session) return [];
+  // Isolasi tenant: sebelumnya mengembalikan guru semua lembaga.
+  const tenantId = await resolveTenantIdForUser(session.user.id);
+  if (!tenantId) return [];
   const today = todayInWib();
 
   const allTutors = await db
@@ -555,12 +558,13 @@ export async function getTodayTutorAttendanceList() {
       photoUrl: tutors.photoUrl,
     })
     .from(tutors)
-    .where(eq(tutors.isActive, true));
+    .where(and(eq(tutors.isActive, true), eq(tutors.tenantId, tenantId)));
+  if (allTutors.length === 0) return [];
 
   const todayRecords = await db
     .select()
     .from(tutorAttendance)
-    .where(eq(tutorAttendance.date, today));
+    .where(and(eq(tutorAttendance.date, today), inArray(tutorAttendance.tutorId, allTutors.map((t) => t.id))));
 
   const recordMap = new Map(todayRecords.map((r) => [r.tutorId || r.userId, r]));
 
