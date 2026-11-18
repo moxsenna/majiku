@@ -4,37 +4,50 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+// Kit Bunayo (.b): biru hanya untuk satu aksi utama per layar; tombol kedua bergaris Tinta 1,5 px.
+// Ukuran: 44 standar · 36 aksi baris desktop · 52 tombol utama mobile.
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded border-[1.5px] border-transparent text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-soft disabled:pointer-events-none disabled:bg-disabled disabled:text-primary-foreground disabled:border-transparent [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-hover shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-md",
-        outline: "border-2 border-border bg-transparent hover:bg-muted hover:border-primary/30 text-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-muted text-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        // Custom variants for daycare app
-        hero: "gradient-primary text-primary-foreground shadow-lg hover:shadow-glow hover:-translate-y-1 active:translate-y-0 font-bold",
-        success: "bg-success text-success-foreground hover:bg-success/90 shadow-md",
-        warning: "bg-warning text-warning-foreground hover:bg-warning/90 shadow-md",
-        info: "bg-info text-info-foreground hover:bg-info/90 shadow-md",
-        soft: "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20",
-        glass: "bg-card/80 backdrop-blur-xl border border-border/50 text-foreground hover:bg-card/90 shadow-card",
+        pri: "bg-primary text-primary-foreground hover:bg-primary-hover",
+        sec: "border-foreground bg-card text-foreground hover:bg-background",
+        txt: "text-muted-foreground hover:text-foreground px-2.5",
+        link: "text-primary hover:underline underline-offset-4 px-2.5",
+        dng: "border-destructive text-destructive bg-card hover:bg-destructive-soft",
+        dark: "bg-foreground text-background hover:bg-foreground-2",
+        soft: "bg-muted text-foreground hover:bg-border",
+        // Nama varian lama → padanan kit (dibersihkan per layar)
+        default: "bg-primary text-primary-foreground hover:bg-primary-hover",
+        hero: "bg-primary text-primary-foreground hover:bg-primary-hover",
+        outline: "border-foreground bg-card text-foreground hover:bg-background",
+        glass: "border-foreground bg-card text-foreground hover:bg-background",
+        secondary: "bg-muted text-foreground hover:bg-border",
+        ghost: "text-foreground hover:bg-muted",
+        destructive: "border-destructive text-destructive bg-card hover:bg-destructive-soft",
+        success: "bg-foreground text-background hover:bg-foreground-2",
+        warning: "bg-foreground text-background hover:bg-foreground-2",
+        info: "bg-foreground text-background hover:bg-foreground-2",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-12 rounded-xl px-8 text-base",
-        xl: "h-14 rounded-xl px-10 text-lg",
-        icon: "h-10 w-10",
-        "icon-sm": "h-8 w-8",
-        "icon-lg": "h-12 w-12",
+        default: "h-btn px-[18px]",
+        sm: "h-btn-sm px-3.5",
+        lg: "h-btn-lg px-[22px] text-base",
+        xl: "h-btn-lg px-[22px] text-base rounded-full",
+        icon: "h-btn w-btn p-0",
+        "icon-sm": "h-btn-sm w-btn-sm p-0 [&_svg]:size-[18px]",
+        "icon-lg": "h-btn-lg w-btn-lg p-0",
+      },
+      full: {
+        true: "w-full",
+      },
+      pill: {
+        true: "rounded-full",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "pri",
       size: "default",
     },
   }
@@ -47,11 +60,11 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, full, pill, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, full, pill, className }))}
         ref={ref}
         {...props}
       />

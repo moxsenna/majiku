@@ -36,6 +36,12 @@ export default {
         background: "hsl(var(--background))",
         surface: "hsl(var(--surface))",
         kanvas: "hsl(var(--kanvas))",
+        disabled: "hsl(var(--disabled))",
+        scrim: "hsl(var(--scrim) / <alpha-value>)",
+        skeleton: {
+          DEFAULT: "hsl(var(--skeleton))",
+          light: "hsl(var(--skeleton-light))",
+        },
         foreground: {
           DEFAULT: "hsl(var(--foreground))",
           2: "hsl(var(--foreground-2))",
@@ -147,6 +153,7 @@ export default {
       width: {
         btn: "var(--btn-h)",
         "btn-sm": "var(--btn-h-sm)",
+        "btn-lg": "var(--btn-h-lg)",
         touch: "var(--touch)",
         sidebar: "232px",
         rail: "76px",
@@ -155,6 +162,7 @@ export default {
         float: "var(--shadow-float)",
         sheet: "var(--shadow-sheet)",
         soft: "var(--shadow-soft)",
+        focus: "0 0 0 4px hsl(var(--primary-soft))",
         // alias lama: kartu di halaman memakai garis, bukan bayangan
         sm: "var(--shadow-soft)",
         md: "var(--shadow-soft)",

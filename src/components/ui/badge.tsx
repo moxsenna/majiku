@@ -3,29 +3,33 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Badge lama dipetakan ke gaya status kit (.st): titik + teks. Pil merah muda hanya untuk yang menuntut tindakan.
+ * Untuk kode baru pakai <StatusDot> dari @/components/bunayo.
+ */
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1.5 whitespace-nowrap text-[13px] font-semibold before:h-2 before:w-2 before:shrink-0 before:rounded-full before:content-['']",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground",
-        secondary: "border-transparent bg-secondary text-secondary-foreground",
-        destructive: "border-transparent bg-destructive text-destructive-foreground",
-        outline: "text-foreground border-border",
-        success: "border-transparent bg-success/15 text-success border-success/30",
-        warning: "border-transparent bg-warning/15 text-warning-foreground border-warning/30",
-        info: "border-transparent bg-info/15 text-info border-info/30",
-        muted: "border-transparent bg-muted text-muted-foreground",
-        accent: "border-transparent bg-accent text-accent-foreground",
-        highlight: "border-transparent bg-highlight/15 text-highlight-foreground border-highlight/30",
-        // Status badges
-        present: "border-transparent bg-success/15 text-success",
-        absent: "border-transparent bg-destructive/15 text-destructive",
-        late: "border-transparent bg-warning/15 text-warning-foreground",
-        overdue: "border-transparent bg-destructive/15 text-destructive",
-        pending: "border-transparent bg-muted text-muted-foreground",
-        paid: "border-transparent bg-success/15 text-success",
-        unpaid: "border-transparent bg-destructive/15 text-destructive",
+        default: "text-foreground before:bg-foreground",
+        secondary: "text-muted-foreground before:border-[1.5px] before:border-muted-foreground before:h-1.5 before:w-1.5",
+        outline: "text-foreground-2 before:hidden rounded-full border border-border px-2.5 py-0.5",
+        muted: "text-muted-foreground before:border-[1.5px] before:border-muted-foreground before:h-1.5 before:w-1.5",
+        accent: "text-foreground before:bg-foreground",
+        success: "text-success before:bg-daun",
+        warning: "text-warning before:bg-matahari",
+        info: "text-info before:bg-langit",
+        highlight: "hl before:hidden",
+        destructive: "text-destructive bg-destructive-soft rounded-full px-2.5 py-0.5 before:hidden",
+        // status lama
+        present: "text-success before:bg-daun",
+        paid: "text-success before:bg-daun",
+        late: "text-warning before:bg-matahari",
+        pending: "text-muted-foreground before:border-[1.5px] before:border-muted-foreground before:h-1.5 before:w-1.5",
+        unpaid: "text-warning before:bg-matahari",
+        absent: "text-destructive bg-destructive-soft rounded-full px-2.5 py-0.5 before:hidden",
+        overdue: "text-destructive bg-destructive-soft rounded-full px-2.5 py-0.5 before:hidden",
       },
     },
     defaultVariants: {

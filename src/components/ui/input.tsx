@@ -3,19 +3,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+// Kit .in: tinggi 44, garis --input (3,6:1), fokus 2 px biru + cincin primary-soft, galat 2 px merah.
 const inputVariants = cva(
-  "flex w-full rounded-lg border bg-background text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 [&[type='date']]:pr-3",
+  "flex w-full rounded-input border border-input bg-card px-3 text-[15px] text-foreground placeholder:text-placeholder transition-shadow file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:shadow-focus aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-destructive disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground [&[type='date']]:pr-3",
   {
     variants: {
       variant: {
-        default: "border-input hover:border-primary/50 focus:border-primary",
-        filled: "bg-muted border-transparent hover:bg-muted/80 focus:bg-background focus:border-primary",
-        ghost: "border-transparent hover:bg-muted focus:border-primary focus:bg-background",
+        default: "",
+        // varian lama
+        filled: "",
+        ghost: "",
       },
       inputSize: {
-        sm: "h-8 px-3 text-sm",
-        default: "h-10 px-4 py-2",
-        lg: "h-12 px-5 text-base",
+        default: "h-input",
+        sm: "h-btn-sm text-sm",
+        lg: "h-btn-lg",
       },
     },
     defaultVariants: {
