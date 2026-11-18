@@ -150,6 +150,8 @@ export function formatRelatif(input: DateInput, acuan: Date = new Date()): strin
 /** Inisial nama untuk avatar: "Kayla Putri" → "KP". */
 export function inisial(nama: string | null | undefined): string {
   if (!nama) return "?";
-  const kata = nama.trim().split(/\s+/).filter(Boolean);
+  // Tanda baca diabaikan: "TK Pelangi (Uji)" → "TU", bukan "T(".
+  const kata = nama.replace(/[^\p{L}\p{N}\s]/gu, "").trim().split(/\s+/).filter(Boolean);
+  if (!kata.length) return "?";
   return ((kata[0]?.[0] ?? "") + (kata.length > 1 ? kata[kata.length - 1][0] : kata[0]?.[1] ?? "")).toUpperCase();
 }

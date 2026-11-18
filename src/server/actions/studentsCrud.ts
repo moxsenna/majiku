@@ -1,9 +1,9 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
 import { db } from "@/db";
-import { students, studentEnrollments, classes, user, userRoles } from "@/db/schema";
+import { students, studentEnrollments, classes, user, userRoles, trialApplications } from "@/db/schema";
 import { requireTenantContext } from "@/server/authz";
 
 export type StudentRecord = typeof students.$inferSelect;
@@ -233,7 +233,18 @@ export async function linkStudentParent(
 export async function getLinkableParents(): Promise<
   Array<{ id: string; name: string; email: string }>
 > {
-  await requireTenantContext();
+  const ctx = await requireTenantContext();
+  // Hanya wali yang sudah terkait lembaga ini (lewat siswa atau trial). Wali baru
+  // ditautkan lewat pencocokan email di createStudent/updateStudent.
+  const viaStudents = db
+    .select({ id: students.parentUserId })
+    .from(students)
+    .where(and(eq(students.tenantId, ctx.tenantId), isNotNull(students.parentUserId)));
+  const viaTrials = db
+    .select({ id: trialApplications.parentUserId })
+    .from(trialApplications)
+    .where(and(eq(trialApplications.tenantId, ctx.tenantId), isNotNull(trialApplications.parentUserId)));
+
   const rows = await db
     .select({
       id: user.id,
@@ -242,7 +253,12 @@ export async function getLinkableParents(): Promise<
     })
     .from(user)
     .innerJoin(userRoles, eq(userRoles.userId, user.id))
-    .where(eq(userRoles.role, "parent"))
+    .where(
+      and(
+        eq(userRoles.role, "parent"),
+        or(inArray(user.id, viaStudents), inArray(user.id, viaTrials))
+      )
+    )
     .orderBy(asc(user.name));
 
   return rows;

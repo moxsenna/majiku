@@ -172,7 +172,7 @@ export default function Siswa({
                   }
                 />
                 {data.length > 0 && (
-                  <div className="max-[1000px]:hidden">
+                  <div className="sticky top-6 max-h-[calc(100vh-48px)] overflow-y-auto max-[1000px]:hidden">
                     {aktifId ? (
                       <PanelProfil id={aktifId} kelas={kelas} akunWali={akunWali} />
                     ) : (

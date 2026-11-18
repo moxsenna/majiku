@@ -395,7 +395,8 @@ export async function listKelasUntukDaftar(): Promise<KelasUntukDaftar[]> {
       capacity: classes.capacity,
       pricePerMonth: classes.pricePerMonth,
       sessionsPerMonth: classes.sessionsPerMonth,
-      terisi: sql<number>`(select count(*)::int from ${studentEnrollments} se join ${students} st on st.id = se.student_id where se.class_id = ${classes.id} and se.is_active = true and st.is_active = true)`,
+      // "classes"."id" ditulis eksplisit: ${classes.id} di dalam select dirender drizzle sebagai "id" (ambigu di subquery).
+      terisi: sql<number>`(select count(*)::int from ${studentEnrollments} se join ${students} st on st.id = se.student_id where se.class_id = "classes"."id" and se.is_active = true and st.is_active = true)`,
     })
     .from(classes)
     .where(and(eq(classes.tenantId, ctx.tenantId), eq(classes.isActive, true)))

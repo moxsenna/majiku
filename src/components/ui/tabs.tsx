@@ -42,7 +42,8 @@ const TabsContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={cn("mt-4 focus-visible:outline-none", className)}
+    // data-[state=inactive]:hidden: kelas display (flex/grid) dari pemanggil menimpa atribut `hidden` bawaan.
+    className={cn("mt-4 focus-visible:outline-none", className, "data-[state=inactive]:hidden")}
     {...props}
   />
 ));

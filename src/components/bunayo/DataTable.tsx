@@ -237,7 +237,7 @@ export function DataTable<T>({
                     key={id}
                     onClick={onRowClick ? () => onRowClick(r) : undefined}
                     className={cn(
-                      "border-b border-border-subtle last:border-b-0",
+                      "group border-b border-border-subtle last:border-b-0",
                       isSel && "bg-primary-soft/50",
                       isActive && "bg-muted shadow-[inset_3px_0_0_hsl(var(--foreground))]",
                       onRowClick && "cursor-pointer hover:bg-background",
@@ -254,7 +254,10 @@ export function DataTable<T>({
                         className={cn(
                           "px-3.5 py-[11px] align-middle",
                           c.numeric && "tabular whitespace-nowrap text-right",
-                          c.sticky && "sticky left-0 z-[1] bg-card",
+                          // Sel sticky perlu latar sendiri yang mengikuti state baris (aktif/terpilih/hover).
+                          c.sticky && "sticky left-0 z-[1]",
+                          c.sticky && (isActive ? "bg-muted shadow-[inset_3px_0_0_hsl(var(--foreground))]" : isSel ? "bg-primary-soft" : "bg-card"),
+                          c.sticky && !isActive && !isSel && onRowClick && "group-hover:bg-background",
                           c.sticky && selectable && "left-10",
                           c.hideOnMobile && "max-[560px]:hidden",
                           c.className,

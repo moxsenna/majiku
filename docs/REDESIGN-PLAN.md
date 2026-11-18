@@ -231,4 +231,10 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Baris aktif | Tinta, bukan stabilo | `activeRowId` → bg-muted + garis Tinta kiri |
 | Mobile ≤560 | kartu | `renderCard`; panel profil jadi lembar samping ≤1000 |
 | D1 | stepper 4 langkah, satu stabilo (total) | screenshot langkah 1 |
-| Belum diverifikasi visual | S1 terisi, A2 terisi, D1 langkah 2–4 & simpan | tidak ada akun uji ber-data; aku tidak menulis data uji ke DB yang tampaknya produksi |
+| S1 terisi | tabel + chip + panel sticky, kartu ≤560 | DB uji (`scripts/seed-uji-redesign.ts`, 14 anak): screenshot 1440/834/390; `?q=rahmat` → 3 anak saudara; panel tab Tagihan |
+| A2 terisi | kesehatan teratas, kehadiran bulan ini, keluarga + saudara | screenshot Alya Putri 1440/390 (alergi dari trial, saudara Bima) |
+| D1 alur penuh | 4 langkah sampai simpan | Playwright: galat validasi → keluarga lama (Rahmat, "akun aktif") → TK B Pelangi (kursi tersisa) → terbit Rp 950.000 → "Nadia sudah terdaftar"; muncul di S1 dengan wali tertaut |
+| Perbaikan dari verifikasi | — | `listKelasUntukDaftar` gagal (subquery `"id"` ambigu) dan galatnya ditelan jadi "Belum ada kelas" → query diperbaiki + D1 kini menampilkan ErrorBanner bila loader gagal; tab nonaktif ikut tampil (kelas `flex` menimpa `hidden`) → `TabsContent` `data-[state=inactive]:hidden`; panel S1 sticky; sel sticky baris aktif; inisial "T(" → "TU"; angka Stat tidak pecah baris |
+| Keamanan | wali hanya dari lembaga sendiri | `getLinkableParents` dibatasi ke wali yang terkait siswa/trial lembaga (disetujui 2026-11-18) |
+
+**DB uji**: Neon `ep-late-dawn-*`, URL di `.env.test.local` (tidak di-commit). Jalankan dev dengan `export $(grep -v '^#' .env.test.local | xargs -d '\n') && npm run dev`. Akun `admin.uji@ / guru.uji@ / wali.uji@bunayo-uji.test`, sandi `UjiBunayo123!`. Skema: `drizzle-kit migrate` + `push` (tabel `tutor_attendance`, `tutor_leave_requests` belum ada di folder migrasi — catatan untuk rilis).

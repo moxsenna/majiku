@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EmptyState, FilterChip, InfoBox, PageBody, PageHeader, Panel, PanelRow, StatusDot, Stepper } from "@/components/bunayo";
+import { EmptyState, ErrorBanner, FilterChip, InfoBox, PageBody, PageHeader, Panel, PanelRow, StatusDot, Stepper } from "@/components/bunayo";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { formatPeriode, formatRupiah, formatTanggal, formatUmur } from "@/lib/format";
@@ -65,7 +65,7 @@ function Field({ id, label, hint, children }: { id: string; label: React.ReactNo
  * BARU yang disembunyikan: nama panggilan, jenis kelamin, alergi/kondisi medis, penjemput resmi, paket & diskon saudara,
  * prorata otomatis, kirim tagihan via WhatsApp, simpan draf (lihat REDESIGN-BACKLOG).
  */
-export default function DaftarkanAnak({ kelas, siswa }: { kelas: KelasUntukDaftar[]; siswa: SiswaRow[] }) {
+export default function DaftarkanAnak({ kelas, siswa, galatMuat }: { kelas: KelasUntukDaftar[]; siswa: SiswaRow[]; galatMuat?: boolean }) {
   const router = useRouter();
   const qc = useQueryClient();
   const { toast } = useToast();
@@ -204,6 +204,14 @@ export default function DaftarkanAnak({ kelas, siswa }: { kelas: KelasUntukDafta
         }
       />
       <PageBody className="max-w-[900px]">
+        {galatMuat && (
+          <ErrorBanner
+            title="Daftar kelas atau keluarga gagal dimuat"
+            description="Pilihan kelas dan keluarga terdaftar mungkin tidak lengkap. Muat ulang sebelum menyimpan."
+            onRetry={() => router.refresh()}
+            retryLabel="Muat ulang"
+          />
+        )}
         <Stepper steps={LANGKAH} current={langkah} className="max-[560px]:[&_li>span]:text-[0px]" />
 
         <Panel className="flex flex-col gap-4 p-5">

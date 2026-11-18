@@ -50,8 +50,8 @@ export function StatCard({ label, periode, value, suffix, href, linkLabel, onCli
           tone === "red" && "text-destructive",
         )}
       >
-        <span className={cn(stabilo && "hl")}>{value}</span>
-        {suffix && <small className="whitespace-nowrap text-[13px] text-muted-foreground">{suffix}</small>}
+        <span className={cn("whitespace-nowrap", stabilo && "hl")}>{value}</span>
+        {suffix && <small className="text-[13px] text-muted-foreground">{suffix}</small>}
       </span>
       {linkLabel &&
         (href ? (

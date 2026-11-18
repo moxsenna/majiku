@@ -5,6 +5,10 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Daftarkan anak" };
 
 export default async function Page() {
-  const [kelas, siswa] = await Promise.all([listKelasUntukDaftar().catch(() => []), listSiswa().catch(() => [])]);
-  return <DaftarkanAnak kelas={kelas} siswa={siswa} />;
+  // Galat tidak boleh tampil sebagai "belum ada kelas/keluarga": diteruskan ke view sebagai bendera.
+  const [kelas, siswa] = await Promise.all([
+    listKelasUntukDaftar().then((d) => ({ d, ok: true }), () => ({ d: [], ok: false })),
+    listSiswa().then((d) => ({ d, ok: true }), () => ({ d: [], ok: false })),
+  ]);
+  return <DaftarkanAnak kelas={kelas.d} siswa={siswa.d} galatMuat={!kelas.ok || !siswa.ok} />;
 }
