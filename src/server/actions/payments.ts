@@ -225,34 +225,30 @@ export async function createInvoicePaymentOrder(
     })
     .returning({ id: paymentOrders.id });
 
-  try {
-    const phone = detail.parentPhone?.trim();
-    const result = await createPayCoreOrder({
-      externalOrderId,
-      amount,
-      invoiceNumber: detail.invoiceNumber,
-      invoiceId: detail.id,
-      customer: {
-        name: session.user.name ?? detail.parentName ?? "Orang Tua",
-        email: session.user.email,
-        ...(phone && phone.length >= 8 ? { phone } : {}),
-      },
-    });
+  // Kalau PayCore gagal, order tetap pending di lokal untuk audit; error asli diteruskan ke pemanggil.
+  const phone = detail.parentPhone?.trim();
+  const result = await createPayCoreOrder({
+    externalOrderId,
+    amount,
+    invoiceNumber: detail.invoiceNumber,
+    invoiceId: detail.id,
+    customer: {
+      name: session.user.name ?? detail.parentName ?? "Orang Tua",
+      email: session.user.email,
+      ...(phone && phone.length >= 8 ? { phone } : {}),
+    },
+  });
 
-    await db
-      .update(paymentOrders)
-      .set({ paycoreOrderId: result.paycoreOrderId, checkoutUrl: result.checkoutUrl, updatedAt: new Date() })
-      .where(eq(paymentOrders.id, pending.id));
+  await db
+    .update(paymentOrders)
+    .set({ paycoreOrderId: result.paycoreOrderId, checkoutUrl: result.checkoutUrl, updatedAt: new Date() })
+    .where(eq(paymentOrders.id, pending.id));
 
-    return {
-      checkoutUrl: result.checkoutUrl,
-      qrString: result.qrString ?? null,
-      expiresAt: result.expiresAt ?? null,
-    };
-  } catch (e) {
-    // Order tetap pending di lokal untuk audit; pesan error asli diteruskan
-    throw e;
-  }
+  return {
+    checkoutUrl: result.checkoutUrl,
+    qrString: result.qrString ?? null,
+    expiresAt: result.expiresAt ?? null,
+  };
 }
 
 export async function checkInvoiceStatus(

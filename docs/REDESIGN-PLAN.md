@@ -174,3 +174,18 @@ Setiap layar: 4 state (isi/kosong/memuat/galat), cek 1440/834/390 (admin) atau 3
 ## 7. Bukti verifikasi per layar
 
 _(diisi per fase, gaya GATES.md: CHECK / EXPECT / EVIDENCE)_
+
+### Fase 1 — Fondasi (2026-11-18)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| `npm run lint` | 0 error | Lulus. Satu error lama (`no-useless-catch` di `src/server/actions/payments.ts`, sudah ada di `main`) diperbaiki: try/catch yang hanya `throw e` dibuang, perilaku identik. |
+| `npm run build` | sukses | Lulus (Next 15, semua route terbangun, middleware 34.9 kB). |
+| Hex baru di komponen | 0 | `git diff main -- src` → hex hanya di `globals.css` (token, beserta komentar asal) dan `manifest.ts`/`layout.tsx` (`theme_color` wajib literal). Hex lama yang tersisa: `marketplace/[slug]` (hijau WhatsApp) & `PaymentModal` canvas putih — bukan buatan fase ini, dibereskan di layar masing-masing. |
+| `rounded-[..px]` baru | 0 | `git diff main -- src \| grep rounded-\[` → 0. |
+| Kontras teks/kontrol | ≥4,5 / ≥3 | Palet terang = kit (sudah teranotasi). Palet gelap (turunan, bukan dari desain) diukur `contrast.mjs`: primary di kartu 4,79, teks di tombol primary 5,16, destructive-soft 4,88. |
+| Font | Bricolage/Plex via next/font, @import Plus Jakarta hilang | `src/app/fonts.ts`; screenshot `/dev/ui` 1440 terang & gelap menunjukkan font termuat. |
+| Sisa "MAJIKU" yang terlihat pengguna | 0 | Masih 3 file, semuanya data palsu yang dihapus di Fase 5: `ParentBilling.tsx:131,435`, `invoiceExport.ts:102` (fallback nama + alamat/telp palsu, rekening bank palsu N1), `ParentPayment.tsx` (view yatim). Sisanya komentar/identifier yang sengaja dibiarkan (§1b). |
+| Katalog komponen | semua komponen kit tampil | `/dev/ui` (hanya `NODE_ENV=development`). |
+
+Catatan utang: ukuran huruf di komponen memakai nilai arbitrer `text-[13px]` dst. karena `kit.css` sendiri menulis `font-size` literal (tak ada token tipografi). Nilainya disalin persis dari kit; bila nanti ingin skala token, cukup tambah `fontSize` di `tailwind.config.ts`.
