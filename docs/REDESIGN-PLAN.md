@@ -220,3 +220,15 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Data nyata | query jalan pada tenant nyata | dijalankan baca-saja pada lembaga produksi-dev (8 anak): tanpa galat, angka konsisten |
 | Akun demo | jelas bukan data nyata | InfoBox "Mode demo"; jalur demo tidak membaca DB |
 | Bersih-bersih | — | `views/Dashboard.tsx` + 20 widget dashboard yatim dihapus (termasuk `WaitingListManagement` berarray statis, notifikasi demo) |
+
+### Fase 3 · S1 Siswa, A2 Profil anak, D1 Daftarkan (2026-11-18)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber data | baca-saja, scope tenant | `src/server/actions/siswa.ts` (`listSiswa`, `getProfilSiswa`, `listKelasUntukDaftar`); dijalankan baca-saja pada lembaga nyata (8 anak): tanpa galat, status tagihan "Perlu Ditagih" konsisten dengan A1 |
+| Tulis data | tidak ada action tulis baru | D1/A2 memakai `createStudent`, `updateStudent`, `moveStudentClass`, `linkStudentParent`, `toggleStudentActive`, `createInvoice`, `markInvoicePaid` apa adanya |
+| S1 4 state | isi / kosong / memuat / galat | tabel + panel; kosong → EmptyState "Daftarkan anak" (screenshot akun demo, lembaga kosong); memuat → DataTableSkeleton; galat → banner + data lama redup |
+| Baris aktif | Tinta, bukan stabilo | `activeRowId` → bg-muted + garis Tinta kiri |
+| Mobile ≤560 | kartu | `renderCard`; panel profil jadi lembar samping ≤1000 |
+| D1 | stepper 4 langkah, satu stabilo (total) | screenshot langkah 1 |
+| Belum diverifikasi visual | S1 terisi, A2 terisi, D1 langkah 2–4 & simpan | tidak ada akun uji ber-data; aku tidak menulis data uji ke DB yang tampaknya produksi |

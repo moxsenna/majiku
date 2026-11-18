@@ -47,6 +47,8 @@ export function DataTable<T>({
   pageSize = 25,
   empty,
   toolbarRight,
+  activeRowId,
+  initialQuery = "",
   className,
 }: {
   rows: T[];
@@ -66,9 +68,13 @@ export function DataTable<T>({
   /** Ditampilkan bila tidak ada baris sama sekali (sebelum filter) */
   empty?: React.ReactNode;
   toolbarRight?: React.ReactNode;
+  /** Baris yang sedang dibuka di panel samping: latar Garis muda + garis Tinta di kiri (bukan stabilo) */
+  activeRowId?: string | null;
+  /** Isi awal kotak cari, mis. dari ?q= */
+  initialQuery?: string;
   className?: string;
 }) {
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery);
   const [filter, setFilter] = useState(defaultFilter ?? filters?.[0]?.id ?? "");
   const [sort, setSort] = useState<{ id: string; dir: "asc" | "desc" } | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -225,6 +231,7 @@ export function DataTable<T>({
               {pageRows.map((r) => {
                 const id = getRowId(r);
                 const isSel = selected.has(id);
+                const isActive = activeRowId === id;
                 return (
                   <tr
                     key={id}
@@ -232,6 +239,7 @@ export function DataTable<T>({
                     className={cn(
                       "border-b border-border-subtle last:border-b-0",
                       isSel && "bg-primary-soft/50",
+                      isActive && "bg-muted shadow-[inset_3px_0_0_hsl(var(--foreground))]",
                       onRowClick && "cursor-pointer hover:bg-background",
                     )}
                   >

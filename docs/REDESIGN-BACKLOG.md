@@ -49,3 +49,11 @@ Bagian berikut ada di desain tetapi datanya/backend-nya belum ada. Tidak dibangu
 | A1 Hari Ini | Mode scan QR | Alur scan QR kehadiran (N27) | ATT-02 | Disembunyikan |
 | A1 Hari Ini | Setujui izin guru dari Hari Ini | Action approve/reject `tutor_leave_requests` | STF-04 | Status izin tampil (Izin · menunggu), tombol Setujui disembunyikan |
 | A1 Hari Ini | "Kirim pengingat" tagihan / "Ingatkan guru" laporan | Pengiriman WA/notifikasi | BIL-09 | Diganti tautan ke daftar sumber |
+| S1 Siswa | Impor Excel | Alur A3 (unggah, cocokkan keluarga, periksa) | ONB-03 | Tombol disembunyikan |
+| S1 Siswa | Status wali "Diundang" | Tabel undangan + token | RBAC-06 | Hanya "Aktif" (tertaut) / "Belum tertaut" |
+| S1/A2 | Kesehatan & kontak darurat untuk anak non-trial | Kolom kesehatan di `students` | STU-08 | Tampil dari formulir trial bila ada; selain itu teks jujur "Belum tercatat" |
+| A2 Profil | Penjemput resmi, tab Perkembangan, tab Riwayat, Cuti sementara, Berhenti dengan alasan | Tabel `pickups`, modul perkembangan, log riwayat, status cuti | STU-07, PICK | Disembunyikan; tersedia Nonaktifkan/Aktifkan (action lama) |
+| A2 Profil | Ledger keluarga & tagihan gabungan | Ledger per keluarga | BIL-13 | Disembunyikan; daftar tagihan per anak |
+| D1 Daftarkan | Nama panggilan, jenis kelamin, alergi, kondisi medis | Kolom di `students` | STU-01, STU-08 | Tidak ditanyakan |
+| D1 Daftarkan | Penjemput resmi, paket tagihan, diskon saudara, prorata otomatis, kirim tagihan via WA, simpan draf | Paket & biaya, diskon, notifikasi WA, draf pendaftaran | BIL-02/04/05 | Disembunyikan; nominal = harga kelas (bisa diubah) |
+| (temuan) | `getLinkableParents` mengembalikan akun orang tua dari semua lembaga | Batasi ke wali yang terkait lembaga | keamanan | Belum diubah (di luar UI) — perlu persetujuan |
