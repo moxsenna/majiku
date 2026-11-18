@@ -60,6 +60,7 @@ export function adminNav(istilah: Istilah): NavEntry[] {
       sub: [
         { label: "Ringkasan", href: "/billing/ringkasan" },
         { label: "Tagihan", href: "/billing", exact: true },
+        { label: "Pembayaran Masuk", href: "/billing/masuk" },
         { label: istilah.honor, href: "/billing/honor" },
       ],
     },

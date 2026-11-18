@@ -256,4 +256,19 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Lint/build | lulus | `npm run lint` 0, `npm run build` sukses |
 | Perbaikan menyelinap | — | `waLink`/aging dipindah ke `src/lib/keuangan.ts` (ekspor "use server" wajib async); `any(array)` diganti `inArray` (getTagihanDetail 404); `TabsContent` inactive kini benar-benar tersembunyi; StatCard min-w 46% ≤1000 |
 
-**Belum diverifikasi**: state galat refetch di P1/K1 (pola sama dengan A1 yang sudah diuji); K4 (tagihan sekali), K5 (paket), K6 (pengaturan penagihan), K7 (pembayaran masuk), K8 (honor) masih tampilan lama atau belum dibuat — urutan berikutnya.
+**Belum diverifikasi**: state galat refetch di P1/K1 (pola sama dengan A1 yang sudah diuji); K4 (tagihan sekali), K5 (paket), K6 (pengaturan penagihan), K8 (honor) masih tampilan lama atau belum dibuat — urutan berikutnya.
+
+### Fase 3 · Keuangan — K7 Pembayaran masuk (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | data nyata, baca-saja | `getPembayaranMasuk(bulan)` di `keuangan.ts`: tagihan Lunas per `paid_at` (WIB) + `payment_orders` pending untuk tagihan belum Lunas; online = order `paid` (webhook PayCore) |
+| Satu definisi | label beda dari "Diterima" K1/P1 | Kartu bernama "Uang masuk" (per tanggal bayar = batang bulan berjalan grafik K1), bukan "Diterima" (tagihan periode berjalan yang Lunas) |
+| Periode | label + pemilih | "1–19 Nov 2026" (bulan berjalan s.d. hari ini), pilihan 6 bulan `?bulan=YYYY-MM` |
+| Menunggu gateway | baris Matahari muda + chip "Perlu dicek" | `DataTable` prop baru `highlightRow`; InfoBox mencegah catat manual ganda; tombol "Cek status" disembunyikan (webhook memperbarui otomatis) |
+| BARU disembunyikan | settlement, QRIS/VA, admin pencatat | Kartu & kolom Pencairan tidak dirender; catatan jujur di bawah tabel; backlog K7 |
+| Data uji | order online + pending | `scripts/seed-uji-pembayaran.ts` (hanya DB uji): 4 paid, 1 pending |
+| State | isi/kosong/memuat/galat | Isi (DB uji), kosong (`?bulan=2026-07` → EmptyState + Buka Penagihan, Ekspor nonaktif), skeleton & ErrorBanner+Stale (pola sama P1) |
+| Demo | baca-saja | InfoBox Mode demo; klik baris dimatikan di demo (juga di P1 — sebelumnya mengarah ke `/billing/demo-*` 404) |
+| Responsif | 1440/834/390 | 1440 tabel penuh; 834 kartu 2×2 + tabel, nomor tidak terlipat; 390 mode kartu |
+

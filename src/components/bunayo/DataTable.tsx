@@ -48,6 +48,7 @@ export function DataTable<T>({
   empty,
   toolbarRight,
   activeRowId,
+  highlightRow,
   initialQuery = "",
   className,
 }: {
@@ -70,6 +71,8 @@ export function DataTable<T>({
   toolbarRight?: React.ReactNode;
   /** Baris yang sedang dibuka di panel samping: latar Garis muda + garis Tinta di kiri (bukan stabilo) */
   activeRowId?: string | null;
+  /** Baris tertahan yang perlu dicek (latar Matahari muda, kit K7) — bukan stabilo */
+  highlightRow?: (row: T) => boolean;
   /** Isi awal kotak cari, mis. dari ?q= */
   initialQuery?: string;
   className?: string;
@@ -232,6 +235,7 @@ export function DataTable<T>({
                 const id = getRowId(r);
                 const isSel = selected.has(id);
                 const isActive = activeRowId === id;
+                const isHl = !isActive && !isSel && !!highlightRow?.(r);
                 return (
                   <tr
                     key={id}
@@ -239,6 +243,7 @@ export function DataTable<T>({
                     className={cn(
                       "group border-b border-border-subtle last:border-b-0",
                       isSel && "bg-primary-soft/50",
+                      isHl && "bg-matahari-soft",
                       isActive && "bg-muted shadow-[inset_3px_0_0_hsl(var(--foreground))]",
                       onRowClick && "cursor-pointer hover:bg-background",
                     )}
@@ -256,8 +261,8 @@ export function DataTable<T>({
                           c.numeric && "tabular whitespace-nowrap text-right",
                           // Sel sticky perlu latar sendiri yang mengikuti state baris (aktif/terpilih/hover).
                           c.sticky && "sticky left-0 z-[1]",
-                          c.sticky && (isActive ? "bg-muted shadow-[inset_3px_0_0_hsl(var(--foreground))]" : isSel ? "bg-primary-soft" : "bg-card"),
-                          c.sticky && !isActive && !isSel && onRowClick && "group-hover:bg-background",
+                          c.sticky && (isActive ? "bg-muted shadow-[inset_3px_0_0_hsl(var(--foreground))]" : isSel ? "bg-primary-soft" : isHl ? "bg-matahari-soft" : "bg-card"),
+                          c.sticky && !isActive && !isSel && !isHl && onRowClick && "group-hover:bg-background",
                           c.sticky && selectable && "left-10",
                           c.hideOnMobile && "max-[560px]:hidden",
                           c.className,
@@ -286,7 +291,10 @@ export function DataTable<T>({
             {pageRows.map((r) => {
               const id = getRowId(r);
               return (
-                <div key={id} className="flex items-start gap-3 border-b border-border-subtle px-4 py-3 last:border-b-0">
+                <div
+                  key={id}
+                  className={cn("flex items-start gap-3 border-b border-border-subtle px-4 py-3 last:border-b-0", highlightRow?.(r) && "bg-matahari-soft")}
+                >
                   {selectable && (
                     <span className="pt-1">
                       <Checkbox checked={selected.has(id)} onCheckedChange={() => toggle(id)} aria-label="Pilih" />

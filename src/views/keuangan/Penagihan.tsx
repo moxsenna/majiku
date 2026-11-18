@@ -434,7 +434,7 @@ export default function Penagihan({ initialData }: { initialData?: KeuanganData 
                     rows={t.menunggu}
                     columns={kolomMenunggu}
                     getRowId={(r) => r.id}
-                    onRowClick={(r) => router.push(`/billing/${r.id}`)}
+                    onRowClick={readOnly ? undefined : (r) => router.push(`/billing/${r.id}`)}
                     pageSize={10}
                     renderCard={(r) => <BarisKartu r={r} aksi={kolomAksiWa("Ingatkan")} />}
                     empty={tabKosong("Tidak ada tagihan yang menunggu pembayaran.")}
@@ -446,7 +446,7 @@ export default function Penagihan({ initialData }: { initialData?: KeuanganData 
                     rows={t.terlambat}
                     columns={kolomTerlambat}
                     getRowId={(r) => r.id}
-                    onRowClick={(r) => router.push(`/billing/${r.id}`)}
+                    onRowClick={readOnly ? undefined : (r) => router.push(`/billing/${r.id}`)}
                     pageSize={10}
                     renderCard={(r) => <BarisKartu r={r} aksi={kolomAksiWa("Ingatkan")} />}
                     empty={tabKosong("Tidak ada tunggakan. Semua tagihan lunas atau belum jatuh tempo.")}
@@ -458,7 +458,7 @@ export default function Penagihan({ initialData }: { initialData?: KeuanganData 
                     rows={t.lunas}
                     columns={kolomLunas}
                     getRowId={(r) => r.id}
-                    onRowClick={(r) => router.push(`/billing/${r.id}`)}
+                    onRowClick={readOnly ? undefined : (r) => router.push(`/billing/${r.id}`)}
                     pageSize={10}
                     renderCard={(r) => (
                       <span className="flex items-center gap-3">

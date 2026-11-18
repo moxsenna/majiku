@@ -19,7 +19,7 @@ Bagian berikut ada di desain tetapi datanya/backend-nya belum ada. Tidak dibangu
 | K3 | Bayar sebagian, bukti foto, metode pembayaran, audit "dicatat oleh" | Tabel pembayaran + kolom metode/catat-oleh | BIL-08, BIL-19, RBAC-05 | Tombol "Catat pembayaran" = Lunas penuh (action lama `markInvoicePaid`) |
 | K5 | Paket, item biaya, kuota sesi | Tabel paket | BIL-01..03, BIL-11 | Read-only dari kelas |
 | K6 | Seluruh pengaturan penagihan | Tabel pengaturan tenant | BIL-04..10, BIL-21 | Disembunyikan |
-| K7 | Settlement | Data settlement PayCore | BIL-17, BIL-18 | Disembunyikan |
+| K7 | Settlement, metode QRIS/VA per pembayaran, nama admin pencatat, tombol Cek status gateway | Data settlement + metode dari PayCore; kolom recorded_by | BIL-17, BIL-18 | Disembunyikan; layar K7 dari invoices + payment_orders (2026-11-19) |
 | K8 | Sesi nyata dari absen guru | Relasi absen guru ↔ sesi | STF-05 | Label jujur / disembunyikan |
 | K1/P1 | Pecahan metode QRIS vs Virtual Account | Kolom metode di `payment_orders` | BIL-17 | Cara bayar hanya Online vs dicatat admin |
 | P1 | Pengingat otomatis + riwayat pengingat ("WA 17 Nov · dibuka") | Tabel pengingat + status kirim/baca | BIL-06, BIL-09, N25 | Ingatkan manual via `wa.me`; kolom Pengingat disembunyikan |

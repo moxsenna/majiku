@@ -473,6 +473,201 @@ export async function getTagihanDetail(id: string): Promise<TagihanDetail | null
 }
 
 /* ------------------------------------------------------------------ */
+/* K7 Pembayaran masuk                                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Definisi K7:
+ * - Rentang        = satu bulan (WIB) menurut tanggal bayar; bulan berjalan s.d. hari ini. Total bulan berjalan
+ *                    sama dengan batang bulan berjalan di grafik K1 (sumber sama: invoices.paid_at).
+ * - Pembayaran     = tagihan Lunas dengan paid_at di rentang. Nominal = total tagihan (bayar sebagian belum tercatat).
+ * - Online         = ada payment_orders berstatus paid (webhook PayCore); sisanya "Dicatat admin".
+ * - Menunggu gateway = payment_orders pending yang dibuat di rentang untuk tagihan yang belum Lunas.
+ *                    Tidak dihitung ke Diterima; ditampilkan supaya admin tidak mencatat manual (bayar ganda).
+ * BARU yang disembunyikan: metode QRIS/VA per pembayaran, siapa admin yang mencatat, pencairan/settlement.
+ */
+
+export interface BarisPembayaran {
+  /** id unik baris (invoice id untuk Lunas, payment order id untuk menunggu) */
+  id: string;
+  invoiceId: string;
+  waktu: string;
+  keluarga: string;
+  anak: string;
+  nomor: string;
+  nominal: number;
+  metode: "online" | "manual";
+  status: "lunas" | "menunggu";
+}
+
+export interface PembayaranMasukData {
+  isDemo: boolean;
+  diambilPada: string;
+  /** "YYYY-MM" yang ditampilkan */
+  ym: string;
+  /** Label rentang, mis. "1–19 Nov 2026" atau "Okt 2026" */
+  rentang: string;
+  /** Pilihan bulan (6 bulan terakhir, terbaru dulu) */
+  pilihanBulan: { ym: string; label: string }[];
+  diterima: number;
+  diterimaCount: number;
+  online: number;
+  onlineCount: number;
+  manual: number;
+  manualCount: number;
+  menungguCount: number;
+  baris: BarisPembayaran[];
+}
+
+function labelRentang(ym: string, tanggal: string) {
+  const bulan = formatPeriode(`${ym}-01`);
+  if (ym !== tanggal.slice(0, 7)) return bulan;
+  const hari = Number(tanggal.slice(8, 10));
+  return hari === 1 ? `1 ${bulan}` : `1–${hari} ${bulan}`;
+}
+
+function enamBulan(tanggal: string) {
+  const [ty, tm] = [Number(tanggal.slice(0, 4)), Number(tanggal.slice(5, 7))];
+  return Array.from({ length: 6 }, (_, k) => {
+    const d = new Date(Date.UTC(ty, tm - 1 - k, 1));
+    const ym = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+    return { ym, label: formatPeriode(`${ym}-01`) };
+  });
+}
+
+export async function getPembayaranMasuk(ymDiminta?: string): Promise<PembayaranMasukData> {
+  const ctx = await requireTenantContext();
+  const tanggal = todayInWib();
+  const pilihanBulan = enamBulan(tanggal);
+  const ym = pilihanBulan.some((b) => b.ym === ymDiminta) ? ymDiminta! : pilihanBulan[0].ym;
+  if (ctx.isDemo) return demoPembayaranMasuk(tanggal, ym, pilihanBulan);
+
+  const paidYm = sql<string>`to_char((${invoices.paidAt} AT TIME ZONE 'Asia/Jakarta')::date, 'YYYY-MM')`;
+  const orderYm = sql<string>`to_char((${paymentOrders.createdAt} AT TIME ZONE 'Asia/Jakarta')::date, 'YYYY-MM')`;
+
+  const [lunas, menunggu] = await Promise.all([
+    db
+      .select({
+        id: invoices.id,
+        nomor: invoices.invoiceNumber,
+        total: invoices.total,
+        paidAt: invoices.paidAt,
+        studentName: students.name,
+        parentName: students.parentName,
+        online: paymentOrders.id,
+      })
+      .from(invoices)
+      .innerJoin(students, eq(students.id, invoices.studentId))
+      .leftJoin(paymentOrders, and(eq(paymentOrders.invoiceId, invoices.id), eq(paymentOrders.paymentStatus, "paid")))
+      .where(and(eq(students.tenantId, ctx.tenantId), eq(invoices.status, "paid"), isNotNull(invoices.paidAt), sql`${paidYm} = ${ym}`))
+      .orderBy(desc(invoices.paidAt)),
+    db
+      .select({
+        id: paymentOrders.id,
+        invoiceId: invoices.id,
+        nomor: invoices.invoiceNumber,
+        amount: paymentOrders.amount,
+        createdAt: paymentOrders.createdAt,
+        studentName: students.name,
+        parentName: students.parentName,
+      })
+      .from(paymentOrders)
+      .innerJoin(invoices, eq(invoices.id, paymentOrders.invoiceId))
+      .innerJoin(students, eq(students.id, invoices.studentId))
+      .where(
+        and(
+          eq(students.tenantId, ctx.tenantId),
+          eq(paymentOrders.paymentStatus, "pending"),
+          sql`${invoices.status} <> 'paid'`,
+          sql`${orderYm} = ${ym}`,
+        ),
+      )
+      .orderBy(desc(paymentOrders.createdAt)),
+  ]);
+
+  // Satu tagihan bisa punya lebih dari satu order paid (jarang) → hitung tagihan sekali.
+  const unik = new Map<string, (typeof lunas)[number]>();
+  for (const r of lunas) if (!unik.has(r.id)) unik.set(r.id, r);
+  const lunasUnik = [...unik.values()];
+
+  const baris: BarisPembayaran[] = [
+    ...menunggu.map((m) => ({
+      id: m.id,
+      invoiceId: m.invoiceId,
+      waktu: m.createdAt ? m.createdAt.toISOString() : new Date().toISOString(),
+      keluarga: namaKeluarga(m.parentName, m.studentName),
+      anak: m.studentName,
+      nomor: m.nomor,
+      nominal: Number(m.amount) || 0,
+      metode: "online" as const,
+      status: "menunggu" as const,
+    })),
+    ...lunasUnik.map((r) => ({
+      id: r.id,
+      invoiceId: r.id,
+      waktu: r.paidAt!.toISOString(),
+      keluarga: namaKeluarga(r.parentName, r.studentName),
+      anak: r.studentName,
+      nomor: r.nomor,
+      nominal: Number(r.total) || 0,
+      metode: (r.online ? "online" : "manual") as BarisPembayaran["metode"],
+      status: "lunas" as const,
+    })),
+  ].sort((a, b) => b.waktu.localeCompare(a.waktu));
+
+  const jumlah = (rs: BarisPembayaran[]) => rs.reduce((s, r) => s + r.nominal, 0);
+  const lunasBaris = baris.filter((b) => b.status === "lunas");
+  const onlineBaris = lunasBaris.filter((b) => b.metode === "online");
+  const manualBaris = lunasBaris.filter((b) => b.metode === "manual");
+
+  return {
+    isDemo: false,
+    diambilPada: new Date().toISOString(),
+    ym,
+    rentang: labelRentang(ym, tanggal),
+    pilihanBulan,
+    diterima: jumlah(lunasBaris),
+    diterimaCount: lunasBaris.length,
+    online: jumlah(onlineBaris),
+    onlineCount: onlineBaris.length,
+    manual: jumlah(manualBaris),
+    manualCount: manualBaris.length,
+    menungguCount: menunggu.length,
+    baris,
+  };
+}
+
+function demoPembayaranMasuk(tanggal: string, ym: string, pilihanBulan: { ym: string; label: string }[]): PembayaranMasukData {
+  const t = (hari: number, jam: string) => `${ym}-${String(hari).padStart(2, "0")}T${jam}:00+07:00`;
+  const hariIni = ym === tanggal.slice(0, 7) ? Number(tanggal.slice(8, 10)) : 28;
+  const h = (n: number) => Math.max(1, Math.min(hariIni, n));
+  const baris: BarisPembayaran[] = [
+    { id: "dp1", invoiceId: "demo-5", waktu: t(h(17), "14:21"), keluarga: "Keluarga Harahap", anak: "Nara", nomor: "INV-DEMO-009", nominal: 720_000, metode: "online", status: "lunas" },
+    { id: "dp2", invoiceId: "demo-1", waktu: t(h(17), "09:48"), keluarga: "Keluarga Pratama", anak: "Raka", nomor: "INV-DEMO-021", nominal: 1_000_000, metode: "online", status: "menunggu" },
+    { id: "dp3", invoiceId: "demo-5", waktu: t(h(16), "19:02"), keluarga: "Keluarga Kinanti", anak: "Laras", nomor: "INV-DEMO-005", nominal: 1_100_000, metode: "online", status: "lunas" },
+    { id: "dp4", invoiceId: "demo-6", waktu: t(h(15), "07:40"), keluarga: "Keluarga Nugroho", anak: "Kenzo", nomor: "INV-DEMO-011", nominal: 700_000, metode: "manual", status: "lunas" },
+    { id: "dp5", invoiceId: "demo-5", waktu: t(h(12), "20:15"), keluarga: "Keluarga Lubis", anak: "Sekar", nomor: "INV-DEMO-017", nominal: 1_550_000, metode: "online", status: "lunas" },
+  ];
+  const lunas = baris.filter((b) => b.status === "lunas");
+  const sum = (rs: BarisPembayaran[]) => rs.reduce((s, r) => s + r.nominal, 0);
+  return {
+    isDemo: true,
+    diambilPada: new Date().toISOString(),
+    ym,
+    rentang: labelRentang(ym, tanggal),
+    pilihanBulan,
+    diterima: sum(lunas),
+    diterimaCount: lunas.length,
+    online: sum(lunas.filter((b) => b.metode === "online")),
+    onlineCount: lunas.filter((b) => b.metode === "online").length,
+    manual: sum(lunas.filter((b) => b.metode === "manual")),
+    manualCount: lunas.filter((b) => b.metode === "manual").length,
+    menungguCount: 1,
+    baris,
+  };
+}
+
+/* ------------------------------------------------------------------ */
 /* Data demo (akun @majiku.test) — contoh dari frame desain, bukan data lembaga mana pun */
 /* ------------------------------------------------------------------ */
 
