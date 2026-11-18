@@ -113,7 +113,7 @@ export default function Messages({ announcements }: MessagesProps) {
 
   return (
     <DashboardLayout
-      title="Komunikasi"
+      title="Pesan"
       subtitle="Broadcast pengumuman ke orang tua wali murid"
       hideNavbarActions
     >

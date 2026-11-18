@@ -8,6 +8,18 @@ interface RoleProtectedRouteProps {
   children: React.ReactNode;
   role?: AppRole;
   requiredRole?: AppRole;
+  /** Tampilan saat sesi/peran masih dimuat. Bawaan: kerangka halaman (N31: tanpa spinner layar penuh). */
+  fallback?: React.ReactNode;
+}
+
+function DefaultFallback() {
+  return (
+    <div className="flex flex-col gap-4 p-6" aria-busy="true" aria-label="Memuat">
+      <span className="sk h-8 w-56 rounded" />
+      <span className="sk h-24 w-full rounded" />
+      <span className="sk h-48 w-full rounded" />
+    </div>
+  );
 }
 
 function getLoginRouteForRole(role?: AppRole): string {
@@ -18,17 +30,13 @@ function getLoginRouteForRole(role?: AppRole): string {
   return "/admin/login";
 }
 
-export function RoleProtectedRoute({ children, role, requiredRole }: RoleProtectedRouteProps) {
+export function RoleProtectedRoute({ children, role, requiredRole, fallback }: RoleProtectedRouteProps) {
   const targetRole = role ?? requiredRole;
   const { session, loading, hasRole, roleHome, roles } = useAuth();
   const pathname = usePathname();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+    return <>{fallback ?? <DefaultFallback />}</>;
   }
 
   if (!session) {

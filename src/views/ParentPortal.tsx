@@ -34,6 +34,7 @@ import { AnnouncementsCard } from "@/components/parent/AnnouncementsCard";
 import type { AnnouncementItem } from "@/components/parent/AnnouncementsCard";
 import { todayInWib } from "@/lib/datetime";
 import { cn } from "@/lib/utils";
+import { BunayoMark, KidSwitcher, useActiveKid } from "@/components/bunayo";
 import type { TrialApplicationRow } from "@/server/actions/trial";
 import type { ReportRow } from "@/server/actions/dailyReports";
 import type { ParentChildData } from "@/server/actions/parentChildren";
@@ -108,11 +109,11 @@ export default function ParentPortal({
   announcements = [],
 }: ParentPortalProps) {
   const [activeTab, setActiveTab] = useState<"feed" | "progress" | "gallery">("feed");
-  const [selectedChildIndex, setSelectedChildIndex] = useState(0);
+  const { activeKidId, setActiveKidId } = useActiveKid();
 
   const hasChildren = childrenList.length > 0;
   const activeChild = hasChildren
-    ? childrenList[selectedChildIndex] || childrenList[0]
+    ? childrenList.find((c) => c.id === activeKidId) ?? childrenList[0]
     : null;
 
   // Filter laporan harian sesuai anak yang sedang aktif dipilih
@@ -129,20 +130,13 @@ export default function ParentPortal({
     <div className="min-h-screen bg-background">
       {/* Mobile Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border">
-        <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg">Bunayo</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/parent/chat">
-              <Button variant="ghost" size="icon-sm">
-                <MessageCircle className="h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
+        <div className="flex min-h-16 items-center justify-between gap-2 px-4 py-2">
+          <BunayoMark height={36} />
+          <KidSwitcher
+            kids={childrenList.map((c) => ({ id: c.id, name: c.nickname || c.name, photoUrl: c.avatar }))}
+            activeId={activeChild?.id ?? null}
+            onChange={setActiveKidId}
+          />
         </div>
 
         {/* Child Profile Bar / Empty State Header */}
@@ -163,19 +157,6 @@ export default function ParentPortal({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h2 className="font-bold text-foreground truncate">{activeChild.name}</h2>
-                  {childrenList.length > 1 && (
-                    <select
-                      className="text-xs bg-muted border border-border rounded px-1 py-0.5"
-                      value={selectedChildIndex}
-                      onChange={(e) => setSelectedChildIndex(Number(e.target.value))}
-                    >
-                      {childrenList.map((c, i) => (
-                        <option key={c.id} value={i}>
-                          {c.nickname}
-                        </option>
-                      ))}
-                    </select>
-                  )}
                 </div>
                 <p className="text-xs text-muted-foreground truncate">{activeChild.className}</p>
               </div>
@@ -532,34 +513,6 @@ export default function ParentPortal({
         )}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-        <div className="flex items-center justify-around py-2 max-w-lg mx-auto">
-          <button
-            onClick={() => setActiveTab("feed")}
-            className={`flex flex-col items-center gap-1 p-2 ${activeTab === "feed" ? "text-primary" : "text-muted-foreground"}`}
-          >
-            <Home className="h-6 w-6" />
-            <span className="text-xs">Beranda</span>
-          </button>
-          <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <ShoppingBag className="h-6 w-6" />
-            <span className="text-xs">Marketplace</span>
-          </Link>
-          <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <CreditCard className="h-6 w-6" />
-            <span className="text-xs">Tagihan</span>
-          </Link>
-          <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground relative">
-            <MessageCircle className="h-6 w-6" />
-            <span className="text-xs">Chat</span>
-          </Link>
-          <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <User className="h-6 w-6" />
-            <span className="text-xs">Profil</span>
-          </Link>
-        </div>
-      </nav>
     </div>
   );
 }

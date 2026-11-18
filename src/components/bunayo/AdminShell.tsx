@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search, type LucideIcon } from "lucide-react";
+import { Search, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { BunayoLogo, BunayoMark } from "./Logo";
@@ -49,8 +49,7 @@ export interface AdminShellProps {
   org: { name: string; sub?: string | null } | null;
   user: { name: string; role: string } | null;
   onSignOut: () => void;
-  /** Badge lonceng: ada yang perlu tindakan */
-  notifDot?: boolean;
+  /** Lonceng notifikasi (topbar mobile). Kosongkan bila belum ada sumber notifikasi nyata. */
   notifSlot?: React.ReactNode;
   /** Aksi cari global: Enter → hasil */
   onSearch?: (q: string) => void;
@@ -265,7 +264,7 @@ function SidebarFoot({
  * 561–1000 px rail ikon 76 px (titik merah menggantikan angka) ·
  * ≤ 560 px topbar (logo, lembaga, cari, notifikasi) + navigasi bawah 5.
  */
-export function AdminShell({ nav, settings, mobileTabs, org, user, onSignOut, notifDot, notifSlot, onSearch, children }: AdminShellProps) {
+export function AdminShell({ nav, settings, mobileTabs, org, user, onSignOut, notifSlot, onSearch, children }: AdminShellProps) {
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -314,12 +313,7 @@ export function AdminShell({ nav, settings, mobileTabs, org, user, onSignOut, no
         <Link href="/students" aria-label="Cari siswa" className="grid h-touch w-touch place-items-center rounded-full border border-border bg-card">
           <Search className="h-[18px] w-[18px]" aria-hidden />
         </Link>
-        {notifSlot ?? (
-          <span className="relative grid h-touch w-touch place-items-center rounded-full border border-border bg-card" aria-label="Notifikasi">
-            <Bell className="h-[18px] w-[18px]" aria-hidden />
-            {notifDot && <span className="absolute right-[11px] top-2.5 h-2 w-2 rounded-full bg-destructive" />}
-          </span>
-        )}
+        {notifSlot}
       </header>
 
       <main className="min-w-0 pb-24 min-[561px]:pb-0 min-[561px]:max-[1000px]:pl-[76px] min-[1001px]:pl-[232px]">{children}</main>

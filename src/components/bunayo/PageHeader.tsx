@@ -9,12 +9,15 @@ import { cn } from "@/lib/utils";
 export function PageHeader({
   title,
   eyebrow,
+  description,
   crumbs,
   actions,
   className,
 }: {
   title: React.ReactNode;
   eyebrow?: React.ReactNode;
+  /** Kalimat pendek di bawah judul (opsional) */
+  description?: React.ReactNode;
   crumbs?: { label: string; href?: string }[];
   actions?: React.ReactNode;
   className?: string;
@@ -47,6 +50,7 @@ export function PageHeader({
         <h1 className="font-display text-[40px] font-bold leading-[1.02] tracking-tight max-[1000px]:text-[34px] max-[560px]:text-[28px]">
           {title}
         </h1>
+        {description && <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>

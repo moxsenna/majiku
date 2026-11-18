@@ -27,7 +27,7 @@ export function AdminOnboardingCard() {
       step: "3",
       title: "Tugaskan Tutor / Pengajar",
       description: "Kelola profil guru dan hubungkan mereka ke kelas yang aktif.",
-      href: "/tutors",
+      href: "/settings/staff",
       cta: "Kelola Tutor",
       icon: PlusCircle,
       color: "bg-success/10 text-success border-success/20",

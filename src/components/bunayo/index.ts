@@ -24,3 +24,4 @@ export { DataTable, DataTableSkeleton, type Column, type FilterOption } from "./
 export { AdminShell, type NavItem, type NavEntry, type NavSub, type AdminShellProps } from "./AdminShell";
 export { PageHeader, PageBody } from "./PageHeader";
 export { ThemeToggle } from "./ThemeToggle";
+export { ParentShell, useActiveKid } from "./ParentShell";

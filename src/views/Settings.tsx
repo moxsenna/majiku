@@ -41,7 +41,7 @@ const settingsSections: SettingsSection[] = [
     title: "Manajemen Pengguna & Guru",
     description: "Kelola akun guru, staf pendidik, dan hak akses",
     color: "bg-info/10 text-info",
-    actionRoute: "/tutors",
+    actionRoute: "/settings/staff",
   },
   {
     id: "classes",
@@ -263,7 +263,7 @@ export default function Settings() {
                 <CardTitle className="text-base">Pengajar & Tim Pendidik</CardTitle>
                 <CardDescription className="text-xs">Kelola tutor dan penugasan kelas</CardDescription>
               </div>
-              <Button variant="soft" size="sm" onClick={() => router.push("/tutors")}>
+              <Button variant="soft" size="sm" onClick={() => router.push("/settings/staff")}>
                 Kelola Tutor
               </Button>
             </CardHeader>
@@ -278,7 +278,7 @@ export default function Settings() {
                     <p className="text-xs text-muted-foreground">Atur tarif honor per sesi, kelas pengampu, dan izin</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => router.push("/tutors")}>
+                <Button variant="outline" size="sm" onClick={() => router.push("/settings/staff")}>
                   Buka Modul
                 </Button>
               </div>

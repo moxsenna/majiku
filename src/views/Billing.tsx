@@ -158,7 +158,7 @@ export default function Billing() {
   };
 
   return (
-    <DashboardLayout title="Billing & Invoice" subtitle="Invoice otomatis berdasarkan tanggal pendaftaran masing-masing anak">
+    <DashboardLayout title="Tagihan" subtitle="Invoice otomatis berdasarkan tanggal pendaftaran masing-masing anak">
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[

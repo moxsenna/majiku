@@ -760,31 +760,6 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-        <div className="flex items-center justify-around py-2 max-w-lg mx-auto">
-          <Link href="/parent" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <Home className="h-6 w-6" />
-            <span className="text-xs">Beranda</span>
-          </Link>
-          <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <ShoppingBag className="h-6 w-6" />
-            <span className="text-xs">Marketplace</span>
-          </Link>
-          <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <CreditCard className="h-6 w-6" />
-            <span className="text-xs">Tagihan</span>
-          </Link>
-          <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <MessageCircle className="h-6 w-6" />
-            <span className="text-xs">Chat</span>
-          </Link>
-          <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <User className="h-6 w-6" />
-            <span className="text-xs">Profil</span>
-          </Link>
-        </div>
-      </nav>
     </div>
   );
 }

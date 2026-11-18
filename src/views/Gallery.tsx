@@ -230,7 +230,7 @@ export default function Gallery({
   };
 
   return (
-    <DashboardLayout title="Galeri Foto" subtitle="Foto aktivitas anak-anak di Bunayo">
+    <DashboardLayout title="Foto" subtitle="Foto aktivitas anak-anak di Bunayo">
       {/* Action Bar */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

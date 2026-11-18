@@ -1,10 +1,11 @@
 "use client";
 import { RoleProtectedRoute } from "@/components/auth/RoleProtectedRoute";
+import { ParentShell } from "@/components/bunayo/ParentShell";
 
 export default function ParentLayout({ children }: { children: React.ReactNode }) {
   return (
-    <RoleProtectedRoute role="parent">
-      {children}
-    </RoleProtectedRoute>
+    <ParentShell>
+      <RoleProtectedRoute role="parent">{children}</RoleProtectedRoute>
+    </ParentShell>
   );
 }

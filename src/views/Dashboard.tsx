@@ -19,7 +19,6 @@ import { TutorAttendanceWidget } from "@/components/dashboard/TutorAttendanceWid
 import { AttendanceDetailModal } from "@/components/dashboard/AttendanceDetailModal";
 import { RevenueDetailModal } from "@/components/dashboard/RevenueDetailModal";
 import { StudentDetailModal } from "@/components/dashboard/StudentDetailModal";
-import { AdminBottomNav } from "@/components/dashboard/AdminBottomNav";
 import { AdminOnboardingCard } from "@/components/dashboard/AdminOnboardingCard";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -153,7 +152,7 @@ export default function Dashboard({ initialData }: DashboardProps) {
 
   return (
     <DashboardLayout
-      title="Dashboard"
+      title="Hari Ini"
       subtitle={
         isDemo
           ? "Mode Demo: Menampilkan simulasi data operasional daycare."
@@ -221,7 +220,6 @@ export default function Dashboard({ initialData }: DashboardProps) {
       <StudentDetailModal open={studentModalOpen} onOpenChange={setStudentModalOpen} />
 
       {/* Bottom Navigation for Mobile */}
-      <AdminBottomNav />
 
       {/* Add padding at bottom for mobile nav */}
       <div className="h-20 lg:hidden" />

@@ -49,17 +49,17 @@ export async function MarketplaceContent({
   const tenantList = await listActiveTenants(filters);
 
   return (
-    <div className={portalNav ? "min-h-screen bg-background pb-28" : ""}>
+    <div className={portalNav ? "min-h-screen bg-background pb-8" : ""}>
       {portalNav && (
         <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
           <div className="flex items-center gap-3 px-4 h-14 max-w-6xl mx-auto">
-            <Link href="/parent">
+            <Link href="/parent/profile" aria-label="Kembali ke Profil">
               <Button variant="ghost" size="icon-sm">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
-              <h2 className="font-bold text-base">Eksplorasi Cabang Daycare</h2>
+              <h2 className="font-bold text-base">Jelajahi lembaga</h2>
               <p className="text-[11px] text-muted-foreground">Temukan cabang dan program terdekat</p>
             </div>
           </div>
@@ -87,33 +87,7 @@ export async function MarketplaceContent({
           </p>
         )}
       </main>
-
-      {portalNav && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-          <div className="flex items-center justify-around py-2 max-w-lg mx-auto">
-            <Link href="/parent" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-              <Home className="h-5 w-5" />
-              <span className="text-[11px]">Beranda</span>
-            </Link>
-            <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-primary">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="text-[11px]">Marketplace</span>
-            </Link>
-            <Link href="/parent/billing" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-              <CreditCard className="h-5 w-5" />
-              <span className="text-[11px]">Tagihan</span>
-            </Link>
-            <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-              <MessageCircle className="h-5 w-5" />
-              <span className="text-[11px]">Chat</span>
-            </Link>
-            <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-              <User className="h-5 w-5" />
-              <span className="text-[11px]">Profil</span>
-            </Link>
-          </div>
-        </nav>
-      )}
+
     </div>
   );
 }

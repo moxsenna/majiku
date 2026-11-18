@@ -439,31 +439,6 @@ export default function ParentBilling({
           </Card>
         </main>
 
-        {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-          <div className="flex items-center justify-around py-2 max-w-lg mx-auto">
-            <Link href="/parent" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-              <Home className="h-5 w-5" />
-              <span className="text-[11px]">Beranda</span>
-            </Link>
-            <Link href="/parent/marketplace" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="text-[11px]">Marketplace</span>
-            </Link>
-            <button className="flex flex-col items-center gap-1 p-2 text-primary">
-              <CreditCard className="h-5 w-5" />
-              <span className="text-[11px]">Tagihan</span>
-            </button>
-            <Link href="/parent/chat" className="flex flex-col items-center gap-1 p-2 text-muted-foreground relative">
-              <MessageCircle className="h-5 w-5" />
-              <span className="text-[11px]">Chat</span>
-            </Link>
-            <Link href="/parent/profile" className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-              <User className="h-5 w-5" />
-              <span className="text-[11px]">Profil</span>
-            </Link>
-          </div>
-        </nav>
       </div>
     </>
   );

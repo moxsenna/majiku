@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
     return [
       { source: "/demo", destination: "/vendor", permanent: false },
       { source: "/vendor/dashboard", destination: "/vendor", permanent: true },
+      // IA Bunayo: URL lama admin → lokasi barunya (307 sementara agar mudah dibatalkan)
+      { source: "/birthdays", destination: "/dashboard", permanent: false },
+      { source: "/gallery", destination: "/daily-reports/foto", permanent: false },
+      { source: "/tutor-payout", destination: "/billing/honor", permanent: false },
+      { source: "/tutors", destination: "/settings/staff", permanent: false },
     ];
   },
 };

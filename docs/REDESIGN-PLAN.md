@@ -189,3 +189,19 @@ _(diisi per fase, gaya GATES.md: CHECK / EXPECT / EVIDENCE)_
 | Katalog komponen | semua komponen kit tampil | `/dev/ui` (hanya `NODE_ENV=development`). |
 
 Catatan utang: ukuran huruf di komponen memakai nilai arbitrer `text-[13px]` dst. karena `kit.css` sendiri menulis `font-size` literal (tak ada token tipografi). Nilainya disalin persis dari kit; bila nanti ingin skala token, cukup tambah `fontSize` di `tailwind.config.ts`.
+
+### Fase 2 — Shell & navigasi (2026-11-18)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Shell admin 1440 | sidebar 232, logo 30, lembaga, cari, 3 grup, sub-menu hanya menu aktif, Pengaturan + tema + Keluar di kaki | screenshot `/dashboard`, `/billing/honor` (sub Tagihan · Honor Guru aktif, penanda Tinta) |
+| Shell admin 834 | rail 76, mark "b", label pendek | screenshot `/settings/staff` 834 (Atur aktif) |
+| Shell admin 390 | topbar mark + lembaga + cari; nav bawah 5 (Hari Ini, Kehadiran, Pesan, Keuangan, Lainnya) | screenshot `/attendance` 390 (Kehadiran aktif = pil Tinta) |
+| Redirect URL lama | `/birthdays`→`/dashboard`, `/gallery`→`/daily-reports/foto`, `/tutor-payout`→`/billing/honor`, `/tutors`→`/settings/staff` | Playwright: URL akhir sesuai (307, `next.config.ts`) |
+| Guru 390 | 4 tab melayang Hari Ini · Kelas · Pesan · Saya; Keluar di Saya (N30) | screenshot `/tutor/saya` |
+| Ortu 390 | 4 tab Beranda · Tagihan · Pesan · Profil; pemilih anak di header; Marketplace pindah ke Profil › Jelajahi lembaga | screenshot `/parent` (akun demo 2 anak) |
+| N31 | tidak ada spinner layar penuh | `RoleProtectedRoute` kini menampilkan kerangka di dalam shell |
+| Data palsu di shell | 0 | `NotificationsDropdown` (notifikasi demo statis) & `AdminNavbarActions` dihapus; lonceng tidak ditampilkan sampai ada sumber notifikasi nyata (backlog) |
+| `npm run lint` / `npm run build` | lulus | lulus |
+
+Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, akun admin non-demo nyata.

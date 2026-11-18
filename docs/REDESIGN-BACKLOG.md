@@ -42,3 +42,4 @@ Bagian berikut ada di desain tetapi datanya/backend-nya belum ada. Tidak dibangu
 | U1 / U4 | Trial 30 hari tanpa bayar | Status trial tenant | ONB-01, ONB-07 | Copy disesuaikan, tanpa klaim |
 | U2 | Filter umur, harga, jarak | Data lokasi/umur terstruktur | GRW-01 | Filter yang ada saja |
 | U3 | Booking trial tanpa akun | Endpoint publik → CRM | GRW-04, STU-04 | CTA WhatsApp tetap |
+| Shell admin | Lonceng notifikasi | Sumber notifikasi admin (izin guru, tagihan terlambat, pesan) + status baca | — | Disembunyikan (versi lama berisi notifikasi demo statis) |

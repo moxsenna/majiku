@@ -9,6 +9,7 @@ import {
   addTutorBonus,
 } from "@/server/actions/payout";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useIstilah } from "@/hooks/useIstilah";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
 
 export default function TutorPayout() {
+  const istilah = useIstilah();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,7 +148,7 @@ export default function TutorPayout() {
   };
 
   return (
-    <DashboardLayout title="Manajemen Gaji Tutor" subtitle="Kelola tarif per sesi, bonus, dan total gaji tutor">
+    <DashboardLayout title={istilah.honor} subtitle={`Tarif per sesi dan bonus ${istilah.guruKecil}`}>
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[

@@ -83,7 +83,7 @@ export function TutorListWidget({ tutors }: TutorListWidgetProps) {
             </div>
           ))
         )}
-        <Link href="/tutors">
+        <Link href="/settings/staff">
           <Button variant="outline" className="w-full text-xs sm:text-sm h-8 sm:h-9">
             Lihat Semua Tutor
             <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
