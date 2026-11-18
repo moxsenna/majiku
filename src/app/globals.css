@@ -94,15 +94,15 @@
     --border-subtle: 249 12% 18%;
     --input: 249 8% 52%;
     --placeholder: 249 8% 58%;
-    --primary: 226 72% 56%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 226 72% 63%;
+    --primary: 226 85% 66%;           /* tombol: teks Tinta 5,2:1 · tautan di kartu 4,8:1 */
+    --primary-foreground: 249 26% 10%;
+    --primary-hover: 226 85% 72%;
     --primary-soft: 226 40% 22%;
-    --ring: 226 80% 66%;
+    --ring: 226 85% 66%;
     --highlight: 46 100% 62%;
     --highlight-foreground: 249 26% 14%;
     --destructive: 4 80% 63%;
-    --destructive-soft: 4 45% 18%;
+    --destructive-soft: 4 45% 15%;
     --destructive-foreground: 249 26% 10%;
     --success: 150 50% 56%;
     --success-ring: 150 60% 45%;
