@@ -351,3 +351,19 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Demo | baca-saja | InfoBox Mode demo, tombol RPP/salin tidak dirender, kartu tidak bisa diklik |
 | State | isi/kosong/memuat/galat | EmptyState "Belum ada RPP minggu ini" → Buat RPP / Salin (390), skeleton 5 kolom, ErrorBanner + Stale |
 | Bersih-bersih | — | `views/LessonPlans.tsx` dihapus |
+
+### Fase 3 · Pendaftaran — A4 Papan trial + A5 Detail trial (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | baca-saja, scope tenant | `pendaftaran.ts` `getPendaftaran` (trial + daftar tunggu aktif + kursi kelas + guru + statistik; definisi di kepala file). Tulis = action lama `scheduleTrial`, `admitTrial` (trial.ts, ber-scope tenant), `createWaitingListEntry`/`updateWaitingListStatus`/`promoteWaitingListToStudent` |
+| Papan 5 kolom | pemetaan 7 `trial_status` | Diajukan · Terjadwal · Perlu observasi (awaiting_review + scheduled yang jadwalnya lewat) · Siap didaftarkan (recommended + repeat_trial) · Jadi siswa; not_suitable di tab Tidak lanjut |
+| Terlambat | bingkai merah > 2 hari tanpa catatan | DB uji: "Oscar Wijaya · Lewat 2 hari tanpa catatan guru" |
+| Kelas penuh | tawarkan daftar tunggu | kartu Diajukan → "TK A penuh · tawarkan daftar tunggu" + tombol Daftar tunggu (demo) |
+| Statistik | periode + definisi | Trial diajukan / Jadi siswa (% ) bulan berjalan, rata-rata hari ke daftar (data dengan admitted < created dikecualikan), daftar tunggu saat ini |
+| A5 laci | catatan observasi, formulir (alergi merah), riwayat, WA/telepon | Sheet kanan; Jadwalkan/Ubah jadwal, Daftarkan (hanya recommended + suitable + kelas), Buka profil siswa |
+| Alur | jadwalkan | Playwright DB uji: Jadwalkan trial → tanggal + guru → kartu pindah ke Terjadwal "Kam 26 Nov"; dikembalikan via SQL |
+| BARU disembunyikan | sumber calon, alasan tidak lanjut, Hadir otomatis dari check-in, tautan booking, catat calon oleh admin, ingatkan guru | catatan di bawah papan; backlog A4/A5 |
+| Demo | baca-saja | InfoBox Mode demo, tombol tulis tidak dirender, laci tanpa footer aksi |
+| State | isi/kosong/memuat/galat | EmptyState "Belum ada calon siswa", skeleton stat + 5 kolom, ErrorBanner + Stale |
+| Bersih-bersih | — | `views/CRM.tsx`, `components/crm/ScheduleTrialDialog.tsx` dihapus (widget CRM lain yatim, tidak diimpor) |

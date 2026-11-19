@@ -1,13 +1,11 @@
-import CRM from "@/views/CRM";
-import { getTrialPipeline, getSchedulingOptions } from "@/server/actions/trial";
+import Pendaftaran from "@/views/pendaftaran/Pendaftaran";
+import { getPendaftaran } from "@/server/actions/pendaftaran";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Pendaftaran & Trial" };
 
 export default async function Page() {
-  const [pipeline, schedulingOptions] = await Promise.all([
-    getTrialPipeline(),
-    getSchedulingOptions(),
-  ]);
-
-  return <CRM pipeline={pipeline} schedulingOptions={schedulingOptions} />;
+  // Galat dimuat sebagai bendera: view menampilkan banner + Coba lagi, bukan "Belum ada calon siswa".
+  const initialData = await getPendaftaran().catch(() => undefined);
+  return <Pendaftaran initialData={initialData} />;
 }
