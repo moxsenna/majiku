@@ -169,13 +169,14 @@ async function main() {
     if (acc) {
       await db
         .update(account)
-        .set({ password: PASSWORD_HASH, providerId: "credential" })
+        .set({ password: PASSWORD_HASH, providerId: "credential", accountId: effectiveUserId })
         .where(eq(account.id, acc.id));
     } else {
       await db.insert(account).values({
         id: `acc_${effectiveUserId.slice(0, 24)}`,
         userId: effectiveUserId,
-        accountId: u.email,
+        // better-auth signInEmail mensyaratkan accountId === userId utk akun credential.
+        accountId: effectiveUserId,
         providerId: "credential",
         password: PASSWORD_HASH,
         createdAt: new Date(),
