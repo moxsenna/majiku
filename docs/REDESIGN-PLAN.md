@@ -367,3 +367,19 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Demo | baca-saja | InfoBox Mode demo, tombol tulis tidak dirender, laci tanpa footer aksi |
 | State | isi/kosong/memuat/galat | EmptyState "Belum ada calon siswa", skeleton stat + 5 kolom, ErrorBanner + Stale |
 | Bersih-bersih | — | `views/CRM.tsx`, `components/crm/ScheduleTrialDialog.tsx` dihapus (widget CRM lain yatim, tidak diimpor) |
+
+### Fase 3 · Pengaturan — K6 (bagian yang ada) Lembaga + O13 Staf (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | baca-saja, scope tenant | `pengaturan.ts` `getPengaturan` (profil lembaga, pemilik, ringkasan, staf + akun + kelas aktif, akun yang bisa ditautkan; definisi di kepala file). Tulis = `updateTenantProfile` (adminDashboard.ts) dan action lama `tutorsCrud.ts` |
+| Privasi | tidak membuka daftar seluruh pengguna | akun yang bisa ditautkan dibatasi ke email yang sama dengan email staf lembaga itu (pengganti `listLinkableUsers` yang mengembalikan semua user) |
+| Lembaga | nama, WhatsApp, alamat; jenis/kota/pemilik baca-saja | Playwright DB uji: ubah alamat → tersimpan setelah reload → dikembalikan |
+| Ringkasan | angka + periode + tautan sumber | Anak aktif, Kelas aktif + kursi, Guru aktif |
+| O13 tabel | nama, peran, kelas, akun, status | Status Aktif / Belum punya akun / Nonaktif; filter chip; kartu di 390; Pemilik ditampilkan terpisah |
+| Dialog staf | ubah data, tautkan/lepas akun, tugaskan/lepas kelas, nonaktifkan | Playwright: dialog terbuka dengan "Kelas yang diampu"; tarif tetap diubah di Honor (`updateTutorRate`) |
+| BARU disembunyikan | K6 penagihan (jadwal terbit, pengingat, rekening, denda, biaya transaksi), cabang, logo; peran Admin/Keuangan, undangan, matriks izin | catatan jujur di kedua layar; backlog K6/O13 |
+| Navigasi | sub Pengaturan | "Lembaga & Cabang" → "Lembaga" (cabang belum ada) |
+| Demo | baca-saja | InfoBox Mode demo, input nonaktif, tombol tambah/klik baris tidak aktif |
+| State | isi/kosong/memuat/galat | EmptyState "Belum ada guru", skeleton, ErrorBanner + Stale |
+| Bersih-bersih | — | `views/Settings.tsx`, `views/Tutors.tsx` dihapus |

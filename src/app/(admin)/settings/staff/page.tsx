@@ -1,20 +1,11 @@
-import Tutors from "@/views/Tutors";
-import { listTutorsWithAssignments, listLinkableUsers } from "@/server/actions/tutorsCrud";
-import { listClasses } from "@/server/actions/classesCrud";
+import Staf from "@/views/pengaturan/Staf";
+import { getPengaturan } from "@/server/actions/pengaturan";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Staf & peran" };
 
 export default async function Page() {
-  const [tutorsWithAssignments, linkableUsers, classesList] = await Promise.all([
-    listTutorsWithAssignments(),
-    listLinkableUsers(),
-    listClasses(),
-  ]);
-  return (
-    <Tutors
-      initialData={tutorsWithAssignments}
-      linkableUsers={linkableUsers}
-      availableClasses={classesList}
-    />
-  );
+  // Galat dimuat sebagai bendera: view menampilkan banner + Coba lagi, bukan "Belum ada guru".
+  const initialData = await getPengaturan().catch(() => undefined);
+  return <Staf initialData={initialData} />;
 }

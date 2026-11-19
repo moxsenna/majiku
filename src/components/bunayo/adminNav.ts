@@ -93,7 +93,7 @@ export const adminSettingsNav: NavItem = {
   href: "/settings",
   icon: Settings,
   sub: [
-    { label: "Lembaga & Cabang", href: "/settings", exact: true },
+    { label: "Lembaga", href: "/settings", exact: true },
     { label: "Staf & Peran", href: "/settings/staff" },
   ],
 };
