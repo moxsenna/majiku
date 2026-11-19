@@ -96,6 +96,7 @@ const testimonials = [
     name: "Ibu Ratna Sari",
     role: "Pemilik TK Ceria Mandiri",
     avatar: "RS",
+    image: "/images/avatars/parent-anita.jpg",
     content: "Bunayo membantu kami mengelola 150+ siswa dengan lebih efisien. Orang tua sangat senang dengan update harian!",
     rating: 5
   },
@@ -103,6 +104,7 @@ const testimonials = [
     name: "Pak Hendra",
     role: "Direktur Bimbel Prestasi",
     avatar: "PH",
+    image: "/images/avatars/parent-doni.jpg",
     content: "Fitur billing otomatis menghemat waktu admin kami hingga 80%. Sangat recommended!",
     rating: 5
   },
@@ -110,6 +112,7 @@ const testimonials = [
     name: "Ibu Dewi Kusuma",
     role: "Kepala Sekolah PAUD Ananda",
     avatar: "DK",
+    image: "/images/avatars/parent-rina.jpg",
     content: "Dashboard yang intuitif dan laporan yang lengkap. Tim support juga sangat responsif.",
     rating: 5
   }
@@ -243,7 +246,34 @@ export default function SaasLanding({
             </p>
           </div>
 
-          {/* Hero Image/Stats */}
+          {/* Hero Visual Preview */}
+          <div className="mt-12 max-w-5xl mx-auto rounded-3xl p-2 sm:p-3 bg-gradient-to-b from-primary/20 via-primary/5 to-transparent border border-primary/20 shadow-2xl relative overflow-hidden">
+            <div className="relative rounded-2xl overflow-hidden aspect-[21/9] sm:aspect-[2.2/1]">
+              <img
+                src="/images/landing-hero.jpg"
+                alt="Ekosistem Platform Manajemen Daycare & Bimbel Bunayo"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 bg-background/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-border/60">
+                  <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm font-semibold">Solusi Manajemen Terpadu</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Admin • Guru / Tutor • Orang Tua Murid</p>
+                  </div>
+                </div>
+                <div className="hidden sm:flex items-center gap-2 bg-background/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-border/60 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>500+ Lembaga Terverifikasi</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Stats */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {[
               { value: "500+", label: "Lembaga Aktif" },
@@ -642,9 +672,17 @@ export default function SaasLanding({
                   </div>
                   <p className="text-foreground/80 mb-6">"{testimonial.content}"</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                      {testimonial.avatar}
-                    </div>
+                    {testimonial.image ? (
+                      <img
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                        {testimonial.avatar}
+                      </div>
+                    )}
                     <div>
                       <p className="font-medium text-sm">{testimonial.name}</p>
                       <p className="text-xs text-muted-foreground">{testimonial.role}</p>

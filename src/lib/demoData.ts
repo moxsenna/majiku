@@ -337,7 +337,7 @@ export const demoDailyReports: DemoDailyReport[] = [
   {
     id: "1",
     studentName: "Aisyah Putri",
-    studentAvatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=100",
+    studentAvatar: "/images/avatars/student-aisyah.jpg",
     className: "Kelas Bunga Matahari",
     time: "10:30",
     type: "meal",
@@ -348,7 +348,7 @@ export const demoDailyReports: DemoDailyReport[] = [
   {
     id: "2",
     studentName: "Raka Pratama",
-    studentAvatar: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=100",
+    studentAvatar: "/images/avatars/student-raka.jpg",
     className: "Kelas Pelangi",
     time: "12:15",
     type: "nap",
@@ -359,19 +359,19 @@ export const demoDailyReports: DemoDailyReport[] = [
   {
     id: "3",
     studentName: "Keisha Azzahra",
-    studentAvatar: "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=100",
+    studentAvatar: "/images/avatars/student-keisha.jpg",
     className: "Kelas Bintang",
     time: "14:00",
     type: "activity",
     title: "Aktivitas Seni",
     description: "Keisha sangat antusias saat melukis dengan cat air. Hasil karyanya sangat bagus!",
-    imageUrl: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400",
+    imageUrl: "/images/reports/report-art-activity.jpg",
     staffName: "Ibu Dina",
   },
   {
     id: "4",
     studentName: "Arjuna Wijaya",
-    studentAvatar: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=100",
+    studentAvatar: "/images/avatars/student-arjuna.jpg",
     className: "Kelas Bunga Matahari",
     time: "09:45",
     type: "mood",
@@ -396,7 +396,7 @@ export const demoAttendanceEntries: DemoAttendanceEntry[] = [
   {
     id: "1",
     studentName: "Aisyah Putri",
-    studentAvatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=100",
+    studentAvatar: "/images/avatars/student-aisyah.jpg",
     className: "Kelas Bunga Matahari",
     checkInTime: "07:45",
     status: "present",
@@ -404,7 +404,7 @@ export const demoAttendanceEntries: DemoAttendanceEntry[] = [
   {
     id: "2",
     studentName: "Raka Pratama",
-    studentAvatar: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=100",
+    studentAvatar: "/images/avatars/student-raka.jpg",
     className: "Kelas Pelangi",
     checkInTime: "08:15",
     status: "late",
@@ -412,7 +412,7 @@ export const demoAttendanceEntries: DemoAttendanceEntry[] = [
   {
     id: "3",
     studentName: "Keisha Azzahra",
-    studentAvatar: "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=100",
+    studentAvatar: "/images/avatars/student-keisha.jpg",
     className: "Kelas Bintang",
     checkInTime: "07:30",
     checkOutTime: "15:00",
@@ -421,7 +421,7 @@ export const demoAttendanceEntries: DemoAttendanceEntry[] = [
   {
     id: "4",
     studentName: "Arjuna Wijaya",
-    studentAvatar: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=100",
+    studentAvatar: "/images/avatars/student-arjuna.jpg",
     className: "Kelas Bunga Matahari",
     status: "pending",
   },
@@ -442,7 +442,7 @@ export const demoBirthdays: DemoBirthday[] = [
   {
     id: "1",
     name: "Aisyah Putri",
-    avatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=100",
+    avatar: "/images/avatars/student-aisyah.jpg",
     className: "Kelas Bunga Matahari",
     birthDate: "15 Desember",
     age: 5,
@@ -451,7 +451,7 @@ export const demoBirthdays: DemoBirthday[] = [
   {
     id: "2",
     name: "Raka Pratama",
-    avatar: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=100",
+    avatar: "/images/avatars/student-raka.jpg",
     className: "Kelas Pelangi",
     birthDate: "18 Desember",
     age: 4,

@@ -109,7 +109,7 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
           id: "demo-child-1",
           name: "Aisyah Putri",
           nickname: "Aisyah",
-          avatar: "https://images.unsplash.com/photo-1595454223600-91d7bf17b165?w=200",
+          avatar: "/images/avatars/student-aisyah.jpg",
           className: "Kelas Bunga Matahari",
           classId: "cls-1",
           age: 5,

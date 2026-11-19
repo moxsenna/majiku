@@ -704,7 +704,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800",
+          "/images/marketplace/marketplace-bright-kids.jpg",
         ],
         whatsapp: "6281234567890",
         isVerified: true,
@@ -736,7 +736,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+          "/images/marketplace/tenant-lentera-kecil.jpg",
         ],
         whatsapp: "6281198765432",
         isVerified: true,
@@ -768,7 +768,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800",
+          "/images/marketplace/tenant-bintang-prestasi.jpg",
         ],
         whatsapp: "6281311223344",
         isVerified: true,
@@ -800,7 +800,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800",
+          "/images/marketplace/tenant-tunas-harapan.jpg",
         ],
         whatsapp: "6281722334455",
         isVerified: true,
@@ -832,7 +832,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800",
+          "/images/marketplace/tenant-mentari-preschool.jpg",
         ],
         whatsapp: "6281933445566",
         isVerified: true,
@@ -864,7 +864,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800",
+          "/images/marketplace/tenant-cerdas-ceria.jpg",
         ],
         whatsapp: "6281544556677",
         isVerified: false,
@@ -896,7 +896,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1596464716127-f2a829822301?w=800",
+          "/images/marketplace/tenant-kasih-bunda.jpg",
         ],
         whatsapp: "6281255667788",
         isVerified: false,
@@ -928,7 +928,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800",
+          "/images/marketplace/tenant-pelangi-preschool.jpg",
         ],
         whatsapp: "6281366778899",
         isVerified: false,
@@ -960,7 +960,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=800",
+          "/images/marketplace/tenant-al-falah.jpg",
         ],
         whatsapp: "6281877889900",
         isVerified: false,
@@ -992,7 +992,7 @@ async function main() {
           },
         ],
         photos: [
-          "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=800",
+          "/images/marketplace/tenant-sahabat-kecil.jpg",
         ],
         whatsapp: "6281988990011",
         isVerified: false,

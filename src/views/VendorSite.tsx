@@ -65,7 +65,7 @@ const vendorData = {
     tagline: "Raih Prestasi Gemilang Bersama Kami",
     type: "Bimbel",
     description: "Lembaga bimbingan belajar terpercaya dengan metode pembelajaran inovatif dan pengajar berpengalaman untuk membantu siswa meraih prestasi akademik terbaik.",
-    heroImage: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1200",
+    heroImage: "/images/bimbel/bimbel-hero.jpg",
     stats: {
       students: "2,500+",
       teachers: "85",
@@ -73,12 +73,12 @@ const vendorData = {
       graduates: "10,000+"
     },
     gallery: [
-      { src: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600", caption: "Ruang Kelas Nyaman" },
-      { src: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600", caption: "Pembelajaran Interaktif" },
-      { src: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600", caption: "Try Out Rutin" },
-      { src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600", caption: "Wisuda Alumni" },
-      { src: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600", caption: "Konsultasi Belajar" },
-      { src: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=600", caption: "Belajar Kelompok" },
+      { src: "/images/bimbel/bimbel-classroom.jpg", caption: "Ruang Kelas Nyaman" },
+      { src: "/images/bimbel/bimbel-interactive.jpg", caption: "Pembelajaran Interaktif" },
+      { src: "/images/bimbel/bimbel-tryout.jpg", caption: "Try Out Rutin" },
+      { src: "/images/bimbel/bimbel-graduation.jpg", caption: "Wisuda Alumni" },
+      { src: "/images/bimbel/bimbel-consultation.jpg", caption: "Konsultasi Belajar" },
+      { src: "/images/bimbel/bimbel-groupstudy.jpg", caption: "Belajar Kelompok" },
     ],
     curriculum: [
       { title: "Kurikulum Nasional", desc: "Sesuai standar Kemendikbud terbaru", icon: BookOpen },
@@ -112,9 +112,9 @@ const vendorData = {
       { name: "Ahmad Fauzi", role: "Orang tua siswa", text: "Guru-gurunya sabar dan profesional. Recommended banget!", rating: 5 },
     ],
     products: [
-      { name: "Paket Buku Latihan SD", price: "Rp 150.000", image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300" },
-      { name: "Paket Buku Latihan SMP", price: "Rp 200.000", image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300" },
-      { name: "Video Pembelajaran Online", price: "Rp 350.000/tahun", image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=300" },
+      { name: "Paket Buku Latihan SD", price: "Rp 150.000", image: "/images/bimbel/bimbel-book-sd.jpg" },
+      { name: "Paket Buku Latihan SMP", price: "Rp 200.000", image: "/images/bimbel/bimbel-book-smp.jpg" },
+      { name: "Video Pembelajaran Online", price: "Rp 350.000/tahun", image: "/images/bimbel/bimbel-online-video.jpg" },
     ],
     contact: {
       phone: "021-12345678",
@@ -133,7 +133,7 @@ const vendorData = {
     tagline: "Tempat Tumbuh Kembang Anak yang Penuh Kasih",
     type: "Daycare",
     description: "Daycare profesional dengan lingkungan yang aman, nyaman, dan stimulatif untuk mendukung tumbuh kembang optimal si kecil.",
-    heroImage: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=1200",
+    heroImage: "/images/daycare/daycare-hero.jpg",
     stats: {
       students: "120",
       teachers: "25",
@@ -141,12 +141,12 @@ const vendorData = {
       graduates: "500+"
     },
     gallery: [
-      { src: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600", caption: "Bermain Bersama" },
-      { src: "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=600", caption: "Aktivitas Seni" },
-      { src: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600", caption: "Ruang Tidur Nyaman" },
-      { src: "https://images.unsplash.com/photo-1576495199011-eb94736d05d6?w=600", caption: "Bermain Outdoor" },
-      { src: "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=600", caption: "Makan Bersama" },
-      { src: "https://images.unsplash.com/photo-1560969184-10fe8719e047?w=600", caption: "Kegiatan Musik" },
+      { src: "/images/daycare/daycare-art.jpg", caption: "Bermain Bersama" },
+      { src: "/images/daycare/daycare-art.jpg", caption: "Aktivitas Seni" },
+      { src: "/images/daycare/daycare-nap.jpg", caption: "Ruang Tidur Nyaman" },
+      { src: "/images/daycare/daycare-outdoor.jpg", caption: "Bermain Outdoor" },
+      { src: "/images/daycare/daycare-meal.jpg", caption: "Makan Bersama" },
+      { src: "/images/daycare/daycare-music.jpg", caption: "Kegiatan Musik" },
     ],
     curriculum: [
       { title: "Stimulasi Motorik", desc: "Latihan motorik halus & kasar", icon: Dumbbell },
@@ -182,9 +182,9 @@ const vendorData = {
       { name: "Andi Pratama", role: "Orang tua", text: "Fasilitas lengkap dan bersih. Anak saya jadi lebih mandiri sejak di sini.", rating: 5 },
     ],
     products: [
-      { name: "Seragam Sunshine Kids", price: "Rp 250.000/set", image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=300" },
-      { name: "Tas & Perlengkapan", price: "Rp 150.000", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300" },
-      { name: "Paket Foto Tahunan", price: "Rp 350.000", image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=300" },
+      { name: "Seragam Sunshine Kids", price: "Rp 250.000/set", image: "/images/daycare/daycare-uniform.jpg" },
+      { name: "Tas & Perlengkapan", price: "Rp 150.000", image: "/images/daycare/daycare-supplies.jpg" },
+      { name: "Paket Foto Tahunan", price: "Rp 350.000", image: "/images/daycare/daycare-photo-package.jpg" },
     ],
     contact: {
       phone: "021-87654321",
@@ -659,8 +659,8 @@ export default function VendorSite() {
               <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
                 <img 
                   src={vendor.type === "Daycare" 
-                    ? "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600"
-                    : "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600"
+                    ? "/images/daycare/daycare-features.jpg"
+                    : "/images/bimbel/bimbel-features.jpg"
                   }
                   alt="Features"
                   className="w-full aspect-[4/3] object-cover"
