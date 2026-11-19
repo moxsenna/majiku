@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { tenants, user, userRoles, paymentOrders } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -18,6 +18,11 @@ export interface CreateSubscriptionOrderInput {
   email: string;
   phone: string;
   password?: string;
+  city?: string;
+  /** Honeypot anti-bot: wajib kosong dari form sungguhan. */
+  website?: string;
+  /** Epoch ms ketika form mulai diisi; diisi < 3 detik dianggap bot. */
+  formStartedAt?: number;
 }
 
 export interface SubscriptionOrderResult {
@@ -30,11 +35,37 @@ export interface SubscriptionOrderResult {
   checkoutUrl?: string | null;
   qrString?: string | null;
   expiresAt?: string;
+  /** true bila order ini dipakai ulang dari permintaan duplikat sebelumnya */
+  reused?: boolean;
 }
+
+const RATE_LIMIT_ORDERS_PER_HOUR = 5;
+const PENDING_ORDER_REUSE_WINDOW_MS = 30 * 60 * 1000;
+const MIN_FORM_FILL_MS = 3000;
 
 export async function createSubscriptionCheckoutOrder(
   input: CreateSubscriptionOrderInput
 ): Promise<SubscriptionOrderResult> {
+  // --- Guard anti-abuse (action ini publik, tanpa sesi) ---
+  if (input.website?.trim()) {
+    // Diam-diam terlihat sukses bagi bot, tidak melakukan apa pun.
+    return {
+      success: true,
+      paymentMode: "manual",
+      orderId: "ignored",
+      externalOrderId: "ignored",
+      amount: 0,
+      planName: "",
+      checkoutUrl: null,
+    };
+  }
+  if (
+    typeof input.formStartedAt === "number" &&
+    Date.now() - input.formStartedAt < MIN_FORM_FILL_MS
+  ) {
+    throw new Error("Formulir terkirim terlalu cepat. Coba lagi.");
+  }
+
   const plan = SUBSCRIPTION_PLANS[input.planId] || SUBSCRIPTION_PLANS.pro;
   const amount =
     input.billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
@@ -43,6 +74,7 @@ export async function createSubscriptionCheckoutOrder(
   const adminName = input.adminName?.trim();
   const institutionName = input.institutionName?.trim();
   const phone = input.phone?.trim() || "";
+  const city = input.city?.trim() || "Belum diisi";
 
   if (!email || !email.includes("@")) {
     throw new Error("Format email tidak valid");
@@ -52,6 +84,54 @@ export async function createSubscriptionCheckoutOrder(
   }
   if (!institutionName || institutionName.length < 2) {
     throw new Error("Nama lembaga daycare / bimbel wajib diisi");
+  }
+
+  // Rate-limit berbasis DB: batasi order baru per email per jam.
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const [{ recentCount }] = await db
+    .select({ recentCount: sql<number>`count(*)::int` })
+    .from(paymentOrders)
+    .where(
+      and(
+        eq(paymentOrders.customerEmail, email),
+        gte(paymentOrders.createdAt, oneHourAgo)
+      )
+    );
+  if (recentCount >= RATE_LIMIT_ORDERS_PER_HOUR) {
+    throw new Error(
+      "Terlalu banyak permintaan pendaftaran dari email ini. Coba lagi nanti."
+    );
+  }
+
+  // Dedupe: order pending yang sama (email + plan) dalam 30 menit terakhir
+  // dipakai ulang, tidak dibuat lagi (idempoten untuk double-submit).
+  const reuseWindow = new Date(Date.now() - PENDING_ORDER_REUSE_WINDOW_MS);
+  const [pendingOrder] = await db
+    .select()
+    .from(paymentOrders)
+    .where(
+      and(
+        eq(paymentOrders.customerEmail, email),
+        eq(paymentOrders.planKey, input.planId),
+        eq(paymentOrders.paymentStatus, "pending"),
+        gte(paymentOrders.createdAt, reuseWindow)
+      )
+    )
+    .orderBy(desc(paymentOrders.createdAt))
+    .limit(1);
+
+  if (pendingOrder) {
+    return {
+      success: true,
+      paymentMode: pendingOrder.checkoutUrl ? "paycore" : "manual",
+      orderId: pendingOrder.id,
+      externalOrderId: pendingOrder.externalOrderId,
+      amount: Number(pendingOrder.amount ?? amount),
+      planName: plan.name,
+      checkoutUrl: pendingOrder.checkoutUrl,
+      qrString: null,
+      reused: true,
+    };
   }
 
   // 1. Registrasi / cari user
@@ -89,40 +169,56 @@ export async function createSubscriptionCheckoutOrder(
     throw new Error("Kata sandi wajib diisi (minimal 8 karakter) untuk pendaftaran akun baru");
   }
 
-  // 2. Buat / ambil tenant lembaga
-  let tenantId: string | null = null;
-  const tenantSlug =
-    institutionName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "") +
-    "-" +
-    randomUUID().slice(0, 6);
-
+  // 2. Buat / ambil tenant lembaga.
+  // Keamanan: SATU email admin = SATU tenant. Bila admin sudah memiliki
+  // lembaga, pakai tenant eksisting (jangan membuat tenant duplikat yang
+  // membuat resolusi tenant jadi ambigu).
   const mappedType =
     input.institutionType === "preschool" || input.institutionType === "bimbel"
       ? input.institutionType
       : "daycare";
 
-  const newTenantId = randomUUID();
-  await db
-    .insert(tenants)
-    .values({
-      id: newTenantId,
-      name: institutionName,
-      slug: tenantSlug,
-      type: mappedType,
-      city: "Jakarta",
-      priceFrom: String(amount),
-      whatsapp: phone || null,
-      // Lembaga BARU non-aktif sampai pembayaran terkonfirmasi webhook PayCore.
-      // Aktivasi hanya terjadi di event payment.succeeded (lihat api/webhooks/paycore).
-      isActive: false,
-      isVerified: false,
-      adminUserId: userId,
-    })
-    .onConflictDoNothing();
-  tenantId = newTenantId;
+  let tenantId: string | null = null;
+  if (userId) {
+    const [existingTenant] = await db
+      .select({ id: tenants.id })
+      .from(tenants)
+      .where(eq(tenants.adminUserId, userId))
+      .orderBy(desc(tenants.createdAt))
+      .limit(1);
+    tenantId = existingTenant?.id ?? null;
+  }
+
+  if (!tenantId) {
+    const tenantSlug =
+      institutionName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") +
+      "-" +
+      randomUUID().slice(0, 6);
+
+    const newTenantId = randomUUID();
+    await db
+      .insert(tenants)
+      .values({
+        id: newTenantId,
+        name: institutionName,
+        slug: tenantSlug,
+        type: mappedType,
+        city,
+        // Harga layanan lembaga diisi kemudian di Pengaturan; 0 = belum diisi.
+        priceFrom: "0",
+        whatsapp: phone || null,
+        // Lembaga BARU non-aktif sampai pembayaran terkonfirmasi webhook PayCore.
+        // Aktivasi hanya terjadi di event payment.succeeded (lihat api/webhooks/paycore).
+        isActive: false,
+        isVerified: false,
+        adminUserId: userId,
+      })
+      .onConflictDoNothing();
+    tenantId = newTenantId;
+  }
 
   // 3. Catat order lokal di payment_orders
   const orderId = randomUUID();

@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/db";
-import { tenants, tutors, user, userRoles, attendance, type TenantRow } from "@/db/schema";
-import { asc, eq, and } from "drizzle-orm";
+import { tenants, tutors, user, userRoles, attendance, students, type TenantRow } from "@/db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 import { isDemoEmail, DEMO_TENANT_ID } from "@/lib/demo";
 import { todayInWib } from "@/lib/datetime";
 import type { AppRole } from "@/server/actions/roles";
@@ -39,9 +39,20 @@ export function assertDemoMutationLock(
 
 /**
  * Proyeksi kalender dinamis: memastikan tenant demo selalu memiliki data absensi hari ini (todayInWib).
+ * Hanya menulis bila seluruh siswa demo terverifikasi milik tenant demo.
  */
 export async function ensureDemoAttendanceToday(): Promise<void> {
   try {
+    const demoStudentIds = ["stu_demo_aisyah", "stu_demo_raka", "stu_demo_keisha", "stu_demo_arjuna"];
+    const demoStudents = await db
+      .select({ id: students.id })
+      .from(students)
+      .where(and(inArray(students.id, demoStudentIds), eq(students.tenantId, DEMO_TENANT_ID)));
+    if (demoStudents.length < demoStudentIds.length) {
+      // Tenant/siswa demo belum lengkap — jangan tulis apa pun ke tabel produksi.
+      return;
+    }
+
     const today = todayInWib();
     const [existing] = await db
       .select({ id: attendance.id })
@@ -156,9 +167,11 @@ export async function requireTenantContext(): Promise<TenantContext> {
   const [owned] = await db.select().from(tenants).where(eq(tenants.adminUserId, session.user.id)).limit(1);
   if (owned) return { session, tenantId: owned.id, tenant: owned, isDemo: isDemoEmail(email) };
 
+  // Keamanan: akun demo TIDAK PERNAH fallback ke tenant operasional pertama —
+  // itu akan membuka data lembaga nyata ke sesi demo. Jika tnt_demo tidak ada,
+  // gagal jelas agar konfigurasi demo diperbaiki.
   if (isDemoEmail(email)) {
-    const [first] = await db.select().from(tenants).orderBy(asc(tenants.createdAt)).limit(1);
-    if (first) return { session, tenantId: first.id, tenant: first, isDemo: true };
+    throw new Error("Demo tidak tersedia: tenant demo belum di-seed. Hubungi pengelola platform.");
   }
 
   throw new Error("Forbidden: akun admin tidak terhubung ke lembaga mana pun");

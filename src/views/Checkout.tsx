@@ -26,6 +26,7 @@ import {
   Calendar,
   Layers,
   Zap,
+  MapPin,
 } from "lucide-react";
 import {
   SUBSCRIPTION_PLANS,
@@ -58,11 +59,15 @@ export default function CheckoutView() {
   const [form, setForm] = useState({
     institutionName: "",
     institutionType: "daycare" as "daycare" | "preschool" | "bimbel",
+    city: "",
     adminName: "",
     email: "",
     phone: "",
     password: "",
   });
+  // Anti-abuse: honeypot disembunyikan dari manusia; timestamp mulai isi form.
+  const [formStartedAt] = useState(() => Date.now());
+  const [honeypot, setHoneypot] = useState("");
 
   const selectedPlan: SubscriptionPlan =
     SUBSCRIPTION_PLANS[selectedPlanId] || SUBSCRIPTION_PLANS.pro;
@@ -125,10 +130,13 @@ export default function CheckoutView() {
           billingCycle,
           institutionName: form.institutionName.trim(),
           institutionType: form.institutionType,
+          city: form.city.trim() || undefined,
           adminName: form.adminName.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
           password: form.password,
+          website: honeypot || undefined,
+          formStartedAt,
         });
 
         if (result.checkoutUrl) {
@@ -319,6 +327,36 @@ export default function CheckoutView() {
                         <option value="bimbel">Bimbingan Belajar / Kursus</option>
                       </select>
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="city" className="text-xs">
+                      Kota / Domisili Lembaga
+                    </Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="city"
+                        placeholder="Contoh: Bandung"
+                        className="pl-9"
+                        value={form.city}
+                        onChange={(e) => setForm({ ...form, city: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Honeypot anti-bot: tersembunyi dari pengguna sungguhan */}
+                  <div aria-hidden="true" className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      id="website"
+                      name="website"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
