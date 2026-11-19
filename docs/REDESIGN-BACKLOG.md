@@ -32,6 +32,7 @@ Bagian berikut ada di desain tetapi datanya/backend-nya belum ada. Tidak dibangu
 | O5 | Koreksi dengan audit, scan QR | Audit log, pemindai | ATT-06, ATT-09 | Disembunyikan |
 | O6 / G2 | GPS, tepat waktu, persetujuan izin | Kolom lokasi, action approve | STF-01..04 | Disembunyikan |
 | O7 / G6 | Feed event berwaktu, ringkasan otomatis 16.00 | Tabel event | COM-02, COM-10 | Disembunyikan |
+| O8 | Libur bertanggal mengosongkan hari, tujuan ↔ indikator perkembangan, trial ikut sesi | Kalender libur, kerangka perkembangan (O9) | LRN-01, SCH-07 | Disembunyikan; hari tanpa sesi tampil redup |
 | O9 / G12 / P10 | Modul perkembangan | Tabel perkembangan | LRN-01..06, PAR-08 | Tidak dibuat |
 | O10 / P6 | Kotak masuk admin, percakapan per anak dengan lembaga | Percakapan lembaga | COM-07 | EmptyState jujur |
 | O11 | Audiens, jadwal kirim, tingkat baca | Kolom audiens/jadwal/read | COM-08 | Disembunyikan |
