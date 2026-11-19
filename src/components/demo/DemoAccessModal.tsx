@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
+import { getSubdomainForRole } from "@/lib/roleRedirect";
 
 interface DemoAccessModalProps {
   open: boolean;
@@ -33,7 +34,6 @@ interface DemoRoleOption {
   roleBadge: string;
   badgeVariant: "default" | "secondary" | "outline" | "success" | "warning";
   email: string;
-  targetUrl: string;
   description: string;
   highlights: string[];
   icon: any;
@@ -47,7 +47,6 @@ const demoOptions: DemoRoleOption[] = [
     roleBadge: "Role: Admin",
     badgeVariant: "default",
     email: "admin@bunayo.test",
-    targetUrl: "/dashboard",
     description: "Kelola operasional Bunayo Daycare: Kelas Bunga Matahari, absensi terpadu, billing & SPP Aisyah Putri, dan pengumuman.",
     highlights: ["Kelas Bunga Matahari", "Billing SPP Sinkron", "Monitoring Absensi"],
     icon: Building2,
@@ -59,7 +58,6 @@ const demoOptions: DemoRoleOption[] = [
     roleBadge: "Role: Parent",
     badgeVariant: "success",
     email: "parent@bunayo.test",
-    targetUrl: "/parent",
     description: "Aplikasi mobile orang tua: pantau anak Aisyah Putri, feed laporan harian, galeri foto, & status SPP lunas.",
     highlights: ["Profil Anak (Aisyah)", "Laporan Aktivitas Harian", "Status SPP Lunas"],
     icon: HeartHandshake,
@@ -71,7 +69,6 @@ const demoOptions: DemoRoleOption[] = [
     roleBadge: "Role: Tutor",
     badgeVariant: "warning",
     email: "tutor@bunayo.test",
-    targetUrl: "/tutor",
     description: "Portal pendidik: jadwal Kelas Bunga Matahari, absensi siswa, laporan harian Aisyah Putri, dan chat dengan bunda.",
     highlights: ["Kelas Bunga Matahari", "Absensi Siswa Hari Ini", "Laporan Perkembangan"],
     icon: GraduationCap,
@@ -100,7 +97,9 @@ export function DemoAccessModal({
         description: "Membuka portal dengan dataset demo interaktif...",
       });
 
-      window.location.href = opt.targetUrl;
+      // Pindah ke subdomain peran (cookie sesi lintas-subdomain di produksi);
+      // URL relatif membuat demo dari subdomain salah mendarat di portal lain.
+      window.location.href = getSubdomainForRole(opt.id, window.location.host);
     } catch (err: any) {
       toast({
         title: "Gagal Masuk Demo",
