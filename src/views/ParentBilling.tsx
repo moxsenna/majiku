@@ -2,76 +2,54 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 import {
-  ArrowLeft,
-  CreditCard,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Home,
-  ShoppingBag,
-  MessageCircle,
-  User,
-  Eye,
+  BadgeCheck,
+  ChevronRight,
+  CircleAlert,
+  Clock3,
   Loader2,
   QrCode,
+  ReceiptText,
+  Wallet,
+  type LucideIcon,
 } from "lucide-react";
 import { InvoiceModal } from "@/components/invoice/InvoiceModal";
 import { PaymentModal } from "@/components/payment/PaymentModal";
-import { format } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
-import {
-  createInvoicePaymentOrder,
-  type ParentInvoiceSummary,
-} from "@/server/actions/payments";
+import { cn } from "@/lib/utils";
+import { formatRupiah, formatTanggal } from "@/lib/format";
+import { MobileGroupTitle, MobileSubHeader } from "@/components/bunayo";
+import { createInvoicePaymentOrder, type ParentInvoiceSummary } from "@/server/actions/payments";
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(amount);
-};
-
-function getInvoicePeriodTitle(inv: ParentInvoiceSummary): string {
+function judulPeriode(inv: ParentInvoiceSummary): string {
   if (inv.billingPeriodStart) {
-    try {
-      const d = new Date(inv.billingPeriodStart);
-      if (!isNaN(d.getTime())) {
-        return `SPP ${format(d, "MMMM yyyy", { locale: idLocale })}`;
-      }
-    } catch {
-      // fallback
-    }
+    const d = new Date(inv.billingPeriodStart);
+    if (!isNaN(d.getTime())) return `SPP ${format(d, "MMMM yyyy", { locale: idLocale })}`;
   }
-  const match = inv.invoiceNumber?.match(/INV-(\d{4})(\d{2})-/);
-  if (match) {
-    const year = parseInt(match[1], 10);
-    const month = parseInt(match[2], 10) - 1;
-    const d = new Date(year, month, 1);
-    return `SPP ${format(d, "MMMM yyyy", { locale: idLocale })}`;
-  }
+  const m = inv.invoiceNumber?.match(/INV-(\d{4})(\d{2})-/);
+  if (m) return `SPP ${format(new Date(Number(m[1]), Number(m[2]) - 1, 1), "MMMM yyyy", { locale: idLocale })}`;
   return "Tagihan SPP";
 }
+
+const STATUS: Record<"paid" | "unpaid" | "overdue", { label: string; icon: LucideIcon; cls: string }> = {
+  paid: { label: "Lunas", icon: BadgeCheck, cls: "text-daun-ink" },
+  unpaid: { label: "Belum bayar", icon: Clock3, cls: "text-matahari-ink" },
+  overdue: { label: "Jatuh tempo", icon: CircleAlert, cls: "text-destructive" },
+};
 
 interface ParentBillingProps {
   invoices: ParentInvoiceSummary[];
   paymentsEnabled: boolean;
 }
 
-export default function ParentBilling({
-  invoices = [],
-  paymentsEnabled = false,
-}: ParentBillingProps) {
+export default function ParentBilling({ invoices = [], paymentsEnabled = false }: ParentBillingProps) {
   const { toast } = useToast();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isPayingId, setIsPayingId] = useState<string | null>(null);
-  const [selectedChildFilter, setSelectedChildFilter] = useState<string>("all");
+  const [filterAnak, setFilterAnak] = useState<string>("all");
   const [paymentModalData, setPaymentModalData] = useState<{
     open: boolean;
     invoiceId: string;
@@ -81,89 +59,67 @@ export default function ParentBilling({
     qrString?: string | null;
   } | null>(null);
 
-  const childNames = useMemo(() => {
-    return Array.from(new Set(invoices.map((i) => i.studentName).filter(Boolean)));
-  }, [invoices]);
+  const anakNames = useMemo(
+    () => Array.from(new Set(invoices.map((i) => i.studentName).filter(Boolean))),
+    [invoices],
+  );
+  const invoicesTampil = useMemo(
+    () => (filterAnak === "all" ? invoices : invoices.filter((i) => i.studentName === filterAnak)),
+    [invoices, filterAnak],
+  );
+  const aktif = invoicesTampil.find((i) => i.status === "unpaid" || i.status === "overdue") ?? null;
 
-  const filteredInvoices = useMemo(() => {
-    if (selectedChildFilter === "all") return invoices;
-    return invoices.filter((i) => i.studentName === selectedChildFilter);
-  }, [invoices, selectedChildFilter]);
-
-  const activeInvoice = useMemo(() => {
-    return filteredInvoices.find((inv) => inv.status === "unpaid" || inv.status === "overdue") || null;
-  }, [filteredInvoices]);
-
-  const mapToInvoiceData = (inv: ParentInvoiceSummary) => {
-    const period =
+  const mapToInvoiceData = (inv: ParentInvoiceSummary) => ({
+    id: inv.id,
+    invoiceNumber: inv.invoiceNumber,
+    parentName: "Orang Tua Siswa",
+    studentName: inv.studentName,
+    className: "",
+    packageName: "SPP Bulanan",
+    period:
       inv.billingPeriodStart && inv.billingPeriodEnd
-        ? `${format(new Date(inv.billingPeriodStart), "d MMM yyyy", { locale: idLocale })} - ${format(new Date(inv.billingPeriodEnd), "d MMM yyyy", { locale: idLocale })}`
-        : "Periode SPP";
+        ? `${format(new Date(inv.billingPeriodStart), "d MMM yyyy", { locale: idLocale })} – ${format(new Date(inv.billingPeriodEnd), "d MMM yyyy", { locale: idLocale })}`
+        : "Periode SPP",
+    items: [
+      { description: `SPP Bulanan – ${inv.studentName}`, amount: inv.amount },
+      ...(inv.discount > 0 ? [{ description: "Potongan", amount: -inv.discount }] : []),
+    ],
+    subtotal: inv.amount,
+    discount: inv.discount,
+    total: inv.total,
+    amount: inv.total,
+    dueDate: inv.dueDate ? format(new Date(inv.dueDate), "d MMMM yyyy", { locale: idLocale }) : "-",
+    status: (inv.status === "paid" ? "paid" : inv.status === "overdue" ? "overdue" : "unpaid") as
+      | "paid"
+      | "unpaid"
+      | "overdue",
+    paidDate: inv.paidAt ? format(new Date(inv.paidAt), "d MMMM yyyy", { locale: idLocale }) : undefined,
+    // Nama/alamat lembaga belum ada di ringkasan tagihan; jangan isi alamat & telepon karangan.
+    schoolName: "Bunayo",
+  });
 
-    return {
-      id: inv.id,
-      invoiceNumber: inv.invoiceNumber,
-      parentName: "Orang Tua Siswa",
-      studentName: inv.studentName,
-      className: "Kelas Siswa",
-      packageName: "SPP Bulanan",
-      period,
-      items: [
-        { description: `SPP Bulanan - ${inv.studentName}`, amount: inv.amount },
-        ...(inv.discount > 0 ? [{ description: "Potongan / Diskon", amount: -inv.discount }] : []),
-      ],
-      subtotal: inv.amount,
-      discount: inv.discount,
-      total: inv.total,
-      amount: inv.total,
-      dueDate: inv.dueDate
-        ? format(new Date(inv.dueDate), "d MMMM yyyy", { locale: idLocale })
-        : "-",
-      status: (inv.status === "paid"
-        ? "paid"
-        : inv.status === "overdue"
-        ? "overdue"
-        : "unpaid") as "paid" | "unpaid" | "overdue",
-      paidDate: inv.paidAt
-        ? format(new Date(inv.paidAt), "d MMMM yyyy", { locale: idLocale })
-        : undefined,
-      // Nama/alamat lembaga belum ada di ringkasan tagihan; jangan isi alamat & telepon karangan.
-      schoolName: "Bunayo",
-    };
-  };
-
-  const handleViewInvoice = (inv: ParentInvoiceSummary) => {
-    setSelectedInvoice(mapToInvoiceData(inv));
-    setModalOpen(true);
-  };
-
-  const handlePayOnline = async (invoiceId: string, customInvoice?: ParentInvoiceSummary) => {
+  const bayarOnline = async (invoiceId: string, inv?: ParentInvoiceSummary) => {
     if (!paymentsEnabled) {
-      toast({
-        title: "Pembayaran Online Belum Aktif",
-        description: "Silakan gunakan metode transfer manual sementara waktu.",
-        variant: "destructive",
-      });
+      toast({ title: "Pembayaran online belum aktif", description: "Minta admin lembaga mengaktifkan PayCore.", variant: "destructive" });
       return;
     }
-
-    const inv = customInvoice || invoices.find((i) => i.id === invoiceId);
+    const target = inv ?? invoices.find((i) => i.id === invoiceId);
     setIsPayingId(invoiceId);
     try {
       const result = await createInvoicePaymentOrder(invoiceId);
       setPaymentModalData({
         open: true,
         invoiceId,
-        invoiceNumber: inv?.invoiceNumber || "INV",
-        amount: inv?.total || 0,
+        invoiceNumber: target?.invoiceNumber || "INV",
+        amount: target?.total || 0,
         checkoutUrl: result.checkoutUrl,
         qrString: result.qrString,
       });
     } catch (e: any) {
       const isDemo = e.message?.includes("Demo");
       toast({
-        title: isDemo ? "Mode Simulasi Demo" : "Gagal Membuat Pembayaran",
-        description: e.message || "Terjadi kesalahan saat menghubungi payment gateway",
+        title: isDemo ? "Mode simulasi demo" : "Gagal membuat pembayaran",
+        description: e.message || "Terjadi kesalahan saat menghubungi payment gateway.",
         variant: isDemo ? "default" : "destructive",
       });
     } finally {
@@ -176,9 +132,7 @@ export default function ParentBilling({
       {paymentModalData && (
         <PaymentModal
           open={paymentModalData.open}
-          onOpenChange={(open) =>
-            setPaymentModalData((prev) => (prev ? { ...prev, open } : null))
-          }
+          onOpenChange={(open) => setPaymentModalData((prev) => (prev ? { ...prev, open } : null))}
           invoiceId={paymentModalData.invoiceId}
           invoiceNumber={paymentModalData.invoiceNumber}
           amount={paymentModalData.amount}
@@ -187,249 +141,150 @@ export default function ParentBilling({
         />
       )}
       {selectedInvoice && (
-        <InvoiceModal
-          invoice={selectedInvoice}
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-        />
+        <InvoiceModal invoice={selectedInvoice} open={modalOpen} onOpenChange={setModalOpen} />
       )}
-      <div className="min-h-screen bg-background pb-20">
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-background border-b border-border">
-          <div className="flex items-center gap-3 px-4 h-14">
-            <Link href="/parent">
-              <Button variant="ghost" size="icon-sm">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="font-bold text-lg">Tagihan & Pembayaran</h1>
-          </div>
-        </header>
 
-        <main className="p-4 max-w-lg mx-auto space-y-4">
-          {/* Current Bill */}
-          {activeInvoice ? (
-            <Card className="border-primary/30 bg-primary/5">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <span className="text-[11px] font-semibold text-primary uppercase tracking-wide">
-                      Tagihan Aktif • {getInvoicePeriodTitle(activeInvoice)}
-                    </span>
-                    <p className="text-sm font-bold text-foreground mt-0.5">
-                      {activeInvoice.studentName}
-                    </p>
-                    <p className="text-2xl font-extrabold text-foreground mt-1">
-                      {formatCurrency(activeInvoice.total)}
-                    </p>
-                  </div>
-                  <Badge variant={activeInvoice.status === "overdue" ? "destructive" : "warning"}>
-                    {activeInvoice.status === "overdue" ? "Jatuh Tempo" : "Belum Bayar"}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>
-                    Jatuh tempo:{" "}
-                    {activeInvoice.dueDate
-                      ? format(new Date(activeInvoice.dueDate), "d MMMM yyyy", { locale: idLocale })
-                      : "-"}
+      <MobileSubHeader title="Tagihan" backHref="/parent" />
+
+      <div className="flex flex-col gap-4 px-4 pb-4">
+        {aktif ? (
+          <section className="rise field-ink relative flex flex-col gap-1 overflow-hidden rounded-[28px] bg-langit p-5">
+            <span className="field-sub text-sm font-semibold">
+              {aktif.studentName} · {judulPeriode(aktif)}
+            </span>
+            <p className="tabular font-display text-[36px] font-extrabold leading-none tracking-[-0.02em]">
+              {formatRupiah(aktif.total)}
+            </p>
+            <span className="field-sub flex items-center gap-1.5 text-sm">
+              <Clock3 className="h-4 w-4" aria-hidden /> Jatuh tempo {formatTanggal(aktif.dueDate, { tanpaTahun: new Date(aktif.dueDate ?? Date.now()).getFullYear() === new Date().getFullYear() })}
+            </span>
+            <div className="mt-3 grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                disabled={isPayingId === aktif.id || !paymentsEnabled}
+                onClick={() => bayarOnline(aktif.id)}
+                className="press grid h-btn-lg place-items-center rounded-full bg-[hsl(249_26%_14%)] text-base font-semibold text-[hsl(40_60%_96%)] disabled:opacity-60"
+              >
+                {isPayingId === aktif.id ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Menghubungkan…
                   </span>
-                  <span>•</span>
-                  <span className="font-mono text-[11px]">#{activeInvoice.invoiceNumber}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button
-                    variant="hero"
-                    className="flex-1"
-                    disabled={isPayingId === activeInvoice.id || !paymentsEnabled}
-                    onClick={() => handlePayOnline(activeInvoice.id)}
-                  >
-                    {isPayingId === activeInvoice.id ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Menghubungkan...
-                      </>
-                    ) : (
-                      <>
-                        <QrCode className="h-4 w-4 mr-2" /> Bayar Online (QRIS/VA)
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleViewInvoice(activeInvoice)}
-                  >
-                    Detail
-                  </Button>
-                </div>
-                {!paymentsEnabled && (
-                  <p className="text-[11px] text-muted-foreground mt-2 text-center">
-                    * Pembayaran online sedang disiapkan. Gunakan transfer bank di bawah ini.
-                  </p>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <QrCode className="h-5 w-5" aria-hidden /> Bayar online (QRIS/VA)
+                  </span>
                 )}
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-border">
-              <CardContent className="p-6 text-center">
-                <CheckCircle2 className="h-10 w-10 text-success mx-auto mb-2" />
-                <h3 className="font-semibold text-sm">Tidak Ada Tagihan Aktif</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Semua kewajiban SPP anak Anda telah lunas. Terima kasih!
-                </p>
-              </CardContent>
-            </Card>
-          )}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedInvoice(mapToInvoiceData(aktif));
+                  setModalOpen(true);
+                }}
+                className="press grid h-btn place-items-center rounded-full bg-[hsl(0_0%_100%/.6)] text-[15px] font-semibold"
+              >
+                Lihat rincian
+              </button>
+            </div>
+            {!paymentsEnabled && (
+              <p className="field-sub mt-1 text-[13px]">
+                Pembayaran online sedang disiapkan lembaga. Nomor rekening resmi akan diberikan lembaga lewat Pesan.
+              </p>
+            )}
+          </section>
+        ) : (
+          <section className="rise flex items-center gap-3 rounded-sheet bg-card p-5">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-daun-soft text-daun-ink">
+              <BadgeCheck className="h-6 w-6" aria-hidden />
+            </span>
+            <div>
+              <p className="text-[15px] font-semibold">Semua tagihan lunas</p>
+              <p className="text-sm text-foreground-2">Tidak ada kewajiban SPP yang menunggu. Terima kasih!</p>
+            </div>
+          </section>
+        )}
 
-          {/* Payment History */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <span>Daftar Tagihan</span>
-                  <span className="text-xs font-normal text-muted-foreground">
-                    ({filteredInvoices.length} tagihan)
-                  </span>
-                </CardTitle>
-                {childNames.length > 1 && (
-                  <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+        {anakNames.length > 1 && (
+          <div role="tablist" aria-label="Filter anak" className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none]">
+            {["all", ...anakNames].map((n) => {
+              const on = filterAnak === n;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setFilterAnak(n)}
+                  className={cn(
+                    "h-8 shrink-0 rounded-full px-3.5 text-[13px] font-semibold transition-colors",
+                    on ? "bg-nav-active text-nav-active-foreground" : "bg-card text-muted-foreground",
+                  )}
+                >
+                  {n === "all" ? "Semua" : n.split(" ")[0]}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <section className="flex flex-col gap-2" aria-labelledby="riwayat-judul">
+          <MobileGroupTitle>
+            <span id="riwayat-judul">Semua tagihan</span>
+          </MobileGroupTitle>
+          {invoicesTampil.length === 0 ? (
+            <p className="rounded-sheet bg-card p-5 text-sm text-foreground-2">Belum ada tagihan yang diterbitkan lembaga.</p>
+          ) : (
+            <ul className="overflow-hidden rounded-sheet bg-card">
+              {invoicesTampil.map((inv) => {
+                const st = STATUS[(inv.status === "paid" ? "paid" : inv.status === "overdue" ? "overdue" : "unpaid")];
+                const Icon = st.icon;
+                const bisaBayar = inv.status !== "paid" && paymentsEnabled;
+                return (
+                  <li key={inv.id} className="border-b border-border-subtle last:border-b-0">
                     <button
                       type="button"
-                      onClick={() => setSelectedChildFilter("all")}
-                      className={`text-xs px-2.5 py-1 rounded-full transition-colors whitespace-nowrap ${
-                        selectedChildFilter === "all"
-                          ? "bg-primary text-primary-foreground font-semibold"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
+                      onClick={() => {
+                        setSelectedInvoice(mapToInvoiceData(inv));
+                        setModalOpen(true);
+                      }}
+                      className="flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted"
                     >
-                      Semua Anak
-                    </button>
-                    {childNames.map((name) => (
-                      <button
-                        key={name}
-                        type="button"
-                        onClick={() => setSelectedChildFilter(name)}
-                        className={`text-xs px-2.5 py-1 rounded-full transition-colors whitespace-nowrap ${
-                          selectedChildFilter === name
-                            ? "bg-primary text-primary-foreground font-semibold"
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        }`}
-                      >
-                        {name.split(" ")[0]}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              {filteredInvoices.length === 0 ? (
-                <div className="p-6 text-center text-xs text-muted-foreground">
-                  Belum ada data tagihan yang diterbitkan.
-                </div>
-              ) : (
-                filteredInvoices.map((invoice, index) => {
-                  const isPaid = invoice.status === "paid";
-                  const isOverdue = invoice.status === "overdue";
-                  const periodTitle = getInvoicePeriodTitle(invoice);
-                  return (
-                    <div
-                      key={invoice.id}
-                      className={`flex items-center justify-between p-3.5 ${
-                        index !== filteredInvoices.length - 1 ? "border-b border-border" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {isPaid ? (
-                          <div className="h-9 w-9 rounded-full bg-success/10 flex items-center justify-center shrink-0">
-                            <CheckCircle2 className="h-4 w-4 text-success" />
-                          </div>
-                        ) : isOverdue ? (
-                          <div className="h-9 w-9 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
-                            <AlertCircle className="h-4 w-4 text-destructive" />
-                          </div>
-                        ) : (
-                          <div className="h-9 w-9 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
-                            <Clock className="h-4 w-4 text-warning" />
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-sm text-foreground">
-                              {periodTitle}
-                            </p>
-                            <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal text-muted-foreground">
-                              {invoice.studentName}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate mt-0.5">
-                            <span className="font-mono text-[11px]">#{invoice.invoiceNumber}</span> ·{" "}
-                            {isPaid
-                              ? invoice.paidAt
-                                ? `Lunas: ${format(new Date(invoice.paidAt), "d MMM yyyy", { locale: idLocale })}`
+                      <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted", st.cls)}>
+                        <Icon className="h-5 w-5" aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline justify-between gap-2">
+                          <b className="block truncate text-[15px] font-semibold">{judulPeriode(inv)}</b>
+                          <b className="tabular shrink-0 text-[15px]">{formatRupiah(inv.total)}</b>
+                        </span>
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="tabular block truncate text-[13px] text-muted-foreground">
+                            {inv.studentName.split(" ")[0]} ·{" "}
+                            {inv.status === "paid"
+                              ? inv.paidAt
+                                ? `Lunas ${format(new Date(inv.paidAt), "d MMM yyyy", { locale: idLocale })}`
                                 : "Lunas"
-                              : invoice.dueDate
-                              ? `Tempo: ${format(new Date(invoice.dueDate), "d MMM yyyy", { locale: idLocale })}`
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="text-right">
-                          <p className="font-semibold text-sm">{formatCurrency(invoice.total)}</p>
-                          <Badge
-                            variant={isPaid ? "success" : isOverdue ? "destructive" : "warning"}
-                            className="text-[10px] px-1.5 py-0"
-                          >
-                            {isPaid ? "Lunas" : isOverdue ? "Jatuh Tempo" : "Belum Bayar"}
-                          </Badge>
-                        </div>
-                        {!isPaid && (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="h-8 text-xs"
-                            disabled={isPayingId === invoice.id || !paymentsEnabled}
-                            onClick={() => handlePayOnline(invoice.id, invoice)}
-                          >
-                            Bayar
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => handleViewInvoice(invoice)}
-                          title="Lihat Invoice"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </CardContent>
-          </Card>
+                              : `Tempo ${inv.dueDate ? format(new Date(inv.dueDate), new Date(inv.dueDate).getFullYear() === new Date().getFullYear() ? "d MMM" : "d MMM yy", { locale: idLocale }) : "-"}`}
+                          </span>
+                          <small className={cn("shrink-0 text-[13px] font-semibold", st.cls)}>{st.label}</small>
+                        </span>
+                      </span>
+                      <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
 
-          {/* Payment Methods */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Metode Pembayaran Tersedia</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs">
-              <div className="p-3 rounded-lg bg-muted/40 space-y-1">
-                <p className="font-semibold text-foreground flex items-center gap-1.5">
-                  <QrCode className="h-4 w-4 text-primary" /> Pembayaran Online (QRIS & Virtual Account)
-                </p>
-                <p className="text-muted-foreground text-[11px]">
-                  Didukung oleh PayCore & Duitku. Verifikasi instan otomatis tanpa perlu upload bukti transfer.
-                </p>
-              </div>
-
-            </CardContent>
-          </Card>
-        </main>
-
+        <section className="flex items-start gap-3 rounded-sheet bg-muted p-4">
+          <ReceiptText className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+          <p className="text-[13px] leading-relaxed text-muted-foreground">
+            Pembayaran online memakai QRIS & Virtual Account (PayCore/Duitku) dan terverifikasi otomatis. Untuk transfer manual, minta
+            nomor rekening resmi lembaga melalui menu Pesan.
+          </p>
+        </section>
       </div>
     </>
   );

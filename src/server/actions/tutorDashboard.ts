@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { sql, eq, and, or, desc, isNull, ne, inArray } from "drizzle-orm";
+import { sql, eq, and, or, desc, isNull, ne, inArray, asc } from "drizzle-orm";
 import { db } from "@/db";
 import {
   tutors,
@@ -347,4 +347,60 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     todayStudents: mappedStudents,
     schedules: mappedSchedules,
   };
+}
+
+/** Jadwal mingguan kelas yang diampu guru (dipakai /tutor/schedule; listSchedules milik admin). */
+export async function getMyTutorSchedules() {
+  let session = null;
+  try {
+    const h = await headers();
+    session = await auth.api.getSession({ headers: h });
+  } catch {
+    return [];
+  }
+  if (!session?.user) return [];
+  const userEmail = session.user.email ?? "";
+  const isDemo = isDemoEmail(userEmail);
+
+  const [tutorRecord] = await db
+    .select({ id: tutors.id, tenantId: tutors.tenantId })
+    .from(tutors)
+    .where(
+      and(
+        isDemo
+          ? or(eq(tutors.userId, session.user.id), userEmail ? eq(tutors.email, userEmail) : sql`false`, eq(tutors.id, "tut_demo_rina"))
+          : userEmail
+          ? or(eq(tutors.userId, session.user.id), userEmail ? eq(tutors.email, userEmail) : sql`false`)
+          : eq(tutors.userId, session.user.id),
+        eq(tutors.isActive, true),
+      ),
+    )
+    .limit(1);
+  if (!tutorRecord) return [];
+
+  const rows = await db
+    .select({
+      id: classSchedules.id,
+      title: classSchedules.title,
+      dayOfWeek: classSchedules.dayOfWeek,
+      startTime: classSchedules.startTime,
+      durationMinutes: classSchedules.durationMinutes,
+      location: classSchedules.location,
+      type: classSchedules.type,
+      className: classes.name,
+    })
+    .from(classSchedules)
+    .innerJoin(classes, eq(classes.id, classSchedules.classId))
+    .innerJoin(tutorClassAssignments, eq(tutorClassAssignments.classId, classes.id))
+    .where(
+      and(
+        eq(tutorClassAssignments.tutorId, tutorRecord.id),
+        eq(tutorClassAssignments.isActive, true),
+        eq(classes.tenantId, tutorRecord.tenantId),
+        eq(classSchedules.isActive, true),
+      ),
+    )
+    .orderBy(asc(classSchedules.dayOfWeek), asc(classSchedules.startTime));
+
+  return rows;
 }

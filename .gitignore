@@ -47,3 +47,6 @@ next-env.d.ts
 .unlazy/
 .reticle/
 .playwright-mcp/
+
+# Impeccable review captures (screenshot evidence, besar)
+.impeccable/review/

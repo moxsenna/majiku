@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, ClipboardList, MapPin, MessageCircle, NotebookPen, TriangleAlert, type LucideIcon } from "lucide-react";
+import { ChevronRight, ClipboardList, Eye, MapPin, MessageCircle, NotebookPen, TriangleAlert, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatJam, formatTanggal, inisial } from "@/lib/format";
 import { KELAS_KRAYON, krayonDari } from "@/lib/krayon";
@@ -57,16 +57,16 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
     <div className="flex flex-col gap-4 px-4 pb-4 pt-2">
       <header className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <span className="block text-[15px] font-medium text-muted-foreground" suppressHydrationWarning>
+          <span className="block text-sm font-medium text-muted-foreground" suppressHydrationWarning>
             {formatTanggal(new Date(), { hari: true, panjang: true }).replace(/ \d{4}$/, "")}
           </span>
-          <h1 className="truncate font-display text-[34px] font-extrabold leading-[1.05] tracking-[-0.03em]" suppressHydrationWarning>
+          <h1 className="truncate font-display text-[26px] font-bold leading-[1.1] tracking-[-0.025em]" suppressHydrationWarning>
             {salam()}, {nama.split(/\s+/).slice(0, 2).join(" ") || "Guru"}
           </h1>
         </div>
         {nama && (
           <Link href="/tutor/saya" aria-label="Saya" className="press">
-            <KidAvatar name={nama} krayon="matahari" size="lg" />
+            <KidAvatar name={nama} krayon="matahari" size="md" />
           </Link>
         )}
       </header>
@@ -74,7 +74,7 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
       {isDemo && (
         <div className="flex items-center justify-between rounded-sheet bg-amber-500/10 border border-amber-500/20 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
           <span className="flex items-center gap-2 font-medium">
-            <span>👁️</span>
+            <Eye className="h-4 w-4" aria-hidden />
             <span>Mode Demo Bunayo: Eksplorasi Interaktif</span>
           </span>
           <span className="text-[11px] opacity-80">Simulasi Aman</span>
@@ -85,7 +85,7 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
 
       {!isAssigned ? (
         <section className="rise field-ink flex flex-col gap-2 rounded-[28px] bg-matahari p-5">
-          <h2 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.03em]">Belum ada kelas</h2>
+          <h2 className="font-display text-[22px] font-bold leading-[1.1] tracking-[-0.025em]">Belum ada kelas</h2>
           <p className="field-sub text-[15px] leading-relaxed">
             Akun Anda sudah terdaftar sebagai guru, tetapi admin lembaga belum menugaskan kelas. Minta admin menautkan Anda ke kelas agar
             anak-anak muncul di sini.
@@ -103,7 +103,7 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
       )}
 
       <section className="rise rise-3 flex flex-col gap-2" aria-labelledby="tugas-judul">
-        <h2 id="tugas-judul" className="px-1 font-display text-xl font-bold tracking-tight">
+        <h2 id="tugas-judul" className="px-1 font-display text-lg font-bold tracking-tight">
           Tugas hari ini
         </h2>
         <ul className="overflow-hidden rounded-sheet bg-card">
@@ -229,9 +229,9 @@ function KartuKelas({
   return (
     <section className={cn("rise rise-2 field-ink flex flex-col gap-4 rounded-[28px] p-5", k.bg)} aria-label={`Kelas ${nama}`}>
       <div>
-        <h2 className="font-display text-[40px] font-extrabold leading-none tracking-[-0.035em] [text-wrap:balance]">{nama}</h2>
+        <h2 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.03em] [text-wrap:balance]">{nama}</h2>
         {jadwal && (
-          <span className="field-sub tabular mt-1.5 block text-[15px]">
+          <span className="field-sub tabular mt-1 block text-sm">
             {jam ? `${formatJam(jam)} · ` : ""}
             {jadwal.location}
           </span>

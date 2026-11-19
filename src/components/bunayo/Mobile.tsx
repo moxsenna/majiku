@@ -66,7 +66,7 @@ export const TAB_BAR_SPACE = "pb-[110px]";
 
 /* ---------------- Header mobile ---------------- */
 
-/** Kit .mh: judul besar Bricolage 34 + subjudul, opsional aksi kanan (tombol bulat 48). */
+/** Kit .mh (diperkecil untuk HP): judul Bricolage 26 + subjudul, opsional aksi kanan (tombol bulat 48). */
 export function MobileHeader({
   title,
   sub,
@@ -84,7 +84,7 @@ export function MobileHeader({
     <header className={cn("flex items-center justify-between gap-2.5 px-4 pb-3 pt-1.5", className)}>
       <div className="min-w-0">
         {eyebrow && <span className="block text-[15px] font-medium text-muted-foreground">{eyebrow}</span>}
-        <h1 className="font-display text-[34px] font-extrabold leading-[1.05] tracking-[-0.03em]">{title}</h1>
+        <h1 className="font-display text-[26px] font-bold leading-[1.1] tracking-[-0.025em]">{title}</h1>
         {sub && <span className="block text-[15px] font-medium text-muted-foreground">{sub}</span>}
       </div>
       {right && <div className="flex shrink-0 items-center gap-2">{right}</div>}

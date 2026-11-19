@@ -13,7 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { BookOpen, Mail, Lock, Eye, EyeOff, Info, HelpCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Info, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authClient } from "@/lib/auth-client";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
@@ -74,21 +74,18 @@ export default function TutorAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-soft flex flex-col justify-center items-center p-4 sm:p-6">
+    <div className="app-mobile flex min-h-screen flex-col items-center justify-center bg-surface px-5 py-8">
       <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2.5 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-info/10 text-info flex items-center justify-center shadow-sm">
-              <BookOpen className="w-7 h-7" />
-            </div>
-            <span className="font-bold text-2xl tracking-tight text-foreground">Bunayo Tutor</span>
-          </div>
-          <p className="text-sm text-muted-foreground font-medium">Portal Khusus Guru & Pendidik</p>
+        <div className="mb-6 text-center">
+          <h1 className="font-display text-[30px] font-extrabold tracking-[-0.03em]">
+            Kelas <span className="hl">Anda</span>, satu genggaman.
+          </h1>
+          <p className="mt-1.5 text-[15px] text-muted-foreground">Masuk dengan email yang diberikan lembaga Anda.</p>
         </div>
 
-        <Card className="shadow-xl border-border/60">
+        <Card className="rounded-sheet border-border shadow-float">
           <CardHeader className="pb-3 pt-6 px-6">
-            <CardTitle className="text-lg">Masuk Pengajar</CardTitle>
+            <CardTitle className="font-display text-lg tracking-tight">Masuk pengajar</CardTitle>
             <CardDescription className="text-xs">
               Gunakan email yang telah didaftarkan oleh lembaga Daycare Anda.
             </CardDescription>
@@ -143,8 +140,8 @@ export default function TutorAuth() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={isLoading}>
-                {isLoading ? "Memproses..." : "Masuk ke Dashboard Tutor"}
+              <Button type="submit" className="press w-full rounded-full bg-nav-active text-nav-active-foreground hover:bg-nav-active/90" size="lg" disabled={isLoading}>
+                {isLoading ? "Memproses…" : "Masuk"}
               </Button>
             </form>
 

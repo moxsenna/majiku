@@ -16,8 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { KidAvatar } from "@/components/bunayo";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -44,14 +43,6 @@ interface ChatShellProps {
   role: "parent" | "tutor";
   conversations?: ConversationSummary[];
   partners?: ChatPartner[];
-}
-
-function getInitials(name: string): string {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
 function formatTime(val: Date | string | null | undefined): string {
@@ -200,16 +191,16 @@ export function ChatShell({
   const homeHref = role === "parent" ? "/parent" : "/tutor";
 
   return (
-    <div className="h-screen max-h-screen bg-background flex flex-col md:flex-row overflow-hidden">
+    <div className="fixed inset-x-0 top-0 bottom-[calc(max(16px,env(safe-area-inset-bottom))+76px)] z-30 mx-auto max-w-[560px] bg-surface md:top-6 md:bottom-6 flex flex-col md:flex-row overflow-hidden">
       {/* Conversation List Column */}
       <div
         className={cn(
-          "w-full md:w-80 lg:w-96 border-r border-border flex flex-col h-full bg-background shrink-0",
+          "w-full md:w-80 lg:w-96 border-r border-border flex flex-col h-full bg-surface shrink-0",
           selectedId ? "hidden md:flex" : "flex"
         )}
       >
         {/* Header */}
-        <header className="p-4 border-b border-border flex flex-col gap-3">
+        <header className="px-4 pb-3 pt-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Link href={homeHref}>
@@ -217,16 +208,15 @@ export function ChatShell({
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <h1 className="font-bold text-lg">Pesan</h1>
+              <h1 className="font-display text-[22px] font-bold tracking-tight">Pesan</h1>
             </div>
-            <Button
-              size="sm"
+            <button
+              type="button"
               onClick={() => setIsNewChatOpen(true)}
-              className="gap-1.5"
+              className="press inline-flex h-9 items-center gap-1.5 rounded-full bg-nav-active px-3.5 text-sm font-semibold text-nav-active-foreground"
             >
-              <Plus className="h-4 w-4" />
-              <span>Baru</span>
-            </Button>
+              <Plus className="h-4 w-4" aria-hidden /> Baru
+            </button>
           </div>
 
           <div className="relative">
@@ -235,7 +225,7 @@ export function ChatShell({
               placeholder="Cari percakapan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 text-sm"
+              className="pl-9 h-10 text-[15px] !rounded-full bg-card border-input"
             />
           </div>
         </header>
@@ -251,14 +241,13 @@ export function ChatShell({
                   : "Percakapan tidak ditemukan"}
               </p>
               {conversationList.length === 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
+                <button
+                  type="button"
                   onClick={() => setIsNewChatOpen(true)}
-                  className="mt-2 text-xs"
+                  className="press mt-2 inline-flex h-10 items-center gap-1.5 rounded-full bg-foreground px-4 text-sm font-semibold text-background"
                 >
-                  Mulai Percakapan Baru
-                </Button>
+                  <Plus className="h-4 w-4" aria-hidden /> Mulai Percakapan Baru
+                </button>
               )}
             </div>
           ) : (
@@ -270,24 +259,13 @@ export function ChatShell({
                     key={conv.id}
                     onClick={() => setSelectedId(conv.id)}
                     className={cn(
-                      "w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left",
+                      "w-full flex items-center gap-3 p-3 rounded-sheet transition-colors text-left",
                       isSelected
-                        ? "bg-primary/10 text-foreground"
+                        ? "bg-primary-soft text-foreground"
                         : "hover:bg-muted/70 text-foreground"
                     )}
                   >
-                    <Avatar className="h-12 w-12 shrink-0">
-                      <AvatarFallback
-                        className={cn(
-                          "text-sm font-semibold",
-                          isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
-                        )}
-                      >
-                        {getInitials(conv.partnerName)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <KidAvatar name={conv.partnerName} id={conv.partnerUserId ?? conv.id} size="lg" />
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1 mb-0.5">
@@ -318,12 +296,9 @@ export function ChatShell({
                           {conv.lastMessageBody || "Belum ada pesan"}
                         </p>
                         {conv.unreadCount > 0 && (
-                          <Badge
-                            variant="default"
-                            className="h-5 min-w-[20px] px-1.5 flex items-center justify-center text-[10px] rounded-full shrink-0"
-                          >
+                          <span className="tabular grid h-5 min-w-[20px] shrink-0 place-items-center rounded-full bg-tomat px-1.5 text-[11px] font-bold text-[hsl(249_26%_14%)]">
                             {conv.unreadCount}
-                          </Badge>
+                          </span>
                         )}
                       </div>
                     </div>
@@ -338,14 +313,14 @@ export function ChatShell({
       {/* Chat Window Column */}
       <div
         className={cn(
-          "flex-1 flex flex-col h-full bg-background",
+          "flex-1 flex flex-col h-full bg-surface",
           !selectedId ? "hidden md:flex" : "flex"
         )}
       >
         {selectedId ? (
           <>
             {/* Chat Window Header */}
-            <header className="p-3.5 border-b border-border flex items-center gap-3 bg-background/95 backdrop-blur shrink-0">
+            <header className="sticky top-0 z-10 px-4 py-3 border-b border-border flex items-center gap-3 bg-surface/95 backdrop-blur shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
@@ -355,11 +330,7 @@ export function ChatShell({
                 <ArrowLeft className="h-5 w-5" />
               </Button>
 
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                  {getInitials(selectedConversation?.partnerName || "")}
-                </AvatarFallback>
-              </Avatar>
+              <KidAvatar name={selectedConversation?.partnerName || "?"} size="md" />
 
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm truncate">
@@ -372,7 +343,7 @@ export function ChatShell({
             </header>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {isLoadingMessages && messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                   Memuat pesan...
@@ -397,14 +368,14 @@ export function ChatShell({
                   >
                     <div
                       className={cn(
-                        "max-w-[82%] sm:max-w-[70%] rounded-2xl px-3.5 py-2 shadow-sm",
+                        "max-w-[82%] sm:max-w-[70%] rounded-[20px] px-3.5 py-2.5",
                         msg.isMine
-                          ? "bg-primary text-primary-foreground rounded-br-sm"
-                          : "bg-background border border-border text-foreground rounded-bl-sm"
+                          ? "bg-nav-active text-nav-active-foreground rounded-br-sm"
+                          : "bg-card text-foreground shadow-soft rounded-bl-sm"
                       )}
                     >
                       {!msg.isMine && (
-                        <p className="text-[11px] font-semibold text-primary mb-0.5">
+                        <p className="text-[11px] font-semibold text-langit-ink mb-0.5">
                           {msg.senderName}
                         </p>
                       )}
@@ -435,7 +406,7 @@ export function ChatShell({
             </div>
 
             {/* Input Bar */}
-            <div className="p-3 border-t border-border bg-background shrink-0">
+            <div className="sticky bottom-0 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 border-t border-border bg-surface shrink-0">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -455,12 +426,12 @@ export function ChatShell({
                   placeholder="Ketik pesan..."
                   disabled={isSending}
                   maxLength={2000}
-                  className="flex-1 text-sm h-10"
+                  className="flex-1 text-[15px] h-11 !rounded-full bg-card border-input"
                 />
                 <Button
                   type="submit"
                   size="icon"
-                  className="h-10 w-10 shrink-0"
+                  className="press h-11 w-11 shrink-0 rounded-full bg-nav-active text-nav-active-foreground hover:bg-nav-active/90"
                   disabled={isSending || !inputText.trim()}
                 >
                   <Send className="h-4 w-4" />
@@ -469,11 +440,11 @@ export function ChatShell({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-muted-foreground">
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-surface"><span className="hidden" />
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
               <MessageSquare className="h-8 w-8 text-muted-foreground/60" />
             </div>
-            <h2 className="font-semibold text-lg text-foreground mb-1">
+            <h2 className="font-display text-[22px] font-bold tracking-tight text-foreground mb-1">
               Pilih Percakapan
             </h2>
             <p className="text-sm max-w-sm mb-4">
@@ -481,14 +452,13 @@ export function ChatShell({
               percakapan baru.
             </p>
             {partners.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => setIsNewChatOpen(true)}
+                className="press mt-2 inline-flex h-10 items-center gap-1.5 rounded-full bg-foreground px-4 text-sm font-semibold text-background"
               >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Mulai Percakapan Baru
-              </Button>
+                <Plus className="h-4 w-4" aria-hidden /> Mulai Percakapan Baru
+              </button>
             )}
           </div>
         )}
@@ -518,13 +488,9 @@ export function ChatShell({
                     key={partner.userId}
                     onClick={() => handleStartConversation(partner.userId)}
                     disabled={isStarting}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/70 transition-colors text-left disabled:opacity-50"
+                    className="w-full flex items-center gap-3 p-3 rounded-sheet bg-card hover:bg-muted transition-colors text-left disabled:opacity-50"
                   >
-                    <Avatar className="h-10 w-10 shrink-0">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                        {getInitials(partner.name)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <KidAvatar name={partner.name} id={partner.userId} size="md" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate text-foreground">
                         {partner.name}

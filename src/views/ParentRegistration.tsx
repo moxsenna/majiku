@@ -272,7 +272,7 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
   };
 
   return (
-    <div className="min-h-screen bg-background pb-40">
+    <div className="min-h-screen bg-surface pb-40">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border">
         <div className="flex items-center gap-3 px-4 h-14">
@@ -282,7 +282,7 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
             </Button>
           </Link>
           <div className="flex-1">
-            <h1 className="font-bold text-lg">Pendaftaran Program</h1>
+            <h1 className="font-display text-[22px] font-bold tracking-tight">Pendaftaran program</h1>
             <p className="text-xs text-muted-foreground">Langkah {step} dari 4</p>
           </div>
         </div>
@@ -308,7 +308,7 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
           <div className="space-y-4 animate-fade-in">
             <div className="text-center mb-6">
               <Sparkles className="h-12 w-12 mx-auto text-primary mb-3" />
-              <h2 className="text-xl font-bold">Pilih Program</h2>
+              <h2 className="font-display text-[22px] font-bold tracking-tight">Pilih program</h2>
               <p className="text-sm text-muted-foreground">
                 Pilih program yang sesuai untuk putra/putri Anda
               </p>

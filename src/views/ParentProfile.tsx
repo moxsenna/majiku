@@ -2,176 +2,158 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
-  Shield,
-  HelpCircle,
+  ChevronRight,
+  LifeBuoy,
   LogOut,
-  Home,
-  ShoppingBag,
-  CreditCard,
-  MessageCircle,
-  User,
   Mail,
-  GraduationCap,
-  Plus,
+  ShieldCheck,
+  Sprout,
+  Store,
+  type LucideIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { inisial } from "@/lib/format";
 import { useAuth } from "@/hooks/useAuth";
-import { getMyChildren, type ParentChildData } from "@/server/actions/parentChildren";
+import { KidAvatar, MobileGroupTitle, MobileSubHeader } from "@/components/bunayo";
+import { getMyChildren } from "@/server/actions/parentChildren";
+
+function MenuRow({
+  href,
+  icon: Icon,
+  label,
+  sub,
+  className,
+  iconBg,
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  sub?: string;
+  className?: string;
+  iconBg?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn("flex min-h-touch items-center gap-3 border-b border-border-subtle px-4 py-3 text-left last:border-b-0 hover:bg-muted", className)}
+    >
+      <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full", iconBg ?? "bg-muted text-muted-foreground")}>
+        <Icon className="h-[18px] w-[18px]" aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <b className="block text-[15px] font-semibold">{label}</b>
+        {sub && <small className="block truncate text-[13px] text-muted-foreground">{sub}</small>}
+      </span>
+      <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+    </Link>
+  );
+}
 
 export default function ParentProfile() {
   const { user, signOut } = useAuth();
+  const { data: children = [] } = useQuery({ queryKey: ["my-children"], queryFn: getMyChildren });
 
-  const { data: children = [] } = useQuery({
-    queryKey: ["my-children"],
-    queryFn: getMyChildren,
-  });
-
-  const handleLogout = async () => {
-    await signOut();
-    window.location.href = "/parent/login";
-  };
-
-  const displayName = user?.name || "Orang Tua Siswa";
-  const displayEmail = user?.email || "ortu@email.com";
-  const userInitials = (user?.name || user?.email || "OT")
-    .slice(0, 2)
-    .toUpperCase();
+  const nama = user?.name || "Orang Tua Siswa";
+  const email = user?.email;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-3">
-            <Link href="/parent">
-              <Button variant="ghost" size="icon-sm">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="font-bold text-lg">Profil Orang Tua</h1>
+    <>
+      <MobileSubHeader title="Profil" backHref="/parent" />
+
+      <div className="flex flex-col gap-4 px-4 pb-4">
+        <section className="rise field-ink flex items-center gap-4 rounded-[28px] bg-langit p-5">
+          <span
+            aria-hidden
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-[hsl(0_0%_100%/.5)] font-display text-[22px] font-bold text-[hsl(249_26%_14%)] ring-4 ring-[hsl(0_0%_100%/.55)]"
+          >
+            {inisial(nama)}
+          </span>
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-[26px] font-bold leading-[1.1] tracking-[-0.025em]">{nama}</h1>
+            <span className="field-sub flex items-center gap-1.5 text-sm" title={email}>
+              <Mail className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="truncate">{email || "—"}</span>
+            </span>
           </div>
-        </div>
-      </header>
+        </section>
 
-      <main className="p-4 max-w-lg mx-auto space-y-4">
-        {/* Profile Card */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center">
-              <div className="relative">
-                <Avatar size="2xl">
-                  <AvatarFallback className="text-xl font-bold bg-primary/20 text-primary">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <h2 className="mt-4 font-bold text-xl">{displayName}</h2>
-              <p className="text-sm text-muted-foreground">Akun Orang Tua Terdaftar</p>
+        {children.length > 0 && (
+          <section className="flex flex-col gap-2">
+            <MobileGroupTitle>Anak saya</MobileGroupTitle>
+            <ul className="overflow-hidden rounded-sheet bg-card">
+              {children.map((c) => (
+                <li key={c.id} className="flex min-h-16 items-center gap-3 border-b border-border-subtle px-4 py-3 last:border-b-0">
+                  <KidAvatar id={c.id} name={c.nickname || c.name} photoUrl={c.avatar} size="md" tiba={c.attendanceToday} />
+                  <span className="min-w-0 flex-1">
+                    <b className="block truncate text-[15px] font-semibold">{c.nickname || c.name}</b>
+                    <small className="block truncate text-[13px] text-muted-foreground">
+                      {c.className} · {c.age} th
+                    </small>
+                  </span>
+                  {c.attendanceToday && (
+                    <small className="shrink-0 text-[13px] font-semibold text-daun-ink">Sudah tiba</small>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section className="flex flex-col gap-2">
+          <MobileGroupTitle>Jelajahi</MobileGroupTitle>
+          <ul className="overflow-hidden rounded-sheet bg-card">
+            <MenuRow
+              href="/parent/registration"
+              icon={Sprout}
+              iconBg="bg-daun-soft text-daun-ink"
+              label="Daftar program / trial"
+              sub="Kelas baru untuk anak atau adiknya"
+            />
+            <MenuRow
+              href="/parent/marketplace"
+              icon={Store}
+              iconBg="bg-anggur-soft text-anggur-ink"
+              label="Cari lembaga"
+              sub="Daycare, preschool & bimbel terverifikasi"
+            />
+          </ul>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <MobileGroupTitle>Bantuan & keamanan</MobileGroupTitle>
+          <div className="rounded-sheet bg-card px-4 py-3.5">
+            <div className="flex gap-3">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-langit-soft text-langit-ink">
+                <LifeBuoy className="h-[18px] w-[18px]" aria-hidden />
+              </span>
+              <p className="text-[13px] leading-relaxed text-foreground-2">
+                Butuh bantuan? Hubungi lembaga Anda lewat menu <Link href="/parent/chat" className="font-semibold text-primary">Pesan</Link>.
+              </p>
             </div>
-
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Mail className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="font-medium text-sm">{displayEmail}</p>
-                </div>
-              </div>
+            <div className="mt-3 flex gap-3 border-t border-border-subtle pt-3">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-daun-soft text-daun-ink">
+                <ShieldCheck className="h-[18px] w-[18px]" aria-hidden />
+              </span>
+              <p className="text-[13px] leading-relaxed text-foreground-2">
+                Login Anda terlindungi kata sandi, dan sesi hanya berlaku di perangkat ini.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <p className="tabular px-1 text-[11px] text-muted-foreground">Bunayo Parent v1.0.0</p>
+        </section>
 
-        {/* Child Info */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-sm">Informasi Anak</h3>
-              <Link href="/parent/registration">
-                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary">
-                  <Plus className="h-3.5 w-3.5" />
-                  Daftar Anak
-                </Button>
-              </Link>
-            </div>
-            {children.length === 0 ? (
-              <div className="p-4 rounded-lg bg-muted/20 text-center">
-                <p className="text-xs text-muted-foreground">Belum ada anak yang terhubung ke akun Anda.</p>
-                <Link href="/parent/registration" className="mt-2 inline-block">
-                  <Button size="sm" variant="outline" className="text-xs mt-1">Daftar Trial Sekarang</Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {children.map((c) => (
-                  <div key={c.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={c.avatar || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                        {c.name.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{c.name}</p>
-                      <p className="text-xs text-muted-foreground">{c.className} • {c.age} tahun</p>
-                    </div>
-                    {c.attendanceToday && (
-                      <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-600 border-emerald-200">
-                        Hadir Hari Ini
-                      </Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Account Info & Help */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <h3 className="font-semibold text-sm text-foreground">Informasi Layanan & Bantuan</h3>
-
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
-              <HelpCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <div className="text-xs space-y-1">
-                <p className="font-medium text-foreground">Bantuan & Customer Service</p>
-                <p className="text-muted-foreground leading-relaxed">
-                  Hubungi pengelola via menu <Link href="/parent/chat" className="text-primary underline">Chat Tutor/Admin</Link> atau email ke <a href="mailto:support@majiku.id" className="text-primary hover:underline font-mono">support@majiku.id</a>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/40">
-              <Shield className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-              <div className="text-xs space-y-0.5">
-                <p className="font-medium text-foreground">Keamanan Akun</p>
-                <p className="text-muted-foreground">Autentikasi sesi terproteksi standar keamanan better-auth</p>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground px-1">
-              <span>Versi Aplikasi</span>
-              <span className="font-mono">v1.0.0 (Bunayo Parent Portal)</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Logout */}
-        <Button
-          variant="outline"
-          className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={handleLogout}
+        <button
+          type="button"
+          onClick={async () => {
+            await signOut();
+            window.location.href = "/parent/login";
+          }}
+          className="press flex h-btn-lg items-center justify-center gap-2 rounded-sheet bg-card text-[15px] font-semibold text-destructive hover:bg-muted"
         >
-          <LogOut className="h-4 w-4 mr-2" />
-          Keluar dari Akun
-        </Button>
-      </main>
-
-    </div>
+          <LogOut className="h-5 w-5" aria-hidden /> Keluar
+        </button>
+      </div>
+    </>
   );
 }

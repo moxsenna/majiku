@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, MessageCircle, Megaphone, Moon, Puzzle, Smile, Sprout, StickyNote, Utensils, type LucideIcon } from "lucide-react";
+import { ChevronRight, Eye, MessageCircle, Megaphone, Moon, Puzzle, Smile, Sprout, StickyNote, Utensils, type LucideIcon } from "lucide-react";
 import { TrialStatusList } from "@/components/parent/TrialStatusList";
 import type { AnnouncementItem } from "@/components/parent/AnnouncementsCard";
 import { todayInWib } from "@/lib/datetime";
@@ -71,7 +71,7 @@ export default function ParentPortal({
       {anak?.id?.includes("demo") && (
         <div className="flex items-center justify-between rounded-sheet bg-amber-500/10 border border-amber-500/20 px-4 py-2 text-xs text-amber-700 dark:text-amber-400">
           <span className="flex items-center gap-2 font-medium">
-            <span>👁️</span>
+            <Eye className="h-4 w-4" aria-hidden />
             <span>Mode Demo Orang Tua: Aisyah Putri</span>
           </span>
           <span className="text-[11px] opacity-80">Simulasi Aman</span>
@@ -83,7 +83,7 @@ export default function ParentPortal({
           <Sorotan anak={anak} laporan={terbaru} fotoUtama={fotoUtama} />
 
           <section className="rise rise-2 flex flex-col gap-2.5" aria-labelledby="kabar-judul">
-            <h2 id="kabar-judul" className="px-1 font-display text-xl font-bold tracking-tight">
+            <h2 id="kabar-judul" className="px-1 font-display text-lg font-bold tracking-tight">
               {terbaru ? judulKabar(terbaru.reportDate) : "Kabar hari ini"}
             </h2>
             {terbaru ? (
@@ -100,7 +100,7 @@ export default function ParentPortal({
 
           {galeriLain.length > 0 && (
             <section className="flex flex-col gap-2.5" aria-labelledby="foto-judul">
-              <h2 id="foto-judul" className="px-1 font-display text-xl font-bold tracking-tight">
+              <h2 id="foto-judul" className="px-1 font-display text-lg font-bold tracking-tight">
                 Foto {panggilanDari(anak)}
               </h2>
               <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
@@ -170,7 +170,7 @@ export default function ParentPortal({
                 <i key={k} className={cn("block h-3.5 w-3.5 rounded-full", KELAS_KRAYON[k].bg)} />
               ))}
             </span>
-            <h1 className="font-display text-[34px] font-extrabold leading-[1.02] tracking-[-0.03em]">
+            <h1 className="font-display text-[26px] font-bold leading-[1.1] tracking-[-0.025em]">
               {trialStatus.length > 0 ? "Pendaftaran sedang diproses" : "Selamat datang di Bunayo"}
             </h1>
             <p className="field-sub text-[15px] leading-relaxed">
@@ -225,7 +225,7 @@ function Sorotan({ anak, laporan, fotoUtama }: { anak: ParentChildData; laporan:
             {anak.className}
             {laporan?.createdAt && ` · ${formatRelatif(laporan.createdAt)}`}
           </span>
-          <h1 className="font-display text-[40px] font-extrabold leading-none tracking-[-0.035em]">{panggilan}</h1>
+          <h1 className="font-display text-[30px] font-extrabold leading-none tracking-[-0.03em]">{panggilan}</h1>
         </div>
       </section>
     );
@@ -236,10 +236,10 @@ function Sorotan({ anak, laporan, fotoUtama }: { anak: ParentChildData; laporan:
       {status}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <span className="field-sub block text-[15px] font-semibold">{anak.className}</span>
-          <h1 className="font-display text-[44px] font-extrabold leading-none tracking-[-0.035em]">{panggilan}</h1>
+          <span className="field-sub block text-sm font-semibold">{anak.className}</span>
+          <h1 className="font-display text-[30px] font-extrabold leading-none tracking-[-0.03em]">{panggilan}</h1>
         </div>
-        <KidAvatar id={anak.id} name={anak.nickname || anak.name} photoUrl={anak.avatar} size="2xl" className="shrink-0 bg-[hsl(0_0%_100%/.5)] ring-4 ring-[hsl(0_0%_100%/.55)]" />
+        <KidAvatar id={anak.id} name={anak.nickname || anak.name} photoUrl={anak.avatar} size="xl" className="shrink-0 bg-[hsl(0_0%_100%/.5)] ring-4 ring-[hsl(0_0%_100%/.55)]" />
       </div>
     </section>
   );

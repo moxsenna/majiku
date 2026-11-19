@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-20",
+  "title": "Design System: Bunayo",
+  "extensions": {
+    "colorMeta": {
+      "biru-bunayo": {
+        "role": "primary",
+        "displayName": "Biru Bunayo (Logo Blue)",
+        "canonical": "hsl(226.1 71.9% 44.7%)",
+        "tonalRamp": ["#131c39", "#1a2d6b", "#1b3ca7", "#244fdb", "#5879e4", "#92a6e8", "#c8d1ef", "#e9ecf6"]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta (Ink)",
+        "canonical": "hsl(249 26% 14%)",
+        "tonalRamp": ["#211f2d", "#383451", "#4f487a", "#685ea1", "#8c85b7", "#b2adcc", "#d6d4e2", "#eeedf2"]
+      },
+      "kertas": {
+        "role": "neutral",
+        "displayName": "Kertas (Warm Paper)",
+        "canonical": "hsl(40 100% 98%)",
+        "tonalRamp": ["#412f0b", "#7b550a", "#c28100", "#ffaa00", "#ffbe3d", "#f8d181", "#f6e4c1", "#f9f3e7"]
+      },
+      "stabilo": {
+        "role": "accent",
+        "displayName": "Stabilo (Highlighter Yellow)",
+        "canonical": "hsl(46 100% 62%)",
+        "tonalRamp": ["#41350b", "#7b600a", "#c29500", "#ffc300", "#ffd23d", "#f8dd81", "#f6eac1", "#f9f5e7"]
+      },
+      "merah-status": {
+        "role": "semantic",
+        "displayName": "Merah Status (Status Red)",
+        "canonical": "hsl(4 75% 44%)",
+        "tonalRamp": ["#3b1512", "#6d1e18", "#aa2218", "#df2d20", "#e75f55", "#ea9690", "#efcac7", "#f7eae9"]
+      },
+      "hijau-tiba": {
+        "role": "semantic",
+        "displayName": "Hijau Tiba (Arrival Green)",
+        "canonical": "hsl(150 67% 37%)",
+        "tonalRamp": ["#143826", "#1d6842", "#20a261", "#2ad580", "#5ddf9e", "#95e4bd", "#c9eddb", "#eaf6f0"]
+      },
+      "tomat": {
+        "role": "crayon",
+        "displayName": "Tomat (Tomato — meals, unread)",
+        "canonical": "hsl(10.9 100% 64.5%)",
+        "tonalRamp": ["#41150b", "#7b1f0a", "#c22400", "#ff2f00", "#ff613d", "#f89781", "#f6cac1", "#f9eae7"]
+      },
+      "matahari": {
+        "role": "crayon",
+        "displayName": "Matahari (Sun — mood, late, welcome)",
+        "canonical": "hsl(42 100% 60%)",
+        "tonalRamp": ["#41310b", "#7b590a", "#c28800", "#ffb300", "#ffc53d", "#f8d581", "#f6e6c1", "#f9f3e7"]
+      },
+      "daun": {
+        "role": "crayon",
+        "displayName": "Daun (Leaf — activities, success)",
+        "canonical": "hsl(150 58% 48%)",
+        "tonalRamp": ["#173626", "#226342", "#299961", "#36c980", "#66d69e", "#9adfbd", "#ccebdb", "#eaf5f0"]
+      },
+      "langit": {
+        "role": "crayon",
+        "displayName": "Langit (Sky — photos, notes, default)",
+        "canonical": "hsl(206 85% 60%)",
+        "tonalRamp": ["#10293d", "#134972", "#0f6cb3", "#138eec", "#4ca9f0", "#8ac4f0", "#c4def2", "#e8f1f8"]
+      },
+      "anggur": {
+        "role": "crayon",
+        "displayName": "Anggur (Grape — nap time, trials)",
+        "canonical": "hsl(264 73% 66%)",
+        "tonalRamp": ["#22133a", "#3a196b", "#531aa8", "#6d22dd", "#9057e5", "#b491e8", "#d7c8ef", "#eee9f6"]
+      },
+      "permen": {
+        "role": "crayon",
+        "displayName": "Permen (Candy Pink — medicine, special moments)",
+        "canonical": "hsl(338 100% 75%)",
+        "tonalRamp": ["#410b1f", "#7b0a33", "#c20047", "#ff005d", "#ff3d84", "#f881ad", "#f6c1d4", "#f9e7ed"]
+      }
+    },
+    "typographyMeta": {
+      "display-hero": { "displayName": "Display Hero", "purpose": "Child's name on the parent home hero (30px/800)." },
+      "display": { "displayName": "Display", "purpose": "Page titles and big numerals on crayon fields (26px/700)." },
+      "heading-sub": { "displayName": "Heading Sub", "purpose": "Pushed-page sub-header titles (22px)." },
+      "title": { "displayName": "Title", "purpose": "Section titles (18px/700)." },
+      "body": { "displayName": "Body", "purpose": "All UI copy (15px/1.45, base 14px)." },
+      "label": { "displayName": "Label", "purpose": "Group titles, uppercase 13px; inline labels 13px medium." },
+      "numeral-mono": { "displayName": "Numeral Mono", "purpose": "Desktop/admin ledger numerals (IBM Plex Mono, tabular)." },
+      "numeral-mobile": { "displayName": "Numeral Mobile", "purpose": "Mobile portal numerals (IBM Plex Sans tabular-nums inside .app-mobile)." }
+    },
+    "shadows": [
+      { "name": "shadow-soft", "value": "0 1px 2px hsl(249 26% 14% / .06)", "purpose": "Hairline lift for pills floating over content (status pill, back button, KidSwitcher). Dark: 0 1px 2px hsl(0 0% 0% / .3)." },
+      { "name": "shadow-float", "value": "0 8px 24px hsl(249 26% 14% / .14)", "purpose": "FloatingTabBar and sticky primary actions. Dark: 0 8px 24px hsl(0 0% 0% / .45)." },
+      { "name": "shadow-sheet", "value": "0 -12px 32px hsl(249 26% 14% / .18)", "purpose": "Bottom sheets and modals, casting upward. Dark: 0 -12px 32px hsl(0 0% 0% / .5)." },
+      { "name": "focus-ring", "value": "0 0 0 4px hsl(var(--primary-soft))", "purpose": "The only glow — focus-visible on every interactive element (#DFE6FA light / #222C4F dark)." }
+    ],
+    "motion": [
+      { "name": "rise", "value": "animation: rise .5s cubic-bezier(.16,1,.3,1) both; from { opacity:.001; transform:translateY(10px) } — stagger .rise-2 (60ms) / .rise-3 (120ms)", "purpose": "Screen/section entrances: rise in briefly from an already-visible state." },
+      { "name": "press", "value": "transition: transform .18s cubic-bezier(.2,.8,.2,1); :active { transform: scale(.97) }", "purpose": "Every tappable card and pill feels pressed on touch." },
+      { "name": "tiba-ping", "value": "animation: tiba-ping 1.6s cubic-bezier(.2,.8,.2,1) 2; from { opacity:.45; transform:scale(.6) } to { opacity:0; transform:scale(2.4) }", "purpose": "The 'sudah tiba' dot pulses softly twice on currentColor, then goes still." },
+      { "name": "sk-pulse", "value": "animation: sk-pulse 1.6s ease-in-out infinite; 50% { opacity:.55 }", "purpose": "Per-section skeleton loading shapes (never a full-screen spinner)." },
+      { "name": "fade-in", "value": "animation: fade-in .25s ease-out forwards", "purpose": "Generic appearance for legacy slide/scale aliases." },
+      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce) { .sk, .rise, .tiba-dot::after, .animate-* { animation: none } .press:active { transform: none } }", "purpose": "All motion is silenced under reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "base", "value": "390px design target (mobile-first, PWA standalone)" },
+      { "name": "content", "value": "max-[560px] — rows wrap/stack; desktop row-text max 560px" },
+      { "name": "stats", "value": "max-[1000px] — desktop stat cards go 2×2" },
+      { "name": "container", "value": "1400px (2xl) desktop admin container; sidebar 232px / rail 76px" },
+      { "name": "tabbar", "value": "FloatingTabBar max-w 440px, 68px tall, content reserves pb-110px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Ink Pill Button",
+      "kind": "button",
+      "refersTo": "ink-pill",
+      "description": "Mobile portals' one primary action per screen: Tinta ink pill, 52px, full press-scale.",
+      "html": "<button class=\"ds-btn-ink\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Absen anak</button>",
+      "css": ".ds-btn-ink { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:52px; padding:0 22px; border:none; border-radius:999px; background:hsl(var(--foreground, 249 26% 14%)); color:hsl(var(--background, 40 100% 98%)); font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; font-size:16px; font-weight:600; cursor:pointer; transition:transform .18s cubic-bezier(.2,.8,.2,1), background-color .15s ease; } .ds-btn-ink:hover { background:hsl(var(--foreground-2, 249 19% 26%)); } .ds-btn-ink:active { transform:scale(.97); } .ds-btn-ink:focus-visible { outline:none; box-shadow:0 0 0 4px hsl(var(--primary-soft, 224.4 73% 92.7%)); } .ds-btn-ink:disabled { background:hsl(var(--disabled, 252 15% 81%)); color:hsl(var(--primary-foreground, 0 0% 100%)); pointer-events:none; }"
+    },
+    {
+      "name": "Primary Button (Biru Bunayo, desktop kit)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Desktop/admin kit primary: the single blue action, 44px, 12px radius.",
+      "html": "<button class=\"ds-btn-primary\">Simpan</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:44px; padding:0 18px; border:1.5px solid transparent; border-radius:12px; background:hsl(var(--primary, 226.1 71.9% 44.7%)); color:#fff; font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:background-color .15s ease; } .ds-btn-primary:hover { background:hsl(var(--primary-hover, 226.7 72.9% 37.6%)); } .ds-btn-primary:focus-visible { outline:none; box-shadow:0 0 0 4px hsl(var(--primary-soft, 224.4 73% 92.7%)); }"
+    },
+    {
+      "name": "Secondary Outline Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Kit second action: 1.5px Tinta outline on Card, never a second coloured fill.",
+      "html": "<button class=\"ds-btn-secondary\">Lihat rincian</button>",
+      "css": ".ds-btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:44px; padding:0 18px; border:1.5px solid hsl(var(--foreground, 249 26% 14%)); border-radius:12px; background:hsl(var(--card, 0 0% 100%)); color:hsl(var(--foreground, 249 26% 14%)); font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:background-color .15s ease; } .ds-btn-secondary:hover { background:hsl(var(--background, 40 100% 98%)); } .ds-btn-secondary:focus-visible { outline:none; box-shadow:0 0 0 4px hsl(var(--primary-soft, 224.4 73% 92.7%)); }"
+    },
+    {
+      "name": "Crayon Field Card",
+      "kind": "card",
+      "refersTo": "crayon-field-card",
+      "description": "Signature cheerful-layer card: a whole card painted in the entity's base crayon, Tinta text, ink + white pills inside.",
+      "html": "<section class=\"ds-crayon-card\"><span class=\"ds-crayon-sub\">Kelompok Bermain A</span><h3 class=\"ds-crayon-title\">Alya</h3><p class=\"ds-crayon-note\"><b>12 dari 18</b> sudah tiba</p><div class=\"ds-crayon-actions\"><button class=\"ds-crayon-ink\">Absen anak</button><button class=\"ds-crayon-ghost\">Kirim kabar</button></div></section>",
+      "css": ".ds-crayon-card { display:flex; flex-direction:column; gap:10px; padding:20px; border-radius:28px; background:hsl(var(--matahari, 42 100% 60%)); color:hsl(249 26% 14%); font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; } .ds-crayon-sub { font-size:14px; font-weight:600; color:hsl(249 26% 14% / .72); } .ds-crayon-title { margin:0; font-family:var(--font-display, \"Bricolage Grotesque\"), system-ui, sans-serif; font-size:30px; font-weight:800; line-height:1; letter-spacing:-.03em; } .ds-crayon-note { margin:0; font-size:15px; } .ds-crayon-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; } .ds-crayon-ink { height:52px; border:none; border-radius:999px; background:hsl(249 26% 14%); color:hsl(40 60% 96%); font-size:16px; font-weight:600; cursor:pointer; transition:transform .18s cubic-bezier(.2,.8,.2,1); } .ds-crayon-ghost { height:52px; border:none; border-radius:999px; background:hsl(0 0% 100% / .6); color:hsl(249 26% 14%); font-size:16px; font-weight:600; cursor:pointer; transition:transform .18s cubic-bezier(.2,.8,.2,1); } .ds-crayon-ink:active, .ds-crayon-ghost:active { transform:scale(.97); } .ds-crayon-ink:focus-visible, .ds-crayon-ghost:focus-visible { outline:none; box-shadow:0 0 0 4px hsl(249 26% 14% / .35); }"
+    },
+    {
+      "name": "Kit Choice Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "One-tap choice pills (mood, makan, tidur, filters); selected = Tinta pill.",
+      "html": "<div class=\"ds-chip-row\"><button class=\"ds-chip\" aria-pressed=\"false\">Habis</button><button class=\"ds-chip ds-chip-on\" aria-pressed=\"true\">Setengah</button><button class=\"ds-chip\" aria-pressed=\"false\">Sedikit</button></div>",
+      "css": ".ds-chip-row { display:flex; flex-wrap:wrap; gap:6px; font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; } .ds-chip { min-height:36px; padding:0 14px; border:none; border-radius:999px; background:hsl(var(--muted, 41 36% 91%)); color:hsl(var(--foreground, 249 26% 14%)); font-size:14px; font-weight:600; cursor:pointer; transition:background-color .15s ease, transform .18s cubic-bezier(.2,.8,.2,1); } .ds-chip:hover { background:hsl(var(--border, 41 30% 88%)); } .ds-chip:active { transform:scale(.97); } .ds-chip:focus-visible { outline:none; box-shadow:0 0 0 4px hsl(var(--primary-soft, 224.4 73% 92.7%)); } .ds-chip-on, .ds-chip-on:hover { background:hsl(var(--nav-active, 249 26% 14%)); color:hsl(var(--nav-active-foreground, 0 0% 100%)); }"
+    },
+    {
+      "name": "Floating Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-item-active",
+      "description": "68px floating pill nav: active tab is a Tinta sheet-radius pill; Tomat dot = unread.",
+      "html": "<nav class=\"ds-tabbar\" aria-label=\"Navigasi utama\"><a class=\"ds-tab ds-tab-on\" aria-current=\"page\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3 9 9-9 9 9v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><path d=\"M9 22V12h6v10\"/></svg>Beranda</a><a class=\"ds-tab\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\"/></svg>Tagihan</a><a class=\"ds-tab\" href=\"#\"><span class=\"ds-tab-dot\" aria-label=\"belum dibaca\"></span><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/></svg>Pesan</a><a class=\"ds-tab\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/><path d=\"M7 20.66V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.66\"/></svg>Profil</a></nav>",
+      "css": ".ds-tabbar { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); max-width:440px; height:68px; padding:6px; border-radius:999px; background:hsl(var(--card, 0 0% 100%) / .9); box-shadow:0 8px 24px hsl(249 26% 14% / .14), 0 0 0 1px hsl(var(--border, 41 30% 88%) / .6); backdrop-filter:blur(20px) saturate(1.5); font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; } .ds-tab { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-height:56px; border-radius:20px; font-size:11px; font-weight:600; color:hsl(var(--muted-foreground, 252 10% 39%)); text-decoration:none; transition:color .15s ease; } .ds-tab:hover { color:hsl(var(--foreground, 249 26% 14%)); } .ds-tab-on { background:hsl(var(--nav-active, 249 26% 14%)); color:hsl(var(--nav-active-foreground, 0 0% 100%)); } .ds-tab:focus-visible { outline:none; box-shadow:0 0 0 4px hsl(var(--primary-soft, 224.4 73% 92.7%)); } .ds-tab-dot { position:absolute; right:24%; top:9px; width:8px; height:8px; border-radius:999px; background:hsl(var(--tomat, 10.9 100% 64.5%)); }"
+    },
+    {
+      "name": "Kid Avatar with Tiba Ring",
+      "kind": "custom",
+      "refersTo": "kid-avatar",
+      "description": "Child identity: soft crayon fill + ink display initials; green tiba dot = sudah tiba.",
+      "html": "<span class=\"ds-avatar-row\"><span class=\"ds-avatar\" title=\"Alya\">AL</span><span class=\"ds-avatar ds-avatar-tiba\" title=\"Bima\" aria-label=\"sudah tiba\">BI</span><span class=\"ds-avatar ds-avatar-ink\" title=\"Bu Rina\">RN</span></span>",
+      "css": ".ds-avatar-row { display:flex; gap:12px; font-family:var(--font-display, \"Bricolage Grotesque\"), system-ui, sans-serif; } .ds-avatar { position:relative; display:grid; place-items:center; width:40px; height:40px; border-radius:999px; background:hsl(var(--langit-soft, 205 89% 93%)); color:hsl(var(--langit-ink, 208 77% 37%)); font-weight:700; font-size:15px; } .ds-avatar-tiba::after { content:\"\"; position:absolute; right:-2px; bottom:-2px; width:14px; height:14px; border-radius:999px; border:3px solid hsl(var(--card, 0 0% 100%)); background:hsl(var(--success-ring, 150 67% 37%)); } .ds-avatar-ink { background:hsl(var(--foreground, 249 26% 14%)); color:hsl(var(--background, 40 100% 98%)); }"
+    },
+    {
+      "name": "Status Pill (sudah tiba)",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Arrival status over the photo hero: white pill, tiba-dot ping on the green dot.",
+      "html": "<span class=\"ds-status-pill\"><span class=\"ds-tiba-dot\" aria-hidden=\"true\"></span>Sudah tiba · <span class=\"ds-status-time\">07.32</span></span>",
+      "css": ".ds-status-pill { display:inline-flex; align-items:center; gap:8px; align-self:flex-start; height:32px; padding:0 12px; border-radius:999px; background:hsl(var(--card, 0 0% 100%)); color:hsl(var(--foreground, 249 26% 14%)); box-shadow:0 1px 2px hsl(249 26% 14% / .06); font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; font-size:13px; font-weight:600; } .ds-status-time { font-variant-numeric:tabular-nums; letter-spacing:-.01em; } .ds-tiba-dot { position:relative; width:8px; height:8px; border-radius:999px; background:hsl(var(--success-ring, 150 67% 37%)); } .ds-tiba-dot::after { content:\"\"; position:absolute; inset:-4px; border-radius:999px; background:currentColor; color:hsl(var(--success-ring, 150 67% 37%)); opacity:0; animation:ds-tiba-ping 1.6s cubic-bezier(.2,.8,.2,1) 2; } @keyframes ds-tiba-ping { 0% { opacity:.45; transform:scale(.6); } 100% { opacity:0; transform:scale(2.4); } } @media (prefers-reduced-motion: reduce) { .ds-tiba-dot::after { animation:none; } }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "44px field, 8px radius, Input-line stroke; focus = 4px Biru-soft ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Tulis pesan untuk guru…\" />",
+      "css": ".ds-input { height:44px; width:100%; padding:0 14px; border:1px solid hsl(var(--input, 40 7% 51%)); border-radius:8px; background:hsl(var(--card, 0 0% 100%)); color:hsl(var(--foreground, 249 26% 14%)); font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; font-size:15px; } .ds-input::placeholder { color:hsl(var(--placeholder, 253 8% 56%)); } .ds-input:focus-visible { outline:none; box-shadow:0 0 0 4px hsl(var(--primary-soft, 224.4 73% 92.7%)); } .ds-input:disabled { opacity:.6; }"
+    },
+    {
+      "name": "Empty State",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Bordered card with three krayon dots; always teaches the next step plus one action.",
+      "html": "<div class=\"ds-empty\"><span class=\"ds-empty-dots\" aria-hidden=\"true\"><i class=\"ds-dot-tomat\"></i><i class=\"ds-dot-matahari\"></i><i class=\"ds-dot-daun\"></i></span><h4>Belum ada kabar dari guru</h4><p>Begitu guru mencatat makan, tidur, dan kegiatan, kabarnya muncul di sini.</p><button class=\"ds-btn-secondary ds-empty-action\">Pelajari portal</button></div>",
+      "css": ".ds-empty { display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding:32px; border:1px solid hsl(var(--border, 41 30% 88%)); border-radius:12px; background:hsl(var(--card, 0 0% 100%)); font-family:var(--font-sans, \"IBM Plex Sans\"), system-ui, sans-serif; } .ds-empty-dots { display:flex; gap:4px; } .ds-empty-dots i { display:block; width:14px; height:14px; border-radius:999px; } .ds-dot-tomat { background:hsl(var(--tomat, 10.9 100% 64.5%)); } .ds-dot-matahari { background:hsl(var(--matahari, 42 100% 60%)); } .ds-dot-daun { background:hsl(var(--daun, 150 58% 48%)); } .ds-empty h4 { margin:0; font-family:var(--font-display, \"Bricolage Grotesque\"), system-ui, sans-serif; font-size:24px; font-weight:700; letter-spacing:-.01em; color:hsl(var(--foreground, 249 26% 14%)); } .ds-empty p { margin:0; max-width:560px; font-size:15px; line-height:1.45; color:hsl(var(--foreground-2, 249 19% 26%)); } .ds-empty-action { margin-top:4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Papan Kelas Ceria (The Cheerful Classroom Board)",
+    "overview": "Bunayo looks like a well-kept classroom wall: warm paper instead of sterile white, ink instead of pure black, and six crayon colours pinned up by the children's own names. The system is \"premium yang ceria\" — premium-plain structure (bordered panels, tabular numbers, one action colour) carrying a cheerful layer (whole cards painted in a child's or class's crayon colour, one authored motion vocabulary, a photo-led hero). The foundation is the desktop admin kit (\"Arah B — Papan Kelas\"); the Parent/Tutor portals mount it inside .app-mobile and add the cheerful layer as a documented sub-system. Every number on screen is real data from the classroom — no invented balances, promos, or testimonials. Warmth comes from colour fields and language, never from decoration: cheerfulness is structural, the crayon field is the card.",
+    "keyCharacteristics": [
+      "Warm paper base (#FFFCF5/#F7F2E9) with ink text (#1D1A2D); dark mode is a hue-faithful inversion, not a separate design.",
+      "One blue action (#2046C4) on desktop; on mobile portals the primary action is the Tinta ink pill.",
+      "Six crayons (Tomat, Matahari, Daun, Langit, Anggur, Permen) in three steps each — base / soft / ink — assigned deterministically per child, class, and activity type.",
+      "Bricolage Grotesque display over IBM Plex Sans body; mono numerals on desktop, tabular sans numerals inside .app-mobile.",
+      "Line-first depth: 1px borders for cards, three shadow tokens reserved for things that float.",
+      "One motion vocabulary: rise-in entrances, press scale-down, tiba-dot ping — all silenced by prefers-reduced-motion.",
+      "PWA polish: per-scheme theme-color, safe-area padding, pill composer, 68px floating tab bar."
+    ],
+    "rules": [
+      { "name": "The One Ink Pill Rule", "body": "On Parent/Tutor mobile portals there is one primary action per screen and it is the Tinta ink pill (52px tall, fully rounded, press-scale). Biru Bunayo is the desktop primary, never a mobile CTA.", "section": "colors" },
+      { "name": "The Ink-on-Crayon Rule", "body": "Text on a base crayon field is always Tinta (#1D1A2D, via .field-ink, ≥6:1, both schemes); white text appears only over photos, under the Tinta scrim gradient. Secondary text on crayon fields is Tinta at 72% opacity (.field-sub), never grey.", "section": "colors" },
+      { "name": "The Six-Crayon Rule", "body": "Only six crayons exist. Entity colour is derived, not chosen: krayonDari(id) hashes the child/class ID, KRAYON_KEGIATAN maps activity types — the same child is the same colour on every screen. A new category must map onto an existing crayon, not add a seventh.", "section": "colors" },
+      { "name": "The Stabilo Rule", "body": "Stabilo marks exactly one thing per screen — the number or phrase the user must not miss. A screen with two highlights has none.", "section": "colors" },
+      { "name": "The Two-Numeral Rule", "body": ".tabular is the only numeral treatment, and the scheme switches by context, not per-screen: mono on desktop/admin, tabular sans inside .app-mobile. Never hand-pick a font for a number.", "section": "typography" },
+      { "name": "The Reduced-Scale Rule", "body": "Mobile display type tops out at 30px (child name). The kit's 34px stat scale belongs to desktop admin screens only.", "section": "typography" },
+      { "name": "The Line-First Rule", "body": "A card gets a Garis border, not a shadow. Shadows are earned by leaving the document flow (nav, sheets, sticky actions) — a card that merely sits on the page stays flat.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do derive every entity colour through krayonDari(id) / KRAYON_KEGIATAN — same child, class, or activity = same crayon on every screen, both schemes.",
+      "Do wrap crayon-field content in .field-ink so text stays Tinta ≥6:1; use .field-sub (Tinta/72%) for secondary lines.",
+      "Do make the mobile primary action the ink pill (h-btn-lg rounded-full bg-foreground text-background + .press); keep Biru Bunayo for the desktop kit's primary and for links/selection on mobile.",
+      "Do put .tabular on every numeral — it resolves to mono on desktop and tabular sans inside .app-mobile automatically.",
+      "Do animate with the three moves only: .rise (0.5s cubic-bezier(.16,1,.3,1), stagger .rise-2/.rise-3 at 60/120ms), .press (scale .97, 0.18s), .tiba-dot (ping ×2, 1.6s).",
+      "Do honour prefers-reduced-motion (rise, press, tiba, skeletons all switch off) and keep targets ≥44px.",
+      "Do ship the PWA pair: theme-color #F7F2E9 (light) / #100F15 (dark), safe-area padding, content reserved above the 68px tab bar.",
+      "Do mark demo/simulated sessions with a labelled banner and keep real data the only content."
+    ],
+    "donts": [
+      "Don't use emoji as icons — icons are inline Lucide SVGs at 16–24px.",
+      "Don't ship blue rectangle CTAs on the Parent/Tutor mobile portals; the ink pill is the primary. (Biru Bunayo kit buttons on desktop keep their 12px radius.)",
+      "Don't add coloured side-stripes to mobile list rows — colour arrives through icon ink, soft avatar fills, or whole crayon fields. The desktop kit's Feed crayon rail is legacy kit, not the mobile vocabulary.",
+      "Don't invent a seventh crayon, a new status hue, or a hardcoded entity colour.",
+      "Don't put white text on base crayon fields; white appears only over photos, under the Tinta scrim.",
+      "Don't fake data — no invented bank accounts, promos, testimonials, or user counts; hide unfinished features instead.",
+      "Don't resurrect the 34px mockup display scale on mobile (page title 26, child name 30, class name 28, section title 18).",
+      "Don't use more than one blue primary, one Stabilo highlight, or one ink pill per screen."
+    ]
+  }
+}

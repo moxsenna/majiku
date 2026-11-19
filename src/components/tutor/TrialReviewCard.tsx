@@ -19,7 +19,6 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -184,13 +183,13 @@ export function TrialReviewCard({ trial }: TrialReviewCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden border border-border shadow-xs hover:border-primary/40 transition-colors">
-      <CardContent className="p-5 space-y-4">
+    <Card className="overflow-hidden rounded-sheet border-border shadow-none hover:border-primary/40 transition-colors">
+      <CardContent className="p-4 space-y-3.5">
         {/* Header row: Child info + Status Badge */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg font-bold text-foreground">
+              <h3 className="font-display text-lg font-bold tracking-tight text-foreground">
                 {trial.childName}
               </h3>
               {trial.childNickname && (
@@ -198,11 +197,11 @@ export function TrialReviewCard({ trial }: TrialReviewCardProps) {
                   ({trial.childNickname})
                 </span>
               )}
-              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-semibold">
                 {calculateAge(trial.childBirthDate)}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-primary mt-1">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mt-1">
               <span>{programName}</span>
               {trial.className && (
                 <>
@@ -215,27 +214,25 @@ export function TrialReviewCard({ trial }: TrialReviewCardProps) {
               )}
             </div>
           </div>
-          <Badge variant={badgeInfo.variant} className="self-start">
+          <span className="inline-flex h-7 w-fit shrink-0 items-center rounded-full bg-langit-soft px-3 text-[13px] font-semibold text-langit-ink">
             {badgeInfo.label}
-          </Badge>
+          </span>
         </div>
 
         {/* Schedule & Parent info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-muted/40 p-3 rounded-lg border border-border/40">
+        <div className="grid grid-cols-1 gap-2 text-[13px]">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-primary shrink-0" />
+            <Calendar className="h-4 w-4 shrink-0 text-langit-ink" aria-hidden />
             <span className="text-muted-foreground">
               Jadwal:{" "}
-              <strong className="text-foreground font-medium">
-                {formattedSchedule}
-              </strong>
+              <strong className="tabular font-medium text-foreground">{formattedSchedule}</strong>
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {trial.parentName && (
               <div className="flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <User className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
                 <span className="text-muted-foreground">
                   Ortu:{" "}
                   <strong className="text-foreground font-medium">
@@ -246,7 +243,7 @@ export function TrialReviewCard({ trial }: TrialReviewCardProps) {
             )}
             {trial.parentPhone && (
               <div className="flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+                <Phone className="h-3.5 w-3.5 shrink-0 text-langit-ink" aria-hidden />
                 <a
                   href={`tel:${trial.parentPhone}`}
                   className="font-medium text-primary hover:underline"
@@ -281,12 +278,12 @@ export function TrialReviewCard({ trial }: TrialReviewCardProps) {
 
         {/* Action button for scheduled */}
         {trial.status === "scheduled" && (
-          <div className="pt-2 flex justify-end">
+          <div className="pt-2 flex">
             <Button
               size="sm"
               onClick={handleMarkCompleted}
               disabled={isPending}
-              className="gap-2 w-full sm:w-auto"
+              className="press w-full rounded-full bg-nav-active text-nav-active-foreground hover:bg-nav-active/90 sm:w-auto"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

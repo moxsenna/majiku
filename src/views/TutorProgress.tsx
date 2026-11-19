@@ -1,20 +1,12 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  ArrowLeft, Upload, Camera, Check, 
-  Utensils, Moon, Smile, BookOpen,
-  Users, FileText, Loader2, X
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { Camera, Check, Frown, Loader2, Meh, Moon, Smile, SmilePlus, Sparkles, StickyNote, Thermometer, Utensils, UsersRound, X, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { formatTanggal } from "@/lib/format";
+import { KidAvatar, MobileSubHeader } from "@/components/bunayo";
 import { createDailyReport, type MyStudentItem } from "@/server/actions/dailyReports";
 
 export interface TutorProgressProps {
@@ -22,10 +14,53 @@ export interface TutorProgressProps {
   today: string;
 }
 
-const moodOptions = ["😊 Senang", "😐 Biasa", "😢 Sedih", "😴 Lelah", "🤒 Kurang Sehat"];
-const mealOptions = ["Habis", "Setengah", "Sedikit", "Tidak Makan"];
-const napOptions = ["Tidur Nyenyak", "Tidur Sebentar", "Sulit Tidur", "Tidak Tidur"];
+const MOOD: { value: string; icon: LucideIcon }[] = [
+  { value: "Senang", icon: Smile },
+  { value: "Biasa", icon: Meh },
+  { value: "Sedih", icon: Frown },
+  { value: "Lelah", icon: Moon },
+  { value: "Kurang Sehat", icon: Thermometer },
+];
+const MAKAN = ["Habis", "Setengah", "Sedikit", "Tidak Makan"];
+const TIDUR = ["Tidur Nyenyak", "Tidur Sebentar", "Sulit Tidur", "Tidak Tidur"];
 
+/** Grup chip pilihan satu ketukan; terpilih = pil Tinta. */
+function Chips({
+  options,
+  value,
+  onPick,
+  disabled,
+}: {
+  options: string[];
+  value: string;
+  onPick: (v: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((o) => {
+        const on = value === o;
+        return (
+          <button
+            key={o}
+            type="button"
+            onClick={() => onPick(o)}
+            disabled={disabled}
+            aria-pressed={on}
+            className={cn(
+              "press min-h-9 rounded-full px-3.5 text-sm font-semibold transition-colors disabled:opacity-60",
+              on ? "bg-nav-active text-nav-active-foreground" : "bg-muted text-foreground hover:bg-border",
+            )}
+          >
+            {o}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** GV3/G5/G6: kirim kabar harian banyak anak dalam satu ketukan per grup pilihan. */
 export default function TutorProgress({ students, today }: TutorProgressProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -40,18 +75,12 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const toggleStudent = (id: string) => {
-    setSelectedStudents((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
+  const toggleStudent = (id: string) =>
+    setSelectedStudents((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
 
   const selectAll = () => {
-    if (selectedStudents.length === students.length) {
-      setSelectedStudents([]);
-    } else {
-      setSelectedStudents(students.map((s) => s.id));
-    }
+    if (selectedStudents.length === students.length) setSelectedStudents([]);
+    else setSelectedStudents(students.map((s) => s.id));
   };
 
   const resetForm = () => {
@@ -69,7 +98,7 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
     if (!fileList || fileList.length === 0) return;
 
     const files = Array.from(fileList);
-    // Reset input so re-selecting same files triggers change event
+    // Reset input agar memilih file yang sama memicu event lagi.
     e.target.value = "";
 
     if (photos.length + files.length > 6) {
@@ -93,19 +122,11 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
     try {
       const formData = new FormData();
       formData.append("prefix", "reports");
-      for (const file of files) {
-        formData.append("files", file);
-      }
+      for (const file of files) formData.append("files", file);
 
-      const res = await fetch("/api/photos", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch("/api/photos", { method: "POST", body: formData });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Gagal mengunggah foto");
-      }
+      if (!res.ok) throw new Error(data.error || "Gagal mengunggah foto");
 
       if (Array.isArray(data.keys)) {
         setPhotos((prev) => [...prev, ...data.keys]);
@@ -119,13 +140,11 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
     }
   };
 
-  const removePhoto = (indexToRemove: number) => {
-    setPhotos((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-  };
+  const removePhoto = (i: number) => setPhotos((prev) => prev.filter((_, idx) => idx !== i));
 
   const handleSubmit = () => {
     if (selectedStudents.length === 0) {
-      toast.error("Pilih minimal satu siswa");
+      toast.error("Pilih minimal satu anak");
       return;
     }
     if (!activities.trim() && !notes.trim()) {
@@ -146,386 +165,237 @@ export default function TutorProgress({ students, today }: TutorProgressProps) {
           photos: photos.length > 0 ? photos : undefined,
         });
 
-        toast.success(`Laporan untuk ${res.created} siswa terkirim`);
+        toast.success(`Kabar untuk ${res.created} anak terkirim`);
         resetForm();
         router.refresh();
       } catch (err: unknown) {
-        const errorMsg =
-          err instanceof Error
-            ? err.message
-            : "Terjadi kesalahan saat menyimpan laporan";
-        toast.error(errorMsg);
+        const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan laporan";
+        toast.error(msg);
       }
     });
   };
 
+  const selesai = students.filter((s) => s.hasReportToday).length;
+
   return (
-    <div className="min-h-screen bg-background pb-8">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="flex items-center gap-3 p-4">
-          <Link href="/tutor">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div className="flex-1">
-            <h1 className="font-bold text-lg">Upload Laporan Progress</h1>
-            <p className="text-xs text-muted-foreground">Buat laporan harian siswa</p>
-          </div>
-        </div>
-      </header>
+    <>
+      <MobileSubHeader title="Kirim kabar" eyebrow={`Kabar harian ${formatTanggal(today)}`} backHref="/tutor" />
 
-      <main className="p-4 max-w-2xl mx-auto space-y-6">
-        {/* Select Students */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Users className="w-5 h-5 text-primary" />
-                  Pilih Siswa
-                </CardTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Laporan akan dibuat untuk setiap siswa yang dipilih
-                </p>
-              </div>
-              {students.length > 0 && (
-                <Button variant="outline" size="sm" onClick={selectAll} disabled={isPending}>
-                  {selectedStudents.length === students.length ? "Batal Semua" : "Pilih Semua"}
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {students.length === 0 ? (
-              <div className="py-6 text-center text-muted-foreground">
-                <p className="text-sm">Belum ada siswa yang ditugaskan di kelas Anda.</p>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {students.map((student) => {
-                    const isSelected = selectedStudents.includes(student.id);
-                    return (
-                      <div
-                        key={student.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => !isPending && toggleStudent(student.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            if (!isPending) toggleStudent(student.id);
-                          }
-                        }}
-                        className={cn(
-                          "relative flex flex-col justify-between p-3 rounded-xl border-2 cursor-pointer transition-all text-left",
-                          isSelected
-                            ? "border-primary bg-primary/5 shadow-sm"
-                            : "border-border hover:border-primary/50",
-                          isPending && "opacity-70 pointer-events-none"
-                        )}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className="relative shrink-0">
-                            <Avatar className="w-10 h-10">
-                              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                                {student.name
-                                  .split(" ")
-                                  .filter(Boolean)
-                                  .map((n) => n[0])
-                                  .slice(0, 2)
-                                  .join("")
-                                  .toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {isSelected && (
-                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                                <Check className="w-3 h-3 text-primary-foreground stroke-[3]" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold truncate text-foreground">
-                              {student.name}
-                            </p>
-                            {student.className && (
-                              <p className="text-xs text-muted-foreground truncate">
-                                {student.className}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {student.hasReportToday && (
-                          <div className="mt-2 pt-1 border-t border-border/60">
-                            <Badge
-                              variant="secondary"
-                              className="text-[10px] px-1.5 py-0 h-4 font-normal text-muted-foreground bg-muted w-full justify-center truncate"
-                            >
-                              Sudah dilaporkan hari ini
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {selectedStudents.length > 0 && (
-                  <p className="text-sm text-primary mt-3 font-medium">
-                    {selectedStudents.length} siswa dipilih
-                  </p>
-                )}
-              </>
+      <div className="flex flex-col gap-4 px-4 pb-4">
+        {/* Anak */}
+        <section className="flex flex-col gap-2.5 rounded-sheet bg-card p-4" aria-labelledby="pilih-anak">
+          <div className="flex items-center justify-between gap-2">
+            <h2 id="pilih-anak" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
+              <UsersRound className="h-5 w-5 text-langit-ink" aria-hidden /> Pilih anak
+            </h2>
+            {students.length > 0 && (
+              <button type="button" onClick={selectAll} disabled={isPending} className="text-sm font-semibold text-primary">
+                {selectedStudents.length === students.length ? "Batal semua" : "Pilih semua"}
+              </button>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Mood */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Smile className="w-5 h-5 text-amber-500" />
-              Mood Anak
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {moodOptions.map((mood) => (
-                <button
-                  type="button"
-                  key={mood}
-                  onClick={() => setMoodValue((prev) => (prev === mood ? "" : mood))}
-                  disabled={isPending}
-                  className={cn(
-                    "px-4 py-2 rounded-full border-2 text-sm transition-all font-medium",
-                    moodValue === mood
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                      : "border-border hover:border-primary/50 text-foreground bg-card"
-                  )}
-                >
-                  {mood}
-                </button>
-              ))}
+          </div>
+          {students.length === 0 ? (
+            <p className="py-3 text-sm text-foreground-2">Belum ada anak yang ditugaskan di kelas Anda.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {students.map((s) => {
+                const on = selectedStudents.includes(s.id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => !isPending && toggleStudent(s.id)}
+                    disabled={isPending}
+                    aria-pressed={on}
+                    className={cn(
+                      "press relative flex items-center gap-2.5 rounded-[16px] p-2.5 text-left transition-colors",
+                      on ? "bg-primary-soft ring-2 ring-primary" : "bg-muted hover:bg-border",
+                      isPending && "opacity-70 pointer-events-none",
+                    )}
+                  >
+                    <KidAvatar id={s.id} name={s.name} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <b className="block truncate text-sm">{s.name.split(" ")[0]}</b>
+                      {s.className && <small className="block truncate text-[11px] text-muted-foreground">{s.className}</small>}
+                    </span>
+                    {on && (
+                      <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-nav-active">
+                        <Check className="h-3 w-3 text-nav-active-foreground" aria-hidden />
+                      </span>
+                    )}
+                    {s.hasReportToday && (
+                      <span className="absolute inset-x-2.5 bottom-1.5 block truncate text-[10px] font-medium text-muted-foreground">
+                        Sudah terkirim
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          </CardContent>
-        </Card>
+          )}
+          {selectedStudents.length > 0 && (
+            <p className="tabular text-sm font-medium text-primary">{selectedStudents.length} anak dipilih</p>
+          )}
+          {selesai > 0 && selectedStudents.length === 0 && (
+            <p className="text-[13px] text-daun-ink">{selesai} dari {students.length} anak sudah ada kabarnya hari ini</p>
+          )}
+        </section>
 
-        {/* Status Makan & Tidur */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Utensils className="w-5 h-5 text-orange-500" />
-                Status Makan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {mealOptions.map((meal) => (
+        {/* Pilihan cepat */}
+        <section className="flex flex-col gap-3 rounded-sheet bg-card p-4">
+          <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
+            <SmilePlus className="h-5 w-5 text-matahari-ink" aria-hidden /> Kabar singkat
+          </h2>
+          <div>
+            <p className="mb-1.5 text-[13px] font-semibold text-muted-foreground">Suasana hati</p>
+            <div className="flex flex-wrap gap-1.5">
+              {MOOD.map(({ value, icon: Icon }) => {
+                const on = moodValue === value;
+                return (
                   <button
+                    key={value}
                     type="button"
-                    key={meal}
-                    onClick={() => setMealValue((prev) => (prev === meal ? "" : meal))}
+                    onClick={() => setMoodValue((p) => (p === value ? "" : value))}
                     disabled={isPending}
+                    aria-pressed={on}
                     className={cn(
-                      "px-3.5 py-1.5 rounded-full border-2 text-xs sm:text-sm transition-all font-medium",
-                      mealValue === meal
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                        : "border-border hover:border-primary/50 text-foreground bg-card"
+                      "press inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors disabled:opacity-60",
+                      on ? "bg-nav-active text-nav-active-foreground" : "bg-muted text-foreground hover:bg-border",
                     )}
                   >
-                    {meal}
+                    <Icon className="h-4 w-4" aria-hidden /> {value}
                   </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <p className="mb-1.5 text-[13px] font-semibold text-muted-foreground">Makan</p>
+            <Chips options={MAKAN} value={mealValue} onPick={(v) => setMealValue((p) => (p === v ? "" : v))} disabled={isPending} />
+          </div>
+          <div>
+            <p className="mb-1.5 text-[13px] font-semibold text-muted-foreground">Tidur siang</p>
+            <Chips options={TIDUR} value={napValue} onPick={(v) => setNapValue((p) => (p === v ? "" : v))} disabled={isPending} />
+          </div>
+        </section>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Moon className="w-5 h-5 text-blue-500" />
-                Status Tidur Siang
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {napOptions.map((nap) => (
-                  <button
-                    type="button"
-                    key={nap}
-                    onClick={() => setNapValue((prev) => (prev === nap ? "" : nap))}
-                    disabled={isPending}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-full border-2 text-xs sm:text-sm transition-all font-medium",
-                      napValue === nap
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                        : "border-border hover:border-primary/50 text-foreground bg-card"
-                    )}
-                  >
-                    {nap}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Activities */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-green-500" />
-              Aktivitas & Pembelajaran
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Ceritakan aktivitas bermain, sensorik, motorik, atau materi belajar hari ini..."
+        {/* Cerita */}
+        <section className="flex flex-col gap-3 rounded-sheet bg-card p-4">
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
+              <Sparkles className="h-5 w-5 text-daun-ink" aria-hidden /> Kegiatan hari ini
+            </h2>
+            <textarea
+              placeholder="Main apa hari ini? Sensorik, motorik, lagu, atau materi belajar…"
               value={activities}
               onChange={(e) => setActivities(e.target.value)}
-              className="min-h-[100px] resize-none"
+              rows={3}
               disabled={isPending}
+              className="mt-2 w-full rounded-[16px] border border-input bg-background px-3.5 py-2.5 text-[15px] leading-relaxed placeholder:text-placeholder focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-soft disabled:opacity-60"
             />
-          </CardContent>
-        </Card>
-
-        {/* Notes */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <FileText className="w-5 h-5 text-purple-500" />
-              Catatan Tambahan untuk Orang Tua
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Catatan kondisi khusus anak, konsumsi obat, baju ganti, atau pesan penting untuk orang tua..."
+          </div>
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
+              <StickyNote className="h-5 w-5 text-anggur-ink" aria-hidden /> Catatan untuk orang tua
+            </h2>
+            <textarea
+              placeholder="Obat, baju ganti, atau pesan penting…"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="min-h-[90px] resize-none"
+              rows={2}
               disabled={isPending}
+              className="mt-2 w-full rounded-[16px] border border-input bg-background px-3.5 py-2.5 text-[15px] leading-relaxed placeholder:text-placeholder focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-soft disabled:opacity-60"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        {/* Photo Upload */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Camera className="w-5 h-5 text-indigo-500" />
-                Foto Kegiatan
-              </CardTitle>
-              <span className="text-xs text-muted-foreground">
-                {photos.length}/6 foto
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              className="hidden"
-              disabled={isPending || isUploading || photos.length >= 6}
-            />
+        {/* Foto */}
+        <section className="flex flex-col gap-3 rounded-sheet bg-card p-4">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
+              <Camera className="h-5 w-5 text-langit-ink" aria-hidden /> Foto kegiatan
+            </h2>
+            <span className="tabular text-[13px] text-muted-foreground">{photos.length}/6</span>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="hidden"
+            disabled={isPending || isUploading || photos.length >= 6}
+          />
 
-            {photos.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {photos.map((key, idx) => (
-                  <div
-                    key={key}
-                    className="relative aspect-square rounded-xl overflow-hidden border border-border group bg-muted"
+          {photos.length > 0 && (
+            <div className="grid grid-cols-3 gap-1.5">
+              {photos.map((key, idx) => (
+                <div key={key} className="relative aspect-square overflow-hidden rounded-[12px] bg-muted">
+                  <img src={`/api/photos/${key}`} alt={`Foto kegiatan ${idx + 1}`} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(idx)}
+                    disabled={isPending || isUploading}
+                    aria-label="Hapus foto"
+                    className="absolute right-1 top-1 rounded-full bg-[hsl(249_26%_14%/.7)] p-1 text-[hsl(40_60%_96%)]"
                   >
-                    <img
-                      src={`/api/photos/${key}`}
-                      alt={`Foto kegiatan ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removePhoto(idx)}
-                      disabled={isPending || isUploading}
-                      aria-label="Hapus foto"
-                      className="absolute top-1.5 right-1.5 p-1 bg-black/60 hover:bg-black/80 text-white rounded-full transition-opacity shadow-sm"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {photos.length < 6 && (
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => !isPending && !isUploading && fileInputRef.current?.click()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    if (!isPending && !isUploading) fileInputRef.current?.click();
-                  }
-                }}
-                className={cn(
-                  "rounded-xl border-2 border-dashed border-border p-6 text-center cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted/40 flex flex-col items-center justify-center gap-2",
-                  (isPending || isUploading) && "opacity-60 pointer-events-none cursor-not-allowed"
-                )}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-8 h-8 text-primary animate-spin mb-1" />
-                    <p className="text-sm font-medium text-foreground">Mengunggah foto...</p>
-                    <p className="text-xs text-muted-foreground">Mohon tunggu sebentar</p>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
-                      <Camera className="w-5 h-5" />
-                    </div>
-                    <p className="text-sm font-medium text-foreground">
-                      {photos.length === 0 ? "Unggah Foto Kegiatan" : "Tambah Foto Lagi"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      JPG, PNG, atau WebP (maks. 5MB per file, hingga {6 - photos.length} foto lagi)
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Submit Button */}
-        <Button
-          onClick={handleSubmit}
-          className="w-full h-12 text-base font-semibold"
-          size="lg"
-          disabled={isPending || isUploading || students.length === 0}
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Mengirim Laporan...
-            </>
-          ) : isUploading ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Mengunggah Foto...
-            </>
-          ) : (
-            <>
-              <Upload className="w-5 h-5 mr-2" />
-              Kirim Laporan
-            </>
+                    <X className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
-        </Button>
-      </main>
-    </div>
+
+          {photos.length < 6 && (
+            <button
+              type="button"
+              onClick={() => !isPending && !isUploading && fileInputRef.current?.click()}
+              disabled={isPending || isUploading}
+              className={cn(
+                "flex min-h-[92px] flex-col items-center justify-center gap-1.5 rounded-[16px] border-2 border-dashed border-border text-center transition-colors hover:border-primary/60 hover:bg-muted/40",
+                (isPending || isUploading) && "opacity-60 pointer-events-none",
+              )}
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden />
+                  <p className="text-sm font-medium">Mengunggah foto…</p>
+                </>
+              ) : (
+                <>
+                  <Camera className="h-6 w-6 text-muted-foreground" aria-hidden />
+                  <p className="text-sm font-semibold">{photos.length === 0 ? "Unggah foto kegiatan" : "Tambah foto lagi"}</p>
+                  <p className="text-[11px] text-muted-foreground">JPG, PNG, WebP · maks 5MB · sisa {6 - photos.length} foto</p>
+                </>
+              )}
+            </button>
+          )}
+        </section>
+
+        {/* Kirim */}
+        <div className="sticky bottom-[86px] z-10">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isPending || isUploading || students.length === 0}
+            className="press grid h-btn-lg w-full place-items-center rounded-full bg-nav-active text-base font-semibold text-nav-active-foreground shadow-float disabled:bg-disabled disabled:text-primary-foreground"
+          >
+            {isPending ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Mengirim…
+              </span>
+            ) : isUploading ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> Mengunggah foto…
+              </span>
+            ) : selectedStudents.length > 0 ? (
+              `Kirim ke ${selectedStudents.length} anak`
+            ) : (
+              "Kirim kabar"
+            )}
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

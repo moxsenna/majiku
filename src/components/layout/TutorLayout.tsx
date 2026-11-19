@@ -10,7 +10,7 @@ const TUTOR_TABS: TabItem[] = [
   { href: "/tutor", label: "Hari Ini", icon: Sun, exact: true },
   { href: "/tutor/schedule", label: "Kelas", icon: UsersRound, match: ["/tutor/progress"] },
   { href: "/tutor/chat", label: "Pesan", icon: MessageCircle },
-  { href: "/tutor/saya", label: "Saya", icon: CircleUser, match: ["/tutor/kpi", "/tutor/attendance", "/tutor/trials", "/tutor/guides"] },
+  { href: "/tutor/saya", label: "Saya", icon: CircleUser, match: ["/tutor/kpi", "/tutor/attendance", "/tutor/trials"] },
 ];
 
 /** Shell portal guru: mobile-first (390), konten dibatasi 560 px di layar lebar, navigasi melayang 4 tab. */

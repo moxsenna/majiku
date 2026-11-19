@@ -1,50 +1,45 @@
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  ArrowLeft, Clock, MapPin, CheckCircle2, XCircle, 
-  Calendar, TrendingUp, AlertCircle, FileText
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CalendarPlus, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { formatJam, formatTanggal } from "@/lib/format";
 import { LeaveRequestDialog, type LeaveRequestData } from "@/components/leave/LeaveRequestDialog";
-import {
-  recordTutorAttendance,
-  getMyTutorAttendanceToday,
-  getMyTutorAttendanceHistory,
-} from "@/server/actions/attendance";
-import {
-  submitLeaveRequest,
-  getMyLeaveRequests,
-} from "@/server/actions/leave";
+import { MobileGroupTitle, MobileSubHeader } from "@/components/bunayo";
+import { recordTutorAttendance, getMyTutorAttendanceToday, getMyTutorAttendanceHistory } from "@/server/actions/attendance";
+import { submitLeaveRequest, getMyLeaveRequests } from "@/server/actions/leave";
 import { timeInWib } from "@/lib/datetime";
 
-const LEAVE_TYPE_LABELS: Record<string, string> = {
+const LABEL_IZIN: Record<string, string> = {
   sick: "Sakit",
-  personal: "Keperluan Pribadi",
-  annual: "Cuti Tahunan",
+  personal: "Keperluan pribadi",
+  annual: "Cuti tahunan",
   emergency: "Darurat",
 };
 
+const STATUS_RIWAYAT: Record<string, { label: string; cls: string }> = {
+  hadir: { label: "Hadir", cls: "text-daun-ink" },
+  terlambat: { label: "Terlambat", cls: "text-matahari-ink" },
+  izin: { label: "Izin", cls: "text-langit-ink" },
+  sakit: { label: "Sakit", cls: "text-langit-ink" },
+  alpa: { label: "Alpa", cls: "text-destructive" },
+  tidak_hadir: { label: "Tidak hadir", cls: "text-destructive" },
+};
+
+/** G2/G3: absen diri guru — satu bidang, satu tombol. */
 export default function TutorAttendance() {
   const queryClient = useQueryClient();
-  const [isCheckedIn, setIsCheckedIn] = useState(false);
-  const [checkInTime, setCheckInTime] = useState<string | null>(null);
   const [historyLimit, setHistoryLimit] = useState(10);
   const [currentTime, setCurrentTime] = useState(() => timeInWib());
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(timeInWib());
-    }, 15000);
+    const timer = setInterval(() => setCurrentTime(timeInWib()), 15000);
     return () => clearInterval(timer);
   }, []);
 
-  const { data: todayAttendance } = useQuery({
+  const { data: todayAttendance, isLoading } = useQuery({
     queryKey: ["tutor-attendance-today"],
     queryFn: getMyTutorAttendanceToday,
   });
@@ -59,36 +54,17 @@ export default function TutorAttendance() {
     queryFn: getMyLeaveRequests,
   });
 
-  useEffect(() => {
-    if (todayAttendance) {
-      if (todayAttendance.checkInTime && !todayAttendance.checkOutTime) {
-        setIsCheckedIn(true);
-        setCheckInTime(todayAttendance.checkInTime);
-      } else if (todayAttendance.checkOutTime) {
-        setIsCheckedIn(false);
-        setCheckInTime(todayAttendance.checkInTime);
-      }
-    }
-  }, [todayAttendance]);
+  const masuk = todayAttendance?.checkInTime ?? null;
+  const pulang = todayAttendance?.checkOutTime ?? null;
 
   const checkMutation = useMutation({
-    mutationFn: (input: { type: "check-in" | "check-out"; time: string; method: string }) =>
-      recordTutorAttendance(input),
+    mutationFn: (input: { type: "check-in" | "check-out"; time: string; method: string }) => recordTutorAttendance(input),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["tutor-attendance-today"] });
       queryClient.invalidateQueries({ queryKey: ["tutor-attendance-history"] });
-      if (res.type === "check-in") {
-        setIsCheckedIn(true);
-        setCheckInTime(res.time);
-        toast.success(`Check-in berhasil tercatat pada ${res.time} WIB`);
-      } else {
-        setIsCheckedIn(false);
-        toast.success(`Check-out berhasil tercatat pada ${res.time} WIB`);
-      }
+      toast.success(res.type === "check-in" ? `Check-in tercatat ${res.time} WIB` : `Check-out tercatat ${res.time} WIB`);
     },
-    onError: (err: any) => {
-      toast.error(err?.message || "Gagal mencatat absensi");
-    },
+    onError: (err: any) => toast.error(err?.message || "Gagal mencatat absensi"),
   });
 
   const leaveMutation = useMutation({
@@ -102,298 +78,167 @@ export default function TutorAttendance() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tutor-leave-requests"] });
-      toast.success("Pengajuan izin / cuti berhasil dikirim", {
-        description: "Pengajuan Anda telah disimpan dan menunggu peninjauan admin.",
-      });
+      toast.success("Pengajuan izin terkirim", { description: "Menunggu peninjauan admin lembaga." });
     },
-    onError: (err: any) => {
-      toast.error(err?.message || "Gagal mengirim pengajuan izin");
-    },
+    onError: (err: any) => toast.error(err?.message || "Gagal mengirim pengajuan izin"),
   });
 
-  const handleCheckOut = async () => {
-    checkMutation.mutate({ type: "check-out", time: currentTime, method: "manual" });
-  };
+  // Satu baris per tanggal: check-in/check-out bisa menghasilkan dua record untuk hari yang sama.
+  const riwayatPerHari = Array.from(
+    dbHistory.reduce((acc, r) => {
+      const tgl = String(r.date);
+      const cur = acc.get(tgl);
+      if (!cur) {
+        acc.set(tgl, { date: tgl, status: r.status, checkInTime: r.checkInTime, checkOutTime: r.checkOutTime });
+      } else {
+        cur.checkInTime = cur.checkInTime || r.checkInTime;
+        cur.checkOutTime = cur.checkOutTime || r.checkOutTime;
+        if (r.status === "hadir") cur.status = "hadir";
+      }
+      return acc;
+    }, new Map<string, { date: string; status: string; checkInTime: string | null; checkOutTime: string | null }>()),
+  ).map(([, v]) => v);
 
-  const handleManualCheckIn = () => {
-    checkMutation.mutate({ type: "check-in", time: currentTime, method: "manual" });
-  };
-
-  const handleLeaveSubmit = (data: LeaveRequestData) => {
-    leaveMutation.mutate(data);
-  };
-
-  const currentDate = new Intl.DateTimeFormat("id-ID", {
-    timeZone: "Asia/Jakarta",
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date());
-
-  const presentCount = dbHistory.filter((h) => h.status === "hadir").length;
-  const absentCount = dbHistory.filter((h) => h.status === "alpa" || h.status === "tidak_hadir").length;
-  const leaveCount = dbHistory.filter((h) => h.status === "izin" || h.status === "sakit").length;
-  const lateCount = dbHistory.filter((h) => h.status === "terlambat").length;
-  const totalDays = dbHistory.length;
-  const attendancePercentage = totalDays > 0 ? (presentCount / totalDays) * 100 : 0;
+  const hariHadir = riwayatPerHari.filter((r) => r.status === "hadir").length;
+  const total = riwayatPerHari.length;
+  const persen = total > 0 ? Math.round((hariHadir / total) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="flex items-center gap-3 p-4">
-          <Link href="/tutor">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div className="flex-1">
-            <h1 className="font-bold text-lg">Absensi Tutor</h1>
-            <p className="text-xs text-muted-foreground">{currentDate}</p>
+    <>
+      <MobileSubHeader title="Absen saya" eyebrow={formatTanggal(new Date(), { hari: true, panjang: true })} backHref="/tutor" />
+
+      <div className="flex flex-col gap-4 px-4 pb-4">
+        {/* Jam + aksi */}
+        <section className="rise field-ink flex flex-col gap-4 rounded-[28px] bg-daun p-5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="field-sub text-sm font-semibold">Waktu sekarang · WIB</span>
+            <span className="tabular rounded-full bg-[hsl(0_0%_100%/.55)] px-3 py-1 text-[15px] font-bold">{currentTime}</span>
           </div>
-        </div>
-      </header>
-
-      <main className="p-4 max-w-2xl mx-auto space-y-6">
-        {/* Check In/Out Card */}
-        <Card className="overflow-hidden">
-          <div className={cn(
-            "p-6 text-center",
-            isCheckedIn 
-              ? "bg-gradient-to-br from-green-500 to-green-600" 
-              : "bg-gradient-to-br from-primary to-primary/80"
-          )}>
-            <div className="text-white/80 text-sm mb-2">Waktu Sekarang (WIB)</div>
-            <div className="text-5xl font-bold text-white mb-4">{currentTime}</div>
-            
-            <div className="flex items-center justify-center gap-2 text-white/80 text-sm mb-4">
-              <MapPin className="w-4 h-4" />
-              <span>Bunayo Daycare - Presensi Pengajar</span>
-            </div>
-
-            {isCheckedIn ? (
-              <div className="space-y-4">
-                <div className="bg-white/20 rounded-xl p-4">
-                  <p className="text-white/80 text-sm">Check-in pada</p>
-                  <p className="text-white text-2xl font-bold">{checkInTime} WIB</p>
-                  <Badge variant="secondary" className="mt-2 bg-white/20 text-white">
-                    <Clock className="w-3 h-3 mr-1" />
-                    Metode: Manual
-                  </Badge>
-                </div>
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  className="w-full h-14 text-lg bg-white text-red-500 hover:bg-white/90"
-                  onClick={handleCheckOut}
-                  disabled={checkMutation.isPending}
-                >
-                  <XCircle className="w-6 h-6 mr-2" />
-                  {checkMutation.isPending ? "Memproses..." : "Check Out"}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="bg-white/10 rounded-xl p-4">
-                  <p className="text-white/90 text-sm">Catat kehadiran Anda hari ini secara mandiri</p>
-                </div>
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  className="w-full h-14 text-lg bg-white text-primary hover:bg-white/90 font-semibold"
-                  onClick={handleManualCheckIn}
-                  disabled={checkMutation.isPending}
-                >
-                  <CheckCircle2 className="w-6 h-6 mr-2" />
-                  {checkMutation.isPending ? "Memproses..." : "Check In Sekarang"}
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Quick Stats */}
-          <CardContent className="p-4 border-t border-border">
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="p-3 rounded-xl bg-green-500/10">
-                <p className="text-2xl font-bold text-green-500">{presentCount}</p>
-                <p className="text-xs text-muted-foreground">Hadir</p>
-              </div>
-              <div className="p-3 rounded-xl bg-red-500/10">
-                <p className="text-2xl font-bold text-red-500">{absentCount}</p>
-                <p className="text-xs text-muted-foreground">Tidak Hadir</p>
-              </div>
-              <div className="p-3 rounded-xl bg-yellow-500/10">
-                <p className="text-2xl font-bold text-yellow-500">{leaveCount}</p>
-                <p className="text-xs text-muted-foreground">Izin</p>
-              </div>
-              <div className="p-3 rounded-xl bg-orange-500/10">
-                <p className="text-2xl font-bold text-orange-500">{lateCount}</p>
-                <p className="text-xs text-muted-foreground">Terlambat</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Monthly Progress */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Kehadiran Berdasarkan Riwayat
-              </CardTitle>
-              <Badge variant="secondary">{attendancePercentage.toFixed(0)}%</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Progress value={attendancePercentage} className="h-3 mb-2" />
-            <p className="text-sm text-muted-foreground">
-              {presentCount} hadir dari {totalDays} sesi tercatat di database
+          {isLoading ? (
+            <span className="sk block h-10 w-56" />
+          ) : pulang ? (
+            <p className="flex items-center gap-2 text-lg font-semibold">
+              <LogOut className="h-5 w-5" aria-hidden /> Pulang <b className="tabular">{formatJam(pulang)}</b>
+              <span className="field-sub text-sm">· masuk {formatJam(masuk)}</span>
             </p>
-          </CardContent>
-        </Card>
-
-        {/* Attendance History */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Riwayat Absensi
-              </CardTitle>
-              {dbHistory.length > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setHistoryLimit((prev) => (prev === 10 ? 50 : 10))}
-                >
-                  {historyLimit === 10 ? "Lihat Semua" : "Perkecil"}
-                </Button>
+          ) : masuk ? (
+            <p className="flex items-center gap-2 text-lg font-semibold">
+              <LogIn className="h-5 w-5" aria-hidden /> Sudah masuk <b className="tabular">{formatJam(masuk)}</b>
+            </p>
+          ) : (
+            <p className="text-[15px]">Belum check-in hari ini. Catat sekarang agar kehadiran Anda terhitung.</p>
+          )}
+          {!pulang && (
+            <button
+              type="button"
+              onClick={() => checkMutation.mutate({ type: masuk ? "check-out" : "check-in", time: currentTime, method: "manual" })}
+              disabled={checkMutation.isPending}
+              className={cn(
+                "press grid h-btn-lg place-items-center rounded-full text-base font-semibold disabled:opacity-60",
+                masuk ? "bg-[hsl(0_0%_100%/.65)] text-[hsl(249_26%_14%)]" : "bg-[hsl(249_26%_14%)] text-[hsl(40_60%_96%)]",
               )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {dbHistory.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-xl">
-                <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-medium">Belum ada riwayat absensi</p>
-                <p className="text-xs mt-1">Data absensi akan muncul di sini setelah Anda melakukan check-in</p>
-              </div>
-            ) : (
-              dbHistory.map((record, index) => (
-                <div 
-                  key={record.id || index}
-                  className="flex items-center justify-between p-3 rounded-xl bg-muted/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center",
-                      record.status === "hadir" ? "bg-green-500/10" : "bg-yellow-500/10"
-                    )}>
-                      {record.status === "hadir" ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-5 h-5 text-yellow-500" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{String(record.date)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {record.status === "hadir" 
-                          ? `${record.checkInTime || "-"} - ${record.checkOutTime || "-"}` 
-                          : "Izin"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant={record.status === "hadir" ? "default" : "secondary"}>
-                      {record.status === "hadir" ? "Hadir" : "Izin"}
-                    </Badge>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {record.method || "manual"}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+            >
+              {checkMutation.isPending ? "Mencatat…" : masuk ? "Check-out" : "Check-in sekarang"}
+            </button>
+          )}
+        </section>
 
-        {/* Daftar Pengajuan Cuti / Izin */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Pengajuan Izin & Cuti
-              </CardTitle>
-              <Badge variant="outline">{leaveRequests.length} diajukan</Badge>
+        {/* Rekap riwayat */}
+        {total > 0 && (
+          <section className="rounded-sheet bg-card p-4">
+            <div className="flex items-baseline justify-between">
+              <b className="tabular font-display text-[26px] font-bold">{persen}%</b>
+              <span className="text-[13px] text-muted-foreground">
+                {hariHadir} hari hadir dari {total} hari tercatat
+              </span>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {leaveRequests.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground bg-muted/20 rounded-xl">
-                <p className="text-sm">Belum ada pengajuan izin atau cuti yang diajukan.</p>
-              </div>
-            ) : (
-              leaveRequests.map((req) => (
-                <div
-                  key={req.id}
-                  className="p-3 rounded-xl border bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm">
-                        {LEAVE_TYPE_LABELS[req.leaveType] || req.leaveType}
-                      </p>
-                      <Badge
-                        variant={
-                          req.status === "approved"
-                            ? "default"
-                            : req.status === "rejected"
-                            ? "destructive"
-                            : "secondary"
-                        }
-                        className="text-xs"
-                      >
-                        {req.status === "approved"
-                          ? "Disetujui"
-                          : req.status === "rejected"
-                          ? "Ditolak"
-                          : "Menunggu Persetujuan"}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Periode: {req.startDate} s/d {req.endDate}
-                    </p>
-                    {req.reason && (
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        Alasan: {req.reason}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+            <div aria-hidden className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+              <div className="h-full rounded-full bg-daun transition-[width] duration-500" style={{ width: `${persen}%` }} />
+            </div>
+          </section>
+        )}
 
-        {/* Request Leave Action */}
-        <Card>
-          <CardContent className="p-4">
-            <LeaveRequestDialog onSubmit={handleLeaveSubmit}>
-              <Button variant="outline" className="w-full" disabled={leaveMutation.isPending}>
-                <Calendar className="w-4 h-4 mr-2" />
-                {leaveMutation.isPending ? "Mengirim Pengajuan..." : "Ajukan Izin / Cuti"}
-              </Button>
-            </LeaveRequestDialog>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Chat akan otomatis dialihkan ke Admin/Pengganti saat cuti disetujui
+        {/* Riwayat */}
+        <section className="flex flex-col gap-2">
+          <div className="flex items-baseline justify-between px-1">
+            <MobileGroupTitle>Riwayat absensi</MobileGroupTitle>
+            {dbHistory.length > 0 && (
+              <button type="button" onClick={() => setHistoryLimit((p) => (p === 10 ? 50 : 10))} className="text-sm font-semibold text-primary">
+                {historyLimit === 10 ? "Lihat semua" : "Perkecil"}
+              </button>
+            )}
+          </div>
+          {dbHistory.length === 0 ? (
+            <p className="rounded-sheet bg-card p-5 text-sm text-foreground-2">
+              Riwayat muncul di sini setelah Anda check-in pertama kali.
             </p>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+          ) : (
+            <ul className="overflow-hidden rounded-sheet bg-card">
+              {riwayatPerHari.map((r, i) => {
+                const st = STATUS_RIWAYAT[r.status] ?? STATUS_RIWAYAT.izin;
+                return (
+                  <li key={r.date || i} className="flex min-h-14 items-center gap-3 border-b border-border-subtle px-4 py-2.5 last:border-b-0">
+                    <span className="tabular w-10 shrink-0 text-[13px] font-semibold">{String(r.date).slice(8, 10)}/{String(r.date).slice(5, 7)}</span>
+                    <span className="min-w-0 flex-1">
+                      <b className="block text-[15px]">{st.label}</b>
+                      {r.status === "hadir" || r.status === "terlambat" ? (
+                        <small className="tabular block text-[13px] text-muted-foreground">
+                          {r.checkInTime ? formatJam(r.checkInTime) : "—"} – {r.checkOutTime ? formatJam(r.checkOutTime) : "belum pulang"}
+                        </small>
+                      ) : null}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* Izin */}
+        <section className="flex flex-col gap-2">
+          <MobileGroupTitle>Izin & cuti</MobileGroupTitle>
+          <div className="overflow-hidden rounded-sheet bg-card">
+            <LeaveRequestDialog onSubmit={(d) => leaveMutation.mutate(d)}>
+              <button
+                type="button"
+                disabled={leaveMutation.isPending}
+                className="flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted disabled:opacity-60"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-matahari-soft text-matahari-ink">
+                  <CalendarPlus className="h-[18px] w-[18px]" aria-hidden />
+                </span>
+                <span className="flex-1 text-[15px] font-semibold">
+                  {leaveMutation.isPending ? "Mengirim pengajuan…" : "Ajukan izin / cuti"}
+                </span>
+              </button>
+            </LeaveRequestDialog>
+            {leaveRequests.length > 0 && (
+              <ul className="border-t border-border-subtle">
+                {leaveRequests.slice(0, 4).map((r) => (
+                  <li key={r.id} className="flex min-h-12 items-center gap-3 border-b border-border-subtle px-4 py-2.5 last:border-b-0">
+                    <span className="min-w-0 flex-1">
+                      <b className="block text-sm font-semibold">{LABEL_IZIN[r.leaveType] || r.leaveType}</b>
+                      <small className="tabular block text-[13px] text-muted-foreground">
+                        {r.startDate} – {r.endDate}
+                      </small>
+                    </span>
+                    <small
+                      className={cn(
+                        "shrink-0 text-[13px] font-semibold",
+                        r.status === "approved" ? "text-daun-ink" : r.status === "rejected" ? "text-destructive" : "text-matahari-ink",
+                      )}
+                    >
+                      {r.status === "approved" ? "Disetujui" : r.status === "rejected" ? "Ditolak" : "Menunggu"}
+                    </small>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <p className="px-1 text-[13px] text-muted-foreground">Saat izin disetujui, pesan orang tua otomatis dialihkan ke pengganti/admin.</p>
+        </section>
+      </div>
+    </>
   );
+
 }
