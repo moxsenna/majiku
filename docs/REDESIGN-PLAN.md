@@ -322,3 +322,18 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Demo | baca-saja | InfoBox Mode demo, form nonaktif, tanpa tombol hapus |
 | State | isi/kosong/memuat/galat | EmptyState "Belum ada pengumuman" (390), skeleton dua panel, ErrorBanner + Stale |
 | Bersih-bersih | — | `views/Messages.tsx` dihapus |
+
+### Fase 3 · Pembelajaran — O7 Laporan harian & foto (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | baca-saja, scope tenant | `laporanHarian.ts` `getLaporanHarian(tanggal)` + `getFotoKegiatan` (definisi di kepala file). Tulis/hapus = action lama `createDailyReport`/`deleteDailyReport`, `uploadGalleryPhotos`/`deleteGalleryPhoto` |
+| Per kelas | tab terlapor/terdaftar, bilah krayon per kegiatan, status | tab "Baby Bee 2/5"; StatusDot Terkirim / Belum ditulis (hadir tanpa laporan) / — (izin, belum tiba) |
+| Detail | isi laporan per kegiatan, penulis, jam kirim | panel lengket FeedItem makan/kegiatan/foto/tidur/catatan + "Ditulis … · jam" |
+| Alur tulis | multi-anak → terkirim → hapus | Playwright DB uji: 3 anak dipilih, "Kirim ke 3 anak" → 3 baris Terkirim; dihapus lagi (3) |
+| Tanggal lalu | `?tanggal=` | InfoBox "Melihat …" + kembali ke hari ini; tanggal masa depan dibatasi ke hari ini |
+| Foto | grid + filter kelas + unggah | `/daily-reports/foto`, EmptyState "Belum ada foto" → Unggah foto pertama |
+| BARU disembunyikan | feed berwaktu, insiden + konfirmasi baca, status dibaca, ringkasan 16.00, izin publikasi foto | catatan di bawah daftar; backlog O7 |
+| Demo | baca-saja | InfoBox Mode demo, tombol tulis/hapus tidak dirender |
+| State | isi/kosong/memuat/galat | EmptyState "Belum ada anak di kelas", skeleton, ErrorBanner + Stale |
+| Bersih-bersih | — | `views/DailyReports.tsx`, `views/Gallery.tsx` dihapus |

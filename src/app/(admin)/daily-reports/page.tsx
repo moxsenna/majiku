@@ -1,30 +1,12 @@
-import DailyReports from "@/views/DailyReports";
-import {
-  listDailyReports,
-  getStudentOptions,
-} from "@/server/actions/dailyReports";
-import { todayInWib, isValidDateString } from "@/lib/datetime";
+import LaporanHarian from "@/views/laporan/LaporanHarian";
+import { getLaporanHarian } from "@/server/actions/laporanHarian";
 
-interface PageProps {
-  searchParams: Promise<{ date?: string }>;
-}
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Laporan harian" };
 
-export default async function Page({ searchParams }: PageProps) {
-  const resolvedParams = await searchParams;
-  const today = todayInWib();
-  const rawDate = resolvedParams.date?.trim();
-  const selectedDate = rawDate && isValidDateString(rawDate) ? rawDate : today;
-
-  const [reports, studentOptions] = await Promise.all([
-    listDailyReports(selectedDate),
-    getStudentOptions(),
-  ]);
-
-  return (
-    <DailyReports
-      initialReports={reports}
-      studentOptions={studentOptions}
-      selectedDate={selectedDate}
-    />
-  );
+export default async function Page({ searchParams }: { searchParams: Promise<{ tanggal?: string; date?: string }> }) {
+  const { tanggal, date } = await searchParams;
+  const t = tanggal ?? date;
+  const initialData = await getLaporanHarian(t).catch(() => undefined);
+  return <LaporanHarian key={t ?? "hari-ini"} initialData={initialData} tanggal={t} />;
 }

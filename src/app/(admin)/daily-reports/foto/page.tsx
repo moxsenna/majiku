@@ -1,27 +1,10 @@
-import Gallery from "@/views/Gallery";
-import { listGalleryPhotos, listGalleryOptions } from "@/server/actions/gallery";
-import { getMyRoles } from "@/server/actions/roles";
+import FotoKegiatan from "@/views/laporan/FotoKegiatan";
+import { getFotoKegiatan } from "@/server/actions/laporanHarian";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Foto kegiatan" };
 
 export default async function Page() {
-  const [photos, options, roles] = await Promise.all([
-    listGalleryPhotos(),
-    listGalleryOptions(),
-    getMyRoles(),
-  ]);
-
-  const canDelete = roles.includes("admin") || roles.includes("moderator");
-  const canUpload = roles.includes("admin") || roles.includes("moderator") || roles.includes("tutor");
-
-
-  return (
-    <Gallery
-      initialPhotos={photos}
-      studentOptions={options.students}
-      classOptions={options.classes}
-      canDelete={canDelete}
-      canUpload={canUpload}
-    />
-  );
+  const initialData = await getFotoKegiatan().catch(() => undefined);
+  return <FotoKegiatan initialData={initialData} />;
 }
