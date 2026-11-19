@@ -98,7 +98,8 @@ export function middleware(req: NextRequest) {
       pathname.startsWith("/schedule") ||
       pathname.startsWith("/birthdays") ||
       pathname.startsWith("/crm") ||
-      pathname.startsWith("/settings")
+      pathname.startsWith("/settings") ||
+      pathname.startsWith("/reports")
     ) {
       return NextResponse.redirect(new URL("/", req.url));
     }
@@ -141,7 +142,8 @@ export function middleware(req: NextRequest) {
       pathname.startsWith("/vendor") ||
       pathname.startsWith("/classes") ||
       pathname.startsWith("/billing") ||
-      pathname.startsWith("/crm")
+      pathname.startsWith("/crm") ||
+      pathname.startsWith("/reports")
     ) {
       return NextResponse.redirect(new URL("/", req.url));
     }
@@ -211,7 +213,7 @@ export function middleware(req: NextRequest) {
     /^\/dashboard/, /^\/students/, /^\/attendance/, /^\/daily-reports/,
     /^\/gallery/, /^\/messages/, /^\/billing/, /^\/tutor-payout/,
     /^\/classes/, /^\/tutors/, /^\/schedule/, /^\/birthdays/,
-    /^\/lesson-plans/, /^\/crm/, /^\/settings/,
+    /^\/lesson-plans/, /^\/crm/, /^\/settings/, /^\/reports/,
   ];
   const PARENT_PROTECTED = [/^\/parent\b(?!\/login|\/register)/];
   const TUTOR_PROTECTED = [/^\/tutor\b(?!\/login)/];

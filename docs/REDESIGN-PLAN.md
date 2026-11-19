@@ -383,3 +383,18 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Demo | baca-saja | InfoBox Mode demo, input nonaktif, tombol tambah/klik baris tidak aktif |
 | State | isi/kosong/memuat/galat | EmptyState "Belum ada guru", skeleton, ErrorBanner + Stale |
 | Bersih-bersih | — | `views/Settings.tsx`, `views/Tutors.tsx` dihapus |
+
+### Fase 3 · Laporan — O12 Kehadiran (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | baca-saja, scope tenant | `laporan.ts` `getLaporanKehadiran(bulan)` — agregasi `attendance` anak milik tenant di kelas milik tenant (definisi di kepala file) |
+| Definisi jujur | periode + definisi di header panel | "hadir ÷ hari-anak tercatat" (hadir = present + late). Bukan "÷ hari sekolah terjadwal" seperti desain, karena kalender libur/sesi per tanggal belum ada — dijelaskan di bawah tabel |
+| Angka | rata-rata hadir (stabilo, satu per layar), izin+sakit, alpa (→ daftar anak), rata-rata tiba | DB uji Nov 2026: 83% · 12 hari tercatat · 13 anak; Alpa 16 → 13 anak dengan tanggal |
+| Per kelas | chip krayon, bar, hadir/izin/alpa | tabel scroll di dalam panel pada 390 |
+| Bulan | pilih 12 bulan terakhir | `?bulan=YYYY-MM`; Okt 2026 → EmptyState "Belum ada catatan kehadiran" + Buka Kehadiran |
+| Ekspor | CSV | dibuat di peramban dari angka yang tampil (`kehadiran-2026-11.csv`, BOM UTF-8 untuk Excel) |
+| Navigasi | menu Laporan | adminNav Kelola › Laporan (`/reports`), dilindungi middleware (ADMIN_PROTECTED + isolasi subdomain parent/tutor) |
+| BARU disembunyikan | jenis laporan lain, kirim terjadwal via email | panel kiri hanya "Kehadiran anak" + tautan ke Keuangan › Ringkasan; backlog O12 |
+| Demo | angka frame desain | InfoBox Mode demo (749 hadir · 22 hari · 38 anak) |
+| State | isi/kosong/memuat/galat | EmptyState per bulan, skeleton, ErrorBanner + Stale |

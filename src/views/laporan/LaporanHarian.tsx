@@ -264,7 +264,7 @@ export default function LaporanHarian({ initialData, tanggal }: { initialData?: 
                 </TabsList>
               </Tabs>
 
-              <div className="grid items-start gap-5 min-[1001px]:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="grid grid-cols-1 items-start gap-5 min-[1001px]:grid-cols-[minmax(0,1fr)_380px]">
                 <Panel>
                   {rows.map((r) => {
                     const on = aktif?.studentId === r.studentId;

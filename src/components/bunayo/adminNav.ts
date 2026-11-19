@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  ChartColumn,
   ClipboardCheck,
   House,
   Menu,
@@ -15,7 +16,7 @@ import type { AdminShellProps, NavEntry, NavItem } from "./AdminShell";
 /**
  * IA admin Bunayo (kit.js · UIUX-REVIEW §8).
  * Sub-menu hanya memuat layar yang sudah ada; layar BARU yang belum dibangun
- * (Perkembangan, Kotak Masuk, Impor Data, Paket & Biaya, Laporan, dll.) tidak ditampilkan —
+ * (Perkembangan, Impor Data, Paket & Biaya, dll.) tidak ditampilkan —
  * lihat docs/REDESIGN-BACKLOG.md.
  */
 export function adminNav(istilah: Istilah): NavEntry[] {
@@ -83,6 +84,7 @@ export function adminNav(istilah: Istilah): NavEntry[] {
         { label: istilah.honor, href: "/billing/honor" },
       ],
     },
+    { key: "laporan", label: "Laporan", href: "/reports", icon: ChartColumn },
   ];
 }
 

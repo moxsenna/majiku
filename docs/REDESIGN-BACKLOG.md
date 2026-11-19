@@ -36,6 +36,7 @@ Bagian berikut ada di desain tetapi datanya/backend-nya belum ada. Tidak dibangu
 | O9 / G12 / P10 | Modul perkembangan | Tabel perkembangan | LRN-01..06, PAR-08 | Tidak dibuat |
 | O10 / P6 | Kotak masuk admin, percakapan per anak dengan lembaga | Percakapan lembaga | COM-07 | EmptyState jujur |
 | O11 | Audiens, jadwal kirim, tingkat baca | Kolom audiens/jadwal/read | COM-08 | Disembunyikan |
+| O12 | Laporan keuangan/pendaftaran/check-in guru/komunikasi, ÷ hari sekolah terjadwal, kirim terjadwal via email | Kalender libur, agregasi per jenis, email terjadwal | RPT-01..04, RPT-07 | Hanya kehadiran anak; ekspor CSV di peramban |
 | O13 | Peran per lembaga, undangan staf | Tabel peran tenant | RBAC-01, RBAC-02 | Disembunyikan |
 | G4 / O5 | Scan QR anak aktif | Pemindai + QR per anak | ATT-01..03 | Disembunyikan (N27) |
 | G5 | Izin publikasi foto | Kolom izin per anak | COM-11 | Disembunyikan |

@@ -103,7 +103,7 @@ export default function PengaturanLembaga({ initialData }: { initialData?: Penga
           <ErrorBanner title="Pengaturan gagal diperbarui" description={`Yang tampil adalah data terakhir pukul ${formatJam(data.diambilPada)}.`} onRetry={() => refetch()} />
         )}
         <Stale stale={isError}>
-          <div className="grid items-start gap-5 min-[1001px]:grid-cols-2">
+          <div className="grid grid-cols-1 items-start gap-5 min-[1001px]:grid-cols-2">
             <Panel>
               <PanelHeader title="Profil lembaga" meta={data.lembaga.isVerified ? <StatusDot varian="ok" size="sm">Terverifikasi</StatusDot> : undefined} />
               <form
