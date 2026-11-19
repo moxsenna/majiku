@@ -9,6 +9,7 @@ import { KELAS_KRAYON, krayonDari } from "@/lib/krayon";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { AvatarStack, KidAvatar, MobileGroupTitle } from "@/components/bunayo";
+import { NotificationBell } from "@/components/bunayo/NotificationBell";
 import {
   getTutorDashboardOverview,
   type TutorDashboardData,
@@ -65,14 +66,17 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
           </h1>
         </div>
         {nama && (
-          <Link href="/tutor/saya" aria-label="Saya" className="press">
-            <KidAvatar
-              name={nama}
-              photoUrl={data?.tutorPhoto || (isDemo ? "/images/avatars/parent-rina.jpg" : undefined)}
-              krayon="matahari"
-              size="md"
-            />
-          </Link>
+          <span className="flex items-center gap-2">
+            <NotificationBell tone="muted" />
+            <Link href="/tutor/saya" aria-label="Saya" className="press">
+              <KidAvatar
+                name={nama}
+                photoUrl={data?.tutorPhoto || (isDemo ? "/images/avatars/parent-rina.webp" : undefined)}
+                krayon="matahari"
+                size="md"
+              />
+            </Link>
+          </span>
         )}
       </header>
 

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #FCFAF7; }
+
+  #root {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background-color: #FCFAF7;
+    container-type: size;
+    font-family: "Plus Jakarta Sans", sans-serif;
+  }
+
+  .f0-zoom {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+
+  .f0-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .f0-label {
+    position: absolute;
+    top: 54px;
+    left: 64px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 30px;
+    border-radius: 9999px;
+    border: 3px solid #1E1E1E;
+    background-color: #FFFFFF;
+    box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #32221B;
+    text-transform: uppercase;
+    opacity: 0;
+  }
+
+  .f0-label-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #F06542;
+    border: 2px solid #1E1E1E;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+  <div
+    id="root"
+    data-composition-id="03-approve"
+    data-start="0"
+    data-duration="13"
+    data-width="1920"
+    data-height="1080"
+  >
+    <video
+      class="clip"
+      src="assets/demo-s3.mp4"
+      playsinline
+      muted
+      data-start="0"
+      data-duration="12.5"
+      data-track-index="1"
+    ></video>
+    <div id="f0-label" class="f0-label">
+      <span class="f0-label-dot"></span>
+      <span>Approval Satu Klik</span>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+
+      // Label pill pop @0.5 — pada cue "Dari satu dashboard admin"
+      tl.fromTo(
+        "#f0-label",
+        { opacity: 0, y: -18, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" },
+        0.5
+      );
+          window.__timelines = window.__timelines || {};
+      window.__timelines["03-approve"] = tl;
+    })();
+  </script>
+</body>
+</html>

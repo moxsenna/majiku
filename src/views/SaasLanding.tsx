@@ -1,36 +1,22 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import type { TenantRow } from "@/db/schema";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 import Link from "next/link";
-import { DemoAccessModal } from "@/components/demo/DemoAccessModal";
-import { 
-  GraduationCap, 
-  Users, 
-  BarChart3, 
-  MessageSquare, 
-  CreditCard, 
-  Shield, 
-  CheckCircle2,
+import {
   ArrowRight,
-  Sparkles,
-  Building2,
-  BookOpen,
-  Star,
-  ChevronRight,
-  Smartphone,
-  Monitor,
   Bell,
-  ClipboardCheck,
-  Calendar,
-  Image,
-  Play,
+  CalendarDays,
   ChevronDown,
+  ChevronRight,
+  GraduationCap,
   HeartHandshake,
+  BookOpen,
+  NotebookPen,
+  ReceiptText,
+  Sparkles,
+  type LucideIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,708 +25,484 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DemoAccessModal } from "@/components/demo/DemoAccessModal";
+import { BunayoLogo, BunayoMark } from "@/components/bunayo/Logo";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscriptionPlans";
 
-const features = [
-  {
-    icon: Users,
-    title: "Manajemen Siswa",
-    description: "Kelola data siswa, orang tua, dan kelas dengan mudah dalam satu dashboard."
-  },
-  {
-    icon: BarChart3,
-    title: "Laporan & Analytics",
-    description: "Pantau perkembangan siswa dan performa lembaga dengan laporan real-time."
-  },
-  {
-    icon: MessageSquare,
-    title: "Komunikasi Orang Tua",
-    description: "Kirim update harian, foto kegiatan, dan chat langsung dengan orang tua."
-  },
-  {
-    icon: CreditCard,
-    title: "Billing Otomatis",
-    description: "Invoice otomatis, reminder pembayaran, dan laporan keuangan lengkap."
-  },
-  {
-    icon: GraduationCap,
-    title: "Manajemen Tutor",
-    description: "Kelola jadwal, KPI, dan payroll tutor dengan sistem yang terintegrasi."
-  },
-  {
-    icon: Shield,
-    title: "Keamanan Data",
-    description: "Data terenkripsi dan aman dengan backup otomatis setiap hari."
-  }
-];
+/* ------------------------------------------------------------------ */
+/* Data                                                                 */
+/* ------------------------------------------------------------------ */
 
-const formatPriceShort = (amount: number) => {
-  if (amount >= 1000000) return `${(amount / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
-  return `${Math.round(amount / 1000)}K`;
-};
+const rupiah = new Intl.NumberFormat("id-ID");
 
-const pricingPlans = Object.values(SUBSCRIPTION_PLANS).map((plan) => ({
-  id: plan.id,
-  name: plan.name,
-  price: formatPriceShort(plan.priceMonthly),
-  period: "/bulan",
-  description: plan.description,
-  features: plan.features,
-  popular: Boolean(plan.popular),
-  badge: plan.badge,
-  cta: `Pilih ${plan.name}`,
-}));
-
-const testimonials = [
-  {
-    name: "Ibu Ratna Sari",
-    role: "Pemilik TK Ceria Mandiri",
-    avatar: "RS",
-    image: "/images/avatars/parent-anita.jpg",
-    content: "Bunayo membantu kami mengelola 150+ siswa dengan lebih efisien. Orang tua sangat senang dengan update harian!",
-    rating: 5
-  },
-  {
-    name: "Pak Hendra",
-    role: "Direktur Bimbel Prestasi",
-    avatar: "PH",
-    image: "/images/avatars/parent-doni.jpg",
-    content: "Fitur billing otomatis menghemat waktu admin kami hingga 80%. Sangat recommended!",
-    rating: 5
-  },
-  {
-    name: "Ibu Dewi Kusuma",
-    role: "Kepala Sekolah PAUD Ananda",
-    avatar: "DK",
-    image: "/images/avatars/parent-rina.jpg",
-    content: "Dashboard yang intuitif dan laporan yang lengkap. Tim support juga sangat responsif.",
-    rating: 5
-  }
-];
-
-export interface SaasLandingProps {
-  featuredTenants?: TenantRow[];
-  featuredSection?: ReactNode;
+// Sehari di Bunayo: babak-babak hari yang sama, dilihat dari kelas dan dari rumah.
+// Semua kemampuan di bawah nyata; klaim yang belum betul (mis. QR absensi) tidak disebut.
+interface Beat {
+  time: string;
+  ink: string;
+  soft: string;
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  image?: string;
+  imageAlt?: string;
+  frame?: "phone" | "browser";
 }
 
-export default function SaasLanding({
-  featuredTenants = [],
-  featuredSection,
-}: SaasLandingProps = {}) {
+const beats: Beat[] = [
+  {
+    time: "07:15",
+    ink: "text-langit-ink",
+    soft: "bg-langit-soft",
+    icon: Bell,
+    title: "Tiba di kelas",
+    body: "Guru menandai kehadiran dalam satu ketukan. Orang tua langsung menerima kabar bahwa anaknya sudah tiba, tanpa harus bertanya lewat grup chat.",
+    image: "/previews/tutor-bunayo.webp",
+    imageAlt: "Portal Guru Bunayo: kelas hari ini, kehadiran anak, dan tombol Absen anak",
+    frame: "phone",
+  },
+  {
+    time: "09:30",
+    ink: "text-tomat-ink",
+    soft: "bg-tomat-soft",
+    icon: NotebookPen,
+    title: "Kabar harian terkirim",
+    body: "Makan, tidur, mood, dan foto kegiatan dicatat sekali untuk satu kelas. Orang tua membacanya langsung di portal Orang Tua, persis seperti tampilan di bagian atas halaman ini.",
+  },
+  {
+    time: "13:45",
+    ink: "text-anggur-ink",
+    soft: "bg-anggur-soft",
+    icon: CalendarDays,
+    title: "Guru tetap fokus mengajar",
+    body: "Jadwal, kelas, dan tugas hari ini ada di satu layar yang bisa dibuka dengan satu tangan di tengah kelas, jadi catatan selesai sebelum anak-anak bertanya lagi.",
+  },
+  {
+    time: "15:30",
+    ink: "text-daun-ink",
+    soft: "bg-daun-soft",
+    icon: ReceiptText,
+    title: "Tagihan SPP terpantau",
+    body: "Tagihan diterbitkan dari dashboard dan dibayar orang tua lewat QRIS atau Virtual Account via PayCore. Admin melihat siapa yang sudah lunas dan siapa yang terlambat dalam satu layar.",
+    image: "/previews/admin-bunayo.webp",
+    imageAlt: "Dashboard Admin Bunayo: kehadiran hari ini, penerimaan SPP, dan tagihan terlambat",
+    frame: "browser",
+  },
+];
+
+const steps = [
+  {
+    title: "Daftar lembaga",
+    body: "Buat akun admin dan isi nama lembaga Anda. Masa trial 14 hari dimulai otomatis.",
+  },
+  {
+    title: "Susun kelas & siswa",
+    body: "Tambah kelas, siswa, dan jadwal sesuai operasional lembaga Anda.",
+  },
+  {
+    title: "Undang guru & orang tua",
+    body: "Guru dan orang tua masuk ke portal masing-masing dari HP mereka.",
+  },
+  {
+    title: "Catat & tagih",
+    body: "Kabar harian, foto kegiatan, dan tagihan SPP berjalan dalam satu sistem.",
+  },
+];
+
+const plans = Object.values(SUBSCRIPTION_PLANS);
+
+/* ------------------------------------------------------------------ */
+/* Fragmen kecil                                                        */
+/* ------------------------------------------------------------------ */
+
+function PortalMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="press inline-flex h-btn items-center gap-1.5 rounded px-3 text-sm font-medium text-foreground hover:bg-muted"
+        >
+          Masuk Portal
+          <ChevronDown className="h-3.5 w-3.5 opacity-70" aria-hidden />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 p-1.5">
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+          Pilih portal masuk
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/parent/login" className="flex cursor-pointer items-center gap-2.5 py-2">
+            <HeartHandshake className="h-4 w-4 text-primary" aria-hidden />
+            <div>
+              <p className="text-xs font-semibold text-foreground">Orang Tua Murid</p>
+              <p className="text-[10px] text-muted-foreground">parent.majiku.web.id</p>
+            </div>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/tutor/login" className="flex cursor-pointer items-center gap-2.5 py-2">
+            <BookOpen className="h-4 w-4 text-info" aria-hidden />
+            <div>
+              <p className="text-xs font-semibold text-foreground">Guru & Pendidik</p>
+              <p className="text-[10px] text-muted-foreground">tutor.majiku.web.id</p>
+            </div>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/admin/login" className="flex cursor-pointer items-center gap-2.5 py-2">
+            <GraduationCap className="h-4 w-4 text-foreground" aria-hidden />
+            <div>
+              <p className="text-xs font-semibold text-foreground">Admin Lembaga</p>
+              <p className="text-[10px] text-muted-foreground">admin.majiku.web.id</p>
+            </div>
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** CTA utama: memulai trial — satu tombol biru per layar. */
+function TrialButton({ size = "lg" }: { size?: "md" | "lg" }) {
+  return (
+    <Link href="/admin/register">
+      <Button
+        size={size === "lg" ? "lg" : "default"}
+        className={`press gap-2 rounded bg-primary text-primary-foreground hover:bg-primary-hover ${size === "lg" ? "h-btn-lg px-6 text-base" : ""}`}
+      >
+        Coba 14 hari gratis
+        <ArrowRight className="h-5 w-5" aria-hidden />
+      </Button>
+    </Link>
+  );
+}
+
+/** Bingkai HP (tinta) — tangkapan layar portal ortu asli. */
+function PhoneFrame({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`relative mx-auto w-[250px] sm:w-[280px] ${className ?? ""}`}>
+      <div className="rounded-[2.5rem] bg-foreground p-2 shadow-float">
+        <div className="overflow-hidden rounded-[2rem] bg-card">
+          <div className="mx-16 h-5 rounded-b-lg bg-foreground" />
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Bingkai jendela browser netral — tangkapan layar portal desktop asli. */
+function BrowserFrame({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="overflow-hidden rounded border border-border bg-card shadow-soft">
+      <div className="flex items-center gap-1.5 border-b border-border-subtle bg-muted px-3 py-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-border" />
+        <span className="h-2.5 w-2.5 rounded-full bg-border" />
+        <span className="h-2.5 w-2.5 rounded-full bg-border" />
+        <span className="ml-3 truncate text-[11px] text-muted-foreground">Dashboard Admin · data demo</span>
+      </div>
+      <img src={src} alt={alt} loading="lazy" className="h-auto w-full" />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Landing                                                              */
+/* ------------------------------------------------------------------ */
+
+export default function SaasLanding() {
   const [demoModalOpen, setDemoModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="font-bold text-xl">Bunayo</span>
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Fitur</a>
-              <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Harga</a>
-              <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimoni</a>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="gap-1.5 text-xs sm:text-sm">
-                    <span>Masuk Portal</span>
-                    <ChevronDown className="h-3.5 w-3.5 opacity-70" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1.5">
-                  <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Pilih Portal Masuk</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/parent/login" className="flex items-center gap-2.5 py-2 cursor-pointer">
-                      <HeartHandshake className="h-4 w-4 text-primary" />
-                      <div>
-                        <p className="font-semibold text-xs text-foreground">Orang Tua Murid</p>
-                        <p className="text-[10px] text-muted-foreground">parent.majiku.web.id</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/tutor/login" className="flex items-center gap-2.5 py-2 cursor-pointer">
-                      <BookOpen className="h-4 w-4 text-info" />
-                      <div>
-                        <p className="font-semibold text-xs text-foreground">Guru & Pendidik</p>
-                        <p className="text-[10px] text-muted-foreground">tutor.majiku.web.id</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/login" className="flex items-center gap-2.5 py-2 cursor-pointer">
-                      <GraduationCap className="h-4 w-4 text-foreground" />
-                      <div>
-                        <p className="font-semibold text-xs text-foreground">Admin Daycare</p>
-                        <p className="text-[10px] text-muted-foreground">admin.majiku.web.id</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setDemoModalOpen(true)}
-                    className="flex items-center gap-2.5 py-2 cursor-pointer text-primary"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <div>
-                      <p className="font-semibold text-xs text-primary">Coba Akun Demo</p>
-                      <p className="text-[10px] text-muted-foreground">Eksplorasi tanpa login</p>
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Link href="/checkout?plan=pro">
-                <Button className="gradient-primary text-primary-foreground text-xs sm:text-sm shadow-sm">
-                  Langganan
-                </Button>
-              </Link>
-            </div>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navigasi */}
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" aria-label="Bunayo — beranda" className="press">
+            <BunayoLogo height={30} priority />
+          </Link>
+          <div className="hidden items-center gap-7 md:flex">
+            <a href="#hari" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+              Sehari di Bunayo
+            </a>
+            <a href="#cara-kerja" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+              Cara kerja
+            </a>
+            <a href="#harga" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+              Harga
+            </a>
+          </div>
+          <div className="flex items-center gap-2">
+            <PortalMenu />
+            <TrialButton size="md" />
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 px-4 py-1.5">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Platform #1 untuk Daycare & Bimbel
-            </Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-              Kelola Lembaga Pendidikan Anda dengan{" "}
-              <span className="text-gradient">Lebih Mudah</span>
+      {/* Hero: penawaran + bukti pertama */}
+      <section className="px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:pb-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+          <div className="rise">
+            <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-[56px]">
+              Guru catat sekali.
+              <br />
+              Orang tua langsung tahu.
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Bunayo adalah platform all-in-one untuk daycare, TK, PAUD, dan lembaga bimbingan belajar. 
-              Dari manajemen siswa hingga billing, semua dalam satu tempat.
+            <p className="mt-5 max-w-[62ch] text-lg leading-relaxed text-foreground-2">
+              Bunayo menyatukan kehadiran, kabar harian, foto, chat, dan tagihan SPP untuk daycare,
+              preschool, dan bimbel — satu sistem lembaga yang menghubungkan kelas dan rumah.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/checkout?plan=pro">
-                <Button size="lg" className="gradient-primary text-primary-foreground text-lg px-8 h-14">
-                  Langganan Sekarang
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <TrialButton />
               <Button
+                variant="outline"
                 size="lg"
-                variant="outline"
-                className="text-lg px-8 h-14 gap-2"
+                className="press h-btn-lg gap-2 rounded border-[1.5px] border-foreground px-6 text-base"
                 onClick={() => setDemoModalOpen(true)}
               >
-                <Sparkles className="w-5 h-5 text-primary" />
-                Lihat Demo
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+                Lihat demo interaktif
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-4">
-              Tidak perlu kartu kredit • Setup dalam 5 menit
+            <p className="mt-4 text-sm text-muted-foreground">
+              Gratis 14 hari · tanpa kartu kredit · tanpa komitmen
             </p>
           </div>
 
-          {/* Hero Visual Preview */}
-          <div className="mt-12 max-w-5xl mx-auto rounded-3xl p-2 sm:p-3 bg-gradient-to-b from-primary/20 via-primary/5 to-transparent border border-primary/20 shadow-2xl relative overflow-hidden">
-            <div className="relative rounded-2xl overflow-hidden aspect-[21/9] sm:aspect-[2.2/1]">
+          {/* Bukti pertama: portal ortu asli dengan kabar tiba */}
+          <div className="rise rise-2 relative">
+            <PhoneFrame>
               <img
-                src="/images/landing-hero.jpg"
-                alt="Ekosistem Platform Manajemen Daycare & Bimbel Bunayo"
-                className="w-full h-full object-cover"
+                src="/previews/parent-bunayo.webp"
+                alt="Portal Orang Tua Bunayo — kabar harian anak dengan data demo"
+                className="h-auto w-full"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2 sm:gap-3 bg-background/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-border/60">
-                  <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-semibold">Solusi Manajemen Terpadu</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Admin • Guru / Tutor • Orang Tua Murid</p>
-                  </div>
-                </div>
-                <div className="hidden sm:flex items-center gap-2 bg-background/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-border/60 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>500+ Lembaga Terverifikasi</span>
-                </div>
+            </PhoneFrame>
+            <div className="press absolute -left-2 top-8 flex items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-2.5 shadow-soft sm:-left-6">
+              <span className="tiba-dot grid h-9 w-9 place-items-center rounded-full bg-daun-soft">
+                <span className="h-2.5 w-2.5 rounded-full bg-success-ring" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold">Sudah tiba</p>
+                <p className="tabular text-xs text-muted-foreground">07:15 · Portal Orang Tua</p>
               </div>
             </div>
-          </div>
-
-          {/* Hero Stats */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {[
-              { value: "500+", label: "Lembaga Aktif" },
-              { value: "25K+", label: "Siswa Terkelola" },
-              { value: "98%", label: "Kepuasan User" },
-              { value: "24/7", label: "Support" }
-            ].map((stat, i) => (
-              <div key={i} className="text-center p-6 rounded-2xl bg-card border border-border">
-                <p className="text-3xl sm:text-4xl font-bold text-gradient">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-              </div>
-            ))}
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              Tampilan portal Orang Tua · data demo
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Featured Tenants Section */}
-      {featuredSection ?? (
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20 border-y border-border/40">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Pilihan Terbaik
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-                Daycare & Bimbel Pilihan
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Temukan daycare, preschool, dan bimbel terpercaya untuk masa depan buah hati Anda.
-              </p>
-            </div>
-
-            <div className="text-center py-12 rounded-2xl bg-card border border-border">
-              <p className="text-muted-foreground mb-4">
-                Jelajahi direktori daycare, bimbel, dan preschool terverifikasi di seluruh Indonesia.
-              </p>
-              <Link href="/marketplace">
-                <Button variant="outline">Lihat Direktori Marketplace</Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Demo Screenshots Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              <Play className="w-3 h-3 mr-1" />
-              Lihat Demo
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Tampilan Aplikasi yang <span className="text-gradient">Mudah Digunakan</span>
+      {/* Sehari di Bunayo: hari yang sama, dari kelas dan dari rumah */}
+      <section id="hari" className="border-y border-border bg-kanvas px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              Sehari di Bunayo
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Interface yang intuitif untuk admin, tutor, dan orang tua. Lihat bagaimana Bunayo mempermudah operasional lembaga Anda.
+            <p className="mt-4 text-lg text-foreground-2">
+              Hari yang sama, dilihat dari kelas dan dari rumah. Inilah hari lembaga Anda yang
+              berjalan di atas satu sistem.
             </p>
           </div>
 
-          {/* Dashboard Demo */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-            <div className="order-2 lg:order-1">
-              <Badge className="mb-4 bg-primary/10 text-primary">Dashboard Admin</Badge>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4">
-                Kelola Semuanya dalam Satu Dashboard
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Lihat ringkasan lengkap lembaga Anda: kehadiran siswa, tagihan, jadwal, dan notifikasi dalam satu tampilan.
-              </p>
-              <ul className="space-y-3 mb-6">
-                {[
-                  { icon: ClipboardCheck, text: "Monitoring kehadiran real-time" },
-                  { icon: CreditCard, text: "Status billing dan pembayaran" },
-                  { icon: Users, text: "Data siswa dan kelas" },
-                  { icon: BarChart3, text: "Analytics dan laporan" },
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-sm">{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button className="gap-2" onClick={() => setDemoModalOpen(true)}>
-                Lihat Demo Dashboard
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="order-1 lg:order-2 relative">
-              <div className="absolute inset-0 gradient-primary opacity-10 blur-3xl rounded-full"></div>
-              <Card className="relative overflow-hidden shadow-2xl border-2">
-                <div className="bg-muted/50 px-4 py-2 flex items-center gap-2 border-b">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  </div>
-                  <div className="flex-1 flex justify-center">
-                    <div className="bg-muted rounded px-3 py-0.5 text-xs text-muted-foreground">
-                      admin.majiku.web.id
-                    </div>
-                  </div>
+          <ol className="relative mt-12 flex flex-col">
+            {/* rail jam: garis halus tunggal di kolom kiri */}
+            <span aria-hidden className="absolute bottom-3 left-[19px] top-3 w-px bg-border" />
+            {beats.map((beat) => (
+              <li key={beat.time} className="relative grid gap-x-8 pb-14 pl-14 last:pb-0 lg:grid-cols-[1fr_minmax(0,420px)] lg:gap-x-14">
+                <span className={`absolute left-0 top-0 grid h-10 w-10 place-items-center rounded ${beat.soft} ring-4 ring-kanvas`}>
+                  <beat.icon className={`h-5 w-5 ${beat.ink}`} aria-hidden />
+                </span>
+                <div>
+                  <p className="tabular font-mono text-sm font-medium text-muted-foreground">{beat.time}</p>
+                  <h3 className="mt-1 font-display text-2xl font-bold tracking-tight">{beat.title}</h3>
+                  <p className="mt-3 max-w-[58ch] text-[15px] leading-relaxed text-foreground-2">{beat.body}</p>
                 </div>
-                <img
-                  src="/previews/dashboard-admin-real.webp"
-                  alt="Dashboard Admin Bunayo — data siswa, kehadiran, dan pendapatan nyata"
-                  className="w-full h-auto"
-                />
-              </Card>
-            </div>
-          </div>
-
-          {/* Parent Portal Demo */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-            <div className="relative">
-              <div className="absolute inset-0 bg-success/10 blur-3xl rounded-full"></div>
-              <div className="relative flex justify-center">
-                {/* Mobile Phone Frame */}
-                <div className="relative w-64 sm:w-72">
-                  <div className="bg-foreground rounded-[3rem] p-2 shadow-2xl">
-                    <div className="bg-background rounded-[2.5rem] overflow-hidden">
-                      {/* Phone Notch */}
-                      <div className="bg-foreground h-6 rounded-b-2xl mx-16"></div>
-                      <img
-                        src="/previews/parent-app-real.webp"
-                        alt="Portal Orang Tua Bunayo — laporan aktivitas harian anak"
-                        className="w-full h-auto"
-                      />
-                    </div>
+                {beat.image && (
+                  <div className="mt-6 lg:mt-0">
+                    {beat.frame === "phone" ? (
+                      <PhoneFrame>
+                        <img src={beat.image} alt={beat.imageAlt ?? beat.title} loading="lazy" className="h-auto w-full" />
+                      </PhoneFrame>
+                    ) : (
+                      <BrowserFrame src={beat.image} alt={beat.imageAlt ?? beat.title} />
+                    )}
                   </div>
-                  {/* Floating notification */}
-                  <div className="absolute -right-8 top-1/3 bg-background rounded-xl p-3 shadow-lg border animate-float">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-xs font-semibold">Aisyah sudah tiba!</p>
-                        <p className="text-[10px] text-muted-foreground">08:15</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <Badge className="mb-4 bg-success/10 text-success">Portal Orang Tua</Badge>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4">
-                Orang Tua Selalu Terhubung
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Aplikasi mobile untuk orang tua dengan update real-time tentang aktivitas anak, foto kegiatan, dan komunikasi langsung dengan guru.
-              </p>
-              <ul className="space-y-3 mb-6">
-                {[
-                  { icon: Bell, text: "Notifikasi check-in & check-out" },
-                  { icon: Image, text: "Foto & video kegiatan harian" },
-                  { icon: MessageSquare, text: "Chat langsung dengan guru" },
-                  { icon: CreditCard, text: "Lihat dan bayar tagihan" },
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center">
-                      <item.icon className="h-4 w-4 text-success" />
-                    </div>
-                    <span className="text-sm">{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => setDemoModalOpen(true)}
-              >
-                <Smartphone className="h-4 w-4" />
-                Lihat Portal Orang Tua
-              </Button>
-            </div>
-          </div>
-
-          {/* Tutor App Demo */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <Badge className="mb-4 bg-info/10 text-info">Aplikasi Tutor</Badge>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4">
-                Tutor Lebih Produktif
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Dashboard khusus untuk tutor dengan jadwal mengajar, KPI tracking, dan tools untuk membuat laporan harian dengan mudah.
-              </p>
-              <ul className="space-y-3 mb-6">
-                {[
-                  { icon: Calendar, text: "Jadwal mengajar otomatis" },
-                  { icon: ClipboardCheck, text: "Absensi siswa per kelas" },
-                  { icon: BarChart3, text: "KPI dan progress tracking" },
-                  { icon: CreditCard, text: "Lihat gaji dan slip" },
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center">
-                      <item.icon className="h-4 w-4 text-info" />
-                    </div>
-                    <span className="text-sm">{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => setDemoModalOpen(true)}
-              >
-                <Monitor className="h-4 w-4" />
-                Lihat Dashboard Tutor
-              </Button>
-            </div>
-            <div className="order-1 lg:order-2 relative">
-              <div className="absolute inset-0 bg-info/10 blur-3xl rounded-full"></div>
-              <Card className="relative overflow-hidden shadow-2xl border-2">
-                <div className="bg-muted/50 px-4 py-2 flex items-center gap-2 border-b">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  </div>
-                  <div className="flex-1 flex justify-center">
-                    <div className="bg-muted rounded px-3 py-0.5 text-xs text-muted-foreground">
-                      tutor.majiku.web.id
-                    </div>
-                  </div>
-                </div>
-                <img
-                  src="/previews/dashboard-tutor-real.webp"
-                  alt="Dashboard Tutor Bunayo — jadwal, siswa, dan KPI mengajar"
-                  className="w-full h-auto"
-                />
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Target Users */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Cocok Untuk Berbagai Lembaga</h2>
-            <p className="text-muted-foreground">Satu platform untuk semua kebutuhan pendidikan anak</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="w-14 h-14 rounded-2xl bg-highlight/20 flex items-center justify-center mb-4">
-                  <Building2 className="w-7 h-7 text-highlight-foreground" />
-                </div>
-                <CardTitle className="text-xl">Daycare & TK/PAUD</CardTitle>
-                <CardDescription>
-                  Kelola kehadiran, laporan harian, foto kegiatan, dan komunikasi dengan orang tua.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {["Absensi QR Code", "Daily Report dengan foto", "Notifikasi real-time", "Portal khusus orang tua"].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="w-14 h-14 rounded-2xl bg-info/20 flex items-center justify-center mb-4">
-                  <BookOpen className="w-7 h-7 text-info" />
-                </div>
-                <CardTitle className="text-xl">Bimbingan Belajar</CardTitle>
-                <CardDescription>
-                  Kelola jadwal, progress belajar, dan payroll tutor dengan sistem terintegrasi.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {["Manajemen kelas & jadwal", "Tracking progress siswa", "KPI & payroll tutor", "Billing per sesi/paket"].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge className="mb-4">Fitur Lengkap</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Semua yang Anda Butuhkan dalam Satu Platform
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Fitur komprehensif untuk mengelola lembaga pendidikan Anda dengan lebih efisien
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, i) => (
-              <Card key={i} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge className="mb-4">Harga Transparan</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Pilih Paket Sesuai Kebutuhan Anda
-            </h2>
-            <p className="text-muted-foreground">
-              Mulai gratis, upgrade kapan saja
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricingPlans.map((plan, i) => (
-              <Card 
-                key={i} 
-                className={`relative ${plan.popular ? 'border-primary border-2 shadow-lg scale-105' : ''}`}
-              >
-                {(plan.popular || plan.badge) && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gradient-primary text-primary-foreground">
-                    {plan.badge || "Paling Populer"}
-                  </Badge>
                 )}
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">Rp {plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, j) => (
-                      <li key={j} className="flex items-center gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={`/checkout?plan=${plan.id}`}>
-                    <Button 
-                      className={`w-full ${plan.popular ? 'gradient-primary text-primary-foreground' : ''}`}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-10 text-center text-xs text-muted-foreground">
+            Seluruh tangkapan layar diambil dari aplikasi Bunayo dengan data demo.
+          </p>
+        </div>
+      </section>
+
+      {/* Cara kerja: empat langkah nyata */}
+      <section id="cara-kerja" className="px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              Mulai dalam empat langkah
+            </h2>
+            <p className="mt-4 text-lg text-foreground-2">
+              Tidak perlu tim IT. Lembaga berjalan normal di hari yang sama Anda mendaftar.
+            </p>
+          </div>
+          <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((step, i) => (
+              <li key={step.title} className="rounded border border-border bg-card p-5">
+                <span className="tabular font-mono text-sm text-muted-foreground">
+                  Langkah {i + 1}
+                </span>
+                <h3 className="mt-2 font-display text-lg font-bold">{step.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-foreground-2">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-10 flex justify-center">
+            <TrialButton />
+          </div>
+        </div>
+      </section>
+
+      {/* Harga: dari sumber kebenaran billing, trial 14 hari di depan */}
+      <section id="harga" className="border-y border-border bg-kanvas px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              Satu harga per lembaga
+            </h2>
+            <p className="mt-4 text-lg text-foreground-2">
+              Pilih paket setelah melihat semuanya sendiri — semua paket dimulai dengan trial 14 hari.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                className={`relative flex flex-col rounded bg-card p-6 ${
+                  plan.popular ? "border-[1.5px] border-foreground" : "border border-border"
+                }`}
+              >
+                {plan.badge && (
+                  <span
+                    className={`absolute -top-3 left-6 rounded-full px-3 py-1 text-xs font-semibold ${
+                      plan.popular ? "bg-highlight text-highlight-foreground" : "bg-muted text-foreground"
+                    }`}
+                  >
+                    {plan.badge}
+                  </span>
+                )}
+                <h3 className="font-display text-xl font-bold">{plan.name}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{plan.description}</p>
+                <p className="mt-5">
+                  <span className="tabular font-display text-4xl font-extrabold tracking-tight">
+                    Rp {rupiah.format(plan.priceMonthly)}
+                  </span>
+                  <span className="text-sm text-muted-foreground"> /bulan</span>
+                </p>
+                <ul className="mt-6 flex flex-1 flex-col gap-2.5">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5 text-sm text-foreground-2">
+                      <span className={`mt-[7px] h-[7px] w-[7px] shrink-0 rounded-full ${plan.popular ? "bg-foreground" : "bg-border"}`} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-7">
+                  <Link href="/admin/register" className="block">
+                    <Button
+                      className={`press h-btn w-full rounded text-base ${
+                        plan.popular
+                          ? "bg-primary text-primary-foreground hover:bg-primary-hover"
+                          : "border-[1.5px] border-foreground bg-card text-foreground hover:bg-muted"
+                      }`}
                       variant={plan.popular ? "default" : "outline"}
                     >
-                      {plan.cta}
-                      <ChevronRight className="w-4 h-4 ml-1" />
+                      Mulai trial 14 hari
+                      <ChevronRight className="h-4 w-4" aria-hidden />
                     </Button>
                   </Link>
-                </CardContent>
-              </Card>
+                  <p className="mt-2.5 text-center text-xs text-muted-foreground">
+                    Detail paket di{" "}
+                    <Link href={`/checkout?plan=${plan.id}`} className="underline underline-offset-2 hover:text-foreground">
+                      halaman pendaftaran langganan
+                    </Link>
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
+          <p className="mt-8 max-w-2xl text-sm text-muted-foreground">
+            Trial 14 hari tanpa kartu kredit. Setelah trial, pembayaran berjalan lewat PayCore
+            (QRIS / Virtual Account) dan bisa dihentikan kapan saja.
+          </p>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge className="mb-4">Testimoni</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Dipercaya oleh Ratusan Lembaga
+      {/* CTA akhir: kartu krayon matahari */}
+      <section className="px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-4xl">
+          <div className="field-ink rounded-sheet bg-matahari p-8 text-center sm:p-12">
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              Mulai hari pertama lembaga Anda
             </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, i) => (
-              <Card key={i} className="bg-card">
-                <CardContent className="pt-6">
-                  <div className="flex gap-1 mb-4">
-                    {Array(testimonial.rating).fill(0).map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-highlight text-highlight" />
-                    ))}
-                  </div>
-                  <p className="text-foreground/80 mb-6">"{testimonial.content}"</p>
-                  <div className="flex items-center gap-3">
-                    {testimonial.image ? (
-                      <img
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                        {testimonial.avatar}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-medium text-sm">{testimonial.name}</p>
-                      <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <Card className="gradient-primary text-primary-foreground overflow-hidden">
-            <CardContent className="p-8 sm:p-12 text-center">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                Siap Mengelola Lembaga Anda dengan Lebih Baik?
-              </h2>
-              <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-                Bergabung dengan 500+ lembaga pendidikan yang sudah menggunakan Bunayo. 
-                Pilih paket dan nikmati aktivasi otomatis dengan PayCore.
-              </p>
-              <Link href="/checkout?plan=pro">
-                <Button size="lg" variant="secondary" className="text-lg px-8 h-14">
-                  Langganan Sekarang
-                  <ArrowRight className="w-5 h-5 ml-2" />
+            <p className="field-sub mx-auto mt-4 max-w-[52ch] text-base">
+              Coba 14 hari gratis — lihat sendiri bagaimana kelas dan rumah terhubung dalam satu
+              hari yang sama.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/admin/register">
+                <Button size="lg" className="press h-btn-lg rounded-full bg-foreground px-7 text-base text-background hover:bg-foreground/90">
+                  Coba 14 hari gratis
+                  <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
+              <button
+                type="button"
+                onClick={() => setDemoModalOpen(true)}
+                className="press inline-flex h-btn-lg items-center gap-2 rounded-full border-[1.5px] border-foreground bg-white/60 px-6 text-base font-medium"
+              >
+                <Sparkles className="h-5 w-5" aria-hidden />
+                Lihat demo dulu
+              </button>
+            </div>
+            <p className="field-sub mt-5 text-sm">Tanpa kartu kredit · aktif seketika</p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className="font-bold">Bunayo</span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link href="/terms" className="hover:text-foreground">Syarat & Ketentuan</Link>
-              <Link href="/privacy" className="hover:text-foreground">Kebijakan Privasi</Link>
-              <a href="mailto:support@majiku.web.id" className="hover:text-foreground">Kontak</a>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 Bunayo. All rights reserved.
-            </p>
+      <footer className="border-t border-border px-4 py-10 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 md:flex-row">
+          <div className="flex items-center gap-2.5">
+            <BunayoMark height={28} />
+            <span className="text-sm text-muted-foreground">Sistem manajemen lembaga pendidikan</span>
           </div>
+          <nav aria-label="Tautan footer" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <Link href="/marketplace" className="hover:text-foreground">
+              Marketplace Lembaga
+            </Link>
+            <Link href="/terms" className="hover:text-foreground">
+              Syarat & Ketentuan
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground">
+              Kebijakan Privasi
+            </Link>
+            <a href="mailto:support@majiku.web.id" className="hover:text-foreground">
+              Kontak
+            </a>
+          </nav>
+          <p className="tabular text-sm text-muted-foreground">© 2026 Bunayo</p>
         </div>
       </footer>
 
-      {/* Modal Akses Demo Interaktif */}
       <DemoAccessModal open={demoModalOpen} onOpenChange={setDemoModalOpen} />
     </div>
   );

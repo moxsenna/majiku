@@ -1,0 +1,89 @@
+{
+  "bgm": {
+    "path": "assets/bgm/track.wav",
+    "volume": 0.14,
+    "query": null,
+    "duration_s": null
+  },
+  "bgm_pending": false,
+  "voices": [
+    {
+      "frame": 1,
+      "path": "assets/voice/01.wav",
+      "duration_s": 5.72,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Kenalkan",
+          "start": 0.33,
+          "end": 0.98
+        },
+        {
+          "id": "w1",
+          "text": "Majiku,",
+          "start": 1.38,
+          "end": 2.34
+        },
+        {
+          "id": "w2",
+          "text": "satu",
+          "start": 2.5,
+          "end": 2.63
+        },
+        {
+          "id": "w3",
+          "text": "platform",
+          "start": 2.63,
+          "end": 3.12
+        },
+        {
+          "id": "w4",
+          "text": "untuk",
+          "start": 3.28,
+          "end": 3.59
+        },
+        {
+          "id": "w5",
+          "text": "seluruh",
+          "start": 3.59,
+          "end": 4.09
+        },
+        {
+          "id": "w6",
+          "text": "Operational",
+          "start": 4.09,
+          "end": 4.9
+        },
+        {
+          "id": "w7",
+          "text": "daycare.",
+          "start": 4.9,
+          "end": 5.4
+        }
+      ]
+    }
+  ],
+  "sfx": [
+    {
+      "frame": 1,
+      "file": "assets/sfx/sparkle.mp3",
+      "offset_s": 0,
+      "duration_s": 1.8,
+      "volume": 0.35
+    },
+    {
+      "frame": 1,
+      "file": "assets/sfx/chime.mp3",
+      "offset_s": 0,
+      "duration_s": 2.5,
+      "volume": 0.35
+    },
+    {
+      "frame": 2,
+      "file": "assets/sfx/chime.mp3",
+      "offset_s": 0.4,
+      "duration_s": 1.2,
+      "volume": 0.5
+    }
+  ]
+}

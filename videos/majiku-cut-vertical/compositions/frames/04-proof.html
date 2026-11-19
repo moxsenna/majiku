@@ -1,0 +1,488 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed ground with cream base + radial candy glows + grain */
+    [id="04-proof-bg"],
+    .\30 4-proof-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 22% 24%, rgba(240, 101, 66, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 78% 42%, rgba(249, 195, 31, 0.15) 0%, transparent 48%),
+        radial-gradient(circle at 50% 72%, rgba(246, 161, 140, 0.12) 0%, transparent 46%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Floating pill wallpaper (flat decorative confetti pills at outer edges) */
+    [id="04-proof-wallpaper"],
+    .\30 4-proof-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="04-proof-pill-wrap"],
+    .\30 4-proof-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="04-proof-floating-pill"],
+    .\30 4-proof-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 26px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    /* Wallpaper pills placement - strictly above y=1650px keep-out cutoff */
+    [id="04-proof-pill-wrap-1"] { left: 80px; top: 220px; }
+    [id="04-proof-pill-1"] { background: #F9C72E; transform: rotate(-12deg); }
+
+    [id="04-proof-pill-wrap-2"] { right: 80px; top: 260px; }
+    [id="04-proof-pill-2"] { background: #F7B09E; transform: rotate(14deg); }
+
+    [id="04-proof-pill-wrap-3"] { left: 60px; top: 1240px; }
+    [id="04-proof-pill-3"] { background: #FCE292; transform: rotate(10deg); }
+
+    [id="04-proof-pill-wrap-4"] { right: 70px; top: 1280px; }
+    [id="04-proof-pill-4"] { background: #F6A18C; transform: rotate(-10deg); }
+
+    [id="04-proof-pill-wrap-5"] { left: 420px; top: 140px; }
+    [id="04-proof-pill-5"] { background: #F37F62; transform: rotate(6deg); }
+
+    [id="04-proof-pill-wrap-6"] { left: 380px; top: 1480px; }
+    [id="04-proof-pill-6"] { background: #F9C31F; transform: rotate(-7deg); }
+
+    /* Track 2: Main camera / stage layer */
+    [id="04-proof-stage"],
+    .\30 4-proof-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    [id="04-proof-stage-inner"],
+    .\30 4-proof-stage-inner {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: 50% 50%;
+    }
+
+    /* Soft accent glow bloom behind the giant stat-pill */
+    [id="04-proof-hero-glow"],
+    .\30 4-proof-hero-glow {
+      position: absolute;
+      left: 50%;
+      top: 825px;
+      width: 920px;
+      height: 760px;
+      margin-left: -460px;
+      margin-top: -380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240, 101, 66, 0.22) 0%, rgba(249, 195, 31, 0.14) 38%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+      transform-origin: center center;
+    }
+
+    /* Hero Giant Stat-Pill Card (~70% canvas width centered in middle band) */
+    [id="04-proof-card"],
+    .\30 4-proof-card {
+      position: absolute;
+      left: 160px;
+      top: 535px;
+      width: 760px;
+      min-height: 580px;
+      background-color: #FFFFFF;
+      border: 4px solid #1E1E1E;
+      border-radius: 40px;
+      box-shadow: 8px 8px 0 rgba(26, 26, 26, 0.08);
+      box-sizing: border-box;
+      padding: 52px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      transform-origin: center center;
+      pointer-events: none;
+    }
+
+    /* Capsule Accent Bar */
+    [class~="04-proof-accent-line"],
+    .\30 4-proof-accent-line {
+      width: 72px;
+      height: 6px;
+      border-radius: 9999px;
+      background-color: #F06542;
+      margin-bottom: 24px;
+    }
+
+    /* Counter Lockup */
+    [class~="04-proof-counter-wrap"],
+    .\30 4-proof-counter-wrap {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      width: 100%;
+      line-height: 0.9;
+    }
+
+    [id="04-proof-counter"],
+    .\30 4-proof-counter {
+      display: inline-block;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 190px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: #F06542;
+      font-variant-numeric: tabular-nums;
+      transform-origin: center center;
+    }
+
+    [id="04-proof-suffix"],
+    .\30 4-proof-suffix {
+      display: inline-block;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 130px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #F06542;
+      margin-left: 6px;
+      transform-origin: center center;
+    }
+
+    /* Label "LEMBAGA AKTIF" */
+    [id="04-proof-label"],
+    .\30 4-proof-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      margin-top: 18px;
+      margin-bottom: 34px;
+      text-align: center;
+      transform-origin: center center;
+    }
+
+    /* Sub-pill Bar "25K+ SISWA TERKELOLA" */
+    [id="04-proof-subpill"],
+    .\30 4-proof-subpill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 34px;
+      background-color: #FCE292;
+      border: 3.2px solid #1E1E1E;
+      border-radius: 9999px;
+      box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.08);
+      transform-origin: center center;
+    }
+
+    [class~="04-proof-subpill-icon"],
+    .\30 4-proof-subpill-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [class~="04-proof-subpill-text"],
+    .\30 4-proof-subpill-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #32221B;
+      white-space: nowrap;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="04-proof"
+    data-start="0"
+    data-duration="3.56"
+    data-width="1080"
+    data-height="1920"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="04-proof-bg"
+      class="clip 04-proof-bg"
+      data-start="0"
+      data-duration="3.56"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Floating pill wallpaper -->
+    <div
+      id="04-proof-wallpaper"
+      class="clip 04-proof-wallpaper"
+      data-start="0"
+      data-duration="3.56"
+      data-track-index="1"
+    >
+      <div id="04-proof-pill-wrap-1" class="04-proof-pill-wrap">
+        <div id="04-proof-pill-1" class="04-proof-floating-pill">SKALA</div>
+      </div>
+      <div id="04-proof-pill-wrap-2" class="04-proof-pill-wrap">
+        <div id="04-proof-pill-2" class="04-proof-floating-pill">DATA</div>
+      </div>
+      <div id="04-proof-pill-wrap-3" class="04-proof-pill-wrap">
+        <div id="04-proof-pill-3" class="04-proof-floating-pill">VALID</div>
+      </div>
+      <div id="04-proof-pill-wrap-4" class="04-proof-pill-wrap">
+        <div id="04-proof-pill-4" class="04-proof-floating-pill">SISTEM</div>
+      </div>
+      <div id="04-proof-pill-wrap-5" class="04-proof-pill-wrap">
+        <div id="04-proof-pill-5" class="04-proof-floating-pill">JARINGAN</div>
+      </div>
+      <div id="04-proof-pill-wrap-6" class="04-proof-pill-wrap">
+        <div id="04-proof-pill-6" class="04-proof-floating-pill">TERBUKTI</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Main camera / stage layer -->
+    <div
+      id="04-proof-stage"
+      class="clip 04-proof-stage"
+      data-start="0"
+      data-duration="3.56"
+      data-track-index="2"
+    >
+      <div id="04-proof-stage-inner" class="04-proof-stage-inner">
+        <!-- Soft accent glow bloom -->
+        <div id="04-proof-hero-glow" class="04-proof-hero-glow"></div>
+
+        <!-- Hero Giant Stat-Pill Card -->
+        <div id="04-proof-card" class="04-proof-card">
+          <div class="04-proof-accent-line"></div>
+          <div class="04-proof-counter-wrap">
+            <span id="04-proof-counter" class="04-proof-counter">0</span>
+            <span id="04-proof-suffix" class="04-proof-suffix">+</span>
+          </div>
+          <div id="04-proof-label" class="04-proof-label">LEMBAGA AKTIF</div>
+          <div id="04-proof-subpill" class="04-proof-subpill">
+            <div class="04-proof-subpill-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#32221B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <span class="04-proof-subpill-text">25K+ SISWA TERKELOLA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const stageInner = document.getElementById("04-proof-stage-inner");
+      const heroGlow = document.getElementById("04-proof-hero-glow");
+      const card = document.getElementById("04-proof-card");
+      const counter = document.getElementById("04-proof-counter");
+      const suffix = document.getElementById("04-proof-suffix");
+      const label = document.getElementById("04-proof-label");
+      const subpill = document.getElementById("04-proof-subpill");
+
+      const pillWraps = [
+        document.getElementById("04-proof-pill-wrap-1"),
+        document.getElementById("04-proof-pill-wrap-2"),
+        document.getElementById("04-proof-pill-wrap-3"),
+        document.getElementById("04-proof-pill-wrap-4"),
+        document.getElementById("04-proof-pill-wrap-5"),
+        document.getElementById("04-proof-pill-wrap-6"),
+      ];
+
+      // Initial visibility states at t=0
+      tl.set(card, { opacity: 0, scale: 0.85, y: 30 }, 0);
+      tl.set(heroGlow, { opacity: 0, scale: 0.7 }, 0);
+      tl.set(suffix, { opacity: 0, y: 24 }, 0);
+      tl.set(label, { opacity: 0, scale: 0.85, y: 15 }, 0);
+      tl.set(subpill, { opacity: 0, scale: 0.75, y: 20 }, 0);
+      tl.set(pillWraps, { opacity: 0, scale: 0.6 }, 0);
+
+      // Subtle macro camera drift across full 3.0s duration
+      tl.fromTo(
+        stageInner,
+        { scale: 1.0 },
+        { scale: 1.025, ease: "none", duration: 3.0 },
+        0
+      );
+
+      // Track 1: Wallpaper pills spring entrance
+      tl.fromTo(
+        pillWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.42, ease: "back.out(1.7)", stagger: 0.04 },
+        0.04
+      );
+
+      // Hero stat card entrance (fully visible by t <= 0.45s)
+      tl.fromTo(
+        card,
+        { scale: 0.85, opacity: 0, y: 30 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.42, ease: "back.out(1.6)" },
+        0.08
+      );
+
+      // Soft glow bloom begins as card lands
+      tl.fromTo(
+        heroGlow,
+        { opacity: 0, scale: 0.7 },
+        { opacity: 0.5, scale: 0.9, duration: 0.4, ease: "power2.out" },
+        0.1
+      );
+
+      // =========================================================================
+      // Count-Up 0 -> 500 with dynamic scale (`counting-dynamic-scale`)
+      // Starts at t=0.5s on VO cue "lima ratus"
+      // =========================================================================
+      const counterState = { value: 0 };
+      const START_SIZE = 105;
+      const END_SIZE = 190;
+      const START_SCALE = START_SIZE / END_SIZE;
+
+      // Number text count-up
+      tl.to(
+        counterState,
+        {
+          value: 500,
+          duration: 1.1,
+          ease: "power3.out",
+          onUpdate: function () {
+            counter.textContent = Math.round(counterState.value).toLocaleString();
+          },
+        },
+        0.5
+      );
+
+      // Dynamic scale growth synchronized with count
+      tl.fromTo(
+        counter,
+        { scale: START_SCALE },
+        { scale: 1.0, duration: 1.1, ease: "power3.out" },
+        0.5
+      );
+
+      // Glow blooms dramatically during count-up peak
+      tl.to(
+        heroGlow,
+        { opacity: 0.85, scale: 1.12, duration: 1.1, ease: "power2.out" },
+        0.5
+      );
+
+      // Suffix "+" slides/pops in right after count completes at 1.6s
+      tl.fromTo(
+        suffix,
+        { opacity: 0, y: 24, scale: 0.7 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "back.out(1.8)" },
+        1.6
+      );
+
+      // =========================================================================
+      // Label "LEMBAGA AKTIF" pop@1.8s
+      // =========================================================================
+      tl.fromTo(
+        label,
+        { opacity: 0, scale: 0.85, y: 15 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.38, ease: "back.out(1.7)" },
+        1.8
+      );
+
+      // =========================================================================
+      // Sub-pill "25K+ SISWA TERKELOLA" pop kecil@2.4s pada "memakainya"
+      // =========================================================================
+      tl.fromTo(
+        subpill,
+        { opacity: 0, scale: 0.75, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: "back.out(1.9)" },
+        2.4
+      );
+
+      // Settle glow slightly into hold
+      tl.to(
+        heroGlow,
+        { opacity: 0.7, scale: 1.05, duration: 0.5, ease: "power1.out" },
+        2.4
+      );
+
+      // Hold to 3.0s (full duration anchor)
+      tl.to({}, { duration: 0.01 }, 3.0);
+
+      window.__timelines["04-proof"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,794 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      box-sizing: border-box;
+    }
+
+    /* Track 0: Full-bleed background with cream base + radial candy glows + grain */
+    [id="05-parent-bg"],
+    .\30 5-parent-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 18% 45%, rgba(246, 167, 148, 0.22) 0%, transparent 48%),
+        radial-gradient(circle at 76% 24%, rgba(252, 226, 146, 0.18) 0%, transparent 42%),
+        radial-gradient(circle at 65% 78%, rgba(246, 161, 140, 0.14) 0%, transparent 45%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Atmosphere & decorative floating pills */
+    [id="05-parent-wallpaper"],
+    .\30 5-parent-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Peach ambient glow behind phone hero */
+    [id="05-parent-phone-glow"],
+    .\30 5-parent-phone-glow {
+      position: absolute;
+      left: 60px;
+      top: 80px;
+      width: 580px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(246, 167, 148, 0.42) 0%, rgba(246, 167, 148, 0.16) 52%, transparent 72%);
+      filter: blur(36px);
+      pointer-events: none;
+    }
+
+    [class~="05-parent-wall-wrap"],
+    .\30 5-parent-wall-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="05-parent-floating-pill"],
+    .\30 5-parent-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 24px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    [id="05-parent-wall-wrap-1"] { left: 70px; top: 40px; }
+    [id="05-parent-wall-1"] { background: #F7B09E; transform: rotate(-12deg); }
+
+    [id="05-parent-wall-wrap-2"] { right: 80px; top: 50px; }
+    [id="05-parent-wall-2"] { background: #FCE292; transform: rotate(14deg); }
+
+    [id="05-parent-wall-wrap-3"] { right: 70px; top: 440px; }
+    [id="05-parent-wall-3"] { background: #F6A794; transform: rotate(-8deg); }
+
+    [id="05-parent-wall-wrap-4"] { right: 90px; top: 760px; }
+    [id="05-parent-wall-4"] { background: #F9C72E; transform: rotate(10deg); }
+
+    /* Track 2: Phone Mockup Stage */
+    [id="05-parent-phone-track"],
+    .\30 5-parent-phone-track {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [id="05-parent-phone-wrap"],
+    .\30 5-parent-phone-wrap {
+      position: absolute;
+      left: 140px;
+      top: 110px;
+      width: 440px;
+      height: 750px;
+      box-sizing: border-box;
+      background: #FFFFFF;
+      border: 4px solid #1E1E1E;
+      border-radius: 44px;
+      box-shadow: 12px 12px 0 rgba(26, 26, 26, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Phone top chrome */
+    .\30 5-parent-phone-notch-bar {
+      width: 100%;
+      height: 42px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+
+    .\30 5-parent-phone-time {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1E1E1E;
+      letter-spacing: -0.01em;
+    }
+
+    .\30 5-parent-phone-speaker {
+      width: 96px;
+      height: 14px;
+      border-radius: 9999px;
+      background: #1E1E1E;
+    }
+
+    .\30 5-parent-phone-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .\30 5-parent-phone-icon-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1E1E1E;
+    }
+
+    /* In-phone app header */
+    .\30 5-parent-app-header {
+      padding: 2px 20px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+      border-bottom: 2px solid rgba(30, 30, 30, 0.08);
+    }
+
+    .\30 5-parent-app-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .\30 5-parent-app-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid #1E1E1E;
+      background: #F9C72E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #32221B;
+    }
+
+    .\30 5-parent-app-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .\30 5-parent-app-school {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(50, 34, 27, 0.6);
+    }
+
+    .\30 5-parent-app-child {
+      font-size: 15px;
+      font-weight: 700;
+      color: #32221B;
+      letter-spacing: -0.01em;
+    }
+
+    .\30 5-parent-app-status {
+      padding: 4px 12px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #FCE292;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #32221B;
+      text-transform: uppercase;
+    }
+
+    /* In-phone photo screen container */
+    .\30 5-parent-screen-frame {
+      padding: 12px 16px 16px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .\30 5-parent-photo-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 28px;
+      border: 3.5px solid #1E1E1E;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: #243B2A;
+    }
+
+    .\30 5-parent-screen-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    .\30 5-parent-photo-tag {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 9999px;
+      border: 2.5px solid #1E1E1E;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.08);
+      font-size: 12px;
+      font-weight: 700;
+      color: #32221B;
+      box-sizing: border-box;
+    }
+
+    .\30 5-parent-tag-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #F06542;
+      border: 1.5px solid #1E1E1E;
+      flex-shrink: 0;
+    }
+
+    /* Track 3: Notification pills cascade */
+    [id="05-parent-notif-track"],
+    .\30 5-parent-notif-track {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    [class~="05-parent-notif-pill"],
+    .\30 5-parent-notif-pill {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 14px 24px;
+      background: #FFFFFF;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      box-shadow: 8px 8px 0 rgba(26, 26, 26, 0.08);
+      box-sizing: border-box;
+      pointer-events: auto;
+    }
+
+    /* Pill 1 - Mint Check-in */
+    [id="05-parent-notif-1"] {
+      left: 630px;
+      top: 320px;
+      width: 720px;
+    }
+
+    /* Pill 2 - Sky Activity Photo */
+    [id="05-parent-notif-2"] {
+      left: 670px;
+      top: 460px;
+      width: 720px;
+    }
+
+    /* Pill 3 - Yellow Daily Report */
+    [id="05-parent-notif-3"] {
+      left: 710px;
+      top: 600px;
+      width: 720px;
+    }
+
+    .\30 5-parent-notif-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2.5px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .\30 5-parent-icon-mint { background-color: #FCE292; }
+    .\30 5-parent-icon-sky { background-color: #F6A18C; }
+    .\30 5-parent-icon-yellow { background-color: #F9C31F; }
+
+    .\30 5-parent-notif-body {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    .\30 5-parent-notif-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .\30 5-parent-tag-chip {
+      padding: 3px 12px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #32221B;
+      display: inline-block;
+    }
+
+    .\30 5-parent-chip-mint { background-color: #FCE292; }
+    .\30 5-parent-chip-sky { background-color: #F6A18C; color: #32221B; }
+    .\30 5-parent-chip-yellow { background-color: #F9C31F; }
+
+    .\30 5-parent-notif-time {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(50, 34, 27, 0.85);
+      letter-spacing: 0.04em;
+    }
+
+    .\30 5-parent-notif-title {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #32221B;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .\30 5-parent-notif-desc {
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.2;
+      color: rgba(50, 34, 27, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Track 4: Typography & Chrome */
+    [id="05-parent-type-track"],
+    .\30 5-parent-type-track {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    [id="05-parent-headline-wrap"],
+    .\30 5-parent-headline-wrap {
+      position: absolute;
+      left: 640px;
+      top: 115px;
+      width: 1120px;
+    }
+
+    .\30 5-parent-title-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 18px;
+      border-radius: 9999px;
+      border: 2.5px solid #1E1E1E;
+      background: #F9C31F;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: 3px 3px 0 rgba(26, 26, 26, 0.08);
+      margin-bottom: 12px;
+    }
+
+    .\30 5-parent-h1 {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.28em;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 62px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #32221B;
+    }
+
+    [class~="05-parent-h-phrase"],
+    .\30 5-parent-h-phrase {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    [id="05-parent-subhead"],
+    .\30 5-parent-subhead {
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: #32221B;
+      letter-spacing: -0.01em;
+    }
+
+    .\30 5-parent-accent-line {
+      width: 44px;
+      height: 5px;
+      border-radius: 9999px;
+      background: #F06542;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="05-parent"
+    data-start="0"
+    data-duration="8.58"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="05-parent-bg"
+      class="clip 05-parent-bg"
+      data-start="0"
+      data-duration="8.58"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Atmosphere & decorative wallpaper -->
+    <div
+      id="05-parent-wallpaper"
+      class="clip 05-parent-wallpaper"
+      data-start="0"
+      data-duration="8.58"
+      data-track-index="1"
+    >
+      <div id="05-parent-phone-glow" class="05-parent-phone-glow"></div>
+
+      <div id="05-parent-wall-wrap-1" class="05-parent-wall-wrap">
+        <div id="05-parent-wall-1" class="05-parent-floating-pill">REAL-TIME</div>
+      </div>
+      <div id="05-parent-wall-wrap-2" class="05-parent-wall-wrap">
+        <div id="05-parent-wall-2" class="05-parent-floating-pill">TERHUBUNG</div>
+      </div>
+      <div id="05-parent-wall-wrap-3" class="05-parent-wall-wrap">
+        <div id="05-parent-wall-3" class="05-parent-floating-pill">TRANSPARAN</div>
+      </div>
+      <div id="05-parent-wall-wrap-4" class="05-parent-wall-wrap">
+        <div id="05-parent-wall-4" class="05-parent-floating-pill">PERCAYA</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Phone Mockup Hero -->
+    <div
+      id="05-parent-phone-track"
+      class="clip 05-parent-phone-track"
+      data-start="0"
+      data-duration="8.58"
+      data-track-index="2"
+    >
+      <div id="05-parent-phone-wrap" class="05-parent-phone-wrap">
+        <!-- Phone notch & status bar -->
+        <div class="05-parent-phone-notch-bar">
+          <div class="05-parent-phone-time">08:15</div>
+          <div class="05-parent-phone-speaker"></div>
+          <div class="05-parent-phone-icons">
+            <div class="05-parent-phone-icon-dot"></div>
+            <div class="05-parent-phone-icon-dot"></div>
+          </div>
+        </div>
+
+        <!-- Phone app bar -->
+        <div class="05-parent-app-header">
+          <div class="05-parent-app-header-left">
+            <div class="05-parent-app-avatar">M</div>
+            <div class="05-parent-app-meta">
+              <span class="05-parent-app-school">TK PERMATA BUNDA</span>
+              <span class="05-parent-app-child">Aisyah Farhana</span>
+            </div>
+          </div>
+          <div class="05-parent-app-status">AKTIF</div>
+        </div>
+
+        <!-- Phone screen photo container -->
+        <div class="05-parent-screen-frame">
+          <div class="05-parent-photo-card">
+            <img
+              src="assets/parent-app-preview.jpg"
+              alt="Portal Orang Tua — laporan aktivitas harian anak"
+              class="05-parent-screen-img"
+            />
+            <div class="05-parent-photo-tag">
+              <span class="05-parent-tag-dot"></span>
+              <span>Laporan Harian · Catatan Tutor</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track 3: Notifications Cascade -->
+    <div
+      id="05-parent-notif-track"
+      class="clip 05-parent-notif-track"
+      data-start="0"
+      data-duration="8.58"
+      data-track-index="3"
+    >
+      <!-- Pill 1: Mint check-in -->
+      <div id="05-parent-notif-1" class="05-parent-notif-pill">
+        <div class="05-parent-notif-icon 05-parent-icon-mint">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="05-parent-notif-body">
+          <div class="05-parent-notif-header">
+            <span class="05-parent-tag-chip 05-parent-chip-mint">CHECK-IN</span>
+            <span class="05-parent-notif-time">08:15 WIB</span>
+          </div>
+          <div class="05-parent-notif-title">✓ Aisyah sudah tiba! · 08:15</div>
+          <div class="05-parent-notif-desc">Presensi otomatis terekam · Kelas Melati</div>
+        </div>
+      </div>
+
+      <!-- Pill 2: Sky photo activity -->
+      <div id="05-parent-notif-2" class="05-parent-notif-pill">
+        <div class="05-parent-notif-icon 05-parent-icon-sky">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        <div class="05-parent-notif-body">
+          <div class="05-parent-notif-header">
+            <span class="05-parent-tag-chip 05-parent-chip-sky">FOTO KEGIATAN</span>
+            <span class="05-parent-notif-time">10:30 WIB</span>
+          </div>
+          <div class="05-parent-notif-title">Foto kegiatan baru</div>
+          <div class="05-parent-notif-desc">Melukis Jari — 3 foto baru diunggah oleh guru</div>
+        </div>
+      </div>
+
+      <!-- Pill 3: Yellow daily report -->
+      <div id="05-parent-notif-3" class="05-parent-notif-pill">
+        <div class="05-parent-notif-icon 05-parent-icon-yellow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="05-parent-notif-body">
+          <div class="05-parent-notif-header">
+            <span class="05-parent-tag-chip 05-parent-chip-yellow">LAPORAN HARIAN</span>
+            <span class="05-parent-notif-time">14:00 WIB</span>
+          </div>
+          <div class="05-parent-notif-title">Laporan harian siap</div>
+          <div class="05-parent-notif-desc">Makan siang habis, tidur nyenyak, mood ceria</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track 4: Typography & Chrome -->
+    <div
+      id="05-parent-type-track"
+      class="clip 05-parent-type-track"
+      data-start="0"
+      data-duration="8.58"
+      data-track-index="4"
+    >
+      <div id="05-parent-headline-wrap" class="05-parent-headline-wrap">
+        <div id="05-parent-title-pill" class="05-parent-title-pill">PORTAL ORANG TUA</div>
+        <h1 class="05-parent-h1">
+          <span id="05-parent-h-p1" class="05-parent-h-phrase">Orang tua</span>
+          <span id="05-parent-h-p2" class="05-parent-h-phrase">ikut tenang.</span>
+        </h1>
+        <div id="05-parent-subhead" class="05-parent-subhead">
+          <span class="05-parent-accent-line"></span>
+          <span>Langsung di ponsel mereka.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const phoneGlow = document.getElementById("05-parent-phone-glow");
+      const phoneWrap = document.getElementById("05-parent-phone-wrap");
+
+      const wallWraps = [
+        document.getElementById("05-parent-wall-wrap-1"),
+        document.getElementById("05-parent-wall-wrap-2"),
+        document.getElementById("05-parent-wall-wrap-3"),
+        document.getElementById("05-parent-wall-wrap-4"),
+      ];
+
+      const titlePill = document.getElementById("05-parent-title-pill");
+      const hP1 = document.getElementById("05-parent-h-p1");
+      const hP2 = document.getElementById("05-parent-h-p2");
+      const subhead = document.getElementById("05-parent-subhead");
+
+      const notif1 = document.getElementById("05-parent-notif-1");
+      const notif2 = document.getElementById("05-parent-notif-2");
+      const notif3 = document.getElementById("05-parent-notif-3");
+
+      // Initial state: hide subhead and notifications
+      tl.set(subhead, { opacity: 0 }, 0);
+      tl.set([notif1, notif2, notif3], { opacity: 0 }, 0);
+
+      // Scene 1 (0.0–1.9s)
+      // Background floating pill wallpaper entrance
+      tl.fromTo(
+        wallWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.7)", stagger: 0.05 },
+        0.08
+      );
+
+      // Warm peach glow behind phone
+      tl.fromTo(
+        phoneGlow,
+        { scale: 0.72, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 1.05, ease: "power2.out" },
+        0.05
+      );
+
+      // Hero phone mockup rises gently @ 0.0–0.9s (hero clearly visible by t <= 0.5s)
+      tl.fromTo(
+        phoneWrap,
+        { y: 110, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9, ease: "power3.out" },
+        0.0
+      );
+
+      // Category tag pill entrance
+      tl.fromTo(
+        titlePill,
+        { y: -16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.35, ease: "back.out(1.5)" },
+        0.15
+      );
+
+      // Headline "Orang tua ikut tenang." enters per phrase @ 0.2s
+      tl.fromTo(
+        hP1,
+        { y: 28, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" },
+        0.20
+      );
+      tl.fromTo(
+        hP2,
+        { y: 28, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" },
+        0.65
+      );
+
+      // Scene 2 (1.9–6.4s): three notification pills cascade and stack per VO cue
+      // Notification 1: "✓ Aisyah sudah tiba! · 08:15" @ 2.0s (mint)
+      tl.fromTo(
+        notif1,
+        { x: 120, opacity: 0, scale: 0.92 },
+        { x: 0, opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.4)" },
+        2.0
+      );
+
+      // Notification 2: "Foto kegiatan baru" @ 3.6s (sky)
+      tl.fromTo(
+        notif2,
+        { x: 120, opacity: 0, scale: 0.92 },
+        { x: 0, opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.4)" },
+        3.6
+      );
+
+      // Notification 3: "Laporan harian siap" @ 4.9s (yellow)
+      tl.fromTo(
+        notif3,
+        { x: 120, opacity: 0, scale: 0.92 },
+        { x: 0, opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.4)" },
+        4.9
+      );
+
+      // Scene 3 (6.4–8.08s): subheadline "Langsung di ponsel mereka." fades up @ 6.5s
+      tl.fromTo(
+        subhead,
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.48, ease: "power2.out" },
+        6.5
+      );
+
+      // Warm stillness hold until end of duration (no exit animation)
+      tl.to({}, { duration: 0.01 }, 8.08);
+
+      window.__timelines["05-parent"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,124 @@
+{
+  "total_duration_s": 9,
+  "width": 1080,
+  "height": 1920,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0.01,
+      "end": 1.6,
+      "text": "Coba MAJIKU gratis",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "Coba",
+          "start": 0.01,
+          "end": 0.4
+        },
+        {
+          "id": "caption-word-0-1",
+          "text": "MAJIKU",
+          "start": 0.4,
+          "end": 1
+        },
+        {
+          "id": "caption-word-0-2",
+          "text": "gratis",
+          "start": 1,
+          "end": 1.6
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 1,
+      "start": 1.6,
+      "end": 2.87,
+      "text": "14 hari,",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "14",
+          "start": 1.6,
+          "end": 2.2
+        },
+        {
+          "id": "caption-word-1-1",
+          "text": "hari,",
+          "start": 2.2,
+          "end": 2.79
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 1,
+      "start": 2.87,
+      "end": 4.22,
+      "text": "tanpa kartu kredit,",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "tanpa",
+          "start": 2.87,
+          "end": 3.16
+        },
+        {
+          "id": "caption-word-2-1",
+          "text": "kartu",
+          "start": 3.16,
+          "end": 3.53
+        },
+        {
+          "id": "caption-word-2-2",
+          "text": "kredit,",
+          "start": 3.53,
+          "end": 4.19
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 1,
+      "start": 4.22,
+      "end": 4.56,
+      "text": "setup",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "setup",
+          "start": 4.22,
+          "end": 4.44
+        }
+      ]
+    },
+    {
+      "id": "caption-group-4",
+      "frame": 1,
+      "start": 4.87,
+      "end": 6.12,
+      "text": "hanya 5 menit.",
+      "words": [
+        {
+          "id": "caption-word-4-0",
+          "text": "hanya",
+          "start": 4.87,
+          "end": 5.18
+        },
+        {
+          "id": "caption-word-4-1",
+          "text": "5",
+          "start": 5.18,
+          "end": 5.48
+        },
+        {
+          "id": "caption-word-4-2",
+          "text": "menit.",
+          "start": 5.48,
+          "end": 6
+        }
+      ]
+    }
+  ]
+}

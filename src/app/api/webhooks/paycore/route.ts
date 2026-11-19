@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { invoices, paymentOrders, paycoreEvents, tenants } from "@/db/schema";
+import { invoices, paymentOrders, paycoreEvents, students, tenants } from "@/db/schema";
 import { verifyPayCoreEvent } from "@/server/paycore";
+import { notifyUsers } from "@/server/notify";
 
 // Webhook khusus PayCore (bukan Duitku — Duitku callback hanya ke PayCore).
 // Kontrak: D:/Coding/paycore/docs/external/payment-events.md
@@ -132,6 +133,24 @@ export async function POST(req: Request) {
             updatedAt: new Date(),
           })
           .where(eq(invoices.id, order.invoiceId));
+
+        // Beri tahu orang tua bahwa tagihannya lunas.
+        const [inv] = await db
+          .select({ parentUserId: students.parentUserId, studentName: students.name, number: invoices.invoiceNumber })
+          .from(invoices)
+          .innerJoin(students, eq(invoices.studentId, students.id))
+          .where(eq(invoices.id, order.invoiceId))
+          .limit(1);
+        if (inv?.parentUserId) {
+          await notifyUsers({
+            userIds: [inv.parentUserId],
+            type: "payment",
+            title: `Pembayaran diterima — tagihan lunas`,
+            body: `${inv.number} untuk ${inv.studentName}. Terima kasih!`,
+            link: "/parent/billing",
+            tenantId: order.tenantId,
+          });
+        }
       }
 
       if (order.tenantId) {
@@ -142,6 +161,21 @@ export async function POST(req: Request) {
             updatedAt: new Date(),
           })
           .where(eq(tenants.id, order.tenantId));
+
+        // Aktivasi langganan SaaS atau tagihan lain — kabari admin lembaga.
+        if (order.userId && order.userId !== undefined) {
+          await notifyUsers({
+            userIds: [order.userId],
+            type: "payment",
+            title: "Pembayaran berhasil",
+            body:
+              order.productKey === "saas_subscription"
+                ? `Langganan ${order.planKey ?? ""} aktif. Selamat menggunakan Bunayo!`
+                : `Pembayaran ${data.order_id} terkonfirmasi.`,
+            link: "/dashboard",
+            tenantId: order.tenantId,
+          });
+        }
       }
 
       await db

@@ -1,0 +1,844 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed ground with cream base + radial glows + grain */
+    [id="03-intro-bg"],
+    .\30 3-intro-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 14% 18%, rgba(247, 176, 158, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 86% 22%, rgba(252, 226, 146, 0.15) 0%, transparent 42%),
+        radial-gradient(circle at 50% 50%, rgba(249, 195, 31, 0.10) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Atmosphere & Wallpaper */
+    [id="03-intro-atmosphere"],
+    .\30 3-intro-atmosphere {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Center radial atmosphere glow */
+    [id="03-intro-center-glow"],
+    .\30 3-intro-center-glow {
+      position: absolute;
+      top: 440px;
+      left: 960px;
+      width: 720px;
+      height: 720px;
+      margin-top: -360px;
+      margin-left: -360px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249, 195, 31, 0.38) 0%, rgba(240, 101, 66, 0.18) 38%, rgba(252, 226, 146, 0.08) 65%, transparent 75%);
+      pointer-events: none;
+      opacity: 0.12;
+      will-change: transform, opacity;
+    }
+
+    /* Wallpaper pills */
+    [class~="03-intro-pill-wrap"],
+    .\30 3-intro-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="03-intro-floating-pill"],
+    .\30 3-intro-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 26px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    [id="03-intro-wp-wrap-1"] { left: 110px; top: 120px; }
+    [id="03-intro-wp-1"] { background: #F7B09E; transform: rotate(-12deg); }
+
+    [id="03-intro-wp-wrap-2"] { right: 110px; top: 130px; }
+    [id="03-intro-wp-2"] { background: #FCE292; transform: rotate(14deg); }
+
+    [id="03-intro-wp-wrap-3"] { left: 100px; top: 560px; }
+    [id="03-intro-wp-3"] { background: #F6A794; transform: rotate(10deg); }
+
+    [id="03-intro-wp-wrap-4"] { right: 100px; top: 590px; }
+    [id="03-intro-wp-4"] { background: #F9C72E; transform: rotate(-12deg); }
+
+    [id="03-intro-wp-wrap-5"] { left: 280px; top: 770px; }
+    [id="03-intro-wp-5"] { background: #F6A18C; transform: rotate(-8deg); }
+
+    /* Track 2: Main interactive/animated content stage */
+    [id="03-intro-stage"],
+    .\30 3-intro-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Dashed guide arc connecting the 3 roles */
+    [id="03-intro-arc-svg"],
+    .\30 3-intro-arc-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Orbit 3D wrap */
+    [id="03-intro-orbit-wrap"],
+    .\30 3-intro-orbit-wrap {
+      position: absolute;
+      left: 960px;
+      top: 440px;
+      width: 0;
+      height: 0;
+      perspective: 1800px;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+
+    [class~="03-intro-orbit-item"],
+    .\30 3-intro-orbit-item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-style: preserve-3d;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    [class~="03-intro-orbit-dot"],
+    .\30 3-intro-orbit-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2.5px solid #1E1E1E;
+      box-shadow: 2px 2px 0 rgba(26,26,26,0.08);
+    }
+
+    [class~="03-intro-coral-dot"],
+    .\30 3-intro-coral-dot { background-color: #F06542; }
+
+    [class~="03-intro-mint-dot"],
+    .\30 3-intro-mint-dot { background-color: #FCE292; }
+
+    [class~="03-intro-sky-dot"],
+    .\30 3-intro-sky-dot { background-color: #F6A18C; }
+
+    [class~="03-intro-orbit-star"],
+    .\30 3-intro-orbit-star {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(2px 2px 0 rgba(26,26,26,0.08));
+    }
+
+    /* Lockup container */
+    [id="03-intro-lockup-wrap"],
+    .\30 3-intro-lockup-wrap {
+      position: absolute;
+      left: 960px;
+      top: 440px;
+      width: 0;
+      height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* Sparkle mark wrap */
+    [id="03-intro-mark-wrap"],
+    .\30 3-intro-mark-wrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 290px;
+      height: 290px;
+      margin-top: -145px;
+      margin-left: -145px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      will-change: transform, opacity;
+      transform-origin: center center;
+    }
+
+    [id="03-intro-hero-svg"],
+    .\30 3-intro-hero-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    [id="03-intro-sparkle-main"] {
+      fill: #32221B;
+      fill-opacity: 0;
+      stroke: #32221B;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    [id="03-intro-sparkle-tr-v"],
+    [id="03-intro-sparkle-tr-h"],
+    [id="03-intro-sparkle-bl-v"],
+    [id="03-intro-sparkle-bl-h"] {
+      fill: none;
+      stroke: #32221B;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Wordmark cascade container */
+    [id="03-intro-wordmark-wrap"],
+    .\30 3-intro-wordmark-wrap {
+      position: absolute;
+      top: 45px;
+      left: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.04em;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 110px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #32221B;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    [class~="03-intro-letter"],
+    .\30 3-intro-letter {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
+    /* Subtitle pill */
+    [id="03-intro-subtitle-wrap"],
+    .\30 3-intro-subtitle-wrap {
+      position: absolute;
+      top: 185px;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    [id="03-intro-subtitle-pill"],
+    .\30 3-intro-subtitle-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 34px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      background-color: #F9C31F;
+      box-shadow: 6px 6px 0 rgba(26,26,26,0.08);
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #32221B;
+      white-space: nowrap;
+    }
+
+    /* Scene 3: Center-outward expansion role pills */
+    [id="03-intro-burst-wrap"],
+    .\30 3-intro-burst-wrap {
+      position: absolute;
+      left: 960px;
+      top: 440px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    [class~="03-intro-burst-item"],
+    .\30 3-intro-burst-item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    [class~="03-intro-role-pill"],
+    .\30 3-intro-role-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 36px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      box-shadow: 8px 8px 0 rgba(26,26,26,0.08);
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    [class~="03-intro-role-dot"],
+    .\30 3-intro-role-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #1E1E1E;
+      margin-right: 14px;
+      display: inline-block;
+    }
+
+    /* Role 1: Lembaga (coral) */
+    [class~="03-intro-pill-coral"],
+    .\30 3-intro-pill-coral {
+      background-color: #F06542;
+      color: #FFFFFF;
+    }
+    [class~="03-intro-pill-coral"] [class~="03-intro-role-dot"],
+    .\30 3-intro-pill-coral .\30 3-intro-role-dot {
+      background-color: #FFFFFF;
+      border-color: #FFFFFF;
+    }
+
+    /* Role 2: Guru (mint) */
+    [class~="03-intro-pill-mint"],
+    .\30 3-intro-pill-mint {
+      background-color: #FCE292;
+      color: #32221B;
+    }
+    [class~="03-intro-pill-mint"] [class~="03-intro-role-dot"],
+    .\30 3-intro-pill-mint .\30 3-intro-role-dot {
+      background-color: #F06542;
+      border-color: #1E1E1E;
+    }
+
+    /* Role 3: Orang Tua (sky) */
+    [class~="03-intro-pill-sky"],
+    .\30 3-intro-pill-sky {
+      background-color: #F6A18C;
+      color: #32221B;
+    }
+    [class~="03-intro-pill-sky"] [class~="03-intro-role-dot"],
+    .\30 3-intro-pill-sky .\30 3-intro-role-dot {
+      background-color: #F9C31F;
+      border-color: #1E1E1E;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="03-intro"
+    data-start="0"
+    data-duration="8.5"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="03-intro-bg"
+      class="clip 03-intro-bg"
+      data-start="0"
+      data-duration="8.5"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Atmosphere & Wallpaper -->
+    <div
+      id="03-intro-atmosphere"
+      class="clip 03-intro-atmosphere"
+      data-start="0"
+      data-duration="8.5"
+      data-track-index="1"
+    >
+      <!-- Central radial glow -->
+      <div id="03-intro-center-glow" class="03-intro-center-glow"></div>
+
+      <!-- Wallpaper pills -->
+      <div id="03-intro-wp-wrap-1" class="03-intro-pill-wrap">
+        <div id="03-intro-wp-1" class="03-intro-floating-pill">SINERGI</div>
+      </div>
+      <div id="03-intro-wp-wrap-2" class="03-intro-pill-wrap">
+        <div id="03-intro-wp-2" class="03-intro-floating-pill">TERPADU</div>
+      </div>
+      <div id="03-intro-wp-wrap-3" class="03-intro-pill-wrap">
+        <div id="03-intro-wp-3" class="03-intro-floating-pill">EKOSISTEM</div>
+      </div>
+      <div id="03-intro-wp-wrap-4" class="03-intro-pill-wrap">
+        <div id="03-intro-wp-4" class="03-intro-floating-pill">KOLABORASI</div>
+      </div>
+      <div id="03-intro-wp-wrap-5" class="03-intro-pill-wrap">
+        <div id="03-intro-wp-5" class="03-intro-floating-pill">EFISIEN</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Main Stage -->
+    <div
+      id="03-intro-stage"
+      class="clip 03-intro-stage"
+      data-start="0"
+      data-duration="8.5"
+      data-track-index="2"
+    >
+      <!-- Dashed arc guide connecting the three roles -->
+      <svg id="03-intro-arc-svg" class="03-intro-arc-svg" viewBox="0 0 1920 1080">
+        <path
+          id="03-intro-arc-guide"
+          d="M 420 400 Q 960 -70 1500 400"
+          fill="none"
+          stroke="rgba(50, 34, 27, 0.20)"
+          stroke-width="2.5"
+          stroke-dasharray="8 8"
+          opacity="0"
+        />
+      </svg>
+
+      <!-- 3D Orbit Stage for Scene 1 -->
+      <div id="03-intro-orbit-wrap" class="03-intro-orbit-wrap">
+        <div class="03-intro-orbit-item" data-angle="0">
+          <div class="03-intro-orbit-dot 03-intro-coral-dot"></div>
+        </div>
+        <div class="03-intro-orbit-item" data-angle="60">
+          <div class="03-intro-orbit-star">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#F9C31F">
+              <path d="M12 0L14 10L24 12L14 14L12 24L10 14L0 12L10 10Z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="03-intro-orbit-item" data-angle="120">
+          <div class="03-intro-orbit-dot 03-intro-mint-dot"></div>
+        </div>
+        <div class="03-intro-orbit-item" data-angle="180">
+          <div class="03-intro-orbit-star">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#F06542">
+              <path d="M12 0L14 10L24 12L14 14L12 24L10 14L0 12L10 10Z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="03-intro-orbit-item" data-angle="240">
+          <div class="03-intro-orbit-dot 03-intro-sky-dot"></div>
+        </div>
+        <div class="03-intro-orbit-item" data-angle="300">
+          <div class="03-intro-orbit-star">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#FCE292">
+              <path d="M12 0L14 10L24 12L14 14L12 24L10 14L0 12L10 10Z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Lockup (Mark + Wordmark + Subtitle Pill) -->
+      <div id="03-intro-lockup-wrap" class="03-intro-lockup-wrap">
+        <!-- Hero sparkle mark -->
+        <div id="03-intro-mark-wrap" class="03-intro-mark-wrap">
+          <svg
+            id="03-intro-hero-svg"
+            class="03-intro-hero-svg"
+            viewBox="0 0 24 24"
+            width="290"
+            height="290"
+          >
+            <!-- Main 4-point sparkle star -->
+            <path
+              id="03-intro-sparkle-main"
+              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+            />
+            <!-- Top-right star lines -->
+            <path id="03-intro-sparkle-tr-v" d="M20 3v4" />
+            <path id="03-intro-sparkle-tr-h" d="M22 5h-4" />
+            <!-- Bottom-left star lines -->
+            <path id="03-intro-sparkle-bl-v" d="M4 17v2" />
+            <path id="03-intro-sparkle-bl-h" d="M5 18H3" />
+          </svg>
+        </div>
+
+        <!-- Wordmark cascade -->
+        <div id="03-intro-wordmark-wrap" class="03-intro-wordmark-wrap">
+          <span id="03-intro-letter-m" class="03-intro-letter">M</span>
+          <span id="03-intro-letter-a" class="03-intro-letter">A</span>
+          <span id="03-intro-letter-j" class="03-intro-letter">J</span>
+          <span id="03-intro-letter-i" class="03-intro-letter">I</span>
+          <span id="03-intro-letter-k" class="03-intro-letter">K</span>
+          <span id="03-intro-letter-u" class="03-intro-letter">U</span>
+        </div>
+
+        <!-- Subtitle pill -->
+        <div id="03-intro-subtitle-wrap" class="03-intro-subtitle-wrap">
+          <div id="03-intro-subtitle-pill" class="03-intro-subtitle-pill">
+            SATU PLATFORM, TIGA PERAN TERHUBUNG
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 3: Center-outward expansion role pills -->
+      <div id="03-intro-burst-wrap" class="03-intro-burst-wrap">
+        <div
+          id="03-intro-role-1"
+          class="03-intro-burst-item"
+          data-target-x="-540"
+          data-target-y="-40"
+        >
+          <div class="03-intro-role-pill 03-intro-pill-coral">
+            <span class="03-intro-role-dot"></span>
+            <span>Lembaga</span>
+          </div>
+        </div>
+        <div
+          id="03-intro-role-2"
+          class="03-intro-burst-item"
+          data-target-x="0"
+          data-target-y="-275"
+        >
+          <div class="03-intro-role-pill 03-intro-pill-mint">
+            <span class="03-intro-role-dot"></span>
+            <span>Guru</span>
+          </div>
+        </div>
+        <div
+          id="03-intro-role-3"
+          class="03-intro-burst-item"
+          data-target-x="540"
+          data-target-y="-40"
+        >
+          <div class="03-intro-role-pill 03-intro-pill-sky">
+            <span class="03-intro-role-dot"></span>
+            <span>Orang Tua</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Elements
+      const glowEl = document.getElementById("03-intro-center-glow");
+      const arcGuide = document.getElementById("03-intro-arc-guide");
+      const markWrap = document.getElementById("03-intro-mark-wrap");
+      const wordmarkWrap = document.getElementById("03-intro-wordmark-wrap");
+      const subtitleWrap = document.getElementById("03-intro-subtitle-wrap");
+
+      const wpWraps = [
+        document.getElementById("03-intro-wp-wrap-1"),
+        document.getElementById("03-intro-wp-wrap-2"),
+        document.getElementById("03-intro-wp-wrap-3"),
+        document.getElementById("03-intro-wp-wrap-4"),
+        document.getElementById("03-intro-wp-wrap-5"),
+      ];
+
+      const letters = [
+        document.getElementById("03-intro-letter-m"),
+        document.getElementById("03-intro-letter-a"),
+        document.getElementById("03-intro-letter-j"),
+        document.getElementById("03-intro-letter-i"),
+        document.getElementById("03-intro-letter-k"),
+        document.getElementById("03-intro-letter-u"),
+      ];
+
+      const role1 = document.getElementById("03-intro-role-1");
+      const role2 = document.getElementById("03-intro-role-2");
+      const role3 = document.getElementById("03-intro-role-3");
+
+      const orbitItems = document.querySelectorAll("[class~='03-intro-orbit-item']");
+
+      // SVG Paths
+      const mainPath = document.getElementById("03-intro-sparkle-main");
+      const trV = document.getElementById("03-intro-sparkle-tr-v");
+      const trH = document.getElementById("03-intro-sparkle-tr-h");
+      const blV = document.getElementById("03-intro-sparkle-bl-v");
+      const blH = document.getElementById("03-intro-sparkle-bl-h");
+      const allSvgPaths = [mainPath, trV, trH, blV, blH];
+
+      // Measure SVG path lengths for svg-path-draw
+      allSvgPaths.forEach((p) => {
+        let len = 60;
+        try {
+          if (typeof p.getTotalLength === "function") {
+            const measured = p.getTotalLength();
+            if (measured > 0) len = measured;
+          }
+        } catch (e) {}
+        p.style.strokeDasharray = String(len);
+        p.style.strokeDashoffset = String(len);
+      });
+
+      // Initial states
+      gsap.set(markWrap, { x: 0, y: 0, scale: 0.45, opacity: 0 });
+      gsap.set(wordmarkWrap, { xPercent: -50 });
+      gsap.set(subtitleWrap, { xPercent: -50, y: 30, scale: 0.6, opacity: 0 });
+      letters.forEach((el) => {
+        gsap.set(el, { y: 36, scale: 0.7, opacity: 0 });
+      });
+
+      gsap.set(role1, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 0.35, opacity: 0 });
+      gsap.set(role2, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 0.35, opacity: 0 });
+      gsap.set(role3, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 0.35, opacity: 0 });
+
+      // Wallpaper pills entrance @ 0.08s
+      tl.fromTo(
+        wpWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.7)", stagger: 0.05 },
+        0.08
+      );
+
+      // --- Scene 1 (0.0–2.3s) ---
+      // 1. Orbit with 3D Entry (orbit-3d-entry)
+      const RADIUS_X = 330;
+      const RADIUS_Y = 165; // Y_TO_X_RATIO: 0.5
+
+      orbitItems.forEach((el, i) => {
+        const a0 = (Number(el.dataset.angle) / 360) * Math.PI * 2;
+        const startX = Math.cos(a0) * RADIUS_X;
+        const startY = Math.sin(a0) * RADIUS_Y;
+
+        // Park at orbital position hidden in 3D
+        gsap.set(el, {
+          xPercent: -50,
+          yPercent: -50,
+          x: startX,
+          y: startY,
+          rotateX: -65,
+          rotateY: 45,
+          z: -260,
+          opacity: 0,
+          scale: 0.3,
+        });
+
+        // 3D Flip-in in place
+        tl.to(
+          el,
+          {
+            rotateX: 0,
+            rotateY: 0,
+            z: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.55,
+            ease: "back.out(1.5)",
+          },
+          0.15 + i * 0.07
+        );
+
+        // Continuous orbit
+        const orbit = { p: 0 };
+        tl.to(
+          orbit,
+          {
+            p: 1,
+            duration: 4.2,
+            ease: "none",
+            onUpdate: () => {
+              const a = a0 + orbit.p * Math.PI * 2;
+              const x = Math.cos(a) * RADIUS_X;
+              const y = Math.sin(a) * RADIUS_Y;
+              el.style.zIndex = String(1 + Math.round(((y + RADIUS_Y) / (2 * RADIUS_Y)) * 49));
+              el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+            },
+          },
+          0.15 + i * 0.07 + 0.55
+        );
+      });
+
+      // 2. SVG Self-draw + Bloom (svg-path-draw + spring-pop-entrance)
+      // Hero visible by t <= 0.5s: starts @ 0.20s, reaches scale 1 @ 0.90s
+      tl.to(
+        markWrap,
+        { scale: 1, opacity: 1, duration: 0.70, ease: "back.out(1.5)" },
+        0.20
+      );
+
+      // SVG Path draw: main star
+      tl.to(
+        mainPath,
+        { strokeDashoffset: 0, duration: 0.65, ease: "power2.out" },
+        0.22
+      );
+
+      // Cross star paths draw
+      tl.to(
+        [trV, trH],
+        { strokeDashoffset: 0, duration: 0.35, ease: "power2.out", stagger: 0.05 },
+        0.48
+      );
+      tl.to(
+        [blV, blH],
+        { strokeDashoffset: 0, duration: 0.35, ease: "power2.out", stagger: 0.05 },
+        0.58
+      );
+
+      // Main star fill fade-in bloom after stroke completes
+      tl.to(
+        mainPath,
+        { fillOpacity: 1, duration: 0.50, ease: "power1.out" },
+        0.85
+      );
+
+      // Atmospheric radial glow mencerah @ 0.3–2.2s on "Kenalkan MAJIKU"
+      tl.fromTo(
+        glowEl,
+        { opacity: 0.12, scale: 0.70 },
+        { opacity: 0.90, scale: 1.15, duration: 1.90, ease: "power1.out" },
+        0.30
+      );
+
+      // Orbit satellites fade out smoothly as Scene 2 begins
+      tl.to(
+        orbitItems,
+        { opacity: 0, scale: 0.2, duration: 0.35, ease: "power2.in" },
+        2.15
+      );
+
+      // --- Scene 2 (2.3–5.2s) ---
+      // Mark glides up to header position of lockup
+      tl.to(
+        markWrap,
+        { y: -130, scale: 0.72, duration: 0.55, ease: "power2.inOut" },
+        2.25
+      );
+
+      // Wordmark "MAJIKU" cascade (logo-brand-close) starting @ 2.4s on "satu platform"
+      letters.forEach((letter, i) => {
+        tl.to(
+          letter,
+          { y: 0, scale: 1, opacity: 1, duration: 0.42, ease: "back.out(2.0)" },
+          2.40 + i * 0.12
+        );
+      });
+
+      // Subtitle pill pop @ 3.5s below lockup
+      tl.to(
+        subtitleWrap,
+        { y: 0, scale: 1, opacity: 1, duration: 0.48, ease: "back.out(1.8)" },
+        3.50
+      );
+
+      // --- Scene 3 (5.2–8.0s) ---
+      // Faint dashed guide arc fades in
+      tl.to(
+        arcGuide,
+        { opacity: 1, duration: 0.55, ease: "power1.out" },
+        5.15
+      );
+
+      // 1. "Lembaga" @ 5.3s (coral) - center-outward expansion
+      tl.to(
+        role1,
+        {
+          x: Number(role1.dataset.targetX),
+          y: Number(role1.dataset.targetY),
+          scale: 1,
+          opacity: 1,
+          duration: 0.58,
+          ease: "back.out(1.6)",
+        },
+        5.30
+      );
+
+      // 2. "Guru" @ 6.3s (mint) - center-outward expansion
+      tl.to(
+        role2,
+        {
+          x: Number(role2.dataset.targetX),
+          y: Number(role2.dataset.targetY),
+          scale: 1,
+          opacity: 1,
+          duration: 0.58,
+          ease: "back.out(1.6)",
+        },
+        6.30
+      );
+
+      // 3. "Orang Tua" @ 7.0s (sky) - center-outward expansion
+      tl.to(
+        role3,
+        {
+          x: Number(role3.dataset.targetX),
+          y: Number(role3.dataset.targetY),
+          scale: 1,
+          opacity: 1,
+          duration: 0.58,
+          ease: "back.out(1.6)",
+        },
+        7.00
+      );
+
+      // Stillness hold until 8.0s (no exit animation)
+      tl.to({}, { duration: 0.01 }, 8.0);
+
+      window.__timelines["03-intro"] = tl;
+    })();
+  </script>
+</template>

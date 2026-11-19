@@ -1,0 +1,403 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed background with cream base + radial glows + grain */
+    [id="01-hook-bg"],
+    .\30 1-hook-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 14% 18%, rgba(247, 176, 158, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 86% 22%, rgba(252, 226, 146, 0.15) 0%, transparent 42%),
+        radial-gradient(circle at 48% 78%, rgba(249, 199, 46, 0.11) 0%, transparent 48%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Floating pill wallpaper (5 flat candy pills at edges) */
+    [id="01-hook-wallpaper"],
+    .\30 1-hook-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="01-hook-pill-wrap"],
+    .\30 1-hook-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="01-hook-floating-pill"],
+    .\30 1-hook-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 26px;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    /* Pill 1 - Top Left */
+    [id="01-hook-pill-wrap-1"] { left: 90px; top: 110px; }
+    [id="01-hook-pill-1"] { background: #F7B09E; transform: rotate(-14deg); }
+
+    /* Pill 2 - Top Right */
+    [id="01-hook-pill-wrap-2"] { right: 90px; top: 125px; }
+    [id="01-hook-pill-2"] { background: #FCE292; transform: rotate(15deg); }
+
+    /* Pill 3 - Mid Left */
+    [id="01-hook-pill-wrap-3"] { left: 105px; top: 560px; }
+    [id="01-hook-pill-3"] { background: #F9C72E; transform: rotate(10deg); }
+
+    /* Pill 4 - Mid Right */
+    [id="01-hook-pill-wrap-4"] { right: 95px; top: 590px; }
+    [id="01-hook-pill-4"] { background: #F6A794; transform: rotate(-12deg); }
+
+    /* Pill 5 - Bottom Mid-Left (well above 896px) */
+    [id="01-hook-pill-wrap-5"] { left: 340px; top: 750px; }
+    [id="01-hook-pill-5"] { background: #F6A18C; transform: rotate(-7deg); }
+
+    /* Track 2: Main Kinetic Stage */
+    [id="01-hook-stage"],
+    .\30 1-hook-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 80px 100px;
+      pointer-events: none;
+    }
+
+    [class~="01-hook-scene"],
+    .\30 1-hook-scene {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+    }
+
+    [class~="01-hook-phrase"],
+    .\30 1-hook-phrase {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 0.28em;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 8.5cqw;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: #32221B;
+    }
+
+    [class~="01-hook-word"],
+    .\30 1-hook-word {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    /* Quote-highlight pills */
+    [class~="01-hook-quote-pill"],
+    .\30 1-hook-quote-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.04em 0.32em;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      box-shadow: 6px 6px 0 rgba(26,26,26,0.08);
+      vertical-align: baseline;
+    }
+
+    [class~="01-hook-lime"],
+    .\30 1-hook-lime {
+      background-color: #F9C72E;
+      color: #32221B;
+    }
+
+    [class~="01-hook-coral"],
+    .\30 1-hook-coral {
+      background-color: #F06542;
+      color: #FFFFFF;
+    }
+
+    /* Scene 3 Stacked */
+    [class~="01-hook-scene-stacked"],
+    .\30 1-hook-scene-stacked {
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    [class~="01-hook-line"],
+    .\30 1-hook-line {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 8.0cqw;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: #32221B;
+      white-space: nowrap;
+    }
+
+    [class~="01-hook-italic-coral"],
+    .\30 1-hook-italic-coral {
+      font-style: italic;
+      color: #F06542;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="01-hook"
+    data-start="0"
+    data-duration="6.66"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="01-hook-bg"
+      class="clip 01-hook-bg"
+      data-start="0"
+      data-duration="6.66"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Floating pill wallpaper -->
+    <div
+      id="01-hook-wallpaper"
+      class="clip 01-hook-wallpaper"
+      data-start="0"
+      data-duration="6.66"
+      data-track-index="1"
+    >
+      <div id="01-hook-pill-wrap-1" class="01-hook-pill-wrap">
+        <div id="01-hook-pill-1" class="01-hook-floating-pill">OPERASIONAL</div>
+      </div>
+      <div id="01-hook-pill-wrap-2" class="01-hook-pill-wrap">
+        <div id="01-hook-pill-2" class="01-hook-floating-pill">CATATAN</div>
+      </div>
+      <div id="01-hook-pill-wrap-3" class="01-hook-pill-wrap">
+        <div id="01-hook-pill-3" class="01-hook-floating-pill">ARSIP</div>
+      </div>
+      <div id="01-hook-pill-wrap-4" class="01-hook-pill-wrap">
+        <div id="01-hook-pill-4" class="01-hook-floating-pill">HARIAN</div>
+      </div>
+      <div id="01-hook-pill-wrap-5" class="01-hook-pill-wrap">
+        <div id="01-hook-pill-5" class="01-hook-floating-pill">MANUAL</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Main kinetic text stage -->
+    <div
+      id="01-hook-stage"
+      class="clip 01-hook-stage"
+      data-start="0"
+      data-duration="6.66"
+      data-track-index="2"
+    >
+      <!-- Scene 1: Absensi di buku. -->
+      <div id="01-hook-scene-1" class="01-hook-scene">
+        <div class="01-hook-phrase">
+          <span id="01-hook-s1-w1" class="01-hook-word">Absensi</span>
+          <span id="01-hook-s1-w2" class="01-hook-word">di</span>
+          <span id="01-hook-s1-w3" class="01-hook-word 01-hook-quote-pill 01-hook-lime">buku.</span>
+        </div>
+      </div>
+
+      <!-- Scene 2: Tagihan di kertas. -->
+      <div id="01-hook-scene-2" class="01-hook-scene" style="display: none;">
+        <div class="01-hook-phrase">
+          <span id="01-hook-s2-w1" class="01-hook-word">Tagihan</span>
+          <span id="01-hook-s2-w2" class="01-hook-word">di</span>
+          <span id="01-hook-s2-w3" class="01-hook-word 01-hook-quote-pill 01-hook-coral">kertas.</span>
+        </div>
+      </div>
+
+      <!-- Scene 3: Kabar anak? Sering terlambat. -->
+      <div id="01-hook-scene-3" class="01-hook-scene 01-hook-scene-stacked" style="display: none;">
+        <div id="01-hook-s3-line1" class="01-hook-line">Kabar anak?</div>
+        <div id="01-hook-s3-line2" class="01-hook-line">
+          <span>Sering</span> <span id="01-hook-s3-italic" class="01-hook-italic-coral">terlambat.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const pillWraps = [
+        document.getElementById("01-hook-pill-wrap-1"),
+        document.getElementById("01-hook-pill-wrap-2"),
+        document.getElementById("01-hook-pill-wrap-3"),
+        document.getElementById("01-hook-pill-wrap-4"),
+        document.getElementById("01-hook-pill-wrap-5"),
+      ];
+
+      const s1 = document.getElementById("01-hook-scene-1");
+      const s2 = document.getElementById("01-hook-scene-2");
+      const s3 = document.getElementById("01-hook-scene-3");
+
+      const s1w1 = document.getElementById("01-hook-s1-w1");
+      const s1w2 = document.getElementById("01-hook-s1-w2");
+      const s1w3 = document.getElementById("01-hook-s1-w3");
+
+      const s2w1 = document.getElementById("01-hook-s2-w1");
+      const s2w2 = document.getElementById("01-hook-s2-w2");
+      const s2w3 = document.getElementById("01-hook-s2-w3");
+
+      const s3l1 = document.getElementById("01-hook-s3-line1");
+      const s3l2 = document.getElementById("01-hook-s3-line2");
+      const s3it = document.getElementById("01-hook-s3-italic");
+
+      // Initial visibility states
+      tl.set(s1, { display: "flex" }, 0);
+      tl.set(s2, { display: "none" }, 0);
+      tl.set(s3, { display: "none" }, 0);
+
+      // Wallpaper entrance (Scene 1)
+      tl.fromTo(
+        pillWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.7)", stagger: 0.05 },
+        0.08
+      );
+
+      // Scene 1: "Absensi di buku."
+      // Hero visible by t <= 0.5s: "Absensi" hits @ 0.28s, lands ~0.48s
+      tl.fromTo(
+        s1w1,
+        { scale: 1.42, filter: "blur(14px)", opacity: 0 },
+        { scale: 1, filter: "blur(0px)", opacity: 1, duration: 0.4, ease: "power4.out" },
+        0.28
+      );
+      tl.fromTo(
+        s1w2,
+        { y: -30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.22, ease: "expo.out" },
+        1.07
+      );
+      tl.fromTo(
+        s1w3,
+        { scale: 0.6, y: 30, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.44, ease: "back.out(2)" },
+        1.37
+      );
+
+      // Scene 2: Hard cut swap @ 2.08s -> "Tagihan di kertas."
+      tl.set(s1, { display: "none" }, 2.08);
+      tl.set(s2, { display: "flex" }, 2.08);
+
+      tl.fromTo(
+        s2w1,
+        { scale: 1.35, filter: "blur(12px)", opacity: 0 },
+        { scale: 1, filter: "blur(0px)", opacity: 1, duration: 0.38, ease: "power4.out" },
+        2.12
+      );
+      tl.fromTo(
+        s2w2,
+        { y: -26, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.16, ease: "expo.out" },
+        2.69
+      );
+      tl.fromTo(
+        s2w3,
+        { scale: 0.6, y: 30, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.42, ease: "back.out(2)" },
+        2.85
+      );
+
+      // Scene 3: Hard cut swap @ 3.78s -> "Kabar anak?" + "Sering terlambat."
+      tl.set(s2, { display: "none" }, 3.78);
+      tl.set(s3, { display: "flex" }, 3.78);
+
+      tl.fromTo(
+        s3l1,
+        { y: -35, scale: 0.94, opacity: 0 },
+        { y: 0, scale: 1, opacity: 1, duration: 0.3, ease: "power3.out" },
+        3.82
+      );
+      tl.fromTo(
+        s3l2,
+        { scale: 1.38, filter: "blur(14px)", opacity: 0 },
+        { scale: 1, filter: "blur(0px)", opacity: 1, duration: 0.44, ease: "power4.out" },
+        4.54
+      );
+
+      // Vocal inflection on "terlambat" @ 5.06s: subtle punch snap
+      tl.fromTo(
+        s3it,
+        { scale: 1 },
+        { scale: 1.08, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out" },
+        5.06
+      );
+
+      // Complete stillness hold until end of duration (no exit animation)
+      tl.to({}, { duration: 0.01 }, 6.16);
+
+      window.__timelines["01-hook"] = tl;
+    })();
+  </script>
+</template>

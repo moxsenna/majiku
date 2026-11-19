@@ -28,6 +28,7 @@ import {
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { assertDemoMutationLock } from "@/server/authz";
+import { notifyUsers } from "@/server/notify";
 
 export interface ConversationSummary {
   id: string;
@@ -505,6 +506,21 @@ export async function sendMessage(
       updatedAt: now,
     })
     .where(eq(conversations.id, conversationId));
+
+  // Notifikasi ke lawan bicara (parent atau guru) — pesan baru jangan terlewat.
+  const recipientId =
+    conv[0].parentUserId === session.user.id
+      ? conv[0].tutorUserId
+      : conv[0].parentUserId;
+  if (recipientId) {
+    await notifyUsers({
+      userIds: [recipientId],
+      type: "chat",
+      title: `Pesan baru dari ${session.user.name || "pengguna"}`,
+      body: trimmed.slice(0, 120),
+      link: conv[0].parentUserId === session.user.id ? "/tutor/chat" : "/parent/chat",
+    });
+  }
 
   return { id: messageId };
 }

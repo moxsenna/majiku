@@ -1,0 +1,1047 @@
+{
+  "bgm": {
+    "path": "assets/bgm/track.wav",
+    "volume": 0.12,
+    "query": null,
+    "duration_s": 73.96
+  },
+  "bgm_pending": false,
+  "voices": [
+    {
+      "frame": 1,
+      "path": "assets/voice/01.wav",
+      "duration_s": 6.16,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Absensi",
+          "start": 0.28,
+          "end": 1.07
+        },
+        {
+          "id": "w1",
+          "text": "di",
+          "start": 1.07,
+          "end": 1.37
+        },
+        {
+          "id": "w2",
+          "text": "buku,",
+          "start": 1.37,
+          "end": 2.15
+        },
+        {
+          "id": "w3",
+          "text": "tagihan",
+          "start": 2.15,
+          "end": 2.69
+        },
+        {
+          "id": "w4",
+          "text": "di",
+          "start": 2.69,
+          "end": 2.85
+        },
+        {
+          "id": "w5",
+          "text": "kertas,",
+          "start": 2.85,
+          "end": 3.56
+        },
+        {
+          "id": "w6",
+          "text": "kabar",
+          "start": 3.83,
+          "end": 4.05
+        },
+        {
+          "id": "w7",
+          "text": "anak",
+          "start": 4.07,
+          "end": 4.33
+        },
+        {
+          "id": "w8",
+          "text": "sering",
+          "start": 4.54,
+          "end": 5.06
+        },
+        {
+          "id": "w9",
+          "text": "terlambat.",
+          "start": 5.06,
+          "end": 6
+        }
+      ]
+    },
+    {
+      "frame": 2,
+      "path": "assets/voice/02.wav",
+      "duration_s": 8.6,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Setiap",
+          "start": 0.25,
+          "end": 0.73
+        },
+        {
+          "id": "w1",
+          "text": "hari,",
+          "start": 0.73,
+          "end": 1.33
+        },
+        {
+          "id": "w2",
+          "text": "penglola",
+          "start": 1.67,
+          "end": 2.1
+        },
+        {
+          "id": "w3",
+          "text": "lembaga",
+          "start": 2.1,
+          "end": 2.63
+        },
+        {
+          "id": "w4",
+          "text": "mengejar",
+          "start": 2.63,
+          "end": 3.24
+        },
+        {
+          "id": "w5",
+          "text": "data",
+          "start": 3.24,
+          "end": 3.54
+        },
+        {
+          "id": "w6",
+          "text": "siswa,",
+          "start": 3.55,
+          "end": 3.97
+        },
+        {
+          "id": "w7",
+          "text": "pembayaran,",
+          "start": 4.22,
+          "end": 5.33
+        },
+        {
+          "id": "w8",
+          "text": "dan",
+          "start": 5.33,
+          "end": 5.5
+        },
+        {
+          "id": "w9",
+          "text": "pesan",
+          "start": 5.56,
+          "end": 5.86
+        },
+        {
+          "id": "w10",
+          "text": "orang",
+          "start": 5.86,
+          "end": 6.19
+        },
+        {
+          "id": "w11",
+          "text": "tua,",
+          "start": 6.19,
+          "end": 6.56
+        },
+        {
+          "id": "w12",
+          "text": "semuanya",
+          "start": 6.73,
+          "end": 7.21
+        },
+        {
+          "id": "w13",
+          "text": "datang",
+          "start": 7.21,
+          "end": 7.72
+        },
+        {
+          "id": "w14",
+          "text": "bersamaan.",
+          "start": 7.72,
+          "end": 8.52
+        }
+      ]
+    },
+    {
+      "frame": 3,
+      "path": "assets/voice/03.wav",
+      "duration_s": 8,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Kenalkan",
+          "start": 0.25,
+          "end": 0.98
+        },
+        {
+          "id": "w1",
+          "text": "Majiku,",
+          "start": 1.26,
+          "end": 2.2
+        },
+        {
+          "id": "w2",
+          "text": "satu",
+          "start": 2.43,
+          "end": 2.54
+        },
+        {
+          "id": "w3",
+          "text": "platform,",
+          "start": 2.54,
+          "end": 3.32
+        },
+        {
+          "id": "w4",
+          "text": "tiga",
+          "start": 3.49,
+          "end": 3.76
+        },
+        {
+          "id": "w5",
+          "text": "peran",
+          "start": 3.76,
+          "end": 4.21
+        },
+        {
+          "id": "w6",
+          "text": "terhubung,",
+          "start": 4.21,
+          "end": 5.25
+        },
+        {
+          "id": "w7",
+          "text": "lembaga,",
+          "start": 5.28,
+          "end": 6.18
+        },
+        {
+          "id": "w8",
+          "text": "guru,",
+          "start": 6.26,
+          "end": 6.7
+        },
+        {
+          "id": "w9",
+          "text": "dan",
+          "start": 6.99,
+          "end": 7.14
+        },
+        {
+          "id": "w10",
+          "text": "orang",
+          "start": 7.15,
+          "end": 7.67
+        },
+        {
+          "id": "w11",
+          "text": "tua.",
+          "start": 7.67,
+          "end": 7.99
+        }
+      ]
+    },
+    {
+      "frame": 4,
+      "path": "assets/voice/04.wav",
+      "duration_s": 7.28,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Dari",
+          "start": 0.01,
+          "end": 0.36
+        },
+        {
+          "id": "w1",
+          "text": "satu",
+          "start": 0.36,
+          "end": 0.7
+        },
+        {
+          "id": "w2",
+          "text": "dashboard",
+          "start": 0.77,
+          "end": 1.43
+        },
+        {
+          "id": "w3",
+          "text": "admin,",
+          "start": 1.55,
+          "end": 2.14
+        },
+        {
+          "id": "w4",
+          "text": "kehadiran",
+          "start": 2.27,
+          "end": 2.78
+        },
+        {
+          "id": "w5",
+          "text": "real-time,",
+          "start": 2.78,
+          "end": 3.49
+        },
+        {
+          "id": "w6",
+          "text": "tagihan,",
+          "start": 3.71,
+          "end": 4.63
+        },
+        {
+          "id": "w7",
+          "text": "dan",
+          "start": 4.63,
+          "end": 4.83
+        },
+        {
+          "id": "w8",
+          "text": "laporan",
+          "start": 4.83,
+          "end": 5.29
+        },
+        {
+          "id": "w9",
+          "text": "lembaga",
+          "start": 5.29,
+          "end": 5.71
+        },
+        {
+          "id": "w10",
+          "text": "semuanya",
+          "start": 5.9,
+          "end": 6.28
+        },
+        {
+          "id": "w11",
+          "text": "terpantau.",
+          "start": 6.28,
+          "end": 7.03
+        }
+      ]
+    },
+    {
+      "frame": 5,
+      "path": "assets/voice/05.wav",
+      "duration_s": 8.08,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Orang",
+          "start": 0.19,
+          "end": 0.47
+        },
+        {
+          "id": "w1",
+          "text": "tua",
+          "start": 0.47,
+          "end": 0.75
+        },
+        {
+          "id": "w2",
+          "text": "ikut",
+          "start": 0.75,
+          "end": 1.13
+        },
+        {
+          "id": "w3",
+          "text": "tenang,",
+          "start": 1.13,
+          "end": 1.79
+        },
+        {
+          "id": "w4",
+          "text": "notifikasi",
+          "start": 1.98,
+          "end": 2.81
+        },
+        {
+          "id": "w5",
+          "text": "cekin,",
+          "start": 2.95,
+          "end": 3.58
+        },
+        {
+          "id": "w6",
+          "text": "foto",
+          "start": 3.58,
+          "end": 3.95
+        },
+        {
+          "id": "w7",
+          "text": "kegiatan",
+          "start": 3.95,
+          "end": 4.54
+        },
+        {
+          "id": "w8",
+          "text": "sampai",
+          "start": 4.87,
+          "end": 5.15
+        },
+        {
+          "id": "w9",
+          "text": "laporan",
+          "start": 5.21,
+          "end": 5.76
+        },
+        {
+          "id": "w10",
+          "text": "harian",
+          "start": 5.76,
+          "end": 6.23
+        },
+        {
+          "id": "w11",
+          "text": "langsung",
+          "start": 6.46,
+          "end": 6.9
+        },
+        {
+          "id": "w12",
+          "text": "di",
+          "start": 6.9,
+          "end": 7.05
+        },
+        {
+          "id": "w13",
+          "text": "ponsel",
+          "start": 7.05,
+          "end": 7.51
+        },
+        {
+          "id": "w14",
+          "text": "mereka.",
+          "start": 7.51,
+          "end": 8
+        }
+      ]
+    },
+    {
+      "frame": 6,
+      "path": "assets/voice/06.wav",
+      "duration_s": 7.4,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Tagihan",
+          "start": 0.01,
+          "end": 0.65
+        },
+        {
+          "id": "w1",
+          "text": "terbit",
+          "start": 0.65,
+          "end": 1.19
+        },
+        {
+          "id": "w2",
+          "text": "otomatis,",
+          "start": 1.26,
+          "end": 2.11
+        },
+        {
+          "id": "w3",
+          "text": "pengingat",
+          "start": 2.39,
+          "end": 2.74
+        },
+        {
+          "id": "w4",
+          "text": "terkirim",
+          "start": 2.83,
+          "end": 3.37
+        },
+        {
+          "id": "w5",
+          "text": "sendiri,",
+          "start": 3.37,
+          "end": 4.02
+        },
+        {
+          "id": "w6",
+          "text": "pembayaran",
+          "start": 4.14,
+          "end": 4.81
+        },
+        {
+          "id": "w7",
+          "text": "tercatat",
+          "start": 4.81,
+          "end": 5.35
+        },
+        {
+          "id": "w8",
+          "text": "tanpa",
+          "start": 5.62,
+          "end": 5.77
+        },
+        {
+          "id": "w9",
+          "text": "dikejar",
+          "start": 5.77,
+          "end": 6.29
+        },
+        {
+          "id": "w10",
+          "text": "satu",
+          "start": 6.29,
+          "end": 6.59
+        },
+        {
+          "id": "w11",
+          "text": "per",
+          "start": 6.59,
+          "end": 6.81
+        },
+        {
+          "id": "w12",
+          "text": "satu.",
+          "start": 6.81,
+          "end": 7.21
+        }
+      ]
+    },
+    {
+      "frame": 7,
+      "path": "assets/voice/07.wav",
+      "duration_s": 8.88,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Manajemen",
+          "start": 0.25,
+          "end": 0.92
+        },
+        {
+          "id": "w1",
+          "text": "SISWA,",
+          "start": 0.92,
+          "end": 1.53
+        },
+        {
+          "id": "w2",
+          "text": "Laporan",
+          "start": 1.74,
+          "end": 2.31
+        },
+        {
+          "id": "w3",
+          "text": "dan",
+          "start": 2.31,
+          "end": 2.58
+        },
+        {
+          "id": "w4",
+          "text": "Analitik,",
+          "start": 2.58,
+          "end": 3.5
+        },
+        {
+          "id": "w5",
+          "text": "Komunikasi",
+          "start": 3.51,
+          "end": 4.3
+        },
+        {
+          "id": "w6",
+          "text": "Orang",
+          "start": 4.3,
+          "end": 4.7
+        },
+        {
+          "id": "w7",
+          "text": "Tua,",
+          "start": 4.7,
+          "end": 5
+        },
+        {
+          "id": "w8",
+          "text": "billing",
+          "start": 5.25,
+          "end": 5.64
+        },
+        {
+          "id": "w9",
+          "text": "Automatis,",
+          "start": 5.64,
+          "end": 6.51
+        },
+        {
+          "id": "w10",
+          "text": "semua",
+          "start": 6.51,
+          "end": 6.89
+        },
+        {
+          "id": "w11",
+          "text": "lengkap",
+          "start": 6.99,
+          "end": 7.53
+        },
+        {
+          "id": "w12",
+          "text": "dalam",
+          "start": 7.53,
+          "end": 7.95
+        },
+        {
+          "id": "w13",
+          "text": "satu",
+          "start": 7.95,
+          "end": 8.09
+        },
+        {
+          "id": "w14",
+          "text": "platform.",
+          "start": 8.51,
+          "end": 9
+        }
+      ]
+    },
+    {
+      "frame": 8,
+      "path": "assets/voice/08.wav",
+      "duration_s": 8.6,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Lebih",
+          "start": 0.22,
+          "end": 0.37
+        },
+        {
+          "id": "w1",
+          "text": "dari",
+          "start": 0.37,
+          "end": 0.67
+        },
+        {
+          "id": "w2",
+          "text": "500",
+          "start": 0.67,
+          "end": 1.27
+        },
+        {
+          "id": "w3",
+          "text": "lembaga",
+          "start": 1.35,
+          "end": 1.86
+        },
+        {
+          "id": "w4",
+          "text": "sudah",
+          "start": 1.86,
+          "end": 2.24
+        },
+        {
+          "id": "w5",
+          "text": "memakainya.",
+          "start": 2.24,
+          "end": 3.08
+        },
+        {
+          "id": "w6",
+          "text": "25.000",
+          "start": 3.34,
+          "end": 4.32
+        },
+        {
+          "id": "w7",
+          "text": "siswa",
+          "start": 4.32,
+          "end": 4.58
+        },
+        {
+          "id": "w9",
+          "text": "terkelola.",
+          "start": 4.97,
+          "end": 5.62
+        },
+        {
+          "id": "w10",
+          "text": "Waktu",
+          "start": 5.63,
+          "end": 6.03
+        },
+        {
+          "id": "w11",
+          "text": "admin",
+          "start": 6.11,
+          "end": 6.44
+        },
+        {
+          "id": "w12",
+          "text": "pun",
+          "start": 6.44,
+          "end": 6.69
+        },
+        {
+          "id": "w13",
+          "text": "hemat",
+          "start": 6.69,
+          "end": 7.08
+        },
+        {
+          "id": "w14",
+          "text": "hingga",
+          "start": 7.11,
+          "end": 7.58
+        },
+        {
+          "id": "w15",
+          "text": "80",
+          "start": 7.59,
+          "end": 8.03
+        },
+        {
+          "id": "w16",
+          "text": "persen.",
+          "start": 8.1,
+          "end": 8.62
+        }
+      ]
+    },
+    {
+      "frame": 9,
+      "path": "assets/voice/09.wav",
+      "duration_s": 6.04,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Coba",
+          "start": 0.01,
+          "end": 0.4
+        },
+        {
+          "id": "w1",
+          "text": "MAJIKU",
+          "start": 0.4,
+          "end": 1
+        },
+        {
+          "id": "w2",
+          "text": "gratis",
+          "start": 1,
+          "end": 1.6
+        },
+        {
+          "id": "w3",
+          "text": "14",
+          "start": 1.6,
+          "end": 2.2
+        },
+        {
+          "id": "w4",
+          "text": "hari,",
+          "start": 2.2,
+          "end": 2.79
+        },
+        {
+          "id": "w5",
+          "text": "tanpa",
+          "start": 2.87,
+          "end": 3.16
+        },
+        {
+          "id": "w6",
+          "text": "kartu",
+          "start": 3.16,
+          "end": 3.53
+        },
+        {
+          "id": "w7",
+          "text": "kredit,",
+          "start": 3.53,
+          "end": 4.19
+        },
+        {
+          "id": "w8",
+          "text": "setup",
+          "start": 4.22,
+          "end": 4.44
+        },
+        {
+          "id": "w10",
+          "text": "hanya",
+          "start": 4.87,
+          "end": 5.18
+        },
+        {
+          "id": "w11",
+          "text": "5",
+          "start": 5.18,
+          "end": 5.48
+        },
+        {
+          "id": "w12",
+          "text": "menit.",
+          "start": 5.48,
+          "end": 6
+        }
+      ]
+    },
+    {
+      "frame": 10,
+      "path": "assets/voice/10.wav",
+      "duration_s": 4.92,
+      "words": [
+        {
+          "id": "w0",
+          "text": "MAJIKU.",
+          "start": 0.38,
+          "end": 1.49
+        },
+        {
+          "id": "w1",
+          "text": "Kelola",
+          "start": 1.68,
+          "end": 1.94
+        },
+        {
+          "id": "w2",
+          "text": "lembaga",
+          "start": 1.94,
+          "end": 2.45
+        },
+        {
+          "id": "w3",
+          "text": "pendidikan",
+          "start": 2.45,
+          "end": 3.17
+        },
+        {
+          "id": "w4",
+          "text": "Anda",
+          "start": 3.17,
+          "end": 3.5
+        },
+        {
+          "id": "w5",
+          "text": "dengan",
+          "start": 3.63,
+          "end": 4.06
+        },
+        {
+          "id": "w6",
+          "text": "lebih",
+          "start": 4.06,
+          "end": 4.52
+        },
+        {
+          "id": "w7",
+          "text": "mudah.",
+          "start": 4.52,
+          "end": 4.91
+        }
+      ]
+    }
+  ],
+  "sfx": [
+    {
+      "frame": 1,
+      "file": "assets/sfx/impact-bass-1.mp3",
+      "offset_s": 0,
+      "duration_s": 2.12,
+      "volume": 0.35
+    },
+    {
+      "frame": 1,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 1,
+      "file": "assets/sfx/whoosh-short.mp3",
+      "offset_s": 0,
+      "duration_s": 0.57,
+      "volume": 0.35
+    },
+    {
+      "frame": 2,
+      "file": "assets/sfx/typing.mp3",
+      "offset_s": 0,
+      "duration_s": 1.5,
+      "volume": 0.35
+    },
+    {
+      "frame": 2,
+      "file": "assets/sfx/impact-bass-2.mp3",
+      "offset_s": 0,
+      "duration_s": 2.59,
+      "volume": 0.35
+    },
+    {
+      "frame": 2,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 3,
+      "file": "assets/sfx/sparkle.mp3",
+      "offset_s": 0,
+      "duration_s": 1.8,
+      "volume": 0.35
+    },
+    {
+      "frame": 3,
+      "file": "assets/sfx/chime.mp3",
+      "offset_s": 0,
+      "duration_s": 2.5,
+      "volume": 0.35
+    },
+    {
+      "frame": 3,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 4,
+      "file": "assets/sfx/whoosh.mp3",
+      "offset_s": 0,
+      "duration_s": 0.57,
+      "volume": 0.35
+    },
+    {
+      "frame": 4,
+      "file": "assets/sfx/ping.mp3",
+      "offset_s": 0,
+      "duration_s": 1.32,
+      "volume": 0.35
+    },
+    {
+      "frame": 4,
+      "file": "assets/sfx/click.mp3",
+      "offset_s": 0,
+      "duration_s": 0.37,
+      "volume": 0.35
+    },
+    {
+      "frame": 5,
+      "file": "assets/sfx/notification.mp3",
+      "offset_s": 0,
+      "duration_s": 2.46,
+      "volume": 0.35
+    },
+    {
+      "frame": 5,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 5,
+      "file": "assets/sfx/chime.mp3",
+      "offset_s": 0,
+      "duration_s": 2.5,
+      "volume": 0.35
+    },
+    {
+      "frame": 6,
+      "file": "assets/sfx/notification.mp3",
+      "offset_s": 0,
+      "duration_s": 2.46,
+      "volume": 0.35
+    },
+    {
+      "frame": 6,
+      "file": "assets/sfx/click-soft.mp3",
+      "offset_s": 0,
+      "duration_s": 0.37,
+      "volume": 0.35
+    },
+    {
+      "frame": 6,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 7,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 7,
+      "file": "assets/sfx/click-soft.mp3",
+      "offset_s": 0,
+      "duration_s": 0.37,
+      "volume": 0.35
+    },
+    {
+      "frame": 7,
+      "file": "assets/sfx/sparkle.mp3",
+      "offset_s": 0,
+      "duration_s": 1.8,
+      "volume": 0.35
+    },
+    {
+      "frame": 8,
+      "file": "assets/sfx/riser.mp3",
+      "offset_s": 0,
+      "duration_s": 10.03,
+      "volume": 0.35
+    },
+    {
+      "frame": 8,
+      "file": "assets/sfx/impact-bass-1.mp3",
+      "offset_s": 0,
+      "duration_s": 2.12,
+      "volume": 0.35
+    },
+    {
+      "frame": 8,
+      "file": "assets/sfx/ping.mp3",
+      "offset_s": 0,
+      "duration_s": 1.32,
+      "volume": 0.35
+    },
+    {
+      "frame": 9,
+      "file": "assets/sfx/click.mp3",
+      "offset_s": 0,
+      "duration_s": 0.37,
+      "volume": 0.35
+    },
+    {
+      "frame": 9,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 10,
+      "file": "assets/sfx/chime.mp3",
+      "offset_s": 0,
+      "duration_s": 2.5,
+      "volume": 0.35
+    },
+    {
+      "frame": 10,
+      "file": "assets/sfx/sparkle.mp3",
+      "offset_s": 0,
+      "duration_s": 1.8,
+      "volume": 0.35
+    }
+  ]
+}

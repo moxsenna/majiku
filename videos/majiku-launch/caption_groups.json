@@ -1,0 +1,1297 @@
+{
+  "total_duration_s": 73.96,
+  "width": 1920,
+  "height": 1080,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0.28,
+      "end": 2.15,
+      "text": "Absensi di buku,",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "Absensi",
+          "start": 0.28,
+          "end": 1.07
+        },
+        {
+          "id": "caption-word-0-1",
+          "text": "di",
+          "start": 1.07,
+          "end": 1.37
+        },
+        {
+          "id": "caption-word-0-2",
+          "text": "buku,",
+          "start": 1.37,
+          "end": 2.15
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 1,
+      "start": 2.15,
+      "end": 3.68,
+      "text": "tagihan di kertas,",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "tagihan",
+          "start": 2.15,
+          "end": 2.69
+        },
+        {
+          "id": "caption-word-1-1",
+          "text": "di",
+          "start": 2.69,
+          "end": 2.85
+        },
+        {
+          "id": "caption-word-1-2",
+          "text": "kertas,",
+          "start": 2.85,
+          "end": 3.56
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 1,
+      "start": 3.83,
+      "end": 4.45,
+      "text": "kabar anak",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "kabar",
+          "start": 3.83,
+          "end": 4.05
+        },
+        {
+          "id": "caption-word-2-1",
+          "text": "anak",
+          "start": 4.07,
+          "end": 4.33
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 1,
+      "start": 4.54,
+      "end": 6.12,
+      "text": "sering terlambat.",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "sering",
+          "start": 4.54,
+          "end": 5.06
+        },
+        {
+          "id": "caption-word-3-1",
+          "text": "terlambat.",
+          "start": 5.06,
+          "end": 6
+        }
+      ]
+    },
+    {
+      "id": "caption-group-4",
+      "frame": 2,
+      "start": 6.41,
+      "end": 7.61,
+      "text": "Setiap hari,",
+      "words": [
+        {
+          "id": "caption-word-4-0",
+          "text": "Setiap",
+          "start": 6.41,
+          "end": 6.89
+        },
+        {
+          "id": "caption-word-4-1",
+          "text": "hari,",
+          "start": 6.89,
+          "end": 7.49
+        }
+      ]
+    },
+    {
+      "id": "caption-group-5",
+      "frame": 2,
+      "start": 7.83,
+      "end": 9.4,
+      "text": "penglola lembaga mengejar",
+      "words": [
+        {
+          "id": "caption-word-5-0",
+          "text": "penglola",
+          "start": 7.83,
+          "end": 8.26
+        },
+        {
+          "id": "caption-word-5-1",
+          "text": "lembaga",
+          "start": 8.26,
+          "end": 8.79
+        },
+        {
+          "id": "caption-word-5-2",
+          "text": "mengejar",
+          "start": 8.79,
+          "end": 9.4
+        }
+      ]
+    },
+    {
+      "id": "caption-group-6",
+      "frame": 2,
+      "start": 9.4,
+      "end": 10.25,
+      "text": "data siswa,",
+      "words": [
+        {
+          "id": "caption-word-6-0",
+          "text": "data",
+          "start": 9.4,
+          "end": 9.7
+        },
+        {
+          "id": "caption-word-6-1",
+          "text": "siswa,",
+          "start": 9.71,
+          "end": 10.13
+        }
+      ]
+    },
+    {
+      "id": "caption-group-7",
+      "frame": 2,
+      "start": 10.38,
+      "end": 11.49,
+      "text": "pembayaran,",
+      "words": [
+        {
+          "id": "caption-word-7-0",
+          "text": "pembayaran,",
+          "start": 10.38,
+          "end": 11.49
+        }
+      ]
+    },
+    {
+      "id": "caption-group-8",
+      "frame": 2,
+      "start": 11.49,
+      "end": 12.02,
+      "text": "dan pesan",
+      "words": [
+        {
+          "id": "caption-word-8-0",
+          "text": "dan",
+          "start": 11.49,
+          "end": 11.66
+        },
+        {
+          "id": "caption-word-8-1",
+          "text": "pesan",
+          "start": 11.72,
+          "end": 12.02
+        }
+      ]
+    },
+    {
+      "id": "caption-group-9",
+      "frame": 2,
+      "start": 12.02,
+      "end": 12.84,
+      "text": "orang tua,",
+      "words": [
+        {
+          "id": "caption-word-9-0",
+          "text": "orang",
+          "start": 12.02,
+          "end": 12.35
+        },
+        {
+          "id": "caption-word-9-1",
+          "text": "tua,",
+          "start": 12.35,
+          "end": 12.72
+        }
+      ]
+    },
+    {
+      "id": "caption-group-10",
+      "frame": 2,
+      "start": 12.89,
+      "end": 14.8,
+      "text": "semuanya datang bersamaan.",
+      "words": [
+        {
+          "id": "caption-word-10-0",
+          "text": "semuanya",
+          "start": 12.89,
+          "end": 13.37
+        },
+        {
+          "id": "caption-word-10-1",
+          "text": "datang",
+          "start": 13.37,
+          "end": 13.88
+        },
+        {
+          "id": "caption-word-10-2",
+          "text": "bersamaan.",
+          "start": 13.88,
+          "end": 14.68
+        }
+      ]
+    },
+    {
+      "id": "caption-group-11",
+      "frame": 3,
+      "start": 15.01,
+      "end": 15.86,
+      "text": "Kenalkan",
+      "words": [
+        {
+          "id": "caption-word-11-0",
+          "text": "Kenalkan",
+          "start": 15.01,
+          "end": 15.74
+        }
+      ]
+    },
+    {
+      "id": "caption-group-12",
+      "frame": 3,
+      "start": 16.02,
+      "end": 17.08,
+      "text": "Majiku,",
+      "words": [
+        {
+          "id": "caption-word-12-0",
+          "text": "Majiku,",
+          "start": 16.02,
+          "end": 16.96
+        }
+      ]
+    },
+    {
+      "id": "caption-group-13",
+      "frame": 3,
+      "start": 17.19,
+      "end": 18.2,
+      "text": "satu platform,",
+      "words": [
+        {
+          "id": "caption-word-13-0",
+          "text": "satu",
+          "start": 17.19,
+          "end": 17.3
+        },
+        {
+          "id": "caption-word-13-1",
+          "text": "platform,",
+          "start": 17.3,
+          "end": 18.08
+        }
+      ]
+    },
+    {
+      "id": "caption-group-14",
+      "frame": 3,
+      "start": 18.25,
+      "end": 20.04,
+      "text": "tiga peran terhubung,",
+      "words": [
+        {
+          "id": "caption-word-14-0",
+          "text": "tiga",
+          "start": 18.25,
+          "end": 18.52
+        },
+        {
+          "id": "caption-word-14-1",
+          "text": "peran",
+          "start": 18.52,
+          "end": 18.97
+        },
+        {
+          "id": "caption-word-14-2",
+          "text": "terhubung,",
+          "start": 18.97,
+          "end": 20.01
+        }
+      ]
+    },
+    {
+      "id": "caption-group-15",
+      "frame": 3,
+      "start": 20.04,
+      "end": 21.02,
+      "text": "lembaga,",
+      "words": [
+        {
+          "id": "caption-word-15-0",
+          "text": "lembaga,",
+          "start": 20.04,
+          "end": 20.94
+        }
+      ]
+    },
+    {
+      "id": "caption-group-16",
+      "frame": 3,
+      "start": 21.02,
+      "end": 21.58,
+      "text": "guru,",
+      "words": [
+        {
+          "id": "caption-word-16-0",
+          "text": "guru,",
+          "start": 21.02,
+          "end": 21.46
+        }
+      ]
+    },
+    {
+      "id": "caption-group-17",
+      "frame": 3,
+      "start": 21.75,
+      "end": 22.77,
+      "text": "dan orang tua.",
+      "words": [
+        {
+          "id": "caption-word-17-0",
+          "text": "dan",
+          "start": 21.75,
+          "end": 21.9
+        },
+        {
+          "id": "caption-word-17-1",
+          "text": "orang",
+          "start": 21.91,
+          "end": 22.43
+        },
+        {
+          "id": "caption-word-17-2",
+          "text": "tua.",
+          "start": 22.43,
+          "end": 22.75
+        }
+      ]
+    },
+    {
+      "id": "caption-group-18",
+      "frame": 4,
+      "start": 22.77,
+      "end": 24.31,
+      "text": "Dari satu dashboard",
+      "words": [
+        {
+          "id": "caption-word-18-0",
+          "text": "Dari",
+          "start": 22.77,
+          "end": 23.12
+        },
+        {
+          "id": "caption-word-18-1",
+          "text": "satu",
+          "start": 23.12,
+          "end": 23.46
+        },
+        {
+          "id": "caption-word-18-2",
+          "text": "dashboard",
+          "start": 23.53,
+          "end": 24.19
+        }
+      ]
+    },
+    {
+      "id": "caption-group-19",
+      "frame": 4,
+      "start": 24.31,
+      "end": 25.02,
+      "text": "admin,",
+      "words": [
+        {
+          "id": "caption-word-19-0",
+          "text": "admin,",
+          "start": 24.31,
+          "end": 24.9
+        }
+      ]
+    },
+    {
+      "id": "caption-group-20",
+      "frame": 4,
+      "start": 25.03,
+      "end": 26.37,
+      "text": "kehadiran real-time,",
+      "words": [
+        {
+          "id": "caption-word-20-0",
+          "text": "kehadiran",
+          "start": 25.03,
+          "end": 25.54
+        },
+        {
+          "id": "caption-word-20-1",
+          "text": "real-time,",
+          "start": 25.54,
+          "end": 26.25
+        }
+      ]
+    },
+    {
+      "id": "caption-group-21",
+      "frame": 4,
+      "start": 26.47,
+      "end": 27.39,
+      "text": "tagihan,",
+      "words": [
+        {
+          "id": "caption-word-21-0",
+          "text": "tagihan,",
+          "start": 26.47,
+          "end": 27.39
+        }
+      ]
+    },
+    {
+      "id": "caption-group-22",
+      "frame": 4,
+      "start": 27.39,
+      "end": 28.59,
+      "text": "dan laporan lembaga",
+      "words": [
+        {
+          "id": "caption-word-22-0",
+          "text": "dan",
+          "start": 27.39,
+          "end": 27.59
+        },
+        {
+          "id": "caption-word-22-1",
+          "text": "laporan",
+          "start": 27.59,
+          "end": 28.05
+        },
+        {
+          "id": "caption-word-22-2",
+          "text": "lembaga",
+          "start": 28.05,
+          "end": 28.47
+        }
+      ]
+    },
+    {
+      "id": "caption-group-23",
+      "frame": 4,
+      "start": 28.66,
+      "end": 29.91,
+      "text": "semuanya terpantau.",
+      "words": [
+        {
+          "id": "caption-word-23-0",
+          "text": "semuanya",
+          "start": 28.66,
+          "end": 29.04
+        },
+        {
+          "id": "caption-word-23-1",
+          "text": "terpantau.",
+          "start": 29.04,
+          "end": 29.79
+        }
+      ]
+    },
+    {
+      "id": "caption-group-24",
+      "frame": 5,
+      "start": 30.23,
+      "end": 30.79,
+      "text": "Orang tua",
+      "words": [
+        {
+          "id": "caption-word-24-0",
+          "text": "Orang",
+          "start": 30.23,
+          "end": 30.51
+        },
+        {
+          "id": "caption-word-24-1",
+          "text": "tua",
+          "start": 30.51,
+          "end": 30.79
+        }
+      ]
+    },
+    {
+      "id": "caption-group-25",
+      "frame": 5,
+      "start": 30.79,
+      "end": 31.95,
+      "text": "ikut tenang,",
+      "words": [
+        {
+          "id": "caption-word-25-0",
+          "text": "ikut",
+          "start": 30.79,
+          "end": 31.17
+        },
+        {
+          "id": "caption-word-25-1",
+          "text": "tenang,",
+          "start": 31.17,
+          "end": 31.83
+        }
+      ]
+    },
+    {
+      "id": "caption-group-26",
+      "frame": 5,
+      "start": 32.02,
+      "end": 33.62,
+      "text": "notifikasi cekin,",
+      "words": [
+        {
+          "id": "caption-word-26-0",
+          "text": "notifikasi",
+          "start": 32.02,
+          "end": 32.85
+        },
+        {
+          "id": "caption-word-26-1",
+          "text": "cekin,",
+          "start": 32.99,
+          "end": 33.62
+        }
+      ]
+    },
+    {
+      "id": "caption-group-27",
+      "frame": 5,
+      "start": 33.62,
+      "end": 34.7,
+      "text": "foto kegiatan",
+      "words": [
+        {
+          "id": "caption-word-27-0",
+          "text": "foto",
+          "start": 33.62,
+          "end": 33.99
+        },
+        {
+          "id": "caption-word-27-1",
+          "text": "kegiatan",
+          "start": 33.99,
+          "end": 34.58
+        }
+      ]
+    },
+    {
+      "id": "caption-group-28",
+      "frame": 5,
+      "start": 34.91,
+      "end": 36.39,
+      "text": "sampai laporan harian",
+      "words": [
+        {
+          "id": "caption-word-28-0",
+          "text": "sampai",
+          "start": 34.91,
+          "end": 35.19
+        },
+        {
+          "id": "caption-word-28-1",
+          "text": "laporan",
+          "start": 35.25,
+          "end": 35.8
+        },
+        {
+          "id": "caption-word-28-2",
+          "text": "harian",
+          "start": 35.8,
+          "end": 36.27
+        }
+      ]
+    },
+    {
+      "id": "caption-group-29",
+      "frame": 5,
+      "start": 36.5,
+      "end": 37.55,
+      "text": "langsung di ponsel",
+      "words": [
+        {
+          "id": "caption-word-29-0",
+          "text": "langsung",
+          "start": 36.5,
+          "end": 36.94
+        },
+        {
+          "id": "caption-word-29-1",
+          "text": "di",
+          "start": 36.94,
+          "end": 37.09
+        },
+        {
+          "id": "caption-word-29-2",
+          "text": "ponsel",
+          "start": 37.09,
+          "end": 37.55
+        }
+      ]
+    },
+    {
+      "id": "caption-group-30",
+      "frame": 5,
+      "start": 37.55,
+      "end": 38.13,
+      "text": "mereka.",
+      "words": [
+        {
+          "id": "caption-word-30-0",
+          "text": "mereka.",
+          "start": 37.55,
+          "end": 38.04
+        }
+      ]
+    },
+    {
+      "id": "caption-group-31",
+      "frame": 6,
+      "start": 38.13,
+      "end": 40.35,
+      "text": "Tagihan terbit otomatis,",
+      "words": [
+        {
+          "id": "caption-word-31-0",
+          "text": "Tagihan",
+          "start": 38.13,
+          "end": 38.77
+        },
+        {
+          "id": "caption-word-31-1",
+          "text": "terbit",
+          "start": 38.77,
+          "end": 39.31
+        },
+        {
+          "id": "caption-word-31-2",
+          "text": "otomatis,",
+          "start": 39.38,
+          "end": 40.23
+        }
+      ]
+    },
+    {
+      "id": "caption-group-32",
+      "frame": 6,
+      "start": 40.51,
+      "end": 42.26,
+      "text": "pengingat terkirim sendiri,",
+      "words": [
+        {
+          "id": "caption-word-32-0",
+          "text": "pengingat",
+          "start": 40.51,
+          "end": 40.86
+        },
+        {
+          "id": "caption-word-32-1",
+          "text": "terkirim",
+          "start": 40.95,
+          "end": 41.49
+        },
+        {
+          "id": "caption-word-32-2",
+          "text": "sendiri,",
+          "start": 41.49,
+          "end": 42.14
+        }
+      ]
+    },
+    {
+      "id": "caption-group-33",
+      "frame": 6,
+      "start": 42.26,
+      "end": 43.59,
+      "text": "pembayaran tercatat",
+      "words": [
+        {
+          "id": "caption-word-33-0",
+          "text": "pembayaran",
+          "start": 42.26,
+          "end": 42.93
+        },
+        {
+          "id": "caption-word-33-1",
+          "text": "tercatat",
+          "start": 42.93,
+          "end": 43.47
+        }
+      ]
+    },
+    {
+      "id": "caption-group-34",
+      "frame": 6,
+      "start": 43.74,
+      "end": 44.41,
+      "text": "tanpa dikejar",
+      "words": [
+        {
+          "id": "caption-word-34-0",
+          "text": "tanpa",
+          "start": 43.74,
+          "end": 43.89
+        },
+        {
+          "id": "caption-word-34-1",
+          "text": "dikejar",
+          "start": 43.89,
+          "end": 44.41
+        }
+      ]
+    },
+    {
+      "id": "caption-group-35",
+      "frame": 6,
+      "start": 44.41,
+      "end": 45.45,
+      "text": "satu per satu.",
+      "words": [
+        {
+          "id": "caption-word-35-0",
+          "text": "satu",
+          "start": 44.41,
+          "end": 44.71
+        },
+        {
+          "id": "caption-word-35-1",
+          "text": "per",
+          "start": 44.71,
+          "end": 44.93
+        },
+        {
+          "id": "caption-word-35-2",
+          "text": "satu.",
+          "start": 44.93,
+          "end": 45.33
+        }
+      ]
+    },
+    {
+      "id": "caption-group-36",
+      "frame": 7,
+      "start": 45.77,
+      "end": 47.17,
+      "text": "Manajemen SISWA,",
+      "words": [
+        {
+          "id": "caption-word-36-0",
+          "text": "Manajemen",
+          "start": 45.77,
+          "end": 46.44
+        },
+        {
+          "id": "caption-word-36-1",
+          "text": "SISWA,",
+          "start": 46.44,
+          "end": 47.05
+        }
+      ]
+    },
+    {
+      "id": "caption-group-37",
+      "frame": 7,
+      "start": 47.26,
+      "end": 49.03,
+      "text": "Laporan dan Analitik,",
+      "words": [
+        {
+          "id": "caption-word-37-0",
+          "text": "Laporan",
+          "start": 47.26,
+          "end": 47.83
+        },
+        {
+          "id": "caption-word-37-1",
+          "text": "dan",
+          "start": 47.83,
+          "end": 48.1
+        },
+        {
+          "id": "caption-word-37-2",
+          "text": "Analitik,",
+          "start": 48.1,
+          "end": 49.02
+        }
+      ]
+    },
+    {
+      "id": "caption-group-38",
+      "frame": 7,
+      "start": 49.03,
+      "end": 50.64,
+      "text": "Komunikasi Orang Tua,",
+      "words": [
+        {
+          "id": "caption-word-38-0",
+          "text": "Komunikasi",
+          "start": 49.03,
+          "end": 49.82
+        },
+        {
+          "id": "caption-word-38-1",
+          "text": "Orang",
+          "start": 49.82,
+          "end": 50.22
+        },
+        {
+          "id": "caption-word-38-2",
+          "text": "Tua,",
+          "start": 50.22,
+          "end": 50.52
+        }
+      ]
+    },
+    {
+      "id": "caption-group-39",
+      "frame": 7,
+      "start": 50.77,
+      "end": 52.03,
+      "text": "billing Automatis,",
+      "words": [
+        {
+          "id": "caption-word-39-0",
+          "text": "billing",
+          "start": 50.77,
+          "end": 51.16
+        },
+        {
+          "id": "caption-word-39-1",
+          "text": "Automatis,",
+          "start": 51.16,
+          "end": 52.03
+        }
+      ]
+    },
+    {
+      "id": "caption-group-40",
+      "frame": 7,
+      "start": 52.03,
+      "end": 53.73,
+      "text": "semua lengkap dalam satu",
+      "words": [
+        {
+          "id": "caption-word-40-0",
+          "text": "semua",
+          "start": 52.03,
+          "end": 52.41
+        },
+        {
+          "id": "caption-word-40-1",
+          "text": "lengkap",
+          "start": 52.51,
+          "end": 53.05
+        },
+        {
+          "id": "caption-word-40-2",
+          "text": "dalam",
+          "start": 53.05,
+          "end": 53.47
+        },
+        {
+          "id": "caption-word-40-3",
+          "text": "satu",
+          "start": 53.47,
+          "end": 53.61
+        }
+      ]
+    },
+    {
+      "id": "caption-group-41",
+      "frame": 7,
+      "start": 54.03,
+      "end": 54.62,
+      "text": "platform.",
+      "words": [
+        {
+          "id": "caption-word-41-0",
+          "text": "platform.",
+          "start": 54.03,
+          "end": 54.52
+        }
+      ]
+    },
+    {
+      "id": "caption-group-42",
+      "frame": 8,
+      "start": 54.62,
+      "end": 55.75,
+      "text": "Lebih dari 500",
+      "words": [
+        {
+          "id": "caption-word-42-0",
+          "text": "Lebih",
+          "start": 54.62,
+          "end": 54.77
+        },
+        {
+          "id": "caption-word-42-1",
+          "text": "dari",
+          "start": 54.77,
+          "end": 55.07
+        },
+        {
+          "id": "caption-word-42-2",
+          "text": "500",
+          "start": 55.07,
+          "end": 55.67
+        }
+      ]
+    },
+    {
+      "id": "caption-group-43",
+      "frame": 8,
+      "start": 55.75,
+      "end": 57.6,
+      "text": "lembaga sudah memakainya.",
+      "words": [
+        {
+          "id": "caption-word-43-0",
+          "text": "lembaga",
+          "start": 55.75,
+          "end": 56.26
+        },
+        {
+          "id": "caption-word-43-1",
+          "text": "sudah",
+          "start": 56.26,
+          "end": 56.64
+        },
+        {
+          "id": "caption-word-43-2",
+          "text": "memakainya.",
+          "start": 56.64,
+          "end": 57.48
+        }
+      ]
+    },
+    {
+      "id": "caption-group-44",
+      "frame": 8,
+      "start": 57.74,
+      "end": 59.1,
+      "text": "25.000 siswa",
+      "words": [
+        {
+          "id": "caption-word-44-0",
+          "text": "25.000",
+          "start": 57.74,
+          "end": 58.72
+        },
+        {
+          "id": "caption-word-44-1",
+          "text": "siswa",
+          "start": 58.72,
+          "end": 58.98
+        }
+      ]
+    },
+    {
+      "id": "caption-group-45",
+      "frame": 8,
+      "start": 59.37,
+      "end": 60.03,
+      "text": "terkelola.",
+      "words": [
+        {
+          "id": "caption-word-45-0",
+          "text": "terkelola.",
+          "start": 59.37,
+          "end": 60.02
+        }
+      ]
+    },
+    {
+      "id": "caption-group-46",
+      "frame": 8,
+      "start": 60.03,
+      "end": 61.09,
+      "text": "Waktu admin pun",
+      "words": [
+        {
+          "id": "caption-word-46-0",
+          "text": "Waktu",
+          "start": 60.03,
+          "end": 60.43
+        },
+        {
+          "id": "caption-word-46-1",
+          "text": "admin",
+          "start": 60.51,
+          "end": 60.84
+        },
+        {
+          "id": "caption-word-46-2",
+          "text": "pun",
+          "start": 60.84,
+          "end": 61.09
+        }
+      ]
+    },
+    {
+      "id": "caption-group-47",
+      "frame": 8,
+      "start": 61.09,
+      "end": 62.5,
+      "text": "hemat hingga 80",
+      "words": [
+        {
+          "id": "caption-word-47-0",
+          "text": "hemat",
+          "start": 61.09,
+          "end": 61.48
+        },
+        {
+          "id": "caption-word-47-1",
+          "text": "hingga",
+          "start": 61.51,
+          "end": 61.98
+        },
+        {
+          "id": "caption-word-47-2",
+          "text": "80",
+          "start": 61.99,
+          "end": 62.43
+        }
+      ]
+    },
+    {
+      "id": "caption-group-48",
+      "frame": 8,
+      "start": 62.5,
+      "end": 63.01,
+      "text": "persen.",
+      "words": [
+        {
+          "id": "caption-word-48-0",
+          "text": "persen.",
+          "start": 62.5,
+          "end": 63.02
+        }
+      ]
+    },
+    {
+      "id": "caption-group-49",
+      "frame": 9,
+      "start": 63.01,
+      "end": 64.6,
+      "text": "Coba MAJIKU gratis",
+      "words": [
+        {
+          "id": "caption-word-49-0",
+          "text": "Coba",
+          "start": 63.01,
+          "end": 63.4
+        },
+        {
+          "id": "caption-word-49-1",
+          "text": "MAJIKU",
+          "start": 63.4,
+          "end": 64
+        },
+        {
+          "id": "caption-word-49-2",
+          "text": "gratis",
+          "start": 64,
+          "end": 64.6
+        }
+      ]
+    },
+    {
+      "id": "caption-group-50",
+      "frame": 9,
+      "start": 64.6,
+      "end": 65.87,
+      "text": "14 hari,",
+      "words": [
+        {
+          "id": "caption-word-50-0",
+          "text": "14",
+          "start": 64.6,
+          "end": 65.2
+        },
+        {
+          "id": "caption-word-50-1",
+          "text": "hari,",
+          "start": 65.2,
+          "end": 65.79
+        }
+      ]
+    },
+    {
+      "id": "caption-group-51",
+      "frame": 9,
+      "start": 65.87,
+      "end": 67.22,
+      "text": "tanpa kartu kredit,",
+      "words": [
+        {
+          "id": "caption-word-51-0",
+          "text": "tanpa",
+          "start": 65.87,
+          "end": 66.16
+        },
+        {
+          "id": "caption-word-51-1",
+          "text": "kartu",
+          "start": 66.16,
+          "end": 66.53
+        },
+        {
+          "id": "caption-word-51-2",
+          "text": "kredit,",
+          "start": 66.53,
+          "end": 67.19
+        }
+      ]
+    },
+    {
+      "id": "caption-group-52",
+      "frame": 9,
+      "start": 67.22,
+      "end": 67.56,
+      "text": "setup",
+      "words": [
+        {
+          "id": "caption-word-52-0",
+          "text": "setup",
+          "start": 67.22,
+          "end": 67.44
+        }
+      ]
+    },
+    {
+      "id": "caption-group-53",
+      "frame": 9,
+      "start": 67.87,
+      "end": 69.12,
+      "text": "hanya 5 menit.",
+      "words": [
+        {
+          "id": "caption-word-53-0",
+          "text": "hanya",
+          "start": 67.87,
+          "end": 68.18
+        },
+        {
+          "id": "caption-word-53-1",
+          "text": "5",
+          "start": 68.18,
+          "end": 68.48
+        },
+        {
+          "id": "caption-word-53-2",
+          "text": "menit.",
+          "start": 68.48,
+          "end": 69
+        }
+      ]
+    },
+    {
+      "id": "caption-group-54",
+      "frame": 10,
+      "start": 69.42,
+      "end": 70.65,
+      "text": "MAJIKU.",
+      "words": [
+        {
+          "id": "caption-word-54-0",
+          "text": "MAJIKU.",
+          "start": 69.42,
+          "end": 70.53
+        }
+      ]
+    },
+    {
+      "id": "caption-group-55",
+      "frame": 10,
+      "start": 70.72,
+      "end": 72.21,
+      "text": "Kelola lembaga pendidikan",
+      "words": [
+        {
+          "id": "caption-word-55-0",
+          "text": "Kelola",
+          "start": 70.72,
+          "end": 70.98
+        },
+        {
+          "id": "caption-word-55-1",
+          "text": "lembaga",
+          "start": 70.98,
+          "end": 71.49
+        },
+        {
+          "id": "caption-word-55-2",
+          "text": "pendidikan",
+          "start": 71.49,
+          "end": 72.21
+        }
+      ]
+    },
+    {
+      "id": "caption-group-56",
+      "frame": 10,
+      "start": 72.21,
+      "end": 73.56,
+      "text": "Anda dengan lebih",
+      "words": [
+        {
+          "id": "caption-word-56-0",
+          "text": "Anda",
+          "start": 72.21,
+          "end": 72.54
+        },
+        {
+          "id": "caption-word-56-1",
+          "text": "dengan",
+          "start": 72.67,
+          "end": 73.1
+        },
+        {
+          "id": "caption-word-56-2",
+          "text": "lebih",
+          "start": 73.1,
+          "end": 73.56
+        }
+      ]
+    },
+    {
+      "id": "caption-group-57",
+      "frame": 10,
+      "start": 73.56,
+      "end": 74.07,
+      "text": "mudah.",
+      "words": [
+        {
+          "id": "caption-word-57-0",
+          "text": "mudah.",
+          "start": 73.56,
+          "end": 73.95
+        }
+      ]
+    }
+  ]
+}

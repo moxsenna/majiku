@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { desc, eq, and, inArray } from "drizzle-orm";
+import { notifyUsers } from "@/server/notify";
 import { db } from "@/db";
 import { announcements, students } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -55,6 +56,21 @@ export async function createAnnouncement(
       recipientCount,
     })
     .returning({ id: announcements.id });
+
+  // Notifikasi ke semua orang tua penerima (dedup oleh helper).
+  const penerima = parentRows
+    .map((r) => r.parentUserId)
+    .filter((uid): uid is string => Boolean(uid));
+  if (penerima.length > 0) {
+    await notifyUsers({
+      userIds: penerima,
+      type: "announcement",
+      title: `Pengumuman: ${title}`,
+      body: body.slice(0, 140),
+      link: "/parent",
+      tenantId: ctx.tenantId,
+    });
+  }
 
   return { id: row.id, recipientCount };
 }

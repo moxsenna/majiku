@@ -1,0 +1,1293 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      box-sizing: border-box;
+    }
+
+    /* Track 0: Full-bleed background ground on lowest track */
+    [id="06-billing-bg"],
+    .\30 6-billing-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 18% 35%, rgba(246, 167, 148, 0.22) 0%, transparent 46%),
+        radial-gradient(circle at 82% 22%, rgba(252, 226, 146, 0.20) 0%, transparent 44%),
+        radial-gradient(circle at 65% 76%, rgba(246, 161, 140, 0.15) 0%, transparent 48%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Atmosphere & decorative floating pills */
+    [id="06-billing-wallpaper"],
+    .\30 6-billing-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="06-billing-wall-wrap"],
+    .\30 6-billing-wall-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="06-billing-floating-pill"],
+    .\30 6-billing-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 24px;
+      border-radius: 9999px;
+      border: 2.5px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    [id="06-billing-wall-wrap-1"] { left: 70px; top: 40px; }
+    [id="06-billing-wall-1"] { background: #F7B09E; transform: rotate(-10deg); }
+
+    [id="06-billing-wall-wrap-2"] { left: 560px; top: 46px; }
+    [id="06-billing-wall-2"] { background: #F9C31F; transform: rotate(8deg); }
+
+    [id="06-billing-wall-wrap-3"] { right: 80px; top: 40px; }
+    [id="06-billing-wall-3"] { background: #FCE292; transform: rotate(-8deg); }
+
+    [id="06-billing-wall-wrap-4"] { left: 70px; top: 780px; }
+    [id="06-billing-wall-4"] { background: #F6A18C; transform: rotate(10deg); }
+
+    [id="06-billing-wall-wrap-5"] { right: 80px; top: 816px; }
+    [id="06-billing-wall-5"] { background: #F9C72E; transform: rotate(-12deg); }
+
+    /* Track 2: Left column trigger & status theater */
+    [id="06-billing-trigger-track"],
+    .\30 6-billing-trigger-track {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    [id="06-billing-left-col"],
+    .\30 6-billing-left-col {
+      position: absolute;
+      left: 100px;
+      top: 104px;
+      width: 660px;
+    }
+
+    /* Category title pill */
+    [id="06-billing-title-pill"],
+    .\30 6-billing-title-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 18px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #F9C31F;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: 4px 4px 0 rgba(26,26,26,0.08);
+      margin-bottom: 16px;
+    }
+
+    [id="06-billing-h1"],
+    .\30 6-billing-h1 {
+      margin: 0 0 28px 0;
+      font-size: 46px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #32221B;
+    }
+
+    [id="06-billing-h-sub"],
+    .\30 6-billing-h-sub {
+      color: #F06542;
+    }
+
+    /* Trigger Pill-Card */
+    [id="06-billing-trigger-card"],
+    .\30 6-billing-trigger-card {
+      position: relative;
+      width: 660px;
+      background: #FFFFFF;
+      border: 2.5px solid #1E1E1E;
+      border-radius: 2rem;
+      box-shadow: 8px 8px 0 rgba(26,26,26,0.08);
+      padding: 32px 36px 34px 36px;
+      box-sizing: border-box;
+    }
+
+    [class~="06-billing-card-header"],
+    .\30 6-billing-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    [class~="06-billing-header-left"],
+    .\30 6-billing-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    [class~="06-billing-card-icon"],
+    .\30 6-billing-card-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #F9C72E;
+      border: 2.5px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    [class~="06-billing-card-title-block"],
+    .\30 6-billing-card-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    [class~="06-billing-card-label"],
+    .\30 6-billing-card-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #F06542;
+    }
+
+    [class~="06-billing-card-heading"],
+    .\30 6-billing-card-heading {
+      font-size: 24px;
+      font-weight: 700;
+      color: #32221B;
+      line-height: 1.15;
+    }
+
+    [class~="06-billing-chip-badge"],
+    .\30 6-billing-chip-badge {
+      padding: 6px 14px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #F6A18C;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #32221B;
+    }
+
+    [class~="06-billing-card-body-text"],
+    .\30 6-billing-card-body-text {
+      font-size: 15px;
+      color: rgba(50, 34, 27, 0.75);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    [class~="06-billing-progress-bar-track"],
+    .\30 6-billing-progress-bar-track {
+      width: 100%;
+      height: 12px;
+      background: #FFFFFF;
+      border: 2px solid #1E1E1E;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-bottom: 28px;
+      box-sizing: border-box;
+      padding: 1.5px;
+    }
+
+    [id="06-billing-progress-bar-fill"],
+    .\30 6-billing-progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: #FCE292;
+      border-radius: 9999px;
+    }
+
+    /* Press stage & burst button */
+    [class~="06-billing-press-stage"],
+    .\30 6-billing-press-stage {
+      position: relative;
+      width: 100%;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [id="06-billing-burst"],
+    .\30 6-billing-burst {
+      position: absolute;
+      inset: -6px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(240, 101, 66, 0.6) 0%, rgba(240, 101, 66, 0.15) 50%, transparent 75%);
+      filter: blur(14px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+      transform-origin: 50% 50%;
+    }
+
+    [id="06-billing-trigger-btn"],
+    .\30 6-billing-trigger-btn {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 64px;
+      background: #F06542;
+      border: 2.5px solid #1E1E1E;
+      border-radius: 9999px;
+      box-shadow: 4px 4px 0 rgba(26,26,26,0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #FFFFFF;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-sizing: border-box;
+      transform-origin: 50% 50%;
+    }
+
+    /* Status theater pill */
+    [id="06-billing-status-pill"],
+    .\30 6-billing-status-pill {
+      position: relative;
+      margin-top: 24px;
+      width: 660px;
+      height: 74px;
+      background: #FFFFFF;
+      border: 2.5px solid #1E1E1E;
+      border-radius: 9999px;
+      box-shadow: 6px 6px 0 rgba(26,26,26,0.08);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    [id="06-billing-status-publishing"],
+    .\30 6-billing-status-publishing {
+      position: absolute;
+      inset: 0;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    [class~="06-billing-status-left"],
+    .\30 6-billing-status-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    [id="06-billing-spinner"],
+    .\30 6-billing-spinner {
+      width: 26px;
+      height: 26px;
+      transform-origin: 50% 50%;
+    }
+
+    [class~="06-billing-status-text"],
+    .\30 6-billing-status-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #32221B;
+      letter-spacing: 0.02em;
+    }
+
+    [class~="06-billing-status-tag"],
+    .\30 6-billing-status-tag {
+      padding: 5px 14px;
+      border-radius: 9999px;
+      border: 1.8px solid #1E1E1E;
+      background: #F6A18C;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #32221B;
+    }
+
+    [id="06-billing-status-sent"],
+    .\30 6-billing-status-sent {
+      position: absolute;
+      inset: 0;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+      opacity: 0;
+    }
+
+    [class~="06-billing-status-check-circle"],
+    .\30 6-billing-status-check-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #F9C31F;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    /* Track 3: Invoice panel (right column) */
+    [id="06-billing-invoice-track"],
+    .\30 6-billing-invoice-track {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    [id="06-billing-invoice-panel"],
+    .\30 6-billing-invoice-panel {
+      position: absolute;
+      left: 820px;
+      top: 104px;
+      width: 1000px;
+      height: 574px;
+      background: #FFFFFF;
+      border: 2.5px solid #1E1E1E;
+      border-radius: 2rem;
+      box-shadow: 8px 8px 0 rgba(26,26,26,0.08);
+      padding: 28px 32px;
+      box-sizing: border-box;
+    }
+
+    [class~="06-billing-panel-top"],
+    .\30 6-billing-panel-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    [class~="06-billing-panel-heading-group"],
+    .\30 6-billing-panel-heading-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    [class~="06-billing-panel-tag"],
+    .\30 6-billing-panel-tag {
+      padding: 6px 16px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #F7B09E;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+    }
+
+    [class~="06-billing-panel-title"],
+    .\30 6-billing-panel-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #32221B;
+    }
+
+    [class~="06-billing-panel-counter"],
+    .\30 6-billing-panel-counter {
+      padding: 6px 16px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #FCE292;
+      font-size: 13px;
+      font-weight: 600;
+      color: #32221B;
+      letter-spacing: 0.08em;
+    }
+
+    [class~="06-billing-panel-divider"],
+    .\30 6-billing-panel-divider {
+      width: 100%;
+      height: 2px;
+      background: #1E1E1E;
+      opacity: 0.12;
+      margin-bottom: 22px;
+    }
+
+    [class~="06-billing-rows-container"],
+    .\30 6-billing-rows-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    [class~="06-billing-row"],
+    .\30 6-billing-row {
+      height: 114px;
+      background: #FFFFFF;
+      border: 2px solid #1E1E1E;
+      border-radius: 1.5rem;
+      box-shadow: 4px 4px 0 rgba(26,26,26,0.06);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+
+    [class~="06-billing-row-left"],
+    .\30 6-billing-row-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    [class~="06-billing-student-avatar"],
+    .\30 6-billing-student-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: #32221B;
+      box-sizing: border-box;
+    }
+
+    [class~="06-billing-avatar-1"] { background: #F6A794; }
+    [class~="06-billing-avatar-2"] { background: #FCE292; }
+    [class~="06-billing-avatar-3"] { background: #F7B09E; }
+
+    [class~="06-billing-student-meta"],
+    .\30 6-billing-student-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    [class~="06-billing-student-name"],
+    .\30 6-billing-student-name {
+      font-size: 19px;
+      font-weight: 700;
+      color: #32221B;
+    }
+
+    [class~="06-billing-student-grade"],
+    .\30 6-billing-student-grade {
+      font-size: 13px;
+      color: rgba(50, 34, 27, 0.7);
+    }
+
+    [class~="06-billing-row-center"],
+    .\30 6-billing-row-center {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    [class~="06-billing-package-name"],
+    .\30 6-billing-package-name {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(50, 34, 27, 0.65);
+    }
+
+    [class~="06-billing-amount"],
+    .\30 6-billing-amount {
+      font-size: 23px;
+      font-weight: 700;
+      color: #32221B;
+      letter-spacing: -0.02em;
+    }
+
+    /* Badge mutation container */
+    [class~="06-billing-badge-stage"],
+    .\30 6-billing-badge-stage {
+      position: relative;
+      width: 140px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [class~="06-billing-ring-pop"],
+    .\30 6-billing-ring-pop {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid #F9C31F;
+      opacity: 0;
+      pointer-events: none;
+      transform-origin: 50% 50%;
+    }
+
+    [class~="06-billing-badge-pending"],
+    .\30 6-billing-badge-pending {
+      position: absolute;
+      padding: 7px 16px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #F4F3EF;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(50, 34, 27, 0.7);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      transform-origin: 50% 50%;
+    }
+
+    [class~="06-billing-badge-paid"],
+    .\30 6-billing-badge-paid {
+      position: absolute;
+      padding: 7px 18px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #FCE292;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #32221B;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      box-shadow: 2px 2px 0 rgba(26,26,26,0.08);
+      transform-origin: 50% 50%;
+      opacity: 0;
+    }
+
+    [class~="06-billing-check-svg"],
+    .\30 6-billing-check-svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    [class~="06-billing-check-path"],
+    .\30 6-billing-check-path {
+      fill: none;
+      stroke: #1E1E1E;
+      stroke-width: 3.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Track 4: Rekap summary pill at bottom */
+    [id="06-billing-rekap-track"],
+    .\30 6-billing-rekap-track {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    [id="06-billing-rekap-pill"],
+    .\30 6-billing-rekap-pill {
+      position: absolute;
+      left: 820px;
+      top: 704px;
+      width: 1000px;
+      height: 86px;
+      background: #FCE292;
+      border: 2.5px solid #1E1E1E;
+      border-radius: 9999px;
+      box-shadow: 6px 6px 0 rgba(26,26,26,0.08);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+      opacity: 0;
+    }
+
+    [class~="06-billing-rekap-left"],
+    .\30 6-billing-rekap-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    [class~="06-billing-rekap-icon-circle"],
+    .\30 6-billing-rekap-icon-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #F06542;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    [class~="06-billing-rekap-texts"],
+    .\30 6-billing-rekap-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    [class~="06-billing-rekap-title"],
+    .\30 6-billing-rekap-title {
+      font-size: 21px;
+      font-weight: 700;
+      color: #32221B;
+      letter-spacing: -0.01em;
+    }
+
+    [class~="06-billing-rekap-subtitle"],
+    .\30 6-billing-rekap-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(50, 34, 27, 0.75);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    [class~="06-billing-rekap-total-pill"],
+    .\30 6-billing-rekap-total-pill {
+      padding: 8px 22px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      background: #FFFFFF;
+      box-shadow: 3px 3px 0 rgba(26,26,26,0.08);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #F06542;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="06-billing"
+    data-start="0"
+    data-duration="7.9"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="06-billing-bg"
+      class="clip 06-billing-bg"
+      data-start="0"
+      data-duration="7.9"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Atmosphere & decorative wallpaper -->
+    <div
+      id="06-billing-wallpaper"
+      class="clip 06-billing-wallpaper"
+      data-start="0"
+      data-duration="7.9"
+      data-track-index="1"
+    >
+      <div id="06-billing-wall-wrap-1" class="06-billing-wall-wrap">
+        <div id="06-billing-wall-1" class="06-billing-floating-pill">OTOMATIS</div>
+      </div>
+      <div id="06-billing-wall-wrap-2" class="06-billing-wall-wrap">
+        <div id="06-billing-wall-2" class="06-billing-floating-pill">TANPA TAGIH</div>
+      </div>
+      <div id="06-billing-wall-wrap-3" class="06-billing-wall-wrap">
+        <div id="06-billing-wall-3" class="06-billing-floating-pill">TERCATAT</div>
+      </div>
+      <div id="06-billing-wall-wrap-4" class="06-billing-wall-wrap">
+        <div id="06-billing-wall-4" class="06-billing-floating-pill">INSTAN</div>
+      </div>
+      <div id="06-billing-wall-wrap-5" class="06-billing-wall-wrap">
+        <div id="06-billing-wall-5" class="06-billing-floating-pill">AKURAT</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Left column trigger & status theater -->
+    <div
+      id="06-billing-trigger-track"
+      class="clip 06-billing-trigger-track"
+      data-start="0"
+      data-duration="7.9"
+      data-track-index="2"
+    >
+      <div id="06-billing-left-col" class="06-billing-left-col">
+        <!-- Category pill -->
+        <div id="06-billing-title-pill" class="06-billing-title-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>OTOMASI BILLING</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 id="06-billing-h1" class="06-billing-h1">
+          <span>Tagihan terbit,</span><br />
+          <span id="06-billing-h-sub" class="06-billing-h-sub">tanpa dikejar.</span>
+        </h1>
+
+        <!-- Trigger Pill-Card -->
+        <div id="06-billing-trigger-card" class="06-billing-trigger-card">
+          <div class="06-billing-card-header">
+            <div class="06-billing-header-left">
+              <div class="06-billing-card-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+              </div>
+              <div class="06-billing-card-title-block">
+                <span class="06-billing-card-label">SIKLUS BULANAN</span>
+                <span class="06-billing-card-heading">Buat invoice bulanan</span>
+              </div>
+            </div>
+            <div class="06-billing-chip-badge">32 SISWA</div>
+          </div>
+
+          <div class="06-billing-card-body-text">
+            Kalkulasi SPP dan paket ekstrakurikuler siap diterbitkan sekaligus ke wali murid.
+          </div>
+
+          <!-- Progress Bar Preview -->
+          <div class="06-billing-progress-bar-track">
+            <div id="06-billing-progress-bar-fill" class="06-billing-progress-bar-fill"></div>
+          </div>
+
+          <!-- Press Stage with Burst & Button -->
+          <div class="06-billing-press-stage">
+            <div id="06-billing-burst" class="06-billing-burst"></div>
+            <button id="06-billing-trigger-btn" class="06-billing-trigger-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <span>TERBITKAN SEKARANG</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Theater Pill -->
+        <div id="06-billing-status-pill" class="06-billing-status-pill">
+          <!-- State 1: Publishing -->
+          <div id="06-billing-status-publishing" class="06-billing-status-publishing">
+            <div class="06-billing-status-left">
+              <svg id="06-billing-spinner" class="06-billing-spinner" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="#F06542" stroke-width="3" stroke-linecap="round" stroke-dasharray="28 28"></circle>
+              </svg>
+              <span class="06-billing-status-text">Menerbitkan invoice siswa…</span>
+            </div>
+            <span class="06-billing-status-tag">32 TAGIHAN</span>
+          </div>
+
+          <!-- State 2: Sent -->
+          <div id="06-billing-status-sent" class="06-billing-status-sent">
+            <div class="06-billing-status-left">
+              <div class="06-billing-status-check-circle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span class="06-billing-status-text">Pengingat terkirim otomatis ✓</span>
+            </div>
+            <span class="06-billing-status-tag">WHATSAPP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track 3: Invoice Panel with 3 Rows -->
+    <div
+      id="06-billing-invoice-track"
+      class="clip 06-billing-invoice-track"
+      data-start="0"
+      data-duration="7.9"
+      data-track-index="3"
+    >
+      <div id="06-billing-invoice-panel" class="06-billing-invoice-panel">
+        <div class="06-billing-panel-top">
+          <div class="06-billing-panel-heading-group">
+            <div class="06-billing-panel-tag">STATUS INVOICE</div>
+            <div class="06-billing-panel-title">Daftar Tagihan Siswa</div>
+          </div>
+          <div class="06-billing-panel-counter">3 Terverifikasi</div>
+        </div>
+
+        <div class="06-billing-panel-divider"></div>
+
+        <div class="06-billing-rows-container">
+          <!-- Row 1 -->
+          <div id="06-billing-row-1" class="06-billing-row">
+            <div class="06-billing-row-left">
+              <div class="06-billing-student-avatar 06-billing-avatar-1">AF</div>
+              <div class="06-billing-student-meta">
+                <div class="06-billing-student-name">Aisyah Farhana</div>
+                <div class="06-billing-student-grade">Kelas Melati · PAUD</div>
+              </div>
+            </div>
+
+            <div class="06-billing-row-center">
+              <div class="06-billing-package-name">Paket Bulanan</div>
+              <div class="06-billing-amount">Rp 850.000</div>
+            </div>
+
+            <div class="06-billing-badge-stage">
+              <div id="06-billing-ring-1" class="06-billing-ring-pop"></div>
+              <div id="06-billing-badge-pending-1" class="06-billing-badge-pending">Memproses…</div>
+              <div id="06-billing-badge-paid-1" class="06-billing-badge-paid">
+                <svg class="06-billing-check-svg" viewBox="0 0 24 24">
+                  <path id="06-billing-check-path-1" class="06-billing-check-path" d="M 4 12 L 9 17 L 20 6"></path>
+                </svg>
+                <span>Lunas</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2 -->
+          <div id="06-billing-row-2" class="06-billing-row">
+            <div class="06-billing-row-left">
+              <div class="06-billing-student-avatar 06-billing-avatar-2">BP</div>
+              <div class="06-billing-student-meta">
+                <div class="06-billing-student-name">Bima Pratama</div>
+                <div class="06-billing-student-grade">Kelas Anggrek · TK-A</div>
+              </div>
+            </div>
+
+            <div class="06-billing-row-center">
+              <div class="06-billing-package-name">Paket Fullday</div>
+              <div class="06-billing-amount">Rp 1.250.000</div>
+            </div>
+
+            <div class="06-billing-badge-stage">
+              <div id="06-billing-ring-2" class="06-billing-ring-pop"></div>
+              <div id="06-billing-badge-pending-2" class="06-billing-badge-pending">Memproses…</div>
+              <div id="06-billing-badge-paid-2" class="06-billing-badge-paid">
+                <svg class="06-billing-check-svg" viewBox="0 0 24 24">
+                  <path id="06-billing-check-path-2" class="06-billing-check-path" d="M 4 12 L 9 17 L 20 6"></path>
+                </svg>
+                <span>Lunas</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3 -->
+          <div id="06-billing-row-3" class="06-billing-row">
+            <div class="06-billing-row-left">
+              <div class="06-billing-student-avatar 06-billing-avatar-3">CP</div>
+              <div class="06-billing-student-meta">
+                <div class="06-billing-student-name">Clarissa Putri</div>
+                <div class="06-billing-student-grade">Kelas Mawar · TK-B</div>
+              </div>
+            </div>
+
+            <div class="06-billing-row-center">
+              <div class="06-billing-package-name">Paket Ekstra</div>
+              <div class="06-billing-amount">Rp 650.000</div>
+            </div>
+
+            <div class="06-billing-badge-stage">
+              <div id="06-billing-ring-3" class="06-billing-ring-pop"></div>
+              <div id="06-billing-badge-pending-3" class="06-billing-badge-pending">Memproses…</div>
+              <div id="06-billing-badge-paid-3" class="06-billing-badge-paid">
+                <svg class="06-billing-check-svg" viewBox="0 0 24 24">
+                  <path id="06-billing-check-path-3" class="06-billing-check-path" d="M 4 12 L 9 17 L 20 6"></path>
+                </svg>
+                <span>Lunas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track 4: Rekap summary pill -->
+    <div
+      id="06-billing-rekap-track"
+      class="clip 06-billing-rekap-track"
+      data-start="0"
+      data-duration="7.9"
+      data-track-index="4"
+    >
+      <div id="06-billing-rekap-pill" class="06-billing-rekap-pill">
+        <div class="06-billing-rekap-left">
+          <div class="06-billing-rekap-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="06-billing-rekap-texts">
+            <div class="06-billing-rekap-title">Pembayaran masuk — tercatat otomatis</div>
+            <div class="06-billing-rekap-subtitle">Tanpa rekonsiliasi manual · Notifikasi instan ke admin</div>
+          </div>
+        </div>
+
+        <div class="06-billing-rekap-total-pill">
+          <span>TOTAL Rp 2.750.000</span>
+          <span>✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const wallWraps = [
+        document.getElementById("06-billing-wall-wrap-1"),
+        document.getElementById("06-billing-wall-wrap-2"),
+        document.getElementById("06-billing-wall-wrap-3"),
+        document.getElementById("06-billing-wall-wrap-4"),
+        document.getElementById("06-billing-wall-wrap-5"),
+      ];
+
+      const titlePill = document.getElementById("06-billing-title-pill");
+      const h1 = document.getElementById("06-billing-h1");
+      const triggerCard = document.getElementById("06-billing-trigger-card");
+      const progressFill = document.getElementById("06-billing-progress-bar-fill");
+      const triggerBtn = document.getElementById("06-billing-trigger-btn");
+      const burst = document.getElementById("06-billing-burst");
+
+      const statusPill = document.getElementById("06-billing-status-pill");
+      const statusPublishing = document.getElementById("06-billing-status-publishing");
+      const statusSent = document.getElementById("06-billing-status-sent");
+      const spinner = document.getElementById("06-billing-spinner");
+
+      const invoicePanel = document.getElementById("06-billing-invoice-panel");
+      const row1 = document.getElementById("06-billing-row-1");
+      const row2 = document.getElementById("06-billing-row-2");
+      const row3 = document.getElementById("06-billing-row-3");
+
+      const pendingBadge1 = document.getElementById("06-billing-badge-pending-1");
+      const pendingBadge2 = document.getElementById("06-billing-badge-pending-2");
+      const pendingBadge3 = document.getElementById("06-billing-badge-pending-3");
+
+      const paidBadge1 = document.getElementById("06-billing-badge-paid-1");
+      const paidBadge2 = document.getElementById("06-billing-badge-paid-2");
+      const paidBadge3 = document.getElementById("06-billing-badge-paid-3");
+
+      const ring1 = document.getElementById("06-billing-ring-1");
+      const ring2 = document.getElementById("06-billing-ring-2");
+      const ring3 = document.getElementById("06-billing-ring-3");
+
+      const checkPath1 = document.getElementById("06-billing-check-path-1");
+      const checkPath2 = document.getElementById("06-billing-check-path-2");
+      const checkPath3 = document.getElementById("06-billing-check-path-3");
+
+      const rekapPill = document.getElementById("06-billing-rekap-pill");
+
+      // Measure SVG check paths for progressive path-draw
+      const checkPaths = [checkPath1, checkPath2, checkPath3];
+      checkPaths.forEach(function (p) {
+        if (p) {
+          const len = p.getTotalLength ? p.getTotalLength() : 25;
+          p.style.strokeDasharray = len;
+          p.style.strokeDashoffset = len;
+        }
+      });
+
+      // Initial state setup at t=0
+      tl.set([statusPill, invoicePanel, row1, row2, row3, rekapPill], { opacity: 0 }, 0);
+      tl.set([paidBadge1, paidBadge2, paidBadge3, statusSent], { opacity: 0 }, 0);
+
+      // ==========================================
+      // Scene 1 (0.0–2.2s): Trigger Pop & Button Press
+      // ==========================================
+
+      // Floating pills wallpaper arrival @ 0.05s
+      tl.fromTo(
+        wallWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.7)", stagger: 0.05 },
+        0.05
+      );
+
+      // Title tag pill entrance @ 0.08s
+      tl.fromTo(
+        titlePill,
+        { y: -16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.35, ease: "back.out(1.5)" },
+        0.08
+      );
+
+      // Headline entrance @ 0.12s
+      tl.fromTo(
+        h1,
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" },
+        0.12
+      );
+
+      // Trigger pill-card pops in @ 0.15s (hero clearly visible by t <= 0.5s)
+      tl.fromTo(
+        triggerCard,
+        { y: 60, opacity: 0, scale: 0.94 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.4)" },
+        0.15
+      );
+
+      // Progress bar fill animation inside card @ 0.55s
+      tl.fromTo(
+        progressFill,
+        { width: "0%" },
+        { width: "100%", duration: 0.8, ease: "power2.out" },
+        0.55
+      );
+
+      // Button press & release (press-release-spring) @ 1.50s
+      // Phase 1: linear compression
+      tl.to(
+        triggerBtn,
+        { scale: 0.91, duration: 0.14, ease: "power1.in" },
+        1.50
+      );
+
+      // Phase 2: spring release
+      tl.to(
+        triggerBtn,
+        { scale: 1.0, duration: 0.46, ease: "back.out(2.2)" },
+        1.64
+      );
+
+      // Phase 3: burst expansion behind button
+      tl.fromTo(
+        burst,
+        { scale: 0.85, opacity: 0.85 },
+        { scale: 3.2, opacity: 0, duration: 0.55, ease: "power2.out" },
+        1.64
+      );
+
+      // ==========================================
+      // Scene 2 (2.2–5.5s): Status Theater & Invoice Cascade
+      // ==========================================
+
+      // Status pill pops in @ 2.35s
+      tl.fromTo(
+        statusPill,
+        { y: 24, opacity: 0, scale: 0.92 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.5)" },
+        2.35
+      );
+
+      // Arc spinner rotation
+      tl.fromTo(
+        spinner,
+        { rotation: 0 },
+        { rotation: 720, duration: 1.25, ease: "linear" },
+        2.35
+      );
+
+      // Status phrase swap: "Menerbitkan…" -> "Pengingat terkirim ✓" @ 3.60s
+      tl.to(
+        statusPublishing,
+        { opacity: 0, scale: 0.86, duration: 0.18, ease: "power2.in" },
+        3.60
+      );
+      tl.fromTo(
+        statusSent,
+        { opacity: 0, scale: 0.86 },
+        { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.8)" },
+        3.68
+      );
+      tl.to(
+        statusPill,
+        { backgroundColor: "#FCE292", duration: 0.35, ease: "power2.out" },
+        3.68
+      );
+
+      // Invoice panel enters from right @ 4.05s
+      tl.fromTo(
+        invoicePanel,
+        { x: 70, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+        4.05
+      );
+
+      // 3 Invoice rows cascade in staggered
+      tl.fromTo(
+        row1,
+        { y: 35, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.4)" },
+        4.15
+      );
+      tl.fromTo(
+        row2,
+        { y: 35, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.4)" },
+        4.35
+      );
+      tl.fromTo(
+        row3,
+        { y: 35, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.4)" },
+        4.55
+      );
+
+      // Success-check badge flips per row (staggered state mutation)
+      // Row 1: flips @ 4.75s
+      tl.to(
+        pendingBadge1,
+        { scale: 0.65, opacity: 0, duration: 0.16, ease: "power2.in" },
+        4.75
+      );
+      tl.fromTo(
+        paidBadge1,
+        { scale: 0.35, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2.2)" },
+        4.80
+      );
+      tl.fromTo(
+        ring1,
+        { scale: 0.8, opacity: 0.9 },
+        { scale: 2.2, opacity: 0, duration: 0.45, ease: "power2.out" },
+        4.80
+      );
+      tl.to(
+        checkPath1,
+        { strokeDashoffset: 0, duration: 0.26, ease: "power2.out" },
+        4.85
+      );
+
+      // Row 2: flips @ 5.00s
+      tl.to(
+        pendingBadge2,
+        { scale: 0.65, opacity: 0, duration: 0.16, ease: "power2.in" },
+        5.00
+      );
+      tl.fromTo(
+        paidBadge2,
+        { scale: 0.35, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2.2)" },
+        5.05
+      );
+      tl.fromTo(
+        ring2,
+        { scale: 0.8, opacity: 0.9 },
+        { scale: 2.2, opacity: 0, duration: 0.45, ease: "power2.out" },
+        5.05
+      );
+      tl.to(
+        checkPath2,
+        { strokeDashoffset: 0, duration: 0.26, ease: "power2.out" },
+        5.10
+      );
+
+      // Row 3: flips @ 5.25s
+      tl.to(
+        pendingBadge3,
+        { scale: 0.65, opacity: 0, duration: 0.16, ease: "power2.in" },
+        5.25
+      );
+      tl.fromTo(
+        paidBadge3,
+        { scale: 0.35, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2.2)" },
+        5.30
+      );
+      tl.fromTo(
+        ring3,
+        { scale: 0.8, opacity: 0.9 },
+        { scale: 2.2, opacity: 0, duration: 0.45, ease: "power2.out" },
+        5.30
+      );
+      tl.to(
+        checkPath3,
+        { strokeDashoffset: 0, duration: 0.26, ease: "power2.out" },
+        5.35
+      );
+
+      // ==========================================
+      // Scene 3 (5.5–7.4s): Rekap Pill Pop & Climax Settle
+      // ==========================================
+
+      // Rekap pill pop @ 5.60s
+      tl.fromTo(
+        rekapPill,
+        { y: 28, opacity: 0, scale: 0.93 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.52, ease: "back.out(1.6)" },
+        5.60
+      );
+
+      // Settle and hold until full duration (no exit animation)
+      tl.to({}, { duration: 0.01 }, 7.40);
+
+      window.__timelines["06-billing"] = tl;
+    })();
+  </script>
+</template>

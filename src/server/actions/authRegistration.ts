@@ -100,9 +100,9 @@ export async function registerDaycareAdminAction(input: RegisterAdminInput) {
       name: institutionName,
       slug: tenantSlug,
       type: mappedType,
-      // Kota dari input pendaftar; fallback "Jakarta" hanya bila tidak diisi
-      city: input.city?.trim() || "Jakarta",
-      priceFrom: "2000000",
+      // Kota & harga diisi pendaftar/di Pengaturan; "Belum diisi"/0 disembunyikan dari marketplace.
+      city: input.city?.trim() || "Belum diisi",
+      priceFrom: "0",
       whatsapp: input.phone || null,
       isVerified: false,
       isActive: true,

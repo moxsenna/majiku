@@ -316,7 +316,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
   const mappedRecentDailyReports: DemoDailyReport[] = recentReports.map((r) => ({
     id: r.id,
     studentName: r.studentName,
-    studentAvatar: r.studentAvatar || "/images/avatars/student-aisyah.jpg",
+    studentAvatar: r.studentAvatar || "/images/avatars/student-aisyah.webp",
     className: r.className || "Kelas Umum",
     time: r.reportDate ? String(r.reportDate) : todayDate,
     type: "activity",

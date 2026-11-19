@@ -1,0 +1,97 @@
+{
+  "total_duration_s": 9,
+  "width": 1080,
+  "height": 1920,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0.23,
+      "end": 1.64,
+      "text": "Absensi dibuku,",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "Absensi",
+          "start": 0.23,
+          "end": 0.77
+        },
+        {
+          "id": "caption-word-0-1",
+          "text": "dibuku,",
+          "start": 0.77,
+          "end": 1.52
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 1,
+      "start": 1.82,
+      "end": 3.65,
+      "text": "tagihan di kertas.",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "tagihan",
+          "start": 1.82,
+          "end": 2.42
+        },
+        {
+          "id": "caption-word-1-1",
+          "text": "di",
+          "start": 2.42,
+          "end": 2.64
+        },
+        {
+          "id": "caption-word-1-2",
+          "text": "kertas.",
+          "start": 2.64,
+          "end": 3.63
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 1,
+      "start": 3.65,
+      "end": 4.73,
+      "text": "Kabar anak,",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "Kabar",
+          "start": 3.65,
+          "end": 4.08
+        },
+        {
+          "id": "caption-word-2-1",
+          "text": "anak,",
+          "start": 4.08,
+          "end": 4.61
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 1,
+      "start": 4.89,
+      "end": 6.12,
+      "text": "sering terlambat.",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "sering",
+          "start": 4.89,
+          "end": 5.16
+        },
+        {
+          "id": "caption-word-3-1",
+          "text": "terlambat.",
+          "start": 5.16,
+          "end": 6
+        }
+      ]
+    }
+  ]
+}

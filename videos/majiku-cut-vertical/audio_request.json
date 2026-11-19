@@ -1,0 +1,42 @@
+{
+  "lines": [
+    {
+      "id": "01",
+      "sfx": [
+        "impact-bass-1",
+        "pop"
+      ]
+    },
+    {
+      "id": "02",
+      "sfx": [
+        "sparkle",
+        "chime"
+      ]
+    },
+    {
+      "id": "03",
+      "sfx": [
+        "notification",
+        "pop"
+      ]
+    },
+    {
+      "id": "04",
+      "sfx": [
+        "impact-bass-1",
+        "ping"
+      ]
+    },
+    {
+      "id": "05",
+      "sfx": [
+        "click",
+        "pop"
+      ]
+    }
+  ],
+  "bgm": {
+    "mode": "none"
+  }
+}

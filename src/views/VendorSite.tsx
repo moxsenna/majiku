@@ -65,7 +65,7 @@ const vendorData = {
     tagline: "Raih Prestasi Gemilang Bersama Kami",
     type: "Bimbel",
     description: "Lembaga bimbingan belajar terpercaya dengan metode pembelajaran inovatif dan pengajar berpengalaman untuk membantu siswa meraih prestasi akademik terbaik.",
-    heroImage: "/images/bimbel/bimbel-hero.jpg",
+    heroImage: "/images/bimbel/bimbel-hero.webp",
     stats: {
       students: "2,500+",
       teachers: "85",
@@ -73,12 +73,12 @@ const vendorData = {
       graduates: "10,000+"
     },
     gallery: [
-      { src: "/images/bimbel/bimbel-classroom.jpg", caption: "Ruang Kelas Nyaman" },
-      { src: "/images/bimbel/bimbel-interactive.jpg", caption: "Pembelajaran Interaktif" },
-      { src: "/images/bimbel/bimbel-tryout.jpg", caption: "Try Out Rutin" },
-      { src: "/images/bimbel/bimbel-graduation.jpg", caption: "Wisuda Alumni" },
-      { src: "/images/bimbel/bimbel-consultation.jpg", caption: "Konsultasi Belajar" },
-      { src: "/images/bimbel/bimbel-groupstudy.jpg", caption: "Belajar Kelompok" },
+      { src: "/images/bimbel/bimbel-classroom.webp", caption: "Ruang Kelas Nyaman" },
+      { src: "/images/bimbel/bimbel-interactive.webp", caption: "Pembelajaran Interaktif" },
+      { src: "/images/bimbel/bimbel-tryout.webp", caption: "Try Out Rutin" },
+      { src: "/images/bimbel/bimbel-graduation.webp", caption: "Wisuda Alumni" },
+      { src: "/images/bimbel/bimbel-consultation.webp", caption: "Konsultasi Belajar" },
+      { src: "/images/bimbel/bimbel-groupstudy.webp", caption: "Belajar Kelompok" },
     ],
     curriculum: [
       { title: "Kurikulum Nasional", desc: "Sesuai standar Kemendikbud terbaru", icon: BookOpen },
@@ -112,9 +112,9 @@ const vendorData = {
       { name: "Ahmad Fauzi", role: "Orang tua siswa", text: "Guru-gurunya sabar dan profesional. Recommended banget!", rating: 5 },
     ],
     products: [
-      { name: "Paket Buku Latihan SD", price: "Rp 150.000", image: "/images/bimbel/bimbel-book-sd.jpg" },
-      { name: "Paket Buku Latihan SMP", price: "Rp 200.000", image: "/images/bimbel/bimbel-book-smp.jpg" },
-      { name: "Video Pembelajaran Online", price: "Rp 350.000/tahun", image: "/images/bimbel/bimbel-online-video.jpg" },
+      { name: "Paket Buku Latihan SD", price: "Rp 150.000", image: "/images/bimbel/bimbel-book-sd.webp" },
+      { name: "Paket Buku Latihan SMP", price: "Rp 200.000", image: "/images/bimbel/bimbel-book-smp.webp" },
+      { name: "Video Pembelajaran Online", price: "Rp 350.000/tahun", image: "/images/bimbel/bimbel-online-video.webp" },
     ],
     contact: {
       phone: "021-12345678",
@@ -133,7 +133,7 @@ const vendorData = {
     tagline: "Tempat Tumbuh Kembang Anak yang Penuh Kasih",
     type: "Daycare",
     description: "Daycare profesional dengan lingkungan yang aman, nyaman, dan stimulatif untuk mendukung tumbuh kembang optimal si kecil.",
-    heroImage: "/images/daycare/daycare-hero.jpg",
+    heroImage: "/images/daycare/daycare-hero.webp",
     stats: {
       students: "120",
       teachers: "25",
@@ -141,12 +141,12 @@ const vendorData = {
       graduates: "500+"
     },
     gallery: [
-      { src: "/images/daycare/daycare-art.jpg", caption: "Bermain Bersama" },
-      { src: "/images/daycare/daycare-art.jpg", caption: "Aktivitas Seni" },
-      { src: "/images/daycare/daycare-nap.jpg", caption: "Ruang Tidur Nyaman" },
-      { src: "/images/daycare/daycare-outdoor.jpg", caption: "Bermain Outdoor" },
-      { src: "/images/daycare/daycare-meal.jpg", caption: "Makan Bersama" },
-      { src: "/images/daycare/daycare-music.jpg", caption: "Kegiatan Musik" },
+      { src: "/images/daycare/daycare-art.webp", caption: "Bermain Bersama" },
+      { src: "/images/daycare/daycare-art.webp", caption: "Aktivitas Seni" },
+      { src: "/images/daycare/daycare-nap.webp", caption: "Ruang Tidur Nyaman" },
+      { src: "/images/daycare/daycare-outdoor.webp", caption: "Bermain Outdoor" },
+      { src: "/images/daycare/daycare-meal.webp", caption: "Makan Bersama" },
+      { src: "/images/daycare/daycare-music.webp", caption: "Kegiatan Musik" },
     ],
     curriculum: [
       { title: "Stimulasi Motorik", desc: "Latihan motorik halus & kasar", icon: Dumbbell },
@@ -182,9 +182,9 @@ const vendorData = {
       { name: "Andi Pratama", role: "Orang tua", text: "Fasilitas lengkap dan bersih. Anak saya jadi lebih mandiri sejak di sini.", rating: 5 },
     ],
     products: [
-      { name: "Seragam Sunshine Kids", price: "Rp 250.000/set", image: "/images/daycare/daycare-uniform.jpg" },
-      { name: "Tas & Perlengkapan", price: "Rp 150.000", image: "/images/daycare/daycare-supplies.jpg" },
-      { name: "Paket Foto Tahunan", price: "Rp 350.000", image: "/images/daycare/daycare-photo-package.jpg" },
+      { name: "Seragam Sunshine Kids", price: "Rp 250.000/set", image: "/images/daycare/daycare-uniform.webp" },
+      { name: "Tas & Perlengkapan", price: "Rp 150.000", image: "/images/daycare/daycare-supplies.webp" },
+      { name: "Paket Foto Tahunan", price: "Rp 350.000", image: "/images/daycare/daycare-photo-package.webp" },
     ],
     contact: {
       phone: "021-87654321",
@@ -659,8 +659,8 @@ export default function VendorSite() {
               <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
                 <img 
                   src={vendor.type === "Daycare" 
-                    ? "/images/daycare/daycare-features.jpg"
-                    : "/images/bimbel/bimbel-features.jpg"
+                    ? "/images/daycare/daycare-features.webp"
+                    : "/images/bimbel/bimbel-features.webp"
                   }
                   alt="Features"
                   className="w-full aspect-[4/3] object-cover"

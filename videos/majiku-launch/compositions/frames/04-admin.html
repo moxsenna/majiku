@@ -1,0 +1,666 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed ground with cream base + radial glows + grain */
+    [id="04-admin-bg"],
+    .\30 4-admin-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 16% 22%, rgba(247, 176, 158, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 84% 26%, rgba(252, 226, 146, 0.18) 0%, transparent 42%),
+        radial-gradient(circle at 50% 78%, rgba(240, 101, 66, 0.10) 0%, transparent 48%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Floating pill wallpaper (flat candy confetti pills at edges) */
+    [id="04-admin-wallpaper"],
+    .\30 4-admin-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="04-admin-pill-wrap"],
+    .\30 4-admin-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="04-admin-floating-pill"],
+    .\30 4-admin-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 24px;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    /* Pill positions at edges (kept above y=896px) */
+    [id="04-admin-pill-wrap-1"] { right: 80px; top: 46px; }
+    [id="04-admin-pill-1"] { background: #F7B09E; transform: rotate(-12deg); }
+
+    [id="04-admin-pill-wrap-2"] { right: 50px; top: 620px; }
+    [id="04-admin-pill-2"] { background: #F9C72E; transform: rotate(14deg); }
+
+    [id="04-admin-pill-wrap-3"] { left: 590px; top: 38px; }
+    [id="04-admin-pill-3"] { background: #FCE292; transform: rotate(7deg); }
+
+    [id="04-admin-pill-wrap-4"] { right: 120px; top: 780px; }
+    [id="04-admin-pill-4"] { background: #F6A794; transform: rotate(-8deg); }
+
+    [id="04-admin-pill-wrap-5"] { left: 520px; top: 814px; }
+    [id="04-admin-pill-5"] { background: #F6A18C; transform: rotate(10deg); }
+
+    /* Track 2: Main camera stage */
+    [id="04-admin-stage"],
+    .\30 4-admin-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* Nested wrappers for coordinate-target-zoom */
+    [id="04-admin-zoom-outer"],
+    .\30 4-admin-zoom-outer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    [id="04-admin-zoom-inner"],
+    .\30 4-admin-zoom-inner {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      will-change: transform;
+    }
+
+    /* Chrome Label Pill: "DASHBOARD ADMIN" */
+    [id="04-admin-label-pill"],
+    .\30 4-admin-label-pill {
+      position: absolute;
+      left: 80px;
+      top: 46px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 20px;
+      background-color: #F9C31F;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      box-shadow: 5px 5px 0 rgba(26, 26, 26, 0.08);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    [class~="04-admin-label-dot"],
+    .\30 4-admin-label-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #F06542;
+      border: 1.8px solid #1E1E1E;
+      flex-shrink: 0;
+    }
+
+    [class~="04-admin-label-text"],
+    .\30 4-admin-label-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      white-space: nowrap;
+    }
+
+    /* Hero Floating Window: pill-card container */
+    [id="04-admin-window-card"],
+    .\30 4-admin-window-card {
+      position: absolute;
+      left: 80px;
+      top: 96px;
+      width: 980px;
+      background-color: #FFFFFF;
+      border-radius: 32px;
+      border: 3.8px solid #1E1E1E;
+      box-shadow: 12px 12px 0 rgba(26, 26, 26, 0.08);
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    [class~="04-admin-window-header"],
+    .\30 4-admin-window-header {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 3.8px solid #1E1E1E;
+      background-color: #FFFFFF;
+    }
+
+    [class~="04-admin-window-dots"],
+    .\30 4-admin-window-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    [class~="04-admin-dot"],
+    .\30 4-admin-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 2px solid #1E1E1E;
+      display: inline-block;
+    }
+    .\30 4-admin-dot-coral { background-color: #F06542; }
+    .\30 4-admin-dot-yellow { background-color: #F9C31F; }
+    .\30 4-admin-dot-mint { background-color: #FCE292; }
+
+    [class~="04-admin-window-title-pill"],
+    .\30 4-admin-window-title-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 16px;
+      background-color: #FCE292;
+      border: 2px solid #1E1E1E;
+      border-radius: 9999px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #32221B;
+    }
+
+    [class~="04-admin-window-dummy"],
+    .\30 4-admin-window-dummy {
+      width: 55px;
+    }
+
+    [class~="04-admin-window-body"],
+    .\30 4-admin-window-body {
+      width: 100%;
+      background-color: #0F172A;
+      line-height: 0;
+    }
+
+    [class~="04-admin-preview-img"],
+    .\30 4-admin-preview-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Right-side Callout Pills */
+    [id="04-admin-callouts"],
+    .\30 4-admin-callouts {
+      position: absolute;
+      left: 1120px;
+      top: 0px;
+      width: 720px;
+      height: 1080px;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    [class~="04-admin-callout-card"],
+    .\30 4-admin-callout-card {
+      position: absolute;
+      left: 0;
+      width: 680px;
+      height: 124px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 0 32px;
+      background-color: #FFFFFF;
+      border-radius: 32px;
+      border: 3.8px solid #1E1E1E;
+      box-shadow: 8px 8px 0 rgba(26, 26, 26, 0.08);
+      pointer-events: none;
+      transform-origin: 20% 50%;
+    }
+
+    [id="04-admin-callout-1"] { top: 120px; }
+    [id="04-admin-callout-2"] { top: 290px; }
+    [id="04-admin-callout-3"] { top: 460px; }
+
+    [class~="04-admin-callout-icon"],
+    .\30 4-admin-callout-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 3px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 3px 3px 0 rgba(26, 26, 26, 0.08);
+    }
+    .\30 4-admin-icon-mint { background-color: #FCE292; }
+    .\30 4-admin-icon-lime { background-color: #F9C72E; }
+    .\30 4-admin-icon-lavender { background-color: #F7B09E; }
+
+    [class~="04-admin-callout-info"],
+    .\30 4-admin-callout-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    [class~="04-admin-callout-label"],
+    .\30 4-admin-callout-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #716057;
+    }
+
+    [class~="04-admin-callout-value"],
+    .\30 4-admin-callout-value {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #32221B;
+      line-height: 1.1;
+    }
+
+    [class~="04-admin-coral-stat"],
+    .\30 4-admin-coral-stat {
+      color: #F06542;
+    }
+
+    /* Scene 3 Check Pill: "Semuanya terpantau" */
+    [id="04-admin-check-pill"],
+    .\30 4-admin-check-pill {
+      position: absolute;
+      left: 80px;
+      top: 808px;
+      height: 50px;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 26px 6px 12px;
+      background-color: #D1FAE5;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      pointer-events: none;
+      transform-origin: 10% 50%;
+      z-index: 10;
+    }
+
+    [class~="04-admin-check-icon-circle"],
+    .\30 4-admin-check-icon-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #10B981;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    [class~="04-admin-check-text"],
+    .\30 4-admin-check-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #32221B;
+      white-space: nowrap;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="04-admin"
+    data-start="0"
+    data-duration="7.78"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="04-admin-bg"
+      class="clip 04-admin-bg"
+      data-start="0"
+      data-duration="7.78"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Floating pill wallpaper -->
+    <div
+      id="04-admin-wallpaper"
+      class="clip 04-admin-wallpaper"
+      data-start="0"
+      data-duration="7.78"
+      data-track-index="1"
+    >
+      <div id="04-admin-pill-wrap-1" class="04-admin-pill-wrap">
+        <div id="04-admin-pill-1" class="04-admin-floating-pill">KONTROL</div>
+      </div>
+      <div id="04-admin-pill-wrap-2" class="04-admin-pill-wrap">
+        <div id="04-admin-pill-2" class="04-admin-floating-pill">REAL-TIME</div>
+      </div>
+      <div id="04-admin-pill-wrap-3" class="04-admin-pill-wrap">
+        <div id="04-admin-pill-3" class="04-admin-floating-pill">TERPUSAT</div>
+      </div>
+      <div id="04-admin-pill-wrap-4" class="04-admin-pill-wrap">
+        <div id="04-admin-pill-4" class="04-admin-floating-pill">DATA</div>
+      </div>
+      <div id="04-admin-pill-wrap-5" class="04-admin-pill-wrap">
+        <div id="04-admin-pill-5" class="04-admin-floating-pill">OTOMATIS</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Main camera stage -->
+    <div
+      id="04-admin-stage"
+      class="clip 04-admin-stage"
+      data-start="0"
+      data-duration="7.78"
+      data-track-index="2"
+    >
+      <div id="04-admin-zoom-outer" class="04-admin-zoom-outer">
+        <div id="04-admin-zoom-inner" class="04-admin-zoom-inner" data-layout-allow-overflow="true">
+          <!-- Chrome Label Pill: "DASHBOARD ADMIN" -->
+          <div id="04-admin-label-pill" class="04-admin-label-pill">
+            <span class="04-admin-label-dot"></span>
+            <span class="04-admin-label-text">DASHBOARD ADMIN</span>
+          </div>
+
+          <!-- Hero Floating Window Card -->
+          <div id="04-admin-window-card" class="04-admin-window-card">
+            <div class="04-admin-window-header">
+              <div class="04-admin-window-dots">
+                <span class="04-admin-dot 04-admin-dot-coral"></span>
+                <span class="04-admin-dot 04-admin-dot-yellow"></span>
+                <span class="04-admin-dot 04-admin-dot-mint"></span>
+              </div>
+              <div class="04-admin-window-title-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#32221B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span>admin.majiku.id</span>
+              </div>
+              <div class="04-admin-window-dummy"></div>
+            </div>
+            <div class="04-admin-window-body">
+              <img
+                src="assets/dashboard-preview.jpg"
+                alt="Dashboard Admin"
+                class="04-admin-preview-img"
+              />
+            </div>
+          </div>
+
+          <!-- Right-side Callouts -->
+          <div id="04-admin-callouts" class="04-admin-callouts">
+            <!-- Callout 1 -->
+            <div id="04-admin-callout-1" class="04-admin-callout-card">
+              <div class="04-admin-callout-icon 04-admin-icon-mint">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#32221B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <polyline points="16 11 18 13 22 9" />
+                </svg>
+              </div>
+              <div class="04-admin-callout-info">
+                <div class="04-admin-callout-label">Kehadiran real-time</div>
+                <div class="04-admin-callout-value">
+                  <span class="04-admin-coral-stat">94%</span> hadir
+                </div>
+              </div>
+            </div>
+
+            <!-- Callout 2 -->
+            <div id="04-admin-callout-2" class="04-admin-callout-card">
+              <div class="04-admin-callout-icon 04-admin-icon-lime">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#32221B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="3" />
+                  <line x1="2" y1="10" x2="22" y2="10" />
+                  <circle cx="16" cy="15" r="1.5" fill="#32221B" />
+                </svg>
+              </div>
+              <div class="04-admin-callout-info">
+                <div class="04-admin-callout-label">Tagihan</div>
+                <div class="04-admin-callout-value">Rp 234.5 jt</div>
+              </div>
+            </div>
+
+            <!-- Callout 3 -->
+            <div id="04-admin-callout-3" class="04-admin-callout-card">
+              <div class="04-admin-callout-icon 04-admin-icon-lavender">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#32221B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                  <line x1="2" y1="20" x2="22" y2="20" />
+                </svg>
+              </div>
+              <div class="04-admin-callout-info">
+                <div class="04-admin-callout-label">Laporan lembaga</div>
+                <div class="04-admin-callout-value">Laporan & analytics</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scene 3 Check Pill: "Semuanya terpantau" -->
+          <div id="04-admin-check-pill" class="04-admin-check-pill">
+            <div class="04-admin-check-icon-circle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <span class="04-admin-check-text">Semuanya terpantau</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const pillWraps = [
+        document.getElementById("04-admin-pill-wrap-1"),
+        document.getElementById("04-admin-pill-wrap-2"),
+        document.getElementById("04-admin-pill-wrap-3"),
+        document.getElementById("04-admin-pill-wrap-4"),
+        document.getElementById("04-admin-pill-wrap-5"),
+      ];
+
+      const labelPill = document.getElementById("04-admin-label-pill");
+      const windowCard = document.getElementById("04-admin-window-card");
+      const callout1 = document.getElementById("04-admin-callout-1");
+      const callout2 = document.getElementById("04-admin-callout-2");
+      const callout3 = document.getElementById("04-admin-callout-3");
+      const checkPill = document.getElementById("04-admin-check-pill");
+
+      const zoomOuter = document.getElementById("04-admin-zoom-outer");
+      const zoomInner = document.getElementById("04-admin-zoom-inner");
+
+      // Initial visibility states to avoid frame 0 flashes
+      tl.set([labelPill, callout1, callout2, callout3, checkPill], { opacity: 0 }, 0);
+
+      // Track 1: Wallpaper entrance
+      tl.fromTo(
+        pillWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.7)", stagger: 0.05 },
+        0.08
+      );
+
+      // Scene 1 (0.0–2.2s):
+      // Jendela pill-card slide-up lembut@0.0–0.8 pada "Dari satu dashboard admin"
+      // Hero visible by t <= 0.5s
+      tl.fromTo(
+        windowCard,
+        { y: 70, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
+        0.0
+      );
+
+      // Label pill "DASHBOARD ADMIN" pop di atas jendela@1.6
+      tl.fromTo(
+        labelPill,
+        { scale: 0.5, y: 15, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.42, ease: "back.out(2.2)" },
+        1.6
+      );
+
+      // Scene 2 (2.2–5.7s):
+      // Coordinate Target Zoom parameters
+      // Outer scales around 50% 50%, Inner counter-translates: T = -offset
+      // W = 1920, H = 1080. Center = (960, 540)
+      const W = 1920;
+      const H = 1080;
+      const ZOOM_SCALE = 1.14;
+
+      function getCounter(el, defX, defY) {
+        if (el) {
+          const r = el.getBoundingClientRect();
+          if (r.width > 0 && r.height > 0) {
+            return {
+              x: -(r.left + r.width / 2 - W / 2),
+              y: -(r.top + r.height / 2 - H / 2),
+            };
+          }
+        }
+        return {
+          x: -(defX - W / 2),
+          y: -(defY - H / 2),
+        };
+      }
+
+      // Measured or exact target centers
+      const c1 = getCounter(callout1, 1460, 182);
+      const c2 = getCounter(callout2, 1460, 352);
+      const c3 = getCounter(callout3, 1460, 522);
+
+      // Cue 1 @ 2.3s: "Kehadiran real-time · 156/160 siswa" (angka coral)
+      tl.fromTo(
+        callout1,
+        { scale: 0.6, y: 30, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.46, ease: "back.out(1.8)" },
+        2.3
+      );
+      tl.to(zoomOuter, { scale: ZOOM_SCALE, duration: 0.75, ease: "power3.inOut" }, 2.3);
+      tl.to(zoomInner, { x: c1.x, y: c1.y, duration: 0.75, ease: "power3.inOut" }, 2.3);
+
+      // Cue 2 @ 3.7s: "Tagihan · Rp 245 jt"
+      tl.fromTo(
+        callout2,
+        { scale: 0.6, y: 30, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.46, ease: "back.out(1.8)" },
+        3.7
+      );
+      tl.to(zoomOuter, { scale: ZOOM_SCALE, duration: 0.75, ease: "power3.inOut" }, 3.7);
+      tl.to(zoomInner, { x: c2.x, y: c2.y, duration: 0.75, ease: "power3.inOut" }, 3.7);
+
+      // Cue 3 @ 4.6s: "Laporan & analytics"
+      tl.fromTo(
+        callout3,
+        { scale: 0.6, y: 30, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.46, ease: "back.out(1.8)" },
+        4.6
+      );
+      tl.to(zoomOuter, { scale: ZOOM_SCALE, duration: 0.75, ease: "power3.inOut" }, 4.6);
+      tl.to(zoomInner, { x: c3.x, y: c3.y, duration: 0.75, ease: "power3.inOut" }, 4.6);
+
+      // Scene 3 (5.7–7.28s):
+      // Kamera kembali ke framing penuh jendela@5.7
+      tl.to(zoomOuter, { scale: 1.0, duration: 0.55, ease: "power3.inOut" }, 5.7);
+      tl.to(zoomInner, { x: 0, y: 0, duration: 0.55, ease: "power3.inOut" }, 5.7);
+
+      // Baris check-pill hijau "Semuanya terpantau" pop@5.9 di bawah jendela
+      tl.fromTo(
+        checkPill,
+        { scale: 0.6, y: 20, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.44, ease: "back.out(2.0)" },
+        5.9
+      );
+
+      // HOLD — tanpa gerak lanjutan sampai akhir durasi (7.28s)
+      tl.to({}, { duration: 0.01 }, 7.28);
+
+      window.__timelines["04-admin"] = tl;
+    })();
+  </script>
+</template>

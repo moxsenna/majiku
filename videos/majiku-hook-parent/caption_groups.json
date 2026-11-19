@@ -1,0 +1,106 @@
+{
+  "total_duration_s": 8.2,
+  "width": 1080,
+  "height": 1920,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0.2,
+      "end": 1.48,
+      "text": "Orang tua melihat",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "Orang",
+          "start": 0.2,
+          "end": 0.49
+        },
+        {
+          "id": "caption-word-0-1",
+          "text": "tua",
+          "start": 0.49,
+          "end": 0.79
+        },
+        {
+          "id": "caption-word-0-2",
+          "text": "melihat",
+          "start": 0.79,
+          "end": 1.48
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 1,
+      "start": 1.48,
+      "end": 2.12,
+      "text": "semua,",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "semua,",
+          "start": 1.48,
+          "end": 2
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 1,
+      "start": 2.19,
+      "end": 3.07,
+      "text": "cekin,",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "cekin,",
+          "start": 2.19,
+          "end": 2.95
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 1,
+      "start": 3.3,
+      "end": 4.01,
+      "text": "foto,",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "foto,",
+          "start": 3.3,
+          "end": 3.89
+        }
+      ]
+    },
+    {
+      "id": "caption-group-4",
+      "frame": 1,
+      "start": 4.11,
+      "end": 5.67,
+      "text": "dan laporan harian.",
+      "words": [
+        {
+          "id": "caption-word-4-0",
+          "text": "dan",
+          "start": 4.11,
+          "end": 4.28
+        },
+        {
+          "id": "caption-word-4-1",
+          "text": "laporan",
+          "start": 4.28,
+          "end": 4.92
+        },
+        {
+          "id": "caption-word-4-2",
+          "text": "harian.",
+          "start": 4.92,
+          "end": 5.55
+        }
+      ]
+    }
+  ]
+}

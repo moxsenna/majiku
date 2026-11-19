@@ -1,0 +1,579 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed ground with cream base + radial glows + grain atmosphere */
+    [id="07-features-bg"],
+    .\30 7-features-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 14% 18%, rgba(247, 176, 158, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 86% 22%, rgba(252, 226, 146, 0.15) 0%, transparent 42%),
+        radial-gradient(circle at 50% 80%, rgba(240, 101, 66, 0.10) 0%, transparent 48%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Floating pill wallpaper (flat candy confetti pills at lateral margins) */
+    [id="07-features-wallpaper"],
+    .\30 7-features-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="07-features-pill-wrap"],
+    .\30 7-features-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    [class~="07-features-floating-pill"],
+    .\30 7-features-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 24px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    /* Outer margin positions (kept strictly above y=896px) */
+    [id="07-features-pill-wrap-1"] { left: 60px; top: 76px; }
+    [id="07-features-pill-1"] { background: #F7B09E; transform: rotate(-10deg); }
+
+    [id="07-features-pill-wrap-2"] { right: 60px; top: 82px; }
+    [id="07-features-pill-2"] { background: #FCE292; transform: rotate(12deg); }
+
+    [id="07-features-pill-wrap-3"] { left: 50px; top: 460px; }
+    [id="07-features-pill-3"] { background: #F6A794; transform: rotate(8deg); }
+
+    [id="07-features-pill-wrap-4"] { right: 50px; top: 470px; }
+    [id="07-features-pill-4"] { background: #F9C72E; transform: rotate(-12deg); }
+
+    [id="07-features-pill-wrap-5"] { left: 70px; top: 740px; }
+    [id="07-features-pill-5"] { background: #F6A18C; transform: rotate(-6deg); }
+
+    [id="07-features-pill-wrap-6"] { right: 70px; top: 740px; }
+    [id="07-features-pill-6"] { background: #F7B09E; transform: rotate(10deg); }
+
+    /* Track 2: Main feature stage */
+    [id="07-features-stage"],
+    .\30 7-features-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Header Container */
+    [id="07-features-header"],
+    .\30 7-features-header {
+      position: absolute;
+      top: 48px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Title Pill: "FITUR LENGKAP" */
+    [id="07-features-title-pill"],
+    .\30 7-features-title-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 26px;
+      background-color: #F9C31F;
+      border: 3.5px solid #1E1E1E;
+      border-radius: 9999px;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      will-change: transform, opacity;
+    }
+
+    /* Headline: "Semua yang Anda butuhkan" */
+    [id="07-features-headline"],
+    .\30 7-features-headline {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #32221B;
+      text-align: center;
+      will-change: transform, opacity;
+    }
+
+    /* Pill-card container (2rem border-radius, 3.5px ink border, 8px shadow) */
+    [class~="07-features-card"],
+    .\30 7-features-card {
+      position: absolute;
+      width: 440px;
+      height: 226px;
+      box-sizing: border-box;
+      background-color: #FFFFFF;
+      border: 3.5px solid #1E1E1E;
+      border-radius: 32px;
+      box-shadow: 8px 8px 0 rgba(26, 26, 26, 0.08);
+      padding: 22px 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      transform-origin: 50% 50%;
+      will-change: transform, opacity, box-shadow;
+    }
+
+    /* Row 1: 3 tiles (top: 208px) */
+    [id="07-features-card-1"] { left: 264px; top: 208px; }
+    [id="07-features-card-2"] { left: 740px; top: 208px; }
+    [id="07-features-card-3"] { left: 1216px; top: 208px; }
+
+    /* Row 2: 2 tiles (top: 466px) */
+    [id="07-features-card-4"] { left: 500px; top: 466px; }
+    [id="07-features-card-5"] { left: 980px; top: 466px; }
+
+    /* Card Top Bar (Icon + Tag) */
+    [class~="07-features-card-top"],
+    .\30 7-features-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    /* Card Icon (52px circle, candy background, 3px ink stroke) */
+    [class~="07-features-card-icon"],
+    .\30 7-features-card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    [class~="07-features-card-icon"] img {
+      display: block;
+    }
+
+    /* Candy accent fills for icons */
+    .\30 7-features-icon-coral { background-color: #F06542; }
+    .\30 7-features-icon-sky { background-color: #F6A18C; }
+    .\30 7-features-icon-mint { background-color: #FCE292; }
+    .\30 7-features-icon-yellow { background-color: #F9C31F; }
+    .\30 7-features-icon-lavender { background-color: #F7B09E; }
+
+    /* Card 5 custom letter T mark */
+    [class~="07-features-icon-letter"],
+    .\30 7-features-icon-letter {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #32221B;
+      line-height: 1;
+    }
+
+    /* Card Tag Chip */
+    [class~="07-features-card-tag"],
+    .\30 7-features-card-tag {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      padding: 5px 14px;
+      border: 2.5px solid #1E1E1E;
+      border-radius: 9999px;
+      background-color: #FFFFFF;
+      box-shadow: 3px 3px 0 rgba(26, 26, 26, 0.08);
+    }
+
+    /* Card Headline */
+    [class~="07-features-card-headline"],
+    .\30 7-features-card-headline {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 23px;
+      font-weight: 700;
+      color: #32221B;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    /* Card Short Body */
+    [class~="07-features-card-body"],
+    .\30 7-features-card-body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: #5A473E;
+      line-height: 1.45;
+    }
+
+    /* Payoff Row (Scene 3) */
+    [id="07-features-payoff-wrap"],
+    .\30 7-features-payoff-wrap {
+      position: absolute;
+      top: 732px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    [id="07-features-payoff-pill"],
+    .\30 7-features-payoff-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 36px;
+      background-color: #F9C31F;
+      border: 3.5px solid #1E1E1E;
+      border-radius: 9999px;
+      box-shadow: 8px 8px 0 rgba(26, 26, 26, 0.12);
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+
+    [class~="07-features-payoff-sparkle"],
+    .\30 7-features-payoff-sparkle {
+      font-size: 20px;
+      color: #32221B;
+      line-height: 1;
+    }
+
+    [class~="07-features-payoff-text"],
+    .\30 7-features-payoff-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #32221B;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="07-features"
+    data-start="0"
+    data-duration="9.38"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="07-features-bg"
+      class="clip 07-features-bg"
+      data-start="0"
+      data-duration="9.38"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Floating pill wallpaper -->
+    <div
+      id="07-features-wallpaper"
+      class="clip 07-features-wallpaper"
+      data-start="0"
+      data-duration="9.38"
+      data-track-index="1"
+    >
+      <div id="07-features-pill-wrap-1" class="07-features-pill-wrap">
+        <div id="07-features-pill-1" class="07-features-floating-pill">LENGKAP</div>
+      </div>
+      <div id="07-features-pill-wrap-2" class="07-features-pill-wrap">
+        <div id="07-features-pill-2" class="07-features-floating-pill">INTEGRASI</div>
+      </div>
+      <div id="07-features-pill-wrap-3" class="07-features-pill-wrap">
+        <div id="07-features-pill-3" class="07-features-floating-pill">OTOMATIS</div>
+      </div>
+      <div id="07-features-pill-wrap-4" class="07-features-pill-wrap">
+        <div id="07-features-pill-4" class="07-features-floating-pill">TERPUSAT</div>
+      </div>
+      <div id="07-features-pill-wrap-5" class="07-features-pill-wrap">
+        <div id="07-features-pill-5" class="07-features-floating-pill">REAL-TIME</div>
+      </div>
+      <div id="07-features-pill-wrap-6" class="07-features-pill-wrap">
+        <div id="07-features-pill-6" class="07-features-floating-pill">EFISIEN</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Main feature stage -->
+    <div
+      id="07-features-stage"
+      class="clip 07-features-stage"
+      data-start="0"
+      data-duration="9.38"
+      data-track-index="2"
+    >
+      <!-- Header: Title-pill + Section-headline -->
+      <div id="07-features-header" class="07-features-header">
+        <div id="07-features-title-pill" class="07-features-title-pill">FITUR LENGKAP</div>
+        <h2 id="07-features-headline" class="07-features-headline">Semua yang Anda butuhkan</h2>
+      </div>
+
+      <!-- Tile 1: Manajemen Siswa (users, coral) - focal -->
+      <div id="07-features-card-1" class="07-features-card">
+        <div class="07-features-card-top">
+          <div class="07-features-card-icon 07-features-icon-coral">
+            <img src="assets/svg-1cb122d5.svg" width="28" height="28" alt="" />
+          </div>
+          <div class="07-features-card-tag">SISWA</div>
+        </div>
+        <h3 class="07-features-card-headline">Manajemen Siswa</h3>
+        <p class="07-features-card-body">Database siswa, riwayat kelas, dan absensi digital terpadu.</p>
+      </div>
+
+      <!-- Tile 2: Laporan & Analitik (clipboard, sky) -->
+      <div id="07-features-card-2" class="07-features-card">
+        <div class="07-features-card-top">
+          <div class="07-features-card-icon 07-features-icon-sky">
+            <img src="assets/svg-93383a88.svg" width="28" height="28" alt="" />
+          </div>
+          <div class="07-features-card-tag">LAPORAN</div>
+        </div>
+        <h3 class="07-features-card-headline">Laporan & Analitik</h3>
+        <p class="07-features-card-body">Pantau grafik performa dan progres belajar siswa akurat.</p>
+      </div>
+
+      <!-- Tile 3: Komunikasi Orang Tua (bell, mint) -->
+      <div id="07-features-card-3" class="07-features-card">
+        <div class="07-features-card-top">
+          <div class="07-features-card-icon 07-features-icon-mint">
+            <img src="assets/svg-007bdb39.svg" width="28" height="28" alt="" />
+          </div>
+          <div class="07-features-card-tag">KOMUNIKASI</div>
+        </div>
+        <h3 class="07-features-card-headline">Komunikasi Orang Tua</h3>
+        <p class="07-features-card-body">Notifikasi langsung, update berkala, dan kabar harian anak.</p>
+      </div>
+
+      <!-- Tile 4: Billing Otomatis (credit-card, yellow) -->
+      <div id="07-features-card-4" class="07-features-card">
+        <div class="07-features-card-top">
+          <div class="07-features-card-icon 07-features-icon-yellow">
+            <img src="assets/svg-74201ed0.svg" width="28" height="28" alt="" />
+          </div>
+          <div class="07-features-card-tag">BILLING</div>
+        </div>
+        <h3 class="07-features-card-headline">Billing Otomatis</h3>
+        <p class="07-features-card-body">Kirim tagihan digital instan dan verifikasi bukti bayar cepat.</p>
+      </div>
+
+      <!-- Tile 5: Manajemen Tutor (letter T, lavender) -->
+      <div id="07-features-card-5" class="07-features-card">
+        <div class="07-features-card-top">
+          <div class="07-features-card-icon 07-features-icon-lavender">
+            <span class="07-features-icon-letter">T</span>
+          </div>
+          <div class="07-features-card-tag">TUTOR</div>
+        </div>
+        <h3 class="07-features-card-headline">Manajemen Tutor</h3>
+        <p class="07-features-card-body">Atur jadwal mengajar, kehadiran, dan hitung honor terpusat.</p>
+      </div>
+
+      <!-- Payoff Row: "SATU PLATFORM" pop @ 6.5s -->
+      <div id="07-features-payoff-wrap" class="07-features-payoff-wrap">
+        <div id="07-features-payoff-pill" class="07-features-payoff-pill">
+          <span class="07-features-payoff-sparkle">✦</span>
+          <span class="07-features-payoff-text">SATU PLATFORM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const headerPill = document.getElementById("07-features-title-pill");
+      const headerHeadline = document.getElementById("07-features-headline");
+
+      const pillWraps = [
+        document.getElementById("07-features-pill-wrap-1"),
+        document.getElementById("07-features-pill-wrap-2"),
+        document.getElementById("07-features-pill-wrap-3"),
+        document.getElementById("07-features-pill-wrap-4"),
+        document.getElementById("07-features-pill-wrap-5"),
+        document.getElementById("07-features-pill-wrap-6"),
+      ];
+
+      const card1 = document.getElementById("07-features-card-1");
+      const card2 = document.getElementById("07-features-card-2");
+      const card3 = document.getElementById("07-features-card-3");
+      const card4 = document.getElementById("07-features-card-4");
+      const card5 = document.getElementById("07-features-card-5");
+
+      const payoffPill = document.getElementById("07-features-payoff-pill");
+
+      // Initial deterministic state at t=0
+      tl.set([card1, card2, card3, card4, card5], { scale: 0.78, opacity: 0, y: 35 }, 0);
+      tl.set(payoffPill, { scale: 0.55, opacity: 0, y: 24 }, 0);
+
+      // Scene 1 (0.0-0.4s):
+      // Title-pill "FITUR LENGKAP" + headline "Semua yang Anda butuhkan" slide-up@0.0
+      // Perimeter wallpaper pills arrive softly
+      tl.fromTo(
+        pillWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.5)", stagger: 0.04 },
+        0.02
+      );
+
+      tl.fromTo(
+        headerPill,
+        { y: 25, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" },
+        0.0
+      );
+
+      tl.fromTo(
+        headerHeadline,
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.38, ease: "power3.out" },
+        0.06
+      );
+
+      // Scene 2 (0.4-6.4s):
+      // Lima tile pill-card kaskade ke grid 3+2 pada cue VO
+      // 1. "Manajemen Siswa"@0.4 (users, coral) - focal
+      tl.fromTo(
+        card1,
+        { scale: 0.78, opacity: 0, y: 35 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.25)" },
+        0.4
+      );
+
+      // 2. "Laporan & Analitik"@1.7 (clipboard, sky)
+      tl.fromTo(
+        card2,
+        { scale: 0.78, opacity: 0, y: 35 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.25)" },
+        1.7
+      );
+
+      // 3. "Komunikasi Orang Tua"@3.5 (bell, mint)
+      tl.fromTo(
+        card3,
+        { scale: 0.78, opacity: 0, y: 35 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.25)" },
+        3.5
+      );
+
+      // 4. "Billing Otomatis"@5.3 (credit-card, yellow)
+      tl.fromTo(
+        card4,
+        { scale: 0.78, opacity: 0, y: 35 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.48, ease: "back.out(1.25)" },
+        5.3
+      );
+
+      // 5. "Manajemen Tutor"@5.9 (letter T, lavender)
+      tl.fromTo(
+        card5,
+        { scale: 0.78, opacity: 0, y: 35 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.48, ease: "back.out(1.25)" },
+        5.9
+      );
+
+      // Scene 3 (6.5-8.88s):
+      // Payoff pada "semua lengkap dalam satu platform"@6.5
+      // Kelima tile terangkat halus (shadow menguat sekali, bukan glow rule)
+      tl.to(
+        [card1, card2, card3, card4, card5],
+        {
+          y: -12,
+          boxShadow: "14px 14px 0 rgba(26, 26, 26, 0.16)",
+          duration: 0.55,
+          ease: "power2.out",
+          stagger: 0.04,
+        },
+        6.5
+      );
+
+      // Pill "SATU PLATFORM" pop di bawah grid
+      tl.fromTo(
+        payoffPill,
+        { scale: 0.55, opacity: 0, y: 24 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.52, ease: "back.out(1.6)" },
+        6.5
+      );
+
+      // Hold until end of duration (8.88s) — no exit animation on non-final frame
+
+      window.__timelines["07-features"] = tl;
+    })();
+  </script>
+</template>

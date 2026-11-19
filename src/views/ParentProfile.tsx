@@ -66,7 +66,7 @@ export default function ParentProfile() {
         <section className="rise field-ink flex items-center gap-4 rounded-[28px] bg-langit p-5">
           <KidAvatar
             name={nama}
-            photoUrl={user?.image || (isDemoEmail(email) ? "/images/avatars/parent-anita.jpg" : undefined)}
+            photoUrl={user?.image || (isDemoEmail(email) ? "/images/avatars/parent-anita.webp" : undefined)}
             size="xl"
             className="shrink-0 ring-4 ring-[hsl(0_0%_100%/.55)]"
           />

@@ -1,0 +1,187 @@
+[a] Testimoni
+[button] Daftar Gratis
+[div] Platform #1 untuk Daycare & Bimbel
+[h1] Kelola Lembaga Pendidikan Anda dengan
+[span] Lebih Mudah
+[p] MAJIKU adalah platform all-in-one untuk daycare, TK, PAUD, dan lembaga bimbingan belajar. Dari manajemen siswa hingga billing, semua dalam satu tempat.
+[button] Mulai Gratis 14 Hari
+[button] Lihat Demo
+[p] Tidak perlu kartu kredit • Setup dalam 5 menit
+[p] 500+
+[p] Lembaga Aktif
+[p] 25K+
+[p] Siswa Terkelola
+[p] 98%
+[p] Kepuasan User
+[p] 24/7
+[p] Support
+[div] Lembaga Pilihan
+[h2] Daycare & Bimbel Pilihan
+[p] Temukan rekomendasi daycare, preschool, dan bimbingan belajar terbaik dan terverifikasi untuk buah hati Anda.
+[div] bimbel
+[div] Terverifikasi ✓
+[h3] Bimbel Bintang Prestasi Depok
+[p] Bimbingan Belajar SD & Persiapan Masuk SMP Unggulan
+[span] Depok
+[span] Mulai dari
+[span] 850.000
+[span] /bulan
+[div] preschool
+[div] Terverifikasi ✓
+[h3] Lentera Kecil Preschool
+[p] Montessori Early Childhood Education
+[span] Jakarta Selatan
+[span] Mulai dari
+[span] 2.500.000
+[span] /bulan
+[div] daycare
+[div] Terverifikasi ✓
+[h3] Majiku Kids
+[p] Sensory Daycare & Early Learning Space
+[span] Tangerang
+[span] Mulai dari
+[span] 700.000
+[span] /bulan
+[div] preschool
+[div] Terverifikasi ✓
+[h3] Mentari Preschool Surabaya
+[p] Nurturing Curious and Confident Minds
+[span] Surabaya
+[span] Mulai dari
+[span] 2.100.000
+[span] /bulan
+[div] daycare
+[div] Terverifikasi ✓
+[h3] Tunas Harapan Daycare
+[p] Home Away From Home for Your Little Ones
+[span] Bandung
+[span] Mulai dari
+[span] 1.800.000
+[span] /bulan
+[div] bimbel
+[h3] Al-Falah Islamic Tutoring
+[p] Membentuk Generasi Cerdas dan Berakhlak Mulia
+[span] Depok
+[span] Mulai dari
+[span] 700.000
+[span] /bulan
+[button] Jelajahi Semua Lembaga
+[div] Lihat Demo
+[h2] Tampilan Aplikasi yang
+[span] Mudah Digunakan
+[p] Interface yang intuitif untuk admin, tutor, dan orang tua. Lihat bagaimana MAJIKU mempermudah operasional lembaga Anda.
+[div] Dashboard Admin
+[h3] Kelola Semuanya dalam Satu Dashboard
+[p] Lihat ringkasan lengkap lembaga Anda: kehadiran siswa, tagihan, jadwal, dan notifikasi dalam satu tampilan.
+[span] Monitoring kehadiran real-time
+[span] Status billing dan pembayaran
+[span] Data siswa dan kelas
+[span] Analytics dan laporan
+[button] Lihat Demo Dashboard
+[div] majiku.app/dashboard
+[p] Kehadiran Hari Ini
+[p] 156/160 siswa
+[p] Pendapatan Bulan Ini
+[p] Rp 245 juta
+[p] Aisyah sudah tiba!
+[p] 08:15
+[div] Portal Orang Tua
+[h3] Orang Tua Selalu Terhubung
+[p] Aplikasi mobile untuk orang tua dengan update real-time tentang aktivitas anak, foto kegiatan, dan komunikasi langsung dengan guru.
+[span] Notifikasi check-in & check-out
+[span] Foto & video kegiatan harian
+[span] Chat langsung dengan guru
+[span] Lihat dan bayar tagihan
+[button] Lihat Portal Orang Tua
+[div] Aplikasi Tutor
+[h3] Tutor Lebih Produktif
+[p] Dashboard khusus untuk tutor dengan jadwal mengajar, KPI tracking, dan tools untuk membuat laporan harian dengan mudah.
+[span] Jadwal mengajar otomatis
+[span] Absensi siswa per kelas
+[span] KPI dan progress tracking
+[span] Lihat gaji dan slip
+[button] Lihat Dashboard Tutor
+[div] majiku.app/tutor
+[p] Jadwal Hari Ini
+[p] 4 Kelas
+[h2] Cocok Untuk Berbagai Lembaga
+[p] Satu platform untuk semua kebutuhan pendidikan anak
+[h3] Daycare & TK/PAUD
+[p] Kelola kehadiran, laporan harian, foto kegiatan, dan komunikasi dengan orang tua.
+[li] Absensi QR Code
+[li] Daily Report dengan foto
+[li] Notifikasi real-time
+[li] Portal khusus orang tua
+[h3] Bimbingan Belajar
+[p] Kelola jadwal, progress belajar, dan payroll tutor dengan sistem terintegrasi.
+[li] Manajemen kelas & jadwal
+[li] Tracking progress siswa
+[li] KPI & payroll tutor
+[li] Billing per sesi/paket
+[div] Fitur Lengkap
+[h2] Semua yang Anda Butuhkan dalam Satu Platform
+[p] Fitur komprehensif untuk mengelola lembaga pendidikan Anda dengan lebih efisien
+[h3] Manajemen Siswa
+[p] Kelola data siswa, orang tua, dan kelas dengan mudah dalam satu dashboard.
+[h3] Laporan & Analytics
+[p] Pantau perkembangan siswa dan performa lembaga dengan laporan real-time.
+[h3] Komunikasi Orang Tua
+[p] Kirim update harian, foto kegiatan, dan chat langsung dengan orang tua.
+[h3] Billing Otomatis
+[p] Invoice otomatis, reminder pembayaran, dan laporan keuangan lengkap.
+[h3] Manajemen Tutor
+[p] Kelola jadwal, KPI, dan payroll tutor dengan sistem yang terintegrasi.
+[h3] Keamanan Data
+[p] Data terenkripsi dan aman dengan backup otomatis setiap hari.
+[div] Harga Transparan
+[h2] Pilih Paket Sesuai Kebutuhan Anda
+[p] Mulai gratis, upgrade kapan saja
+[h3] Basic
+[p] Untuk lembaga kecil yang baru mulai
+[span] 299K
+[span] /bulan
+[li] Hingga 50 siswa
+[li] 2 kelas aktif
+[li] Laporan dasar
+[li] Chat dengan orang tua
+[li] Support via email
+[button] Mulai Gratis
+[div] Paling Populer
+[h3] Pro
+[p] Untuk lembaga yang sedang berkembang
+[span] 599K
+[span] /bulan
+[li] Hingga 200 siswa
+[li] 10 kelas aktif
+[li] Analytics lengkap
+[li] Billing otomatis
+[li] Manajemen tutor
+[li] Priority support
+[button] Coba 14 Hari Gratis
+[h3] Enterprise
+[p] Untuk jaringan lembaga & franchise
+[span] Custom
+[li] Unlimited siswa
+[li] Multi-cabang
+[li] White-label branding
+[li] API access
+[li] Dedicated support
+[li] Custom integrations
+[button] Hubungi Sales
+[div] Testimoni
+[h2] Dipercaya oleh Ratusan Lembaga
+[p] MAJIKU membantu kami mengelola 150+ siswa dengan lebih efisien. Orang tua sangat senang dengan update harian!
+[p] Ibu Ratna Sari
+[p] Pemilik TK Ceria Mandiri
+[p] Fitur billing otomatis menghemat waktu admin kami hingga 80%. Sangat recommended!
+[p] Pak Hendra
+[p] Direktur Bimbel Prestasi
+[p] Dashboard yang intuitif dan laporan yang lengkap. Tim support juga sangat responsif.
+[p] Ibu Dewi Kusuma
+[p] Kepala Sekolah PAUD Ananda
+[h2] Siap Mengelola Lembaga Anda dengan Lebih Baik?
+[p] Bergabung dengan 500+ lembaga pendidikan yang sudah menggunakan MAJIKU. Gratis 14 hari, tanpa kartu kredit.
+[button] Mulai Sekarang
+[a] Syarat & Ketentuan
+[a] Kebijakan Privasi
+[p] © 2024 MAJIKU. All rights reserved.

@@ -1,0 +1,95 @@
+{
+  "bgm": {
+    "path": "assets/bgm/track.wav",
+    "volume": 0.14,
+    "query": null,
+    "duration_s": null
+  },
+  "bgm_pending": false,
+  "voices": [
+    {
+      "frame": 1,
+      "path": "assets/voice/01.wav",
+      "duration_s": 5.32,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Orang",
+          "start": 0.2,
+          "end": 0.49
+        },
+        {
+          "id": "w1",
+          "text": "tua",
+          "start": 0.49,
+          "end": 0.79
+        },
+        {
+          "id": "w2",
+          "text": "melihat",
+          "start": 0.79,
+          "end": 1.48
+        },
+        {
+          "id": "w3",
+          "text": "semua,",
+          "start": 1.48,
+          "end": 2
+        },
+        {
+          "id": "w4",
+          "text": "cekin,",
+          "start": 2.19,
+          "end": 2.95
+        },
+        {
+          "id": "w5",
+          "text": "foto,",
+          "start": 3.3,
+          "end": 3.89
+        },
+        {
+          "id": "w6",
+          "text": "dan",
+          "start": 4.11,
+          "end": 4.28
+        },
+        {
+          "id": "w7",
+          "text": "laporan",
+          "start": 4.28,
+          "end": 4.92
+        },
+        {
+          "id": "w8",
+          "text": "harian.",
+          "start": 4.92,
+          "end": 5.55
+        }
+      ]
+    }
+  ],
+  "sfx": [
+    {
+      "frame": 1,
+      "file": "assets/sfx/notification.mp3",
+      "offset_s": 0,
+      "duration_s": 2.46,
+      "volume": 0.35
+    },
+    {
+      "frame": 1,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 2,
+      "file": "assets/sfx/chime.mp3",
+      "offset_s": 0.4,
+      "duration_s": 1.2,
+      "volume": 0.5
+    }
+  ]
+}

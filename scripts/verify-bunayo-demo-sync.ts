@@ -111,7 +111,7 @@ async function runVerification() {
 
   const [aisyah] = await db.select().from(students).where(eq(students.id, "stu_demo_aisyah")).limit(1);
   assert(!!aisyah, "Siswa Aisyah Putri (stu_demo_aisyah) ditemukan");
-  assert(aisyah?.photoUrl?.includes("student-aisyah.jpg") || false, "Foto Aisyah Putri menggunakan asset lokal Indonesia");
+  assert(aisyah?.photoUrl?.includes("student-aisyah") || false, "Foto Aisyah Putri menggunakan asset lokal Indonesia");
 
   // 7. Check Attendance Today
   const today = todayInWib();

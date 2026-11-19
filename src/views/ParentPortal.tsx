@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronRight, Eye, MessageCircle, Megaphone, Moon, Puzzle, Smile, Sprout, StickyNote, Utensils, type LucideIcon } from "lucide-react";
 import { TrialStatusList } from "@/components/parent/TrialStatusList";
+import { NotificationBell } from "@/components/bunayo/NotificationBell";
 import type { AnnouncementItem } from "@/components/parent/AnnouncementsCard";
 import { todayInWib } from "@/lib/datetime";
 import { formatJam, formatRelatif, formatTanggal } from "@/lib/format";
@@ -65,7 +66,12 @@ export default function ParentPortal({
         ) : (
           <BunayoMark height={36} />
         )}
-        {anak && <RoundIconButton icon={MessageCircle} label="Pesan guru" href="/parent/chat" />}
+        {anak && (
+          <span className="flex items-center gap-2">
+            <NotificationBell />
+            <RoundIconButton icon={MessageCircle} label="Pesan guru" href="/parent/chat" />
+          </span>
+        )}
       </header>
 
       {anak?.id?.includes("demo") && (

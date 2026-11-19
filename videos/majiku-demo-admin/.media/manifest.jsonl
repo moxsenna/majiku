@@ -1,0 +1,4 @@
+{"id":"sfx_001","type":"sfx","path":"assets/sfx/ping.mp3","source":"bundled","description":"ping","duration":1.3,"provenance":{"provider":"bundled.sfx","prompt":"ping"}}
+{"id":"sfx_002","type":"sfx","path":"assets/sfx/click-soft.mp3","source":"bundled","description":"click-soft","duration":0.4,"provenance":{"provider":"bundled.sfx","prompt":"click-soft"}}
+{"id":"sfx_003","type":"sfx","path":"assets/sfx/notification.mp3","source":"bundled","description":"notification","duration":2.5,"provenance":{"provider":"bundled.sfx","prompt":"notification"}}
+{"id":"sfx_004","type":"sfx","path":"assets/sfx/chime.mp3","source":"bundled","description":"chime","duration":2.5,"provenance":{"provider":"bundled.sfx","prompt":"chime"}}

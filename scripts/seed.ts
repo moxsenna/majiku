@@ -704,7 +704,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/marketplace-bright-kids.jpg",
+          "/images/marketplace/marketplace-bright-kids.webp",
         ],
         whatsapp: "6281234567890",
         isVerified: true,
@@ -736,7 +736,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-lentera-kecil.jpg",
+          "/images/marketplace/tenant-lentera-kecil.webp",
         ],
         whatsapp: "6281198765432",
         isVerified: true,
@@ -768,7 +768,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-bintang-prestasi.jpg",
+          "/images/marketplace/tenant-bintang-prestasi.webp",
         ],
         whatsapp: "6281311223344",
         isVerified: true,
@@ -800,7 +800,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-tunas-harapan.jpg",
+          "/images/marketplace/tenant-tunas-harapan.webp",
         ],
         whatsapp: "6281722334455",
         isVerified: true,
@@ -832,7 +832,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-mentari-preschool.jpg",
+          "/images/marketplace/tenant-mentari-preschool.webp",
         ],
         whatsapp: "6281933445566",
         isVerified: true,
@@ -864,7 +864,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-cerdas-ceria.jpg",
+          "/images/marketplace/tenant-cerdas-ceria.webp",
         ],
         whatsapp: "6281544556677",
         isVerified: false,
@@ -896,7 +896,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-kasih-bunda.jpg",
+          "/images/marketplace/tenant-kasih-bunda.webp",
         ],
         whatsapp: "6281255667788",
         isVerified: false,
@@ -928,7 +928,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-pelangi-preschool.jpg",
+          "/images/marketplace/tenant-pelangi-preschool.webp",
         ],
         whatsapp: "6281366778899",
         isVerified: false,
@@ -960,7 +960,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-al-falah.jpg",
+          "/images/marketplace/tenant-al-falah.webp",
         ],
         whatsapp: "6281877889900",
         isVerified: false,
@@ -992,7 +992,7 @@ async function main() {
           },
         ],
         photos: [
-          "/images/marketplace/tenant-sahabat-kecil.jpg",
+          "/images/marketplace/tenant-sahabat-kecil.webp",
         ],
         whatsapp: "6281988990011",
         isVerified: false,

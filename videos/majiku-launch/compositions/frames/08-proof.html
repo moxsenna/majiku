@@ -1,0 +1,1006 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed ground with cream base + radial candy glows + grain */
+    [id="08-proof-bg"],
+    .\30 8-proof-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 18% 24%, rgba(240, 101, 66, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 75% 42%, rgba(249, 195, 31, 0.16) 0%, transparent 50%),
+        radial-gradient(circle at 48% 78%, rgba(246, 161, 140, 0.10) 0%, transparent 48%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Floating pill wallpaper (flat candy confetti pills at outer edges) */
+    [id="08-proof-wallpaper"],
+    .\30 8-proof-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="08-proof-pill-wrap"],
+    .\30 8-proof-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="08-proof-floating-pill"],
+    .\30 8-proof-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 24px;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    /* Wallpaper pills positions - all kept strictly above y=896px */
+    [id="08-proof-pill-wrap-1"] { right: 80px; top: 60px; }
+    [id="08-proof-pill-1"] { background: #FCE292; transform: rotate(14deg); }
+
+    [id="08-proof-pill-wrap-2"] { left: 480px; top: 58px; }
+    [id="08-proof-pill-2"] { background: #F7B09E; transform: rotate(-8deg); }
+
+    [id="08-proof-pill-wrap-3"] { left: 60px; top: 760px; }
+    [id="08-proof-pill-3"] { background: #F6A18C; transform: rotate(-10deg); }
+
+    [id="08-proof-pill-wrap-4"] { right: 90px; top: 760px; }
+    [id="08-proof-pill-4"] { background: #F6A794; transform: rotate(11deg); }
+
+    [id="08-proof-pill-wrap-5"] { right: 40px; top: 430px; }
+    [id="08-proof-pill-5"] { background: #F9C72E; transform: rotate(-12deg); }
+
+    /* Track 2: Main Camera / Stage Layer */
+    [id="08-proof-stage"],
+    .\30 8-proof-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    [id="08-proof-stage-inner"],
+    .\30 8-proof-stage-inner {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: 50% 50%;
+    }
+
+    /* Top Title Pill: "BUKTI & DAMPAK NYATA" */
+    [id="08-proof-title-pill"],
+    .\30 8-proof-title-pill {
+      position: absolute;
+      left: 140px;
+      top: 68px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 22px;
+      background-color: #F9C31F;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    [class~="08-proof-title-dot"],
+    .\30 8-proof-title-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #F06542;
+      border: 2px solid #1E1E1E;
+    }
+
+    /* Common Card Styling for Stat-Pills */
+    [class~="08-proof-stat-card"],
+    .\30 8-proof-stat-card {
+      position: absolute;
+      background-color: #FFFFFF;
+      border: 3.8px solid #1E1E1E;
+      border-radius: 32px;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      box-sizing: border-box;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Left-column Supporting Stat-Pills */
+    [id="08-proof-pill-1"],
+    .\30 8-proof-card-1 {
+      left: 140px;
+      top: 154px;
+      width: 470px;
+      height: 256px;
+      padding: 26px 32px;
+      z-index: 5;
+    }
+
+    [id="08-proof-pill-2"],
+    .\30 8-proof-card-2 {
+      left: 140px;
+      top: 442px;
+      width: 470px;
+      height: 256px;
+      padding: 26px 32px;
+      z-index: 5;
+    }
+
+    /* Card Header Row */
+    [class~="08-proof-card-head"],
+    .\30 8-proof-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    [class~="08-proof-chip"],
+    .\30 8-proof-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 15px;
+      border-radius: 9999px;
+      border: 2.5px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .\30 8-proof-chip-coral {
+      background-color: #F06542;
+      color: #FFFFFF;
+    }
+
+    .\30 8-proof-chip-sky {
+      background-color: #F6A18C;
+      color: #32221B;
+    }
+
+    [class~="08-proof-accent-bar"],
+    .\30 8-proof-accent-bar {
+      width: 46px;
+      height: 8px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      transform-origin: left center;
+    }
+
+    .\30 8-proof-bar-coral {
+      background-color: #F06542;
+    }
+
+    .\30 8-proof-bar-sky {
+      background-color: #F6A18C;
+    }
+
+    /* Counter Row Mechanics */
+    [class~="08-proof-counter-row"],
+    .\30 8-proof-counter-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-start;
+      width: 100%;
+      height: 94px;
+      overflow: visible;
+    }
+
+    [class~="08-proof-counter-val"],
+    .\30 8-proof-counter-val {
+      display: inline-block;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 84px;
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      transform-origin: center center;
+    }
+
+    [class~="08-proof-counter-suffix"],
+    .\30 8-proof-counter-suffix {
+      display: inline-block;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.02em;
+      margin-left: 6px;
+      transform-origin: center center;
+    }
+
+    .\30 8-proof-color-coral {
+      color: #F06542;
+    }
+
+    .\30 8-proof-color-sky {
+      color: #F6A18C;
+    }
+
+    .\30 8-proof-color-yellow {
+      color: #F9C31F;
+    }
+
+    [class~="08-proof-counter-label"],
+    .\30 8-proof-counter-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+    }
+
+    /* Ambient Glow Bloom behind Hero Card */
+    [id="08-proof-hero-glow"],
+    .\30 8-proof-hero-glow {
+      position: absolute;
+      left: 600px;
+      top: 110px;
+      width: 1220px;
+      height: 620px;
+      background: radial-gradient(circle at 45% 45%, rgba(249, 195, 31, 0.28) 0%, rgba(252, 226, 146, 0.15) 50%, transparent 72%);
+      filter: blur(28px);
+      pointer-events: none;
+      z-index: 4;
+      transform-origin: 50% 50%;
+    }
+
+    /* Right-column HERO Card (Stat-Pill 3 - 80%) */
+    [id="08-proof-pill-3"],
+    .\30 8-proof-card-3 {
+      left: 650px;
+      top: 154px;
+      width: 1130px;
+      height: 544px;
+      padding: 38px 48px;
+      border-radius: 36px;
+      border: 4.5px solid #1E1E1E;
+      box-shadow: 10px 10px 0 rgba(26, 26, 26, 0.08);
+      z-index: 6;
+      justify-content: space-between;
+    }
+
+    [class~="08-proof-hero-head"],
+    .\30 8-proof-hero-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    [class~="08-proof-hero-badge"],
+    .\30 8-proof-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 22px;
+      border-radius: 9999px;
+      border: 3px solid #1E1E1E;
+      background-color: #F9C31F;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.08);
+    }
+
+    [class~="08-proof-hero-tag-dot"],
+    .\30 8-proof-hero-tag-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: #F06542;
+      border: 1.8px solid #1E1E1E;
+    }
+
+    [class~="08-proof-hero-corner-chip"],
+    .\30 8-proof-hero-corner-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 18px;
+      border-radius: 9999px;
+      border: 2.5px solid #1E1E1E;
+      background-color: #FCE292;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+    }
+
+    /* Main Hero Stat Center Area */
+    [class~="08-proof-hero-main"],
+    .\30 8-proof-hero-main {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      width: 100%;
+    }
+
+    [class~="08-proof-hero-num-wrap"],
+    .\30 8-proof-hero-num-wrap {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-start;
+      height: 180px;
+      flex-shrink: 0;
+    }
+
+    [id="08-proof-count-3"],
+    .\30 8-proof-hero-count {
+      display: inline-block;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 200px;
+      font-weight: 700;
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+      color: #F9C31F;
+      font-variant-numeric: tabular-nums;
+      transform-origin: center center;
+    }
+
+    [id="08-proof-suffix-3"],
+    .\30 8-proof-hero-suffix {
+      display: inline-block;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 120px;
+      font-weight: 700;
+      line-height: 0.88;
+      letter-spacing: -0.02em;
+      color: #F9C31F;
+      margin-left: 10px;
+      transform-origin: center center;
+    }
+
+    [class~="08-proof-hero-copy"],
+    .\30 8-proof-hero-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    [id="08-proof-label-3"],
+    .\30 8-proof-hero-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: #32221B;
+    }
+
+    [class~="08-proof-hero-desc"],
+    .\30 8-proof-hero-desc {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 19px;
+      font-weight: 400;
+      line-height: 1.45;
+      color: #32221B;
+      opacity: 0.8;
+      max-width: 520px;
+    }
+
+    /* Paired Accent Progress Bar (`stat-bars-and-fills`) */
+    [class~="08-proof-bar-section"],
+    .\30 8-proof-bar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    [class~="08-proof-bar-track"],
+    .\30 8-proof-bar-track {
+      width: 100%;
+      height: 30px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      background-color: #FFF9E8;
+      box-shadow: inset 2px 2px 0 rgba(26, 26, 26, 0.05);
+      overflow: hidden;
+      position: relative;
+    }
+
+    [id="08-proof-bar-fill"],
+    .\30 8-proof-bar-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #F9C72E 0%, #F9C31F 100%);
+      border-radius: 9999px;
+      transform-origin: left center;
+    }
+
+    [class~="08-proof-bar-ticks"],
+    .\30 8-proof-bar-ticks {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 4px;
+    }
+
+    [class~="08-proof-tick"],
+    .\30 8-proof-tick {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #32221B;
+      opacity: 0.6;
+    }
+
+    [class~="08-proof-tick-hero"],
+    .\30 8-proof-tick-hero {
+      color: #F06542;
+      opacity: 1;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+
+    /* Small Attribution Pill beneath Hero Card */
+    [id="08-proof-attrib-pill"],
+    .\30 8-proof-attrib-pill {
+      position: absolute;
+      left: 650px;
+      top: 724px;
+      height: 56px;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 24px 6px 12px;
+      border-radius: 9999px;
+      border: 3.2px solid #1E1E1E;
+      background-color: #FFFFFF;
+      box-shadow: 5px 5px 0 rgba(26, 26, 26, 0.08);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    [class~="08-proof-attrib-icon"],
+    .\30 8-proof-attrib-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: #F9C72E;
+      border: 2.2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    [class~="08-proof-attrib-text"],
+    .\30 8-proof-attrib-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 16px;
+      color: #32221B;
+      white-space: nowrap;
+    }
+
+    [class~="08-proof-attrib-name"],
+    .\30 8-proof-attrib-name {
+      font-weight: 700;
+    }
+
+    [class~="08-proof-attrib-sep"],
+    .\30 8-proof-attrib-sep {
+      margin: 0 6px;
+      opacity: 0.5;
+    }
+
+    [class~="08-proof-attrib-role"],
+    .\30 8-proof-attrib-role {
+      font-weight: 400;
+      opacity: 0.85;
+    }
+
+    [class~="08-proof-attrib-tag"],
+    .\30 8-proof-attrib-tag {
+      padding: 3px 12px;
+      border-radius: 9999px;
+      border: 1.8px solid #1E1E1E;
+      background-color: #FCE292;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      margin-left: 6px;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="08-proof"
+    data-start="0"
+    data-duration="9"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="08-proof-bg"
+      class="clip 08-proof-bg"
+      data-start="0"
+      data-duration="9"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Floating pill wallpaper (5 flat candy pills at edges) -->
+    <div
+      id="08-proof-wallpaper"
+      class="clip 08-proof-wallpaper"
+      data-start="0"
+      data-duration="9"
+      data-track-index="1"
+    >
+      <div id="08-proof-pill-wrap-1" class="08-proof-pill-wrap">
+        <div id="08-proof-pill-1" class="08-proof-floating-pill">TERPERCAYA</div>
+      </div>
+      <div id="08-proof-pill-wrap-2" class="08-proof-pill-wrap">
+        <div id="08-proof-pill-2" class="08-proof-floating-pill">HASIL NYATA</div>
+      </div>
+      <div id="08-proof-pill-wrap-3" class="08-proof-pill-wrap">
+        <div id="08-proof-pill-3" class="08-proof-floating-pill">TERUKUR</div>
+      </div>
+      <div id="08-proof-pill-wrap-4" class="08-proof-pill-wrap">
+        <div id="08-proof-pill-4" class="08-proof-floating-pill">EFISIENSI</div>
+      </div>
+      <div id="08-proof-pill-wrap-5" class="08-proof-pill-wrap">
+        <div id="08-proof-pill-5" class="08-proof-floating-pill">PERFORMA</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Main camera stage -->
+    <div
+      id="08-proof-stage"
+      class="clip 08-proof-stage"
+      data-start="0"
+      data-duration="9"
+      data-track-index="2"
+    >
+      <div id="08-proof-stage-inner" class="08-proof-stage-inner">
+        <!-- Top Title Pill -->
+        <div id="08-proof-title-pill" class="08-proof-title-pill">
+          <span class="08-proof-title-dot"></span>
+          <span>BUKTI & DAMPAK NYATA</span>
+        </div>
+
+        <!-- Ambient Glow Bloom behind Hero Card -->
+        <div id="08-proof-hero-glow" class="08-proof-hero-glow"></div>
+
+        <!-- Left Stat-Pill 1: "500+ / LEMBAGA AKTIF" -->
+        <div id="08-proof-card-1" class="08-proof-stat-card 08-proof-card-1">
+          <div class="08-proof-card-head">
+            <div class="08-proof-chip 08-proof-chip-coral">ADOPSI</div>
+            <div id="08-proof-bar-1" class="08-proof-accent-bar 08-proof-bar-coral"></div>
+          </div>
+          <div class="08-proof-counter-row">
+            <span id="08-proof-count-1" class="08-proof-counter-val 08-proof-color-coral">0</span>
+            <span id="08-proof-suffix-1" class="08-proof-counter-suffix 08-proof-color-coral">+</span>
+          </div>
+          <div id="08-proof-label-1" class="08-proof-counter-label">LEMBAGA AKTIF</div>
+        </div>
+
+        <!-- Left Stat-Pill 2: "25K+ / SISWA TERKELOLA" -->
+        <div id="08-proof-card-2" class="08-proof-stat-card 08-proof-card-2">
+          <div class="08-proof-card-head">
+            <div class="08-proof-chip 08-proof-chip-sky">SKALA</div>
+            <div id="08-proof-bar-2" class="08-proof-accent-bar 08-proof-bar-sky"></div>
+          </div>
+          <div class="08-proof-counter-row">
+            <span id="08-proof-count-2" class="08-proof-counter-val 08-proof-color-sky">0</span>
+            <span id="08-proof-suffix-2" class="08-proof-counter-suffix 08-proof-color-sky">K+</span>
+          </div>
+          <div id="08-proof-label-2" class="08-proof-counter-label">SISWA TERKELOLA</div>
+        </div>
+
+        <!-- Right Hero Stat-Pill 3: "80% / WAKTU ADMIN HEMAT" -->
+        <div id="08-proof-card-3" class="08-proof-stat-card 08-proof-card-3">
+          <div class="08-proof-hero-head">
+            <div class="08-proof-hero-badge">
+              <span class="08-proof-hero-tag-dot"></span>
+              <span>EFISIENSI MAKSIMAL</span>
+            </div>
+            <div class="08-proof-hero-corner-chip">TERBUKTI DI LAPANGAN</div>
+          </div>
+
+          <div class="08-proof-hero-main">
+            <div class="08-proof-hero-num-wrap">
+              <span id="08-proof-count-3" class="08-proof-hero-count">0</span>
+              <span id="08-proof-suffix-3" class="08-proof-hero-suffix">%</span>
+            </div>
+            <div class="08-proof-hero-copy">
+              <div id="08-proof-label-3" class="08-proof-hero-label">WAKTU ADMIN HEMAT</div>
+              <div class="08-proof-hero-desc">Pangkas beban operasional manual hingga seperlima waktu normal</div>
+            </div>
+          </div>
+
+          <div class="08-proof-bar-section">
+            <div class="08-proof-bar-track">
+              <div id="08-proof-bar-fill" class="08-proof-bar-fill"></div>
+            </div>
+            <div class="08-proof-bar-ticks">
+              <span class="08-proof-tick">0%</span>
+              <span class="08-proof-tick">20%</span>
+              <span class="08-proof-tick">40%</span>
+              <span class="08-proof-tick">60%</span>
+              <span class="08-proof-tick 08-proof-tick-hero">80% HEMAT</span>
+              <span class="08-proof-tick">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Small Attribution Pill beneath Hero Card -->
+        <div id="08-proof-attrib-pill" class="08-proof-attrib-pill">
+          <div class="08-proof-attrib-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#32221B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="08-proof-attrib-text">
+            <span class="08-proof-attrib-name">Pak Hendra</span>
+            <span class="08-proof-attrib-sep">—</span>
+            <span class="08-proof-attrib-role">Direktur Bimbel Prestasi</span>
+          </div>
+          <div class="08-proof-attrib-tag">VALID</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const pillWraps = [
+        document.getElementById("08-proof-pill-wrap-1"),
+        document.getElementById("08-proof-pill-wrap-2"),
+        document.getElementById("08-proof-pill-wrap-3"),
+        document.getElementById("08-proof-pill-wrap-4"),
+        document.getElementById("08-proof-pill-wrap-5"),
+      ];
+
+      const stageInner = document.getElementById("08-proof-stage-inner");
+      const titlePill = document.getElementById("08-proof-title-pill");
+      const heroGlow = document.getElementById("08-proof-hero-glow");
+
+      const card1 = document.getElementById("08-proof-card-1");
+      const count1 = document.getElementById("08-proof-count-1");
+      const suffix1 = document.getElementById("08-proof-suffix-1");
+      const label1 = document.getElementById("08-proof-label-1");
+      const bar1 = document.getElementById("08-proof-bar-1");
+
+      const card2 = document.getElementById("08-proof-card-2");
+      const count2 = document.getElementById("08-proof-count-2");
+      const suffix2 = document.getElementById("08-proof-suffix-2");
+      const label2 = document.getElementById("08-proof-label-2");
+      const bar2 = document.getElementById("08-proof-bar-2");
+
+      const card3 = document.getElementById("08-proof-card-3");
+      const count3 = document.getElementById("08-proof-count-3");
+      const suffix3 = document.getElementById("08-proof-suffix-3");
+      const label3 = document.getElementById("08-proof-label-3");
+      const barFill = document.getElementById("08-proof-bar-fill");
+
+      const attribPill = document.getElementById("08-proof-attrib-pill");
+
+      // Initial visibility states at t=0
+      tl.set([titlePill, card1, card2, card3, heroGlow, attribPill], { opacity: 0 }, 0);
+      tl.set([suffix1, suffix2, suffix3], { opacity: 0 }, 0);
+      tl.set([label1, label2], { opacity: 0 }, 0);
+      tl.set([bar1, bar2], { scaleX: 0 }, 0);
+      tl.set(barFill, { scaleX: 0 }, 0);
+
+      // Macro subtle camera drift across 8.6s
+      tl.fromTo(
+        stageInner,
+        { scale: 1.0 },
+        { scale: 1.025, ease: "none", duration: 8.6 },
+        0
+      );
+
+      // Track 1: Wallpaper entrance
+      tl.fromTo(
+        pillWraps,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.7)", stagger: 0.05 },
+        0.08
+      );
+
+      // Title pill entrance
+      tl.fromTo(
+        titlePill,
+        { scale: 0.7, y: -20, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.42, ease: "back.out(1.8)" },
+        0.12
+      );
+
+      // =========================================================================
+      // Scene 1 (0.0–3.1s):
+      // stat-pill 1 "500+ / LEMBAGA AKTIF" pop@0.2 kiri-tengah (asimetris),
+      // angka coral count-up 0→500 membesar (counting-dynamic-scale) pada VO@0.7
+      // =========================================================================
+
+      // Pop-in @ 0.20s - reaches full visibility by t <= 0.50s (hero visibility rule)
+      tl.fromTo(
+        card1,
+        { scale: 0.62, y: 35, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.44, ease: "back.out(1.8)" },
+        0.20
+      );
+
+      // Coral accent mini-bar expand
+      tl.fromTo(
+        bar1,
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.55, ease: "power2.out" },
+        0.55
+      );
+
+      // Count-up 0 -> 500 starts @ 0.70s
+      const state1 = { val: 0 };
+      tl.to(
+        state1,
+        {
+          val: 500,
+          duration: 1.5,
+          ease: "power3.out",
+          onUpdate: function () {
+            count1.textContent = Math.round(state1.val);
+          },
+        },
+        0.70
+      );
+
+      // counting-dynamic-scale: transform scale grows with the count
+      tl.fromTo(
+        count1,
+        { scale: 0.52 },
+        { scale: 1, duration: 1.5, ease: "power3.out" },
+        0.70
+      );
+
+      // Label fades in early during count
+      tl.fromTo(
+        label1,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
+        0.90
+      );
+
+      // Suffix "+" slides in after count lands @ 2.20s
+      tl.fromTo(
+        suffix1,
+        { opacity: 0, y: 18, scale: 0.65 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.8)" },
+        2.20
+      );
+
+      // =========================================================================
+      // Scene 2 (3.3–5.5s):
+      // stat-pill 2 "25K+ / SISWA TERKELOLA" pop@3.3 di sampingnya,
+      // angka sky count-up; grid 2-up menetap.
+      // =========================================================================
+
+      // Pop-in @ 3.30s
+      tl.fromTo(
+        card2,
+        { scale: 0.62, y: 35, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.44, ease: "back.out(1.8)" },
+        3.30
+      );
+
+      // Sky accent mini-bar expand
+      tl.fromTo(
+        bar2,
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.55, ease: "power2.out" },
+        3.65
+      );
+
+      // Count-up 0 -> 25 starts @ 3.50s
+      const state2 = { val: 0 };
+      tl.to(
+        state2,
+        {
+          val: 25,
+          duration: 1.4,
+          ease: "power3.out",
+          onUpdate: function () {
+            count2.textContent = Math.round(state2.val);
+          },
+        },
+        3.50
+      );
+
+      // counting-dynamic-scale: transform scale grows with the count
+      tl.fromTo(
+        count2,
+        { scale: 0.50 },
+        { scale: 1, duration: 1.4, ease: "power3.out" },
+        3.50
+      );
+
+      // Label fades in early during count
+      tl.fromTo(
+        label2,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
+        3.70
+      );
+
+      // Suffix "K+" slides in after count lands @ 4.90s
+      tl.fromTo(
+        suffix2,
+        { opacity: 0, y: 18, scale: 0.65 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.8)" },
+        4.90
+      );
+
+      // =========================================================================
+      // Scene 3 (5.6–8.6s):
+      // stat-pill 3 "80% / WAKTU ADMIN HEMAT" mendarat@5.6 sebagai HERO —
+      // 3× ukuran tetangganya, angka yellow count-up 0→80 + accent bar terisi (stat-bars-and-fills);
+      // pill atribusi kecil "Pak Hendra — Direktur Bimbel Prestasi" fade-up@7.4 di bawahnya;
+      // HOLD klimaks — masih.
+      // =========================================================================
+
+      // Hero Stat-Pill lands @ 5.60s
+      tl.fromTo(
+        card3,
+        { scale: 0.88, y: 45, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.56, ease: "power3.out" },
+        5.60
+      );
+
+      // Hero ambient glow blooms behind
+      tl.fromTo(
+        heroGlow,
+        { scale: 0.70, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" },
+        5.60
+      );
+
+      // Count-up 0 -> 80 starts @ 5.80s
+      const state3 = { val: 0 };
+      tl.to(
+        state3,
+        {
+          val: 80,
+          duration: 1.5,
+          ease: "power3.out",
+          onUpdate: function () {
+            count3.textContent = Math.round(state3.val);
+          },
+        },
+        5.80
+      );
+
+      // counting-dynamic-scale: transform scale grows with the count
+      tl.fromTo(
+        count3,
+        { scale: 0.45 },
+        { scale: 1, duration: 1.5, ease: "power3.out" },
+        5.80
+      );
+
+      // stat-bars-and-fills: paired progress fill bar sweeps simultaneously with count-up
+      tl.fromTo(
+        barFill,
+        { scaleX: 0 },
+        { scaleX: 0.80, duration: 1.5, ease: "power3.out" },
+        5.80
+      );
+
+      // Hero label fades in
+      tl.fromTo(
+        label3,
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.50, ease: "power2.out" },
+        6.00
+      );
+
+      // Suffix "%" snaps in after count lands @ 7.30s
+      tl.fromTo(
+        suffix3,
+        { opacity: 0, y: 22, scale: 0.60 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2.0)" },
+        7.30
+      );
+
+      // Attribution pill fades up @ 7.40s
+      tl.fromTo(
+        attribPill,
+        { y: 22, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.48, ease: "power2.out" },
+        7.40
+      );
+
+      // Hold climax through duration end @ 8.6s (no exit animation)
+      tl.to({}, { duration: 0.01 }, 8.60);
+
+      window.__timelines["08-proof"] = tl;
+    })();
+  </script>
+</template>

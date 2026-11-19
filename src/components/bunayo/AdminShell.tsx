@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, type LucideIcon } from "lucide-react";
+import { Clock, Search, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { BunayoLogo, BunayoMark } from "./Logo";
@@ -49,6 +49,8 @@ export interface AdminShellProps {
   org: { name: string; sub?: string | null } | null;
   user: { name: string; role: string; image?: string | null } | null;
   onSignOut: () => void;
+  /** Masa trial SaaS lembaga; kosong bila tidak berlaku (tenant lama/demo). */
+  trial?: { daysLeft: number; ended: boolean } | null;
   /** Lonceng notifikasi (topbar mobile). Kosongkan bila belum ada sumber notifikasi nyata. */
   notifSlot?: React.ReactNode;
   /** Aksi cari global: Enter → hasil */
@@ -267,6 +269,39 @@ function SidebarFoot({
 }
 
 /* ------------------------------------------------------------------ */
+/* Strip masa trial                                                     */
+/* ------------------------------------------------------------------ */
+
+function TrialStrip({ trial }: { trial: NonNullable<AdminShellProps["trial"]> }) {
+  const { daysLeft, ended } = trial;
+  return (
+    <div
+      role="status"
+      className={cn(
+        "mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded border px-3.5 py-2 text-[13px]",
+        ended
+          ? "border-destructive/25 bg-destructive-soft text-destructive"
+          : "border-border bg-card text-foreground",
+      )}
+    >
+      <Clock className={cn("h-4 w-4 shrink-0", ended ? "text-destructive" : "text-muted-foreground")} aria-hidden />
+      <span className="min-w-0 flex-1 font-medium">
+        {ended ? (
+          <>Masa trial berakhir — aktifkan paket agar lembaga tetap berjalan.</>
+        ) : (
+          <>
+            Trial 14 hari · sisa <span className="tabular font-semibold">{daysLeft}</span> hari
+          </>
+        )}
+      </span>
+      <Link href="/checkout?plan=pro" className={cn("press shrink-0 rounded px-2 py-1 font-semibold", ended ? "underline decoration-2 underline-offset-2" : "text-primary hover:underline")}>
+        Aktifkan paket
+      </Link>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Shell                                                                */
 /* ------------------------------------------------------------------ */
 
@@ -276,7 +311,7 @@ function SidebarFoot({
  * 561–1000 px rail ikon 76 px (titik merah menggantikan angka) ·
  * ≤ 560 px topbar (logo, lembaga, cari, notifikasi) + navigasi bawah 5.
  */
-export function AdminShell({ nav, settings, mobileTabs, org, user, onSignOut, notifSlot, onSearch, children }: AdminShellProps) {
+export function AdminShell({ nav, settings, mobileTabs, org, user, trial, onSignOut, notifSlot, onSearch, children }: AdminShellProps) {
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -328,7 +363,14 @@ export function AdminShell({ nav, settings, mobileTabs, org, user, onSignOut, no
         {notifSlot}
       </header>
 
-      <main className="min-w-0 pb-24 min-[561px]:pb-0 min-[561px]:max-[1000px]:pl-[76px] min-[1001px]:pl-[232px]">{children}</main>
+      <main className="min-w-0 pb-24 min-[561px]:pb-0 min-[561px]:max-[1000px]:pl-[76px] min-[1001px]:pl-[232px]">
+        {trial && (
+          <div className="px-4 pt-4 min-[1001px]:px-6">
+            <TrialStrip trial={trial} />
+          </div>
+        )}
+        {children}
+      </main>
 
       {/* Navigasi bawah mobile: 5 tab */}
       <nav

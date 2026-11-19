@@ -37,7 +37,7 @@ export default function TutorSaya() {
           {name ? (
             <KidAvatar
               name={name}
-              photoUrl={user?.image || (isDemoEmail(user?.email) ? "/images/avatars/parent-rina.jpg" : undefined)}
+              photoUrl={user?.image || (isDemoEmail(user?.email) ? "/images/avatars/parent-rina.webp" : undefined)}
               size="lg"
               krayon="anggur"
             />

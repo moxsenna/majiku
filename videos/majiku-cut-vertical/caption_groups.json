@@ -1,0 +1,382 @@
+{
+  "total_duration_s": 23.19,
+  "width": 1080,
+  "height": 1920,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0.23,
+      "end": 1.64,
+      "text": "Absensi dibuku,",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "Absensi",
+          "start": 0.23,
+          "end": 0.77
+        },
+        {
+          "id": "caption-word-0-1",
+          "text": "dibuku,",
+          "start": 0.77,
+          "end": 1.52
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 1,
+      "start": 1.82,
+      "end": 3.65,
+      "text": "tagihan di kertas.",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "tagihan",
+          "start": 1.82,
+          "end": 2.42
+        },
+        {
+          "id": "caption-word-1-1",
+          "text": "di",
+          "start": 2.42,
+          "end": 2.64
+        },
+        {
+          "id": "caption-word-1-2",
+          "text": "kertas.",
+          "start": 2.64,
+          "end": 3.63
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 1,
+      "start": 3.65,
+      "end": 4.73,
+      "text": "Kabar anak,",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "Kabar",
+          "start": 3.65,
+          "end": 4.08
+        },
+        {
+          "id": "caption-word-2-1",
+          "text": "anak,",
+          "start": 4.08,
+          "end": 4.61
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 1,
+      "start": 4.89,
+      "end": 6.12,
+      "text": "sering terlambat.",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "sering",
+          "start": 4.89,
+          "end": 5.16
+        },
+        {
+          "id": "caption-word-3-1",
+          "text": "terlambat.",
+          "start": 5.16,
+          "end": 6
+        }
+      ]
+    },
+    {
+      "id": "caption-group-4",
+      "frame": 2,
+      "start": 6.57,
+      "end": 7.34,
+      "text": "Kenalkan",
+      "words": [
+        {
+          "id": "caption-word-4-0",
+          "text": "Kenalkan",
+          "start": 6.57,
+          "end": 7.22
+        }
+      ]
+    },
+    {
+      "id": "caption-group-5",
+      "frame": 2,
+      "start": 7.62,
+      "end": 8.7,
+      "text": "Majiku,",
+      "words": [
+        {
+          "id": "caption-word-5-0",
+          "text": "Majiku,",
+          "start": 7.62,
+          "end": 8.58
+        }
+      ]
+    },
+    {
+      "id": "caption-group-6",
+      "frame": 2,
+      "start": 8.74,
+      "end": 9.83,
+      "text": "satu platform untuk",
+      "words": [
+        {
+          "id": "caption-word-6-0",
+          "text": "satu",
+          "start": 8.74,
+          "end": 8.87
+        },
+        {
+          "id": "caption-word-6-1",
+          "text": "platform",
+          "start": 8.87,
+          "end": 9.36
+        },
+        {
+          "id": "caption-word-6-2",
+          "text": "untuk",
+          "start": 9.52,
+          "end": 9.83
+        }
+      ]
+    },
+    {
+      "id": "caption-group-7",
+      "frame": 2,
+      "start": 9.83,
+      "end": 11.76,
+      "text": "seluruh Operational daycare.",
+      "words": [
+        {
+          "id": "caption-word-7-0",
+          "text": "seluruh",
+          "start": 9.83,
+          "end": 10.33
+        },
+        {
+          "id": "caption-word-7-1",
+          "text": "Operational",
+          "start": 10.33,
+          "end": 11.14
+        },
+        {
+          "id": "caption-word-7-2",
+          "text": "daycare.",
+          "start": 11.14,
+          "end": 11.64
+        }
+      ]
+    },
+    {
+      "id": "caption-group-8",
+      "frame": 3,
+      "start": 12.16,
+      "end": 13.44,
+      "text": "Orang tua melihat",
+      "words": [
+        {
+          "id": "caption-word-8-0",
+          "text": "Orang",
+          "start": 12.16,
+          "end": 12.45
+        },
+        {
+          "id": "caption-word-8-1",
+          "text": "tua",
+          "start": 12.45,
+          "end": 12.75
+        },
+        {
+          "id": "caption-word-8-2",
+          "text": "melihat",
+          "start": 12.75,
+          "end": 13.44
+        }
+      ]
+    },
+    {
+      "id": "caption-group-9",
+      "frame": 3,
+      "start": 13.44,
+      "end": 14.08,
+      "text": "semua,",
+      "words": [
+        {
+          "id": "caption-word-9-0",
+          "text": "semua,",
+          "start": 13.44,
+          "end": 13.96
+        }
+      ]
+    },
+    {
+      "id": "caption-group-10",
+      "frame": 3,
+      "start": 14.15,
+      "end": 15.03,
+      "text": "cekin,",
+      "words": [
+        {
+          "id": "caption-word-10-0",
+          "text": "cekin,",
+          "start": 14.15,
+          "end": 14.91
+        }
+      ]
+    },
+    {
+      "id": "caption-group-11",
+      "frame": 3,
+      "start": 15.26,
+      "end": 15.97,
+      "text": "foto,",
+      "words": [
+        {
+          "id": "caption-word-11-0",
+          "text": "foto,",
+          "start": 15.26,
+          "end": 15.85
+        }
+      ]
+    },
+    {
+      "id": "caption-group-12",
+      "frame": 3,
+      "start": 16.07,
+      "end": 17.5,
+      "text": "dan laporan harian.",
+      "words": [
+        {
+          "id": "caption-word-12-0",
+          "text": "dan",
+          "start": 16.07,
+          "end": 16.24
+        },
+        {
+          "id": "caption-word-12-1",
+          "text": "laporan",
+          "start": 16.24,
+          "end": 16.88
+        },
+        {
+          "id": "caption-word-12-2",
+          "text": "harian.",
+          "start": 16.88,
+          "end": 17.51
+        }
+      ]
+    },
+    {
+      "id": "caption-group-13",
+      "frame": 4,
+      "start": 17.5,
+      "end": 18.73,
+      "text": "Sudah 500 lebih",
+      "words": [
+        {
+          "id": "caption-word-13-0",
+          "text": "Sudah",
+          "start": 17.5,
+          "end": 17.64
+        },
+        {
+          "id": "caption-word-13-1",
+          "text": "500",
+          "start": 17.64,
+          "end": 18.3
+        },
+        {
+          "id": "caption-word-13-2",
+          "text": "lebih",
+          "start": 18.39,
+          "end": 18.66
+        }
+      ]
+    },
+    {
+      "id": "caption-group-14",
+      "frame": 4,
+      "start": 18.73,
+      "end": 20.45,
+      "text": "lembaga yang memakainya.",
+      "words": [
+        {
+          "id": "caption-word-14-0",
+          "text": "lembaga",
+          "start": 18.73,
+          "end": 19.19
+        },
+        {
+          "id": "caption-word-14-1",
+          "text": "yang",
+          "start": 19.19,
+          "end": 19.49
+        },
+        {
+          "id": "caption-word-14-2",
+          "text": "memakainya.",
+          "start": 19.49,
+          "end": 20.39
+        }
+      ]
+    },
+    {
+      "id": "caption-group-15",
+      "frame": 5,
+      "start": 20.45,
+      "end": 22.04,
+      "text": "Coba MAJIKU gratis",
+      "words": [
+        {
+          "id": "caption-word-15-0",
+          "text": "Coba",
+          "start": 20.45,
+          "end": 20.84
+        },
+        {
+          "id": "caption-word-15-1",
+          "text": "MAJIKU",
+          "start": 20.84,
+          "end": 21.44
+        },
+        {
+          "id": "caption-word-15-2",
+          "text": "gratis",
+          "start": 21.44,
+          "end": 22.04
+        }
+      ]
+    },
+    {
+      "id": "caption-group-16",
+      "frame": 5,
+      "start": 22.04,
+      "end": 23.26,
+      "text": "14 hari,",
+      "words": [
+        {
+          "id": "caption-word-16-0",
+          "text": "14",
+          "start": 22.04,
+          "end": 22.64
+        },
+        {
+          "id": "caption-word-16-1",
+          "text": "hari,",
+          "start": 22.64,
+          "end": 23.14
+        }
+      ]
+    }
+  ]
+}

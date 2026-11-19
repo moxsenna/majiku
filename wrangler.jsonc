@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
+  "main": "custom-worker.ts",
   "name": "majiku",
   "account_id": "5fec996560f37f7a5c8e0128cafd1b7b",
   "routes": [
@@ -23,5 +23,6 @@
   "durable_objects": {
     "bindings": [{ "name": "NEXT_INC_CACHE_DO", "class_name": "DOQueueHandler" }]
   },
+  "triggers": { "crons": ["0 0 * * *"] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }]
 }

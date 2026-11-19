@@ -15,6 +15,7 @@ import {
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { requireTenantContext, resolveTenantIdForUser, assertDemoMutationLock } from "@/server/authz";
+import { notifyUsers } from "@/server/notify";
 import { isValidDateString, todayInWib } from "@/lib/datetime";
 import { isDemoEmail } from "@/lib/demo";
 import { deletePhoto } from "@/server/r2";
@@ -215,7 +216,7 @@ export async function createDailyReport(
     throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
   }
   const studentRows = await db
-    .select({ id: students.id, tenantId: students.tenantId })
+    .select({ id: students.id, tenantId: students.tenantId, parentUserId: students.parentUserId, name: students.name })
     .from(students)
     .where(inArray(students.id, studentIds));
   const foreignStudents = studentRows.filter((s) => s.tenantId !== tenantId);
@@ -268,6 +269,24 @@ export async function createDailyReport(
   }));
 
   await db.insert(dailyReports).values(rowsToInsert);
+
+  // Notifikasi ke orang tua anak yang baru dilaporkan (sinkron, non-blocking).
+  const notifiedParents = pendingStudentIds
+    .map((sid) => studentRows.find((s) => s.id === sid)?.parentUserId)
+    .filter((uid): uid is string => Boolean(uid));
+  if (notifiedParents.length > 0) {
+    const judul = pendingStudentIds.length === 1
+      ? `Kabar harian ${studentRows.find((s) => s.id === pendingStudentIds[0])?.name ?? "anak Anda"} tersedia`
+      : `Kabar harian ${pendingStudentIds.length} anak tersedia`;
+    await notifyUsers({
+      userIds: notifiedParents,
+      type: "report",
+      title: judul,
+      body: `${reportDate} · ${activities || notes || ""}`.trim().slice(0, 140),
+      link: "/parent",
+      tenantId,
+    });
+  }
 
   return { created: pendingStudentIds.length };
 }

@@ -1,0 +1,15 @@
+{
+  "cookies": [
+    {
+      "name": "__Secure-better-auth.session_token",
+      "value": "BYre6X02cdWABJFQ5MlDnoZ2QRRgxcNc.tic8I2iO7PrGbZYlsfHJGjzBpc55KjEFgacRMJmRD1E%3D",
+      "domain": ".majiku.web.id",
+      "path": "/",
+      "expires": 1792348097.550718,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

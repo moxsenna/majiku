@@ -1,0 +1,609 @@
+<template>
+  <style>
+    @font-face {
+      font-family: 'Plus Jakarta Sans';
+      src: url('assets/fonts/plus-jakarta-sans-400.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Plus Jakarta Sans';
+      src: url('assets/fonts/plus-jakarta-sans-600.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Plus Jakarta Sans';
+      src: url('assets/fonts/plus-jakarta-sans-700.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    #root {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      contain: strict;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #32221B;
+      user-select: none;
+    }
+
+    /* Track 0: Full-bleed ground */
+    .f02-bg {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+      background-color: #FFFFFF;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .f02-bg-radial {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(80px);
+    }
+    .f02-glow-1 {
+      top: 180px;
+      left: 240px;
+      width: 600px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(240, 101, 66, 0.12) 0%, rgba(249, 195, 31, 0.08) 60%, transparent 80%);
+    }
+    .f02-glow-2 {
+      top: 700px;
+      right: -100px;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(252, 226, 146, 0.16) 0%, rgba(246, 161, 140, 0.08) 60%, transparent 80%);
+    }
+    .f02-glow-3 {
+      top: 1100px;
+      left: -80px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(246, 161, 140, 0.14) 0%, rgba(247, 176, 158, 0.08) 60%, transparent 80%);
+    }
+    .f02-grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Track 1: Content Stage */
+    .f02-stage {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      perspective: 1800px;
+    }
+
+    /* Floating wallpaper pills */
+    .f02-floating-pill {
+      position: absolute;
+      border: 2px solid #1E1E1E;
+      border-radius: 9999px;
+      padding: 10px 24px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Lockup Container */
+    .f02-lockup {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 140px;
+      z-index: 20;
+    }
+
+    /* Orbit 3D Stage */
+    .f02-orbit-stage {
+      position: relative;
+      width: 600px;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+    }
+    .f02-orbit-item {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-style: preserve-3d;
+      will-change: transform;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .f02-orbit-item-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+    .f02-orbit-item-pill {
+      border-radius: 9999px;
+      padding: 8px 18px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #32221B;
+      white-space: nowrap;
+    }
+
+    /* Orbit Center / Sparkle Mark */
+    .f02-orbit-center {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateZ(220px);
+      z-index: 9999;
+    }
+    .f02-mark-glow {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249, 195, 31, 0.45) 0%, rgba(240, 101, 66, 0.2) 60%, transparent 80%);
+      filter: blur(18px);
+      pointer-events: none;
+      opacity: 0;
+    }
+    .f02-hero-svg {
+      width: 140px;
+      height: 140px;
+      overflow: visible;
+    }
+    .f02-draw-path {
+      stroke: #1E1E1E;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .f02-sparkle-main {
+      fill: #F9C31F;
+      fill-opacity: 0;
+    }
+
+    /* Wordmark */
+    .f02-wordmark-wrap {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .f02-letter {
+      display: inline-block;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 90px;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      color: #32221B;
+      will-change: transform, opacity;
+    }
+
+    /* Subtitle Title-Pill */
+    .f02-subtitle-pill {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 30px;
+      border: 2px solid #1E1E1E;
+      border-radius: 9999px;
+      background-color: #F9C31F;
+      box-shadow: 5px 5px 0 rgba(26, 26, 26, 0.08);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 19px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #32221B;
+      will-change: transform, opacity;
+    }
+    .f02-sub-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #F06542;
+      border: 1.5px solid #1E1E1E;
+    }
+
+    /* Role Pills Stacked Column */
+    .f02-roles-column {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      margin-top: 68px;
+      z-index: 25;
+    }
+
+    .f02-role-card {
+      width: 880px;
+      height: 168px;
+      background-color: #FFFFFF;
+      border: 2px solid #1E1E1E;
+      border-radius: 32px;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      padding: 0 36px;
+      gap: 28px;
+      will-change: transform, opacity;
+    }
+    .f02-card-icon {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .f02-icon-coral { background-color: #F06542; }
+    .f02-icon-mint  { background-color: #FCE292; }
+    .f02-icon-sky   { background-color: #F6A18C; }
+
+    .f02-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .f02-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .f02-card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 34px;
+      color: #32221B;
+      letter-spacing: -0.02em;
+    }
+    .f02-badge {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      border: 2px solid #1E1E1E;
+      color: #32221B;
+    }
+    .f02-badge-coral { background-color: #F06542; }
+    .f02-badge-mint  { background-color: #FCE292; }
+    .f02-badge-sky   { background-color: #F6A18C; }
+
+    .f02-card-desc {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 400;
+      font-size: 20px;
+      color: #32221B;
+      opacity: 0.85;
+      line-height: 1.35;
+      margin: 0;
+    }
+  </style>
+
+  <div id="root" data-composition-id="02-intro" data-width="1080" data-height="1920" data-duration="6.5">
+    <!-- Track 0: Full-bleed ground & atmosphere -->
+    <div class="clip f02-bg" data-start="0" data-duration="6.5" data-track-index="0">
+      <div class="f02-bg-radial f02-glow-1"></div>
+      <div class="f02-bg-radial f02-glow-2"></div>
+      <div class="f02-bg-radial f02-glow-3"></div>
+      <div class="f02-grain"></div>
+    </div>
+
+    <!-- Track 1: Content Stage -->
+    <div class="clip f02-stage" data-start="0" data-duration="6.5" data-track-index="1">
+      <!-- Floating Wallpaper Pills -->
+      <div class="f02-floating-pill" style="left: 60px; top: 120px; background-color: #F7B09E; transform: rotate(-14deg);">DAYCARE</div>
+      <div class="f02-floating-pill" style="right: 70px; top: 135px; background-color: #F9C31F; transform: rotate(18deg);">ALL-IN-ONE</div>
+      <div class="f02-floating-pill" style="left: 45px; top: 620px; background-color: #FCE292; transform: rotate(-12deg);">SMART</div>
+      <div data-layout-allow-occlusion  class="f02-floating-pill" style="right: 45px; top: 640px; background-color: #F6A18C; transform: rotate(15deg);">MODERN</div>
+      <div class="f02-floating-pill" style="left: 75px; top: 1400px; background-color: #F6A794; transform: rotate(10deg);">GROWTH</div>
+      <div class="f02-floating-pill" style="right: 75px; top: 1420px; background-color: #F06542; transform: rotate(-15deg);">HARMONY</div>
+
+      <!-- Lockup: Sparkle + Orbit + Wordmark + Subtitle -->
+      <div class="f02-lockup">
+        <!-- Orbit 3D Stage -->
+        <div class="f02-orbit-stage">
+          <div class="f02-orbit-item f02-orbit-item-dot" data-angle="0" style="background-color: #F06542;"></div>
+          <div class="f02-orbit-item f02-orbit-item-pill" data-angle="72" style="background-color: #F7B09E;">OPS</div>
+          <div class="f02-orbit-item f02-orbit-item-dot" data-angle="144" style="background-color: #F9C31F;"></div>
+          <div class="f02-orbit-item f02-orbit-item-pill" data-angle="216" style="background-color: #FCE292;">CARE</div>
+          <div class="f02-orbit-item f02-orbit-item-dot" data-angle="288" style="background-color: #F6A18C;"></div>
+
+          <div class="f02-orbit-center">
+            <div class="f02-mark-glow"></div>
+            <svg class="f02-hero-svg" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path class="f02-draw-path f02-sparkle-main" d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+              <path class="f02-draw-path f02-sparkle-sub" d="M20 3v4" />
+              <path class="f02-draw-path f02-sparkle-sub" d="M22 5h-4" />
+              <path class="f02-draw-path f02-sparkle-sub" d="M4 17v2" />
+              <path class="f02-draw-path f02-sparkle-sub" d="M5 18H3" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Wordmark "MAJIKU" (letters cascaded) -->
+        <div class="f02-wordmark-wrap">
+          <span class="f02-letter">M</span><span class="f02-letter">A</span><span class="f02-letter">J</span><span class="f02-letter">I</span><span class="f02-letter">K</span><span class="f02-letter">U</span>
+        </div>
+
+        <!-- Subtitle Pill -->
+        <div class="f02-subtitle-pill">
+          <span class="f02-sub-dot"></span>
+          <span class="f02-sub-text">SATU PLATFORM OPERASIONAL</span>
+        </div>
+      </div>
+
+      <!-- Role Pills Stacked Column -->
+      <div class="f02-roles-column">
+        <!-- 1: Lembaga (coral) -->
+        <div class="f02-role-card f02-role-1">
+          <div class="f02-card-icon f02-icon-coral">
+            <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18"/>
+              <path d="M5 21V7l7-4 7 4v14"/>
+              <path d="M9 10h1"/>
+              <path d="M14 10h1"/>
+              <path d="M9 14h1"/>
+              <path d="M14 14h1"/>
+              <path d="M9 18h1"/>
+              <path d="M14 18h1"/>
+            </svg>
+          </div>
+          <div class="f02-card-content">
+            <div class="f02-card-header">
+              <span class="f02-card-title">Lembaga</span>
+              <span class="f02-badge f02-badge-coral">ADMIN & KEUANGAN</span>
+            </div>
+            <p class="f02-card-desc">Operasional terpusat, tagihan & SPP otomatis</p>
+          </div>
+        </div>
+
+        <!-- 2: Guru (mint) -->
+        <div class="f02-role-card f02-role-2">
+          <div class="f02-card-icon f02-icon-mint">
+            <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10"/>
+              <path d="M6 10h10"/>
+              <path d="M6 14h6"/>
+            </svg>
+          </div>
+          <div class="f02-card-content">
+            <div class="f02-card-header">
+              <span class="f02-card-title">Guru</span>
+              <span class="f02-badge f02-badge-mint">PENGAJAR & KELAS</span>
+            </div>
+            <p class="f02-card-desc">Absensi digital, agenda harian & log makan-tidur</p>
+          </div>
+        </div>
+
+        <!-- 3: Orang Tua (sky) -->
+        <div class="f02-role-card f02-role-3">
+          <div class="f02-card-icon f02-icon-sky">
+            <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="f02-card-content">
+            <div class="f02-card-header">
+              <span class="f02-card-title">Orang Tua</span>
+              <span class="f02-badge f02-badge-sky">MONITORING ANAK</span>
+            </div>
+            <p class="f02-card-desc">Update berkala, galeri foto & live log aktivitas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines = window.__timelines || {};
+      window.__timelines["02-intro"] = tl;
+
+      // 1. Measure SVG paths for svg-path-draw
+      const drawPaths = document.querySelectorAll(".f02-draw-path");
+      drawPaths.forEach((p) => {
+        let len = 60;
+        try {
+          len = p.getTotalLength() || 60;
+        } catch (e) {
+          len = 60;
+        }
+        p.style.strokeDasharray = `${len}`;
+        p.style.strokeDashoffset = `${len}`;
+      });
+
+      // Atmospheric radial glows breathe up slightly
+      tl.fromTo(
+        [".f02-glow-1", ".f02-glow-2", ".f02-glow-3"],
+        { opacity: 0.4 },
+        { opacity: 1, duration: 1.8, ease: "power1.out" },
+        0
+      );
+
+      // Floating background pills enter softly
+      tl.fromTo(
+        ".f02-floating-pill",
+        { opacity: 0, scale: 0.6 },
+        { opacity: 0.85, scale: 1, duration: 0.8, stagger: 0.08, ease: "back.out(1.4)" },
+        0.1
+      );
+
+      // Hero Center Pop (t=0.1)
+      tl.fromTo(
+        ".f02-orbit-center",
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)" },
+        0.1
+      );
+
+      // Main Sparkle stroke draw (t=0.15)
+      tl.to(
+        ".f02-sparkle-main",
+        { strokeDashoffset: 0, duration: 0.85, ease: "power2.out" },
+        0.15
+      );
+
+      // Sub Sparkles stroke draw (t=0.6)
+      tl.to(
+        ".f02-sparkle-sub",
+        { strokeDashoffset: 0, duration: 0.4, stagger: 0.06, ease: "power2.out" },
+        0.6
+      );
+
+      // Sparkle fill fade-in & glow ignite (t=0.8)
+      tl.to(
+        ".f02-sparkle-main",
+        { fillOpacity: 1, duration: 0.4, ease: "power1.out" },
+        0.8
+      );
+      tl.to(
+        ".f02-mark-glow",
+        { opacity: 0.85, scale: 1.25, duration: 0.7, ease: "power2.out" },
+        0.8
+      );
+
+      // Orbit 3D Entry & continuous orbit
+      const orbitItems = document.querySelectorAll(".f02-orbit-item");
+      const RADIUS_X = 220;
+      const RADIUS_Y = 95;
+      const ORBIT_DURATION = 10;
+      const ENTRY_DUR = 0.6;
+      const STAGGER = 0.08;
+
+      orbitItems.forEach((el, i) => {
+        const a0 = (Number(el.dataset.angle) / 360) * Math.PI * 2;
+        const startX = Math.cos(a0) * RADIUS_X;
+        const startY = Math.sin(a0) * RADIUS_Y;
+
+        // 1) Park at orbital position, hidden
+        gsap.set(el, {
+          xPercent: -50,
+          yPercent: -50,
+          x: startX,
+          y: startY,
+          rotateX: 75,
+          rotateY: 60,
+          z: -260,
+          opacity: 0,
+          scale: 0.4
+        });
+
+        // 2) Flip in IN PLACE
+        tl.to(
+          el,
+          {
+            rotateX: 0,
+            rotateY: 0,
+            z: 0,
+            opacity: 1,
+            scale: 1,
+            duration: ENTRY_DUR,
+            ease: "back.out(1.5)"
+          },
+          0.25 + i * STAGGER
+        );
+
+        // 3) Continuous orbit progress
+        const orbit = { p: 0 };
+        tl.to(
+          orbit,
+          {
+            p: 1,
+            duration: ORBIT_DURATION,
+            ease: "none",
+            onUpdate: () => {
+              const a = a0 + orbit.p * Math.PI * 2;
+              const x = Math.cos(a) * RADIUS_X;
+              const y = Math.sin(a) * RADIUS_Y;
+              el.style.zIndex = String(1 + Math.round(((y + RADIUS_Y) / (2 * RADIUS_Y)) * 49));
+              gsap.set(el, { x, y });
+            }
+          },
+          0.25 + i * STAGGER + ENTRY_DUR
+        );
+      });
+
+      // Wordmark "MAJIKU" cascade (t=1.0 - 1.5)
+      tl.fromTo(
+        ".f02-letter",
+        { opacity: 0, y: 35, scale: 0.5, rotate: -6 },
+        { opacity: 1, y: 0, scale: 1, rotate: 0, duration: 0.45, stagger: 0.08, ease: "back.out(1.8)" },
+        1.0
+      );
+
+      // Subtitle Pill pop (t=2.3)
+      tl.fromTo(
+        ".f02-subtitle-pill",
+        { opacity: 0, scale: 0.5, y: 22 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.6)" },
+        2.3
+      );
+
+      // Scene 2: Tiga Pill Peran column pop (t=3.4, 4.0, 4.5)
+      tl.fromTo(
+        ".f02-role-1",
+        { opacity: 0, y: 55, scale: 0.88 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.5)" },
+        3.4
+      );
+
+      tl.fromTo(
+        ".f02-role-2",
+        { opacity: 0, y: 55, scale: 0.88 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.5)" },
+        4.0
+      );
+
+      tl.fromTo(
+        ".f02-role-3",
+        { opacity: 0, y: 55, scale: 0.88 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.5)" },
+        4.5
+      );
+
+      tl.seek(0);
+    })();
+  </script>
+</template>

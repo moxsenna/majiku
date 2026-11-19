@@ -8,6 +8,7 @@ import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { requireRoles, resolveTenantIdForUser, assertDemoMutationLock } from "@/server/authz";
 import { todayInWib, timeInWib } from "@/lib/datetime";
+import { notifyUsers } from "@/server/notify";
 
 export interface AttendanceRow {
   id: string;
@@ -295,7 +296,7 @@ export async function recordStudentCheckIn(input: {
 
   // Guard tenant: siswa wajib milik lembaga pemanggil
   const [student] = await db
-    .select({ id: students.id, tenantId: students.tenantId })
+    .select({ id: students.id, tenantId: students.tenantId, parentUserId: students.parentUserId, name: students.name })
     .from(students)
     .where(eq(students.id, input.studentId))
     .limit(1);
@@ -327,6 +328,17 @@ export async function recordStudentCheckIn(input: {
         updatedAt: now,
       })
       .where(eq(attendance.id, input.attendanceId));
+
+    if (student.parentUserId) {
+      await notifyUsers({
+        userIds: [student.parentUserId],
+        type: "attendance",
+        title: `${student.name} tiba`,
+        body: `Check-in pukul ${timeStr} oleh ${session.user.name || "admin"}.`,
+        link: "/parent",
+        tenantId,
+      });
+    }
     return { success: true, time: timeStr };
   }
 
@@ -367,6 +379,17 @@ export async function recordStudentCheckIn(input: {
     checkedInBy: session.user.name || "Admin",
   });
 
+  if (student.parentUserId) {
+    await notifyUsers({
+      userIds: [student.parentUserId],
+      type: "attendance",
+      title: `${student.name} tiba`,
+      body: `Check-in pukul ${timeStr} oleh ${session.user.name || "admin"}.`,
+      link: "/parent",
+      tenantId,
+    });
+  }
+
   return { success: true, id, time: timeStr };
 }
 
@@ -377,7 +400,13 @@ export async function recordStudentCheckOut(input: { attendanceId: string }) {
   assertDemoMutationLock(session, tenantId);
 
   const [record] = await db
-    .select({ id: attendance.id, tenantId: students.tenantId })
+    .select({
+      id: attendance.id,
+      tenantId: students.tenantId,
+      parentUserId: students.parentUserId,
+      studentName: students.name,
+      checkInTime: attendance.checkInTime,
+    })
     .from(attendance)
     .innerJoin(students, eq(students.id, attendance.studentId))
     .where(eq(attendance.id, input.attendanceId))
@@ -396,6 +425,18 @@ export async function recordStudentCheckOut(input: { attendanceId: string }) {
       updatedAt: now,
     })
     .where(eq(attendance.id, input.attendanceId));
+
+  if (record.parentUserId) {
+    const mulai = record.checkInTime ? String(record.checkInTime).slice(0, 5) : null;
+    await notifyUsers({
+      userIds: [record.parentUserId],
+      type: "attendance",
+      title: `${record.studentName} sudah dijemput`,
+      body: `Check-out pukul ${timeStr}${mulai ? ` (tiba ${mulai})` : ""}.`,
+      link: "/parent",
+      tenantId,
+    });
+  }
 
   return { success: true, time: timeStr };
 }

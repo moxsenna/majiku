@@ -1,0 +1,230 @@
+<template id="captions-template" data-composition-id="captions" data-width="1080" data-height="1920">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+
+
+<style data-brand-tokens>
+      @font-face { font-family: 'Plus Jakarta Sans'; src: url('assets/fonts/plus-jakarta-sans-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+      @font-face { font-family: 'Plus Jakarta Sans'; src: url('assets/fonts/plus-jakarta-sans-600.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: block; }
+      @font-face { font-family: 'Plus Jakarta Sans'; src: url('assets/fonts/plus-jakarta-sans-700-italic.woff2') format('woff2'); font-weight: 700; font-style: italic; font-display: block; }
+      @font-face { font-family: 'Plus Jakarta Sans'; src: url('assets/fonts/plus-jakarta-sans-700.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: block; }
+      :root {
+      --cream: #FFFFFF;
+      --ink: #32221B;
+      --outline: #1E1E1E;
+      --white: #FFFFFF;
+      --coral: #F06542;
+      --lime: #F9C72E;
+      --lavender: #F7B09E;
+      --sky: #F6A18C;
+      --violet: #F37F62;
+      --yellow: #F9C31F;
+      --peach: #F6A794;
+      --mint: #FCE292;
+      --shadow: rgba(26,26,26,0.08);
+      --cap-ink: #32221B;
+      --cap-canvas: #FFFFFF;
+      --cap-accent: #F9C31F;
+      --cap-accent-2: #F9C72E;
+      --font-display: "Plus Jakarta Sans", system-ui, serif;
+      --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+      --cap-band-top: 1600px;
+      --cap-band-height: 320px;
+      }
+    </style>
+
+<style>
+  #captions-root {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .caption-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+  }
+  /* the keep-out band, from captionBand(H) — frame content stays above it */
+  .caption-stage {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--cap-band-top, 900px);
+    height: var(--cap-band-height, 180px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .caption-group {
+    /* every group is absolutely stacked over the SAME band — exactly one shown at a
+       time via opacity. Must be absolute: in-flow groups would lay out side-by-side. */
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+  }
+
+  /* THE caption capsule — cream pill, fully-rounded (9999px), capsule's universal 2px
+     ink outline, lifted on a soft hard-offset shadow (no blur, 8% ink) */
+  .caption-pill {
+    max-width: 80%;
+    padding: 18px 46px 20px;
+    background: var(--cap-canvas, #f5f5f0);
+    border: 2px solid var(--cap-ink, #1a1a1a);
+    border-radius: 9999px;
+    box-shadow: 8px 8px 0 color-mix(in srgb, var(--cap-ink, #1a1a1a) 8%, transparent);
+  }
+  .caption-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.12em 0.36em;
+    font-family: "Plus Jakarta Sans", Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(38px, 4.2vw, 56px);
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+  }
+
+  /* upcoming — faint ink, no highlight */
+  .caption-word {
+    display: inline-block;
+    padding: 0 0.1em;
+    border-radius: 9999px;
+    color: color-mix(in srgb, var(--cap-ink, #1a1a1a) 42%, var(--cap-canvas, #f5f5f0));
+  }
+  /* current word — THE rounded candy highlight: a candy fill + a box-shadow spread
+     halo that follows the pill radius (a soft candy capsule around the word, no blur,
+     no layout shift), ink reading on top */
+  .caption-word.is-active {
+    color: var(--cap-ink, #1a1a1a);
+    background: var(--cap-accent, #e85d4e);
+    box-shadow: 0 0 0 0.14em var(--cap-accent, #e85d4e);
+  }
+  /* already spoken — solid ink, candy highlight cleared */
+  .caption-word.is-spoken {
+    color: var(--cap-ink, #1a1a1a);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* optional per-word accents (dormant until a word-classer tags them) */
+  /* brand / key term — Bodoni Moda italic, capsule's display inflection */
+  .caption-word.cap-brand {
+    font-style: italic;
+  }
+  /* numerals / data — the Space Grotesk voice, slightly recessed */
+  .caption-word.cap-num {
+    font-family: "Plus Jakarta Sans", ui-sans-serif, sans-serif;
+    color: color-mix(in srgb, var(--cap-ink, #1a1a1a) 72%, var(--cap-canvas, #f5f5f0));
+  }
+  /* emphasis — a second-candy rounded underline (the counter-accent) */
+  .caption-word.cap-cta {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-decoration-color: var(--cap-accent-2, #f2d160);
+    text-underline-offset: 0.12em;
+  }
+
+  @media (max-aspect-ratio: 9/16) {
+    .caption-pill {
+      max-width: 92%;
+    }
+    .caption-line {
+      font-size: clamp(34px, 5.4vw, 48px);
+    }
+  }
+</style>
+
+<div
+  id="captions-root"
+  data-composition-id="captions"
+  data-timeline-locked
+  data-start="0"
+  data-duration="9"
+  data-fps="30"
+  data-width="1080"
+  data-height="1920"
+>
+  <div class="caption-layer" aria-hidden="true">
+    <div id="caption-stage" class="caption-stage"></div>
+  </div>
+</div>
+
+<script>
+  // captions.mjs injects the engine's scene-aware groups + real duration here.
+  var GROUPS = [{"id":"caption-group-0","frame":1,"start":0.01,"end":1.6,"text":"Coba MAJIKU gratis","words":[{"id":"caption-word-0-0","text":"Coba","start":0.01,"end":0.4},{"id":"caption-word-0-1","text":"MAJIKU","start":0.4,"end":1},{"id":"caption-word-0-2","text":"gratis","start":1,"end":1.6}]},{"id":"caption-group-1","frame":1,"start":1.6,"end":2.87,"text":"14 hari,","words":[{"id":"caption-word-1-0","text":"14","start":1.6,"end":2.2},{"id":"caption-word-1-1","text":"hari,","start":2.2,"end":2.79}]},{"id":"caption-group-2","frame":1,"start":2.87,"end":4.22,"text":"tanpa kartu kredit,","words":[{"id":"caption-word-2-0","text":"tanpa","start":2.87,"end":3.16},{"id":"caption-word-2-1","text":"kartu","start":3.16,"end":3.53},{"id":"caption-word-2-2","text":"kredit,","start":3.53,"end":4.19}]},{"id":"caption-group-3","frame":1,"start":4.22,"end":4.56,"text":"setup","words":[{"id":"caption-word-3-0","text":"setup","start":4.22,"end":4.44}]},{"id":"caption-group-4","frame":1,"start":4.87,"end":6.12,"text":"hanya 5 menit.","words":[{"id":"caption-word-4-0","text":"hanya","start":4.87,"end":5.18},{"id":"caption-word-4-1","text":"5","start":5.18,"end":5.48},{"id":"caption-word-4-2","text":"menit.","start":5.48,"end":6}]}];
+  var DURATION = 9;
+
+  (function () {
+    var stage = document.getElementById("caption-stage");
+
+    // build DOM: one .caption-group per group, .caption-word per word
+    GROUPS.forEach(function (group, g) {
+      var groupEl = document.createElement("div");
+      groupEl.className = "caption-group";
+      groupEl.id = "caption-group-" + g;
+      var pill = document.createElement("div");
+      pill.className = "caption-pill";
+      var line = document.createElement("div");
+      line.className = "caption-line";
+      (group.words || []).forEach(function (w, i) {
+        var span = document.createElement("span");
+        span.className = "caption-word";
+        span.id = "caption-word-" + g + "-" + i;
+        span.textContent = String(w.text);
+        line.appendChild(span);
+      });
+      pill.appendChild(line);
+      groupEl.appendChild(pill);
+      stage.appendChild(groupEl);
+    });
+
+    window.__timelines = window.__timelines || {};
+    var tl = gsap.timeline({ paused: true });
+
+    GROUPS.forEach(function (group, g) {
+      var groupEl = document.getElementById("caption-group-" + g);
+      var words = group.words || [];
+      var next = GROUPS[g + 1];
+      var isLast = g === GROUPS.length - 1;
+      var start = Math.max(0, Number(group.start));
+      var end = isLast ? DURATION : Math.min(Number(next.start), Number(group.end) + 0.3);
+      if (end <= start) end = start + 0.01;
+
+      // group on/off — exactly one group visible at a time
+      tl.set(groupEl, { opacity: 1 }, start);
+      tl.set(groupEl, { opacity: 0 }, end);
+
+      // 3-state karaoke via className SETS — seek-safe (gsap.set applies on the
+      // engine's frame-by-frame seek; .call callbacks would NOT fire).
+      words.forEach(function (w, i) {
+        var el = document.getElementById("caption-word-" + g + "-" + i);
+        var at = Math.max(start, Number(w.start));
+        tl.set(el, { className: "caption-word" }, start); // upcoming (also resets on reverse-seek)
+        tl.set(el, { className: "caption-word is-active" }, at); // current
+        tl.fromTo(el, { scale: 0.92 }, { scale: 1, duration: 0.18, ease: "back.out(2)" }, at);
+        if (i + 1 < words.length) {
+          var nextAt = Math.max(start, Number(words[i + 1].start));
+          tl.set(el, { className: "caption-word is-spoken" }, nextAt); // demote when next activates
+        }
+      });
+      if (words.length) {
+        var lastEl = document.getElementById("caption-word-" + g + "-" + (words.length - 1));
+        var lastSpoken = Math.min(end, Number(words[words.length - 1].end) + 0.1);
+        tl.set(lastEl, { className: "caption-word is-spoken" }, lastSpoken);
+      }
+    });
+
+    // full-span anchor so the sub-comp timeline spans the whole video
+    tl.to({}, { duration: DURATION }, 0);
+    window.__timelines["captions"] = tl;
+  })();
+</script>
+
+<style>
+  .caption-line { line-height: 1.1 !important; }
+</style>
+</template>

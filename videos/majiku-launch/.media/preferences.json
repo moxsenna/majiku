@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "preferences": {
+    "language": {
+      "value": "id",
+      "confirmed_in": [
+        "majiku-launch"
+      ],
+      "updated_at": "2026-10-11T05:53:57.253Z"
+    },
+    "style_preset.product-launch-video": {
+      "value": "capsule",
+      "confirmed_in": [
+        "majiku-launch"
+      ],
+      "updated_at": "2026-10-11T05:57:50.723Z"
+    }
+  },
+  "sightings": {}
+}

@@ -1,0 +1,718 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed ground with cream base + radial glows + grain */
+    [id="09-cta-bg"],
+    .\30 9-cta-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 14% 18%, rgba(247, 176, 158, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 86% 22%, rgba(252, 226, 146, 0.15) 0%, transparent 42%),
+        radial-gradient(circle at 50% 50%, rgba(249, 195, 31, 0.12) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Floating pill wallpaper (flat, candy wallpaper confetti at margins) */
+    [id="09-cta-wallpaper"],
+    .\30 9-cta-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="09-cta-pill-wrap"],
+    .\30 9-cta-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="09-cta-floating-pill"],
+    .\30 9-cta-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 26px;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    /* Wallpaper pills positions */
+    [id="09-cta-w-wrap-1"] { left: 160px; top: 120px; }
+    [id="09-cta-wp-1"] { background-color: #F7B09E; transform: rotate(-12deg); }
+
+    [id="09-cta-w-wrap-2"] { right: 160px; top: 130px; }
+    [id="09-cta-wp-2"] { background-color: #F9C31F; transform: rotate(14deg); }
+
+    [id="09-cta-w-wrap-3"] { left: 180px; top: 760px; }
+    [id="09-cta-wp-3"] { background-color: #FCE292; transform: rotate(10deg); }
+
+    [id="09-cta-w-wrap-4"] { right: 180px; top: 750px; }
+    [id="09-cta-wp-4"] { background-color: #F6A794; transform: rotate(-10deg); }
+
+    [id="09-cta-w-wrap-5"] { left: 1240px; top: 100px; }
+    [id="09-cta-wp-5"] { background-color: #F6A18C; transform: rotate(-8deg); }
+
+    /* Track 2: Main interactive stage */
+    [id="09-cta-stage"],
+    .\30 9-cta-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Morph stage anchor at shared center (960, 450) */
+    [id="09-cta-morph-stage"],
+    .\30 9-cta-morph-stage {
+      position: absolute;
+      left: 960px;
+      top: 450px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    /* Outgoing mark: sparkle at center */
+    [id="09-cta-mark"],
+    .\30 9-cta-mark {
+      position: absolute;
+      left: -60px;
+      top: -60px;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: 50% 50%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    [id="09-cta-mark-img"],
+    .\30 9-cta-mark-img {
+      width: 108px;
+      height: 108px;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* Hero CTA Coral Button */
+    [id="09-cta-btn"],
+    .\30 9-cta-btn {
+      position: absolute;
+      left: -270px;
+      top: -46px;
+      width: 540px;
+      height: 92px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 3.8px solid #1E1E1E;
+      background-color: #F06542;
+      color: #FFFFFF;
+      box-shadow: 7.7px 7.7px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 0 44px;
+      transform-origin: 50% 50%;
+      z-index: 20;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    [class~="09-cta-btn-sparkle"],
+    .\30 9-cta-btn-sparkle {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+    }
+
+    [class~="09-cta-btn-text"],
+    .\30 9-cta-btn-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #FFFFFF;
+      line-height: 1;
+    }
+
+    [class~="09-cta-btn-arrow"],
+    .\30 9-cta-btn-arrow {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      border: 2.5px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 4px;
+    }
+
+    /* Supporting Pill 1: Tanpa kartu kredit (mint) */
+    [id="09-cta-support-wrap-1"],
+    .\30 9-cta-support-wrap-1 {
+      position: absolute;
+      left: 470px;
+      top: 450px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    [id="09-cta-support-pill-1"],
+    .\30 9-cta-support-pill-1 {
+      position: absolute;
+      left: -140px;
+      top: -28px;
+      width: 280px;
+      height: 56px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      background-color: #FCE292;
+      color: #32221B;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 20px;
+      transform-origin: 50% 50%;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    /* Supporting Pill 2: Setup 5 menit (sky) */
+    [id="09-cta-support-wrap-2"],
+    .\30 9-cta-support-wrap-2 {
+      position: absolute;
+      left: 1450px;
+      top: 450px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    [id="09-cta-support-pill-2"],
+    .\30 9-cta-support-pill-2 {
+      position: absolute;
+      left: -125px;
+      top: -28px;
+      width: 250px;
+      height: 56px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      background-color: #F6A18C;
+      color: #32221B;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 20px;
+      transform-origin: 50% 50%;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    [class~="09-cta-support-icon"],
+    .\30 9-cta-support-icon {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [class~="09-cta-support-text"],
+    .\30 9-cta-support-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #32221B;
+    }
+
+    /* URL Pill: majiku.moxsenna.workers.dev */
+    [id="09-cta-url-wrap"],
+    .\30 9-cta-url-wrap {
+      position: absolute;
+      left: 960px;
+      top: 590px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    [id="09-cta-url-pill"],
+    .\30 9-cta-url-pill {
+      position: absolute;
+      left: -190px;
+      top: -24px;
+      width: 380px;
+      height: 48px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 2.8px solid #1E1E1E;
+      background-color: #FFFFFF;
+      color: #32221B;
+      box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 24px;
+      transform-origin: 50% 50%;
+      z-index: 16;
+      white-space: nowrap;
+    }
+
+    [class~="09-cta-url-icon"],
+    .\30 9-cta-url-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #F06542;
+    }
+
+    [class~="09-cta-url-text"],
+    .\30 9-cta-url-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: #32221B;
+    }
+
+    /* Animated Cursor */
+    [id="09-cta-cursor"],
+    .\30 9-cta-cursor {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 48px;
+      height: 48px;
+      transform-origin: 0 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* Click Ripples */
+    [class~="09-cta-ripple"],
+    .\30 9-cta-ripple {
+      position: absolute;
+      left: 990px;
+      top: 460px;
+      width: 80px;
+      height: 80px;
+      margin-left: -40px;
+      margin-top: -40px;
+      border-radius: 50%;
+      border: 3.5px solid #F06542;
+      transform-origin: 50% 50%;
+      pointer-events: none;
+      z-index: 18;
+      opacity: 0;
+    }
+
+    [id="09-cta-ripple-2"],
+    .\30 9-cta-ripple-2 {
+      border-color: #F9C31F;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="09-cta"
+    data-start="0"
+    data-duration="6.54"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="09-cta-bg"
+      class="clip 09-cta-bg"
+      data-start="0"
+      data-duration="6.54"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Floating pill wallpaper -->
+    <div
+      id="09-cta-wallpaper"
+      class="clip 09-cta-wallpaper"
+      data-start="0"
+      data-duration="6.54"
+      data-track-index="1"
+    >
+      <div id="09-cta-w-wrap-1" class="09-cta-pill-wrap">
+        <div id="09-cta-wp-1" class="09-cta-floating-pill">SEKARANG</div>
+      </div>
+      <div id="09-cta-w-wrap-2" class="09-cta-pill-wrap">
+        <div id="09-cta-wp-2" class="09-cta-floating-pill">GRATIS</div>
+      </div>
+      <div id="09-cta-w-wrap-3" class="09-cta-pill-wrap">
+        <div id="09-cta-wp-3" class="09-cta-floating-pill">PRAKTIS</div>
+      </div>
+      <div id="09-cta-w-wrap-4" class="09-cta-pill-wrap">
+        <div id="09-cta-wp-4" class="09-cta-floating-pill">CEPAT</div>
+      </div>
+      <div id="09-cta-w-wrap-5" class="09-cta-pill-wrap">
+        <div id="09-cta-wp-5" class="09-cta-floating-pill">MUDAH</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Interactive Stage -->
+    <div
+      id="09-cta-stage"
+      class="clip 09-cta-stage"
+      data-start="0"
+      data-duration="6.54"
+      data-track-index="2"
+    >
+      <!-- Morph Stage: Mark -> CTA Coral Button -->
+      <div id="09-cta-morph-stage" class="09-cta-morph-stage">
+        <!-- Outgoing Mark Sparkle -->
+        <div id="09-cta-mark" class="09-cta-mark">
+          <img
+            id="09-cta-mark-img"
+            class="09-cta-mark-img"
+            src="assets/logo-65fc9c68.svg"
+            alt="MAJIKU Sparkle Mark"
+            width="108"
+            height="108"
+          />
+        </div>
+
+        <!-- Incoming Hero CTA Button -->
+        <div id="09-cta-btn" class="09-cta-btn">
+          <svg
+            class="09-cta-btn-sparkle"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FFFFFF"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+            ></path>
+          </svg>
+          <span class="09-cta-btn-text">Mulai Gratis 14 Hari</span>
+          <div class="09-cta-btn-arrow">
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="#1E1E1E"
+              stroke-width="2.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supporting Pill 1: Tanpa kartu kredit (mint) -->
+      <div id="09-cta-support-wrap-1" class="09-cta-support-wrap-1">
+        <div id="09-cta-support-pill-1" class="09-cta-support-pill-1">
+          <span class="09-cta-support-icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="#1E1E1E"
+              stroke-width="3.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+          <span class="09-cta-support-text">Tanpa kartu kredit</span>
+        </div>
+      </div>
+
+      <!-- Supporting Pill 2: Setup 5 menit (sky) -->
+      <div id="09-cta-support-wrap-2" class="09-cta-support-wrap-2">
+        <div id="09-cta-support-pill-2" class="09-cta-support-pill-2">
+          <span class="09-cta-support-icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="#1E1E1E"
+              stroke-width="2.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          <span class="09-cta-support-text">Setup 5 menit</span>
+        </div>
+      </div>
+
+      <!-- URL Pill: majiku.moxsenna.workers.dev -->
+      <div id="09-cta-url-wrap" class="09-cta-url-wrap">
+        <div id="09-cta-url-pill" class="09-cta-url-pill">
+          <span class="09-cta-url-icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="#F06542"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path
+                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+              ></path>
+            </svg>
+          </span>
+          <span class="09-cta-url-text">majiku.moxsenna.workers.dev</span>
+        </div>
+      </div>
+
+      <!-- Click Ripples -->
+      <div id="09-cta-ripple-1" class="09-cta-ripple"></div>
+      <div id="09-cta-ripple-2" class="09-cta-ripple 09-cta-ripple-2"></div>
+
+      <!-- Cursor -->
+      <div id="09-cta-cursor" class="09-cta-cursor">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M3 3L10.07 20.97L13.58 13.58L20.97 10.07L3 3Z"
+            fill="#1E1E1E"
+            stroke="#FFFFFF"
+            stroke-width="1.8"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Cache DOM references
+      const mark = document.getElementById("09-cta-mark");
+      const btn = document.getElementById("09-cta-btn");
+      const cursor = document.getElementById("09-cta-cursor");
+      const ripple1 = document.getElementById("09-cta-ripple-1");
+      const ripple2 = document.getElementById("09-cta-ripple-2");
+      const supportPill1 = document.getElementById("09-cta-support-pill-1");
+      const supportPill2 = document.getElementById("09-cta-support-pill-2");
+      const urlPill = document.getElementById("09-cta-url-pill");
+
+      // Set initial states for deterministic frame-by-frame seeking
+      gsap.set(mark, { scale: 1, opacity: 1, rotation: 0 });
+      gsap.set(btn, { scale: 0.65, opacity: 0 });
+      gsap.set(cursor, { x: 1720, y: 780, opacity: 0 });
+      gsap.set(ripple1, { scale: 0, opacity: 0 });
+      gsap.set(ripple2, { scale: 0, opacity: 0 });
+      gsap.set(supportPill1, { scale: 0, opacity: 0, rotation: -16, y: 28 });
+      gsap.set(supportPill2, { scale: 0, opacity: 0, rotation: 16, y: 28 });
+      gsap.set(urlPill, { opacity: 0, y: 24 });
+
+      // Subtle float on wallpaper pills
+      const wallpaperPills = [
+        document.getElementById("09-cta-wp-1"),
+        document.getElementById("09-cta-wp-2"),
+        document.getElementById("09-cta-wp-3"),
+        document.getElementById("09-cta-wp-4"),
+        document.getElementById("09-cta-wp-5"),
+      ];
+      wallpaperPills.forEach((p, idx) => {
+        if (!p) return;
+        const drift = idx % 2 === 0 ? 8 : -8;
+        tl.to(p, { y: drift, duration: 3.0, ease: "sine.inOut" }, 0.0);
+        tl.to(p, { y: 0, duration: 3.04, ease: "sine.inOut" }, 3.0);
+      });
+
+      // =========================================================================
+      // SCENE 1 (0.0–2.7s): Mark sparkle at center -> scale-swap to CTA button
+      //                     Cursor arrives from right @ 2.0s and clicks @ 2.4s
+      // =========================================================================
+
+      // 0.0–0.4s: Mark sparkle resting breath
+      tl.to(mark, { rotation: 3, duration: 0.40, ease: "power1.inOut" }, 0.0);
+
+      // 0.4–1.0s: Scale-swap transition (mark shrinks out, coral CTA expands in)
+      tl.to(
+        mark,
+        { scale: 0.65, opacity: 0, duration: 0.35, ease: "power2.in" },
+        0.40
+      );
+      tl.fromTo(
+        btn,
+        { scale: 0.65, opacity: 0 },
+        { scale: 1.0, opacity: 1, duration: 0.55, ease: "back.out(1.6)" },
+        0.45
+      );
+
+      // 2.0s: Cursor decel-arrive from outer right, landing slightly off-center on CTA
+      tl.to(cursor, { opacity: 1, duration: 0.12, ease: "power1.out" }, 2.00);
+      tl.to(cursor, { x: 990, y: 460, duration: 0.40, ease: "power2.out" }, 2.00);
+
+      // 2.4s: Click & press-ripple
+      // Lockstep press depression
+      tl.to(
+        [btn, cursor],
+        { scale: 0.94, duration: 0.08, ease: "power1.in" },
+        2.40
+      );
+      tl.to(
+        btn,
+        { boxShadow: "2px 2px 0 rgba(26, 26, 26, 0.08)", duration: 0.08, ease: "power1.in" },
+        2.40
+      );
+
+      // Spring release with overshoot
+      tl.to(
+        [btn, cursor],
+        { scale: 1.0, duration: 0.32, ease: "back.out(1.8)" },
+        2.48
+      );
+      tl.to(
+        btn,
+        { boxShadow: "7.7px 7.7px 0 rgba(26, 26, 26, 0.08)", duration: 0.32, ease: "power2.out" },
+        2.48
+      );
+
+      // Expanding ripples from click point
+      tl.set(ripple1, { opacity: 0.8 }, 2.40);
+      tl.to(
+        ripple1,
+        { scale: 4.5, opacity: 0, duration: 0.65, ease: "power2.out", immediateRender: false },
+        2.40
+      );
+
+      tl.set(ripple2, { opacity: 0.6 }, 2.48);
+      tl.to(
+        ripple2,
+        { scale: 5.5, opacity: 0, duration: 0.70, ease: "power2.out", immediateRender: false },
+        2.48
+      );
+
+      // Subtle post-click cursor drift
+      tl.to(cursor, { x: 1015, y: 475, duration: 0.50, ease: "power2.out" }, 2.80);
+
+      // =========================================================================
+      // SCENE 2 (2.9–4.2s): Supporting pill "Tanpa kartu kredit" (mint) pop @ 2.9s
+      // =========================================================================
+      tl.fromTo(
+        supportPill1,
+        { scale: 0, opacity: 0, rotation: -16, y: 28 },
+        { scale: 1, opacity: 1, rotation: -4, y: 0, duration: 0.55, ease: "back.out(1.5)" },
+        2.90
+      );
+
+      // =========================================================================
+      // SCENE 3 (4.2–6.04s): Supporting pill "Setup 5 menit" (sky) pop @ 4.2s
+      //                      URL pill "majiku.moxsenna.workers.dev" fade-up @ 5.2s
+      //                      HOLD to 6.04s
+      // =========================================================================
+      tl.fromTo(
+        supportPill2,
+        { scale: 0, opacity: 0, rotation: 16, y: 28 },
+        { scale: 1, opacity: 1, rotation: 4, y: 0, duration: 0.55, ease: "back.out(1.5)" },
+        4.20
+      );
+
+      tl.fromTo(
+        urlPill,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.50, ease: "power2.out" },
+        5.20
+      );
+
+      // Register timeline
+      window.__timelines["09-cta"] = tl;
+    })();
+  </script>
+</template>

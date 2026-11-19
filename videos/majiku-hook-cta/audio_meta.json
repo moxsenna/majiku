@@ -1,0 +1,113 @@
+{
+  "bgm": {
+    "path": "assets/bgm/track.wav",
+    "volume": 0.14,
+    "query": null,
+    "duration_s": null
+  },
+  "bgm_pending": false,
+  "voices": [
+    {
+      "frame": 1,
+      "path": "assets/voice/01.wav",
+      "duration_s": 6.04,
+      "words": [
+        {
+          "id": "w0",
+          "text": "Coba",
+          "start": 0.01,
+          "end": 0.4
+        },
+        {
+          "id": "w1",
+          "text": "MAJIKU",
+          "start": 0.4,
+          "end": 1
+        },
+        {
+          "id": "w2",
+          "text": "gratis",
+          "start": 1,
+          "end": 1.6
+        },
+        {
+          "id": "w3",
+          "text": "14",
+          "start": 1.6,
+          "end": 2.2
+        },
+        {
+          "id": "w4",
+          "text": "hari,",
+          "start": 2.2,
+          "end": 2.79
+        },
+        {
+          "id": "w5",
+          "text": "tanpa",
+          "start": 2.87,
+          "end": 3.16
+        },
+        {
+          "id": "w6",
+          "text": "kartu",
+          "start": 3.16,
+          "end": 3.53
+        },
+        {
+          "id": "w7",
+          "text": "kredit,",
+          "start": 3.53,
+          "end": 4.19
+        },
+        {
+          "id": "w8",
+          "text": "setup",
+          "start": 4.22,
+          "end": 4.44
+        },
+        {
+          "id": "w10",
+          "text": "hanya",
+          "start": 4.87,
+          "end": 5.18
+        },
+        {
+          "id": "w11",
+          "text": "5",
+          "start": 5.18,
+          "end": 5.48
+        },
+        {
+          "id": "w12",
+          "text": "menit.",
+          "start": 5.48,
+          "end": 6
+        }
+      ]
+    }
+  ],
+  "sfx": [
+    {
+      "frame": 1,
+      "file": "assets/sfx/click.mp3",
+      "offset_s": 0,
+      "duration_s": 0.37,
+      "volume": 0.35
+    },
+    {
+      "frame": 1,
+      "file": "assets/sfx/pop.mp3",
+      "offset_s": 0,
+      "duration_s": 0.72,
+      "volume": 0.35
+    },
+    {
+      "frame": 2,
+      "file": "assets/sfx/chime.mp3",
+      "offset_s": 0.4,
+      "duration_s": 1.2,
+      "volume": 0.5
+    }
+  ]
+}

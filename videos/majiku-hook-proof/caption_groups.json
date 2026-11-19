@@ -1,0 +1,61 @@
+{
+  "total_duration_s": 7,
+  "width": 1080,
+  "height": 1920,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0.22,
+      "end": 1.45,
+      "text": "Sudah 500 lebih",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "Sudah",
+          "start": 0.22,
+          "end": 0.36
+        },
+        {
+          "id": "caption-word-0-1",
+          "text": "500",
+          "start": 0.36,
+          "end": 1.02
+        },
+        {
+          "id": "caption-word-0-2",
+          "text": "lebih",
+          "start": 1.11,
+          "end": 1.38
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 1,
+      "start": 1.45,
+      "end": 3.23,
+      "text": "lembaga yang memakainya.",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "lembaga",
+          "start": 1.45,
+          "end": 1.91
+        },
+        {
+          "id": "caption-word-1-1",
+          "text": "yang",
+          "start": 1.91,
+          "end": 2.21
+        },
+        {
+          "id": "caption-word-1-2",
+          "text": "memakainya.",
+          "start": 2.21,
+          "end": 3.11
+        }
+      ]
+    }
+  ]
+}

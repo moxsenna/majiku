@@ -7,6 +7,7 @@ import { invoices, invoiceSequences, studentEnrollments, students, classes, type
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
+import { notifyUsers } from "@/server/notify";
 
 export interface InvoiceRow {
   id: string;
@@ -351,6 +352,23 @@ async function createInvoiceOnce(
     dueDate: input.dueDate,
     notes: input.notes || null,
   });
+
+  // Tagihan baru: beri tahu orang tua (kalau akunnya sudah tertaut).
+  const [studentForNotify] = await db
+    .select({ parentUserId: students.parentUserId, name: students.name })
+    .from(students)
+    .where(eq(students.id, input.studentId))
+    .limit(1);
+  if (studentForNotify?.parentUserId) {
+    await notifyUsers({
+      userIds: [studentForNotify.parentUserId],
+      type: "invoice",
+      title: `Tagihan baru untuk ${studentForNotify.name}`,
+      body: `${invoiceNumber} · Rp ${total.toLocaleString("id-ID")} · jatuh tempo ${input.dueDate}`,
+      link: `/parent/billing`,
+      tenantId: ctx.tenantId,
+    });
+  }
 
   return { success: true, id, invoiceNumber };
 }

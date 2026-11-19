@@ -1,0 +1,91 @@
+{
+  "total_duration_s": 8.5,
+  "width": 1080,
+  "height": 1920,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0.33,
+      "end": 1.1,
+      "text": "Kenalkan",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "Kenalkan",
+          "start": 0.33,
+          "end": 0.98
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 1,
+      "start": 1.38,
+      "end": 2.46,
+      "text": "Majiku,",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "Majiku,",
+          "start": 1.38,
+          "end": 2.34
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 1,
+      "start": 2.5,
+      "end": 3.59,
+      "text": "satu platform untuk",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "satu",
+          "start": 2.5,
+          "end": 2.63
+        },
+        {
+          "id": "caption-word-2-1",
+          "text": "platform",
+          "start": 2.63,
+          "end": 3.12
+        },
+        {
+          "id": "caption-word-2-2",
+          "text": "untuk",
+          "start": 3.28,
+          "end": 3.59
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 1,
+      "start": 3.59,
+      "end": 5.52,
+      "text": "seluruh Operational daycare.",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "seluruh",
+          "start": 3.59,
+          "end": 4.09
+        },
+        {
+          "id": "caption-word-3-1",
+          "text": "Operational",
+          "start": 4.09,
+          "end": 4.9
+        },
+        {
+          "id": "caption-word-3-2",
+          "text": "daycare.",
+          "start": 4.9,
+          "end": 5.4
+        }
+      ]
+    }
+  ]
+}

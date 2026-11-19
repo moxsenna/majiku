@@ -181,7 +181,7 @@ export async function getFotoKegiatan(): Promise<FotoData> {
       foto: [
         {
           id: "demo-gf-1",
-          photoKey: "/images/reports/report-aisyah-art.jpg",
+          photoKey: "/images/reports/report-aisyah-art.webp",
           caption: "Aisyah bangga menunjukkan hasil karya mewarnai bunga matahari",
           studentName: "Aisyah Putri",
           classId: "cls_bunga_matahari",
@@ -191,7 +191,7 @@ export async function getFotoKegiatan(): Promise<FotoData> {
         },
         {
           id: "demo-gf-2",
-          photoKey: "/images/reports/report-aisyah-sensory.jpg",
+          photoKey: "/images/reports/report-aisyah-sensory.webp",
           caption: "Eksplorasi sensori tekstur pasir kinetik dan manik-manik warna",
           studentName: "Aisyah Putri",
           classId: "cls_bunga_matahari",
@@ -201,7 +201,7 @@ export async function getFotoKegiatan(): Promise<FotoData> {
         },
         {
           id: "demo-gf-3",
-          photoKey: "/images/reports/report-aisyah-meal.jpg",
+          photoKey: "/images/reports/report-aisyah-meal.webp",
           caption: "Makan siang mandiri dengan menu gizi seimbang dan buah segar",
           studentName: "Aisyah Putri",
           classId: "cls_bunga_matahari",
@@ -211,7 +211,7 @@ export async function getFotoKegiatan(): Promise<FotoData> {
         },
         {
           id: "demo-gf-4",
-          photoKey: "/images/reports/report-group-outdoor.jpg",
+          photoKey: "/images/reports/report-group-outdoor.webp",
           caption: "Aktivitas motorik kasar di area taman bermain outdoor yang teduh",
           studentName: "Raka Pratama",
           classId: "cls_bunga_matahari",
@@ -221,7 +221,7 @@ export async function getFotoKegiatan(): Promise<FotoData> {
         },
         {
           id: "demo-gf-5",
-          photoKey: "/images/reports/report-circle-story.jpg",
+          photoKey: "/images/reports/report-circle-story.webp",
           caption: "Circle time mendengarkan cerita fabel interaktif bersama Bu Rina",
           studentName: "Keisha Azzahra",
           classId: "cls_bunga_matahari",
@@ -231,7 +231,7 @@ export async function getFotoKegiatan(): Promise<FotoData> {
         },
         {
           id: "demo-gf-6",
-          photoKey: "/images/reports/report-naptime-peaceful.jpg",
+          photoKey: "/images/reports/report-naptime-peaceful.webp",
           caption: "Waktu istirahat tidur siang yang tenang, nyaman, dan sejuk",
           studentName: "Arjuna Wijaya",
           classId: "cls_bunga_matahari",

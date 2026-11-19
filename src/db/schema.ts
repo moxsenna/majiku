@@ -363,6 +363,40 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (t) => [index("messages_conversation_created_idx").on(t.conversationId, t.createdAt)]);
 
+// Notifikasi in-app: satu baris per penerima, ditulis sinkron dari server action
+// yang memicu event (check-in, laporan harian, chat, tagihan, pembayaran, pengumuman).
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    tenantId: text("tenant_id"),
+    type: text("type").notNull(), // attendance | report | chat | invoice | payment | announcement | reminder
+    title: text("title").notNull(),
+    body: text("body"),
+    link: text("link"),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => [index("notifications_user_read_idx").on(t.userId, t.readAt), index("notifications_user_created_idx").on(t.userId, t.createdAt)]
+);
+
+// Langganan Web Push (PWA). Endpoint unik per browser; dibersihkan otomatis
+// saat gateway mengembalikan 404/410.
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => [index("push_subscriptions_user_idx").on(t.userId)]
+);
+
 export type ConversationRow = typeof conversations.$inferSelect;
 export type ChatMessageRow = typeof messages.$inferSelect;
 

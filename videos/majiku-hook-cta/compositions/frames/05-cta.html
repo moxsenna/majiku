@@ -1,0 +1,671 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: normal;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Plus Jakarta Sans";
+      font-style: italic;
+      font-weight: 700;
+      font-display: block;
+      src: url("assets/fonts/plus-jakarta-sans-700-italic.woff2") format("woff2");
+    }
+
+    /* Subcomposition root styled strictly via #root */
+    #root {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      container-type: size;
+      background: transparent;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* Track 0: Full-bleed ground with cream base + radial candy glows + grain */
+    [id="05-cta-bg"],
+    .\30 5-cta-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FFFFFF;
+      background-image:
+        radial-gradient(circle at 18% 15%, rgba(247, 176, 158, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 82% 20%, rgba(252, 226, 146, 0.18) 0%, transparent 42%),
+        radial-gradient(circle at 50% 50%, rgba(249, 195, 31, 0.12) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* Track 1: Floating pill wallpaper (flat, candy wallpaper confetti at margins) */
+    [id="05-cta-wallpaper"],
+    .\30 5-cta-wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    [class~="05-cta-pill-wrap"],
+    .\30 5-cta-pill-wrap {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    [class~="05-cta-floating-pill"],
+    .\30 5-cta-floating-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      border: 3px solid #1E1E1E;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #32221B;
+      box-shadow: none;
+      white-space: nowrap;
+    }
+
+    /* Wallpaper pills positions */
+    [id="05-cta-w-wrap-1"] { left: 80px; top: 180px; }
+    [id="05-cta-wp-1"] { background-color: #F7B09E; transform: rotate(-12deg); }
+
+    [id="05-cta-w-wrap-2"] { right: 80px; top: 200px; }
+    [id="05-cta-wp-2"] { background-color: #F9C31F; transform: rotate(14deg); }
+
+    [id="05-cta-w-wrap-3"] { left: 60px; top: 720px; }
+    [id="05-cta-wp-3"] { background-color: #F6A18C; transform: rotate(10deg); }
+
+    [id="05-cta-w-wrap-4"] { right: 60px; top: 750px; }
+    [id="05-cta-wp-4"] { background-color: #F6A794; transform: rotate(-10deg); }
+
+    [id="05-cta-w-wrap-5"] { left: 80px; top: 1360px; }
+    [id="05-cta-wp-5"] { background-color: #FCE292; transform: rotate(-8deg); }
+
+    [id="05-cta-w-wrap-6"] { right: 80px; top: 1380px; }
+    [id="05-cta-wp-6"] { background-color: #F7B09E; transform: rotate(12deg); }
+
+    /* Track 2: Interactive Stage */
+    [id="05-cta-stage"],
+    .\30 5-cta-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Lockup at ~28% height (538px) */
+    [id="05-cta-lockup-wrap"],
+    .\30 5-cta-lockup-wrap {
+      position: absolute;
+      left: 540px;
+      top: 538px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    [id="05-cta-lockup-pill"],
+    .\30 5-cta-lockup-pill {
+      position: absolute;
+      left: -140px;
+      top: -32px;
+      width: 280px;
+      height: 64px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 3px solid #1E1E1E;
+      background-color: #FFFFFF;
+      box-shadow: 5px 5px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 20px;
+      transform-origin: 50% 50%;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    [class~="05-cta-lockup-icon"],
+    .\30 5-cta-lockup-icon {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #F06542;
+      border: 2px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [class~="05-cta-lockup-icon"] img,
+    .\30 5-cta-lockup-icon img {
+      width: 20px;
+      height: 20px;
+      display: block;
+      filter: brightness(0) invert(1);
+    }
+
+    [class~="05-cta-lockup-text"],
+    .\30 5-cta-lockup-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #32221B;
+      line-height: 1;
+    }
+
+    /* Morph stage anchor at shared center (540, 960) */
+    [id="05-cta-morph-stage"],
+    .\30 5-cta-morph-stage {
+      position: absolute;
+      left: 540px;
+      top: 960px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    /* Outgoing mark: sparkle at center */
+    [id="05-cta-mark"],
+    .\30 5-cta-mark {
+      position: absolute;
+      left: -70px;
+      top: -70px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 3.5px solid #1E1E1E;
+      background-color: #FFFFFF;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: 50% 50%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    [id="05-cta-mark-img"],
+    .\30 5-cta-mark-img {
+      width: 80px;
+      height: 80px;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* Hero CTA Coral Button */
+    [id="05-cta-btn"],
+    .\30 5-cta-btn {
+      position: absolute;
+      left: -390px;
+      top: -64px;
+      width: 780px;
+      height: 128px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 4px solid #1E1E1E;
+      background-color: #F06542;
+      color: #FFFFFF;
+      box-shadow: 8px 8px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 48px;
+      transform-origin: 50% 50%;
+      z-index: 20;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    [class~="05-cta-btn-sparkle"],
+    .\30 5-cta-btn-sparkle {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+    }
+
+    [class~="05-cta-btn-text"],
+    .\30 5-cta-btn-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #FFFFFF;
+      line-height: 1;
+    }
+
+    [class~="05-cta-btn-arrow"],
+    .\30 5-cta-btn-arrow {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      border: 2.8px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 4px;
+    }
+
+    /* Supporting Pill below: Tanpa kartu kredit (mint) */
+    [id="05-cta-support-wrap"],
+    .\30 5-cta-support-wrap {
+      position: absolute;
+      left: 540px;
+      top: 1180px;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    [id="05-cta-support-pill"],
+    .\30 5-cta-support-pill {
+      position: absolute;
+      left: -210px;
+      top: -34px;
+      width: 420px;
+      height: 68px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 3.5px solid #1E1E1E;
+      background-color: #FCE292;
+      color: #32221B;
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 24px;
+      transform-origin: 50% 50%;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    [class~="05-cta-support-icon"],
+    .\30 5-cta-support-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      border: 2.4px solid #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [class~="05-cta-support-text"],
+    .\30 5-cta-support-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #32221B;
+    }
+
+    /* Animated Cursor */
+    [id="05-cta-cursor"],
+    .\30 5-cta-cursor {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 56px;
+      height: 56px;
+      transform-origin: 0 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* Click Ripples */
+    [class~="05-cta-ripple"],
+    .\30 5-cta-ripple {
+      position: absolute;
+      left: 620px;
+      top: 980px;
+      width: 90px;
+      height: 90px;
+      margin-left: -45px;
+      margin-top: -45px;
+      border-radius: 50%;
+      border: 4px solid #F06542;
+      transform-origin: 50% 50%;
+      pointer-events: none;
+      z-index: 25;
+      opacity: 0;
+    }
+
+    [id="05-cta-ripple-2"],
+    .\30 5-cta-ripple-2 {
+      border-color: #F9C31F;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="05-cta"
+    data-start="0"
+    data-duration="7"
+    data-width="1080"
+    data-height="1920"
+  >
+    <!-- Track 0: Full-bleed ground -->
+    <div
+      id="05-cta-bg"
+      class="clip 05-cta-bg"
+      data-start="0"
+      data-duration="7"
+      data-track-index="0"
+    ></div>
+
+    <!-- Track 1: Floating pill wallpaper -->
+    <div
+      id="05-cta-wallpaper"
+      class="clip 05-cta-wallpaper"
+      data-start="0"
+      data-duration="7"
+      data-track-index="1"
+    >
+      <div id="05-cta-w-wrap-1" class="05-cta-pill-wrap">
+        <div id="05-cta-wp-1" class="05-cta-floating-pill">PRAKTIS</div>
+      </div>
+      <div id="05-cta-w-wrap-2" class="05-cta-pill-wrap">
+        <div id="05-cta-wp-2" class="05-cta-floating-pill">GRATIS</div>
+      </div>
+      <div id="05-cta-w-wrap-3" class="05-cta-pill-wrap">
+        <div id="05-cta-wp-3" class="05-cta-floating-pill">CEPAT</div>
+      </div>
+      <div id="05-cta-w-wrap-4" class="05-cta-pill-wrap">
+        <div id="05-cta-wp-4" class="05-cta-floating-pill">MUDAH</div>
+      </div>
+      <div id="05-cta-w-wrap-5" class="05-cta-pill-wrap">
+        <div id="05-cta-wp-5" class="05-cta-floating-pill">SEKARANG</div>
+      </div>
+      <div id="05-cta-w-wrap-6" class="05-cta-pill-wrap">
+        <div id="05-cta-wp-6" class="05-cta-floating-pill">AKTIF</div>
+      </div>
+    </div>
+
+    <!-- Track 2: Interactive Stage -->
+    <div
+      id="05-cta-stage"
+      class="clip 05-cta-stage"
+      data-start="0"
+      data-duration="7"
+      data-track-index="2"
+    >
+      <!-- Lockup mark + MAJIKU kecil pop di atas (~28% tinggi) -->
+      <div id="05-cta-lockup-wrap" class="05-cta-lockup-wrap">
+        <div id="05-cta-lockup-pill" class="05-cta-lockup-pill">
+          <span class="05-cta-lockup-icon">
+            <img
+              src="assets/logo-65fc9c68.svg"
+              alt="MAJIKU mark"
+              width="20"
+              height="20"
+            />
+          </span>
+          <span class="05-cta-lockup-text">MAJIKU</span>
+        </div>
+      </div>
+
+      <!-- Morph Stage: Mark -> CTA Coral Button -->
+      <div id="05-cta-morph-stage" class="05-cta-morph-stage">
+        <!-- Outgoing Mark Sparkle -->
+        <div id="05-cta-mark" class="05-cta-mark">
+          <img
+            id="05-cta-mark-img"
+            class="05-cta-mark-img"
+            src="assets/logo-65fc9c68.svg"
+            alt="MAJIKU Sparkle Mark"
+            width="80"
+            height="80"
+          />
+        </div>
+
+        <!-- Incoming Hero CTA Coral Button -->
+        <div id="05-cta-btn" class="05-cta-btn">
+          <svg
+            class="05-cta-btn-sparkle"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FFFFFF"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+            ></path>
+          </svg>
+          <span class="05-cta-btn-text">Coba Gratis 14 Hari</span>
+          <div class="05-cta-btn-arrow">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="#1E1E1E"
+              stroke-width="2.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supporting Pill: Tanpa kartu kredit (mint) -->
+      <div id="05-cta-support-wrap" class="05-cta-support-wrap">
+        <div id="05-cta-support-pill" class="05-cta-support-pill">
+          <span class="05-cta-support-icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="#1E1E1E"
+              stroke-width="3.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+          <span class="05-cta-support-text">Tanpa kartu kredit</span>
+        </div>
+      </div>
+
+      <!-- Click Ripples -->
+      <div id="05-cta-ripple-1" class="05-cta-ripple"></div>
+      <div id="05-cta-ripple-2" class="05-cta-ripple 05-cta-ripple-2"></div>
+
+      <!-- Cursor -->
+      <div id="05-cta-cursor" class="05-cta-cursor">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M3 3L10.07 20.97L13.58 13.58L20.97 10.07L3 3Z"
+            fill="#1E1E1E"
+            stroke="#FFFFFF"
+            stroke-width="1.8"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Cache DOM references
+      const lockup = document.getElementById("05-cta-lockup-pill");
+      const mark = document.getElementById("05-cta-mark");
+      const btn = document.getElementById("05-cta-btn");
+      const supportPill = document.getElementById("05-cta-support-pill");
+      const cursor = document.getElementById("05-cta-cursor");
+      const ripple1 = document.getElementById("05-cta-ripple-1");
+      const ripple2 = document.getElementById("05-cta-ripple-2");
+
+      // Set initial states for deterministic frame-by-frame seeking
+      gsap.set(lockup, { scale: 0, opacity: 0, y: -20 });
+      gsap.set(mark, { scale: 1, opacity: 1, rotation: 0 });
+      gsap.set(btn, { scale: 0.65, opacity: 0 });
+      gsap.set(supportPill, { scale: 0, opacity: 0, rotation: -12, y: 28 });
+      gsap.set(cursor, { x: 920, y: 1480, opacity: 0 });
+      gsap.set(ripple1, { scale: 0, opacity: 0 });
+      gsap.set(ripple2, { scale: 0, opacity: 0 });
+
+      // Subtle float on wallpaper pills
+      const wpPills = [
+        document.getElementById("05-cta-wp-1"),
+        document.getElementById("05-cta-wp-2"),
+        document.getElementById("05-cta-wp-3"),
+        document.getElementById("05-cta-wp-4"),
+        document.getElementById("05-cta-wp-5"),
+        document.getElementById("05-cta-wp-6"),
+      ];
+      wpPills.forEach((p, idx) => {
+        if (!p) return;
+        const drift = idx % 2 === 0 ? 6 : -6;
+        tl.to(p, { y: drift, duration: 1.75, ease: "sine.inOut" }, 0.0);
+        tl.to(p, { y: 0, duration: 1.75, ease: "sine.inOut" }, 1.75);
+      });
+
+      // =========================================================================
+      // SCENE 1 (0.0–1.6s):
+      // - 0.0–0.4s: Mark sparkle resting breath
+      // - @0.2s: lockup mark+"MAJIKU" pop di atas (~28% tinggi)
+      // - @0.6–1.2s: tombol CTA coral besar "Coba Gratis 14 Hari" scale-swap center
+      // =========================================================================
+
+      // Resting breath on center mark
+      tl.to(mark, { rotation: 4, duration: 0.40, ease: "power1.inOut" }, 0.0);
+
+      // Lockup pop di atas @0.2s
+      tl.fromTo(
+        lockup,
+        { scale: 0, opacity: 0, y: -20 },
+        { scale: 1.0, opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.8)" },
+        0.20
+      );
+
+      // Scale-swap transition: center mark condenses & shrinks out, CTA button scales in
+      tl.to(
+        mark,
+        { scale: 0.65, opacity: 0, duration: 0.35, ease: "power2.in" },
+        0.60
+      );
+      tl.fromTo(
+        btn,
+        { scale: 0.65, opacity: 0 },
+        { scale: 1.0, opacity: 1, duration: 0.55, ease: "back.out(1.7)" },
+        0.65
+      );
+
+      // =========================================================================
+      // SCENE 2 (1.6–3.5s):
+      // - Cursor arrives @1.48–1.80s
+      // - kursor press-ripple klik@1.8s
+      // - pill "Tanpa kartu kredit" (mint) pop@2.6s
+      // - HOLD to 3.5s
+      // =========================================================================
+
+      // Cursor approach from lower-right to CTA button off-center point (620, 980)
+      tl.to(cursor, { opacity: 1, duration: 0.10, ease: "power1.out" }, 1.48);
+      tl.to(cursor, { x: 620, y: 980, duration: 0.32, ease: "power2.out" }, 1.48);
+
+      // Click @1.80s: Lockstep press depression
+      tl.to(
+        [btn, cursor],
+        { scale: 0.94, duration: 0.08, ease: "power1.in" },
+        1.80
+      );
+      tl.to(
+        btn,
+        { boxShadow: "2px 2px 0 rgba(26, 26, 26, 0.08)", duration: 0.08, ease: "power1.in" },
+        1.80
+      );
+
+      // Spring release with overshoot @1.88s
+      tl.to(
+        [btn, cursor],
+        { scale: 1.0, duration: 0.34, ease: "back.out(1.8)" },
+        1.88
+      );
+      tl.to(
+        btn,
+        { boxShadow: "8px 8px 0 rgba(26, 26, 26, 0.08)", duration: 0.34, ease: "power2.out" },
+        1.88
+      );
+
+      // Expanding ripples from click point (620, 980)
+      tl.set(ripple1, { opacity: 0.85 }, 1.80);
+      tl.to(
+        ripple1,
+        { scale: 5.0, opacity: 0, duration: 0.65, ease: "power2.out", immediateRender: false },
+        1.80
+      );
+
+      tl.set(ripple2, { opacity: 0.65 }, 1.88);
+      tl.to(
+        ripple2,
+        { scale: 6.0, opacity: 0, duration: 0.70, ease: "power2.out", immediateRender: false },
+        1.88
+      );
+
+      // Post-click subtle cursor drift
+      tl.to(cursor, { x: 645, y: 995, duration: 0.45, ease: "power2.out" }, 2.22);
+
+      // Pill "Tanpa kartu kredit" (mint) pop@2.6s
+      tl.fromTo(
+        supportPill,
+        { scale: 0, opacity: 0, rotation: -12, y: 28 },
+        { scale: 1.0, opacity: 1, rotation: 0, y: 0, duration: 0.55, ease: "back.out(1.6)" },
+        2.60
+      );
+
+      // Total timeline span anchor (3.5s)
+      tl.to({}, { duration: 3.5 }, 0);
+
+      // Register timeline
+      window.__timelines["05-cta"] = tl;
+    })();
+  </script>
+</template>
