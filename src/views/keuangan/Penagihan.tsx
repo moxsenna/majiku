@@ -24,7 +24,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { formatRupiah, formatRupiahSingkat, formatTanggal } from "@/lib/format";
 import { STATUS_PERLU_DITAGIH, statusTagihan } from "@/lib/status";
-import { createInvoice } from "@/server/actions/billing";
+import { issueInvoicesBulk } from "@/server/actions/billing";
 import { getKeuangan, type BarisPerluDitagih, type BarisTagihan, type KeuanganData } from "@/server/actions/keuangan";
 
 /**
@@ -110,22 +110,34 @@ export default function Penagihan({ initialData }: { initialData?: KeuanganData 
     mutationFn: async (rows: BarisPerluDitagih[]) => {
       if (!data) throw new Error("Data belum siap");
       const jatuhTempo = tambahHari(data.tanggal, 7);
-      for (const r of rows) {
-        await createInvoice({
+      // Server-side + idempoten: baris yang sudah ditagih di periode yang sama
+      // dihitung duplikat, bukan dibuat dua kali.
+      return issueInvoicesBulk(
+        rows.map((r) => ({
           studentId: r.studentId,
           amount: r.nominal,
           dueDate: jatuhTempo,
           billingPeriodStart: `${data.tanggal.slice(0, 7)}-01`,
           billingPeriodEnd: akhirBulan(data.tanggal),
           notes: `Tagihan ${data.periode} · ${r.kelas.join(", ")}`,
-        });
-      }
-      return rows.length;
+        }))
+      );
     },
-    onSuccess: (n) => {
+    onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: ["keuangan"] });
       qc.invalidateQueries({ queryKey: ["hari-ini"] });
-      toast({ title: `${n} tagihan terbit`, description: `Jatuh tempo 7 hari dari sekarang. Wali bisa membayar online bila pembayaran aktif.` });
+      const bagian = [
+        `${result.issued} tagihan baru terbit`,
+        result.duplicates > 0 ? `${result.duplicates} dilewati (sudah ada)` : null,
+        result.failures.length > 0 ? `${result.failures.length} gagal` : null,
+      ].filter(Boolean);
+      toast({
+        title: "Terbitkan selesai",
+        description: `${bagian.join(" · ")}. Jatuh tempo 7 hari dari sekarang. Wali bisa membayar online bila pembayaran aktif.`,
+      });
+      if (result.failures.length > 0) {
+        console.error("Gagal menerbitkan tagihan:", result.failures);
+      }
       startTransition(() => router.refresh());
     },
     onError: (err: Error) => {
@@ -342,7 +354,7 @@ export default function Penagihan({ initialData }: { initialData?: KeuanganData 
         ) : (
           <Stale stale={isError}>
             <div className="flex flex-col gap-5">
-              <StatRow>
+              <StatRow className="rise">
                 <StatCard
                   label="Ditagihkan"
                   periode={data.periode}
@@ -403,7 +415,7 @@ export default function Penagihan({ initialData }: { initialData?: KeuanganData 
                       bulkActions={(sel) => (
                         <>
                           <span className="tabular">{formatRupiah(sel.reduce((s, r) => s + r.nominal, 0))}</span>
-                          <Button variant="sec" size="sm" className="bulk-sec" disabled={readOnly || terbitkan.isPending} onClick={() => terbitkan.mutate(sel)}>
+                          <Button variant="sec" size="sm" className="bulk-sec press" disabled={readOnly || terbitkan.isPending} onClick={() => terbitkan.mutate(sel)}>
                             Terbitkan {sel.length} tagihan
                           </Button>
                         </>

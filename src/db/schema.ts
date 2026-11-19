@@ -240,6 +240,21 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+// Sekuens nomor invoice per tenant per periode (YYYYMM). Menggantikan nomor
+// acak 4 digit yang rawan tabrakan lintas lembaga. `last` dinaikkan atomik via
+// INSERT .. ON CONFLICT DO UPDATE .. RETURNING.
+export const invoiceSequences = pgTable(
+  "invoice_sequences",
+  {
+    id: text("id").primaryKey(),
+    tenantId: text("tenant_id").notNull(),
+    period: text("period").notNull(),
+    last: integer("last").notNull().default(0),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => [unique("invoice_sequences_tenant_id_period_key").on(t.tenantId, t.period)]
+);
+
 export const waitingList = pgTable("waiting_list", {
   id: text("id").primaryKey(),
   tenantId: text("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),

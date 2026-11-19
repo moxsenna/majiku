@@ -1,9 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { invoices, studentEnrollments, students, classes } from "@/db/schema";
+import { invoices, invoiceSequences, studentEnrollments, students, classes, type TenantRow } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
@@ -235,12 +235,41 @@ export interface CreateInvoiceInput {
   notes?: string;
   billingPeriodStart?: string;
   billingPeriodEnd?: string;
+  /** Enrollment spesifik (dipakai alur massal agar relasi tidak salah pilih). */
+  enrollmentId?: string;
 }
 
-export async function createInvoice(input: CreateInvoiceInput) {
-  const ctx = await requireTenantContext();
-  assertDemoMutationLock(ctx.session, ctx.tenantId);
+export interface InvoiceIssueResult {
+  success: boolean;
+  id: string;
+  invoiceNumber: string;
+  /** true bila tagihan periode yang sama sudah ada sebelumnya (idempoten). */
+  duplicate?: boolean;
+}
 
+/**
+ * Nomor invoice berurutan per tenant per periode: INV/{slug}/{YYYYMM}/{seq}.
+ * Sekuens dinaikkan atomik lewat satu statement (aman tanpa transaksi):
+ * INSERT .. ON CONFLICT (tenant_id, period) DO UPDATE SET last = last + 1 RETURNING last.
+ */
+async function nextInvoiceNumber(tenantId: string, tenantSlug: string, period: string): Promise<string> {
+  const [row] = await db
+    .insert(invoiceSequences)
+    .values({ id: crypto.randomUUID(), tenantId, period, last: 1 })
+    .onConflictDoUpdate({
+      target: [invoiceSequences.tenantId, invoiceSequences.period],
+      set: { last: sql`${invoiceSequences.last} + 1`, updatedAt: new Date() },
+    })
+    .returning({ last: invoiceSequences.last });
+  const seq = row?.last ?? 1;
+  const slug = tenantSlug || tenantId;
+  return `INV/${slug}/${period}/${String(seq).padStart(4, "0")}`;
+}
+
+async function createInvoiceOnce(
+  ctx: { tenantId: string; tenant: TenantRow },
+  input: CreateInvoiceInput
+): Promise<InvoiceIssueResult> {
   if (!input.studentId) throw new Error("Pilih siswa terlebih dahulu");
   if (!input.amount || input.amount <= 0) throw new Error("Nominal tagihan harus lebih dari 0");
   if (!input.dueDate) throw new Error("Tanggal jatuh tempo wajib diisi");
@@ -253,25 +282,66 @@ export async function createInvoice(input: CreateInvoiceInput) {
 
   if (!student) throw new Error("Data siswa tidak ditemukan");
 
-  const [enrollment] = await db
-    .select({ id: studentEnrollments.id })
-    .from(studentEnrollments)
-    .where(and(eq(studentEnrollments.studentId, input.studentId), eq(studentEnrollments.isActive, true)))
-    .limit(1);
+  // Idempotensi: satu tagihan per siswa per periode (billingPeriodStart).
+  // Tagihan ad-hoc tanpa periode tidak kena dedupe (dibuat sadar oleh admin).
+  if (input.billingPeriodStart) {
+    const [existing] = await db
+      .select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.studentId, input.studentId),
+          eq(invoices.billingPeriodStart, input.billingPeriodStart)
+        )
+      )
+      .limit(1);
+    if (existing) {
+      return { success: true, id: existing.id, invoiceNumber: existing.invoiceNumber, duplicate: true };
+    }
+  }
+
+  let enrollmentId: string | null = null;
+  if (input.enrollmentId) {
+    const [enrollment] = await db
+      .select({ id: studentEnrollments.id })
+      .from(studentEnrollments)
+      .where(
+        and(
+          eq(studentEnrollments.id, input.enrollmentId),
+          eq(studentEnrollments.studentId, input.studentId),
+          eq(studentEnrollments.isActive, true)
+        )
+      )
+      .limit(1);
+    enrollmentId = enrollment?.id ?? null;
+  }
+  if (!enrollmentId) {
+    const [enrollment] = await db
+      .select({ id: studentEnrollments.id })
+      .from(studentEnrollments)
+      .where(and(eq(studentEnrollments.studentId, input.studentId), eq(studentEnrollments.isActive, true)))
+      .limit(1);
+    enrollmentId = enrollment?.id ?? null;
+  }
 
   const discount = input.discount ? Number(input.discount) : 0;
   const total = Math.max(0, Number(input.amount) - discount);
+
+  // Periode nomor invoice: dari periode tagihan bila ada, else jatuh tempo, else bulan sekarang.
+  const periodSource = input.billingPeriodStart || input.dueDate;
   const now = new Date();
-  const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  const invoiceNumber = `INV-${yearMonth}-${randomSuffix}`;
+  const yearMonth = periodSource
+    ? periodSource.slice(0, 7).replace("-", "")
+    : `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  const invoiceNumber = await nextInvoiceNumber(ctx.tenantId, ctx.tenant.slug, yearMonth);
   const id = crypto.randomUUID();
 
   await db.insert(invoices).values({
     id,
     invoiceNumber,
     studentId: input.studentId,
-    enrollmentId: enrollment?.id || null,
+    enrollmentId,
     amount: String(input.amount),
     discount: String(discount),
     total: String(total),
@@ -283,6 +353,56 @@ export async function createInvoice(input: CreateInvoiceInput) {
   });
 
   return { success: true, id, invoiceNumber };
+}
+
+export async function createInvoice(input: CreateInvoiceInput): Promise<InvoiceIssueResult> {
+  const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
+  return createInvoiceOnce(ctx, input);
+}
+
+export interface BulkIssueInput extends CreateInvoiceInput {}
+
+export interface BulkIssueSummary {
+  issued: number;
+  duplicates: number;
+  failures: Array<{ studentId: string; error: string }>;
+  ids: string[];
+}
+
+/**
+ * Terbitkan banyak tagihan sekaligus di server (mengganti loop client-side).
+ * Idempoten: baris dengan periode yang sudah ditagih dihitung "duplicate",
+ * bukan dibuat dua kali. Kegagalan satu baris tidak menggagalkan sisanya.
+ */
+export async function issueInvoicesBulk(inputs: BulkIssueInput[]): Promise<BulkIssueSummary> {
+  const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
+  if (!Array.isArray(inputs) || inputs.length === 0) {
+    throw new Error("Tidak ada tagihan untuk diterbitkan");
+  }
+  if (inputs.length > 200) {
+    throw new Error("Maksimal 200 tagihan per operasi");
+  }
+
+  const summary: BulkIssueSummary = { issued: 0, duplicates: 0, failures: [], ids: [] };
+  for (const input of inputs) {
+    try {
+      const res = await createInvoiceOnce(ctx, input);
+      if (res.duplicate) {
+        summary.duplicates += 1;
+      } else {
+        summary.issued += 1;
+      }
+      summary.ids.push(res.id);
+    } catch (err: unknown) {
+      summary.failures.push({
+        studentId: input.studentId,
+        error: err instanceof Error ? err.message : "Gagal tidak diketahui",
+      });
+    }
+  }
+  return summary;
 }
 
 export async function getBillingStudentOptions(): Promise<Array<{ id: string; name: string }>> {
