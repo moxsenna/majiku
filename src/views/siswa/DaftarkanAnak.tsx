@@ -212,7 +212,7 @@ export default function DaftarkanAnak({ kelas, siswa, galatMuat }: { kelas: Kela
             retryLabel="Muat ulang"
           />
         )}
-        <Stepper steps={LANGKAH} current={langkah} className="max-[560px]:[&_li>span]:text-[0px]" />
+        <Stepper steps={LANGKAH} current={langkah} srLabelsOnMobile />
 
         <Panel className="flex flex-col gap-4 p-5">
           {langkah === 0 && (

@@ -58,12 +58,27 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
     checkoutUrl?: string | null;
     qrString?: string | null;
   } | null>(null);
+  const [tersalinRek, setTersalinRek] = useState(false);
   const config = statusConfig[invoice.status] || statusConfig.unpaid;
   const StatusIcon = config.icon;
 
-  const schoolName = "Sesuai lembaga terdaftar";
+  // Nama lembaga nyata dari data tenant (dipakai di dokumen tagihan).
+  const schoolName = invoice.tenantName || "Tagihan lembaga";
   const schoolAddress = "Alamat dan kontak sesuai unit/cabang terdaftar";
   const schoolPhone = "-";
+  const bank = invoice.bank ?? null;
+
+  const salinRekening = async () => {
+    if (!bank?.bankAccountNumber) return;
+    try {
+      await navigator.clipboard.writeText(bank.bankAccountNumber);
+      setTersalinRek(true);
+      toast.success("Nomor rekening tersalin");
+      setTimeout(() => setTersalinRek(false), 2000);
+    } catch {
+      toast.error("Gagal menyalin. Salin manual: " + bank.bankAccountNumber);
+    }
+  };
 
   const periodLabel =
     invoice.billingPeriodStart && invoice.billingPeriodEnd
@@ -104,7 +119,11 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
 
   const handlePayOnline = async () => {
     if (!paymentsEnabled) {
-      toast.error("Pembayaran online belum aktif. Gunakan transfer bank manual.");
+      toast.info(
+        bank?.bankAccountNumber
+          ? "Pembayaran online belum tersedia. Silakan transfer ke rekening lembaga di bawah, lalu kirim bukti via Konfirmasi Transfer Manual."
+          : "Pembayaran online belum tersedia. Hubungi lembaga untuk nomor rekening, lalu kirim bukti transfer lewat Konfirmasi Transfer Manual."
+      );
       return;
     }
     setIsPaying(true);
@@ -322,7 +341,7 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
                 >
                   {isPaying ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Menghubungkan ke PayCore...
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Menyiapkan pembayaran…
                     </>
                   ) : (
                     <>
@@ -332,9 +351,26 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
                 </Button>
                 {!paymentsEnabled && (
                   <p className="text-[11px] text-muted-foreground text-center">
-                    * Pembayaran online sedang disiapkan (menunggu aktivasi gateway PayCore).
+                    * Pembayaran online belum tersedia di lembaga ini — gunakan transfer manual di bawah.
                   </p>
                 )}
+
+                {/* Rekening lembaga untuk transfer manual */}
+                {invoice.status !== "paid" && bank?.bankAccountNumber && (
+                  <div className="rounded-lg border border-border bg-muted/40 p-3 space-y-1.5">
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                      Transfer manual ke rekening {schoolName}
+                    </p>
+                    <p className="text-sm">
+                      <b>{bank.bankName || "Bank"}</b> · <span className="tabular">{bank.bankAccountNumber}</span>
+                      {bank.bankAccountHolder ? ` · a.n. ${bank.bankAccountHolder}` : ""}
+                    </p>
+                    <Button variant="sec" size="sm" onClick={salinRekening}>
+                      {tersalinRek ? "Tersalin ✓" : "Salin nomor rekening"}
+                    </Button>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 pt-2">
                   <Link href={`/parent/payment?invoice=${invoice.id}`} className="w-full">
                     <Button variant="outline" className="w-full text-xs">

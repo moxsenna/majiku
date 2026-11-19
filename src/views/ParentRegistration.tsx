@@ -39,56 +39,12 @@ import {
   AlertCircle,
   XCircle,
   CalendarCheck,
+  Building2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { submitTrialApplication, type RegistrationProgramItem } from "@/server/actions/trial";
-
-const defaultPrograms = [
-  {
-    id: "toddler",
-    name: "Program Toddler",
-    age: "1.5 - 3 tahun",
-    price: 2000000,
-    schedule: "Senin - Jumat, 08:00 - 12:00",
-    features: ["Stimulasi motorik", "Musik & gerak", "Bermain sensori"],
-    color: "bg-highlight/10 border-highlight/30",
-    icon: Baby,
-    popular: false,
-    quota: 20,
-    status: "open",
-    nextOpenDate: null,
-  },
-  {
-    id: "playgroup",
-    name: "Playgroup",
-    age: "3 - 4 tahun",
-    price: 2500000,
-    schedule: "Senin - Jumat, 08:00 - 13:00",
-    features: ["Belajar huruf & angka", "Kegiatan seni", "Bermain kreatif"],
-    color: "bg-primary/10 border-primary/30",
-    icon: Star,
-    popular: true,
-    quota: 25,
-    status: "open",
-    nextOpenDate: null,
-  },
-  {
-    id: "kindergarten",
-    name: "TK A & B",
-    age: "4 - 6 tahun",
-    price: 3000000,
-    schedule: "Senin - Jumat, 07:30 - 14:00",
-    features: ["Persiapan SD", "Bahasa Inggris", "Ekstrakurikuler"],
-    color: "bg-success/10 border-success/30",
-    icon: GraduationCap,
-    popular: false,
-    quota: 30,
-    status: "open",
-    nextOpenDate: null,
-  },
-];
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -110,16 +66,17 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
   const [selectedProgram, setSelectedProgram] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Hanya program nyata dari lembaga aktif — tanpa data karangan.
   const rawPrograms = dynamicPrograms || initialPrograms;
-  const programs = rawPrograms && rawPrograms.length > 0
+  const programs = (rawPrograms && rawPrograms.length > 0
     ? rawPrograms.map((p, idx) => ({
         ...p,
         color: idx % 3 === 0 ? "bg-highlight/10 border-highlight/30" : idx % 3 === 1 ? "bg-primary/10 border-primary/30" : "bg-success/10 border-success/30",
         icon: idx % 3 === 0 ? Baby : idx % 3 === 1 ? Star : GraduationCap,
-        popular: idx === 1,
+        popular: false,
         nextOpenDate: null,
       }))
-    : defaultPrograms;
+    : []);
   
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -223,9 +180,6 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
       if (!formData.birthDate) {
         step2Errors.birthDate = "Tanggal lahir anak wajib diisi";
       }
-      if (!formData.gender) {
-        step2Errors.gender = "Jenis kelamin anak wajib dipilih";
-      }
 
       if (Object.keys(step2Errors).length > 0) {
         setErrors(step2Errors);
@@ -315,7 +269,17 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
             </div>
 
             <div className="space-y-3">
-              {programs.map((program) => {
+              {programs.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
+                  <Sparkles className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+                  <h3 className="font-bold text-foreground">Belum ada program dibuka</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Belum ada kelas aktif yang menerima pendaftaran saat ini.
+                    Hubungi lembaga lewat marketplace untuk menanyakan jadwal terdekat.
+                  </p>
+                </div>
+              ) : (
+              programs.map((program) => {
                 const isOpen = program.status === "open";
                 const isFull = program.status === "full";
                 const isClosed = program.status === "closed";
@@ -369,6 +333,9 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                       </div>
 
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                        <Building2 className="h-3 w-3" />
+                        <span>{program.tenantName}</span>
+                        <span aria-hidden>·</span>
                         <Clock className="h-3 w-3" />
                         <span>{program.schedule}</span>
                       </div>
@@ -408,12 +375,15 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
 
                       <div className="flex items-center justify-between pt-3 border-t border-border">
                         <span className="text-xs text-muted-foreground">Biaya per bulan</span>
-                        <span className="font-bold text-primary">{formatCurrency(program.price)}</span>
+                        <span className="font-bold text-primary">
+                          {program.price > 0 ? formatCurrency(program.price) : "Hubungi lembaga"}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
                 );
-              })}
+              })
+              )}
             </div>
           </div>
         )}
@@ -471,22 +441,19 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label>Jenis Kelamin *</Label>
+                      <Label>Jenis Kelamin</Label>
                       <Select
                         value={formData.gender}
                         onValueChange={(value) => updateForm("gender", value)}
                       >
-                        <SelectTrigger className={errors.gender ? "border-destructive focus:ring-destructive" : ""}>
-                          <SelectValue placeholder="Pilih" />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih (opsional)" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="male">Laki-laki</SelectItem>
                           <SelectItem value="female">Perempuan</SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.gender && (
-                        <p className="text-xs text-destructive font-medium">{errors.gender}</p>
-                      )}
                     </div>
                   </div>
 
@@ -641,7 +608,10 @@ export default function ParentRegistration({ initialPrograms, dynamicPrograms }:
                 <div className="flex justify-between items-center pt-3 border-t border-border">
                   <span className="text-sm text-muted-foreground">Biaya Bulanan</span>
                   <span className="font-bold text-primary text-lg">
-                    {formatCurrency(programs.find((p) => p.id === selectedProgram)?.price || 0)}
+                    {(() => {
+                      const p = programs.find((x) => x.id === selectedProgram);
+                      return p && p.price > 0 ? formatCurrency(p.price) : "Hubungi lembaga";
+                    })()}
                   </span>
                 </div>
               </CardContent>

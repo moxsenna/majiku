@@ -363,6 +363,11 @@ export async function updateTenantProfile(input: {
   name: string;
   phone?: string;
   address?: string;
+  city?: string;
+  priceFrom?: number | null;
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankAccountHolder?: string;
 }) {
   const ctx = await requireTenantContext();
 
@@ -371,14 +376,25 @@ export async function updateTenantProfile(input: {
     return { success: true, demo: true };
   }
 
+  const updates: Record<string, unknown> = {
+    name: input.name,
+    whatsapp: input.phone || null,
+    address: input.address || null,
+    updatedAt: new Date(),
+  };
+  if (input.city !== undefined && input.city.trim()) updates.city = input.city.trim();
+  if (input.priceFrom !== undefined) {
+    // 0 = belum diisi (disembunyikan dari marketplace). Nominal harus >= 0.
+    const price = Number(input.priceFrom);
+    updates.priceFrom = Number.isFinite(price) && price > 0 ? String(Math.round(price)) : "0";
+  }
+  if (input.bankName !== undefined) updates.bankName = input.bankName?.trim() || null;
+  if (input.bankAccountNumber !== undefined) updates.bankAccountNumber = input.bankAccountNumber?.trim() || null;
+  if (input.bankAccountHolder !== undefined) updates.bankAccountHolder = input.bankAccountHolder?.trim() || null;
+
   await db
     .update(tenants)
-    .set({
-      name: input.name,
-      whatsapp: input.phone || null,
-      address: input.address || null,
-      updatedAt: new Date(),
-    })
+    .set(updates)
     // WAJIB scope ke tenant milik admin — bukan baris pertama tabel
     .where(eq(tenants.id, ctx.tenantId));
 

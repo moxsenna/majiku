@@ -46,6 +46,11 @@ export const tenants = pgTable("tenants", {
   programs: jsonb("programs").$type<TenantProgram[]>().default([]),
   photos: jsonb("photos").$type<string[]>().default([]),
   whatsapp: text("whatsapp"),
+  // Rekening lembaga untuk instruksi pembayaran manual ke orang tua
+  // (dipakai di portal ortu; diisi lembaga lewat Pengaturan).
+  bankName: text("bank_name"),
+  bankAccountNumber: text("bank_account_number"),
+  bankAccountHolder: text("bank_account_holder"),
   adminUserId: text("admin_user_id").references(() => user.id, { onDelete: "set null" }),
   // Masa trial SaaS 14 hari: diisi saat lembaga mendaftar. NULL = tenant lama/demo (tanpa trial).
   trialUntil: timestamp("trial_until", { withTimezone: true }),

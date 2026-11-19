@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import CheckoutView from "@/views/Checkout";
 
 export const metadata = {
-  title: "Checkout Berlangganan | Bunayo",
+  title: "Checkout Berlangganan",
   description:
     "Aktifkan paket langganan Bunayo untuk daycare, preschool, dan bimbel Anda dengan pembayaran aman PayCore.",
 };

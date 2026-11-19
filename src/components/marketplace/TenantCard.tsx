@@ -35,9 +35,12 @@ export function TenantCard({
       : "");
 
   const numericPrice = Number(tenant.priceFrom);
+  const adaHarga = Number.isFinite(numericPrice) && numericPrice > 0;
   const formattedPrice = Number.isFinite(numericPrice)
     ? Intl.NumberFormat("id-ID").format(numericPrice)
     : tenant.priceFrom;
+  // Kota sentinel "Belum diisi" disembunyikan sampai lembaga mengisinya di Pengaturan.
+  const adaKota = tenant.city && tenant.city !== "Belum diisi";
 
   const targetHref = `/marketplace/${tenant.slug}`;
 
@@ -64,17 +67,23 @@ export function TenantCard({
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-3 pt-0">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{tenant.city}</span>
-        </div>
-        <div className="border-t pt-3 text-sm">
-          <span className="text-xs text-muted-foreground">Mulai dari </span>
-          <span className="font-semibold text-foreground">
-            Rp {formattedPrice}
-          </span>
-          <span className="text-xs text-muted-foreground">/bulan</span>
-        </div>
+        {adaKota && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{tenant.city}</span>
+          </div>
+        )}
+        {adaHarga ? (
+          <div className="border-t pt-3 text-sm">
+            <span className="text-xs text-muted-foreground">Mulai dari </span>
+            <span className="font-semibold text-foreground">Rp {formattedPrice}</span>
+            <span className="text-xs text-muted-foreground">/bulan</span>
+          </div>
+        ) : (
+          <div className="border-t pt-3 text-sm text-xs text-muted-foreground">
+            Info biaya: hubungi lembaga
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -124,7 +133,13 @@ export function TenantCard({
               <div className="p-3 bg-muted/40 rounded-lg space-y-1.5">
                 <div className="flex items-start gap-2 text-xs">
                   <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                  <span>{tenant.address ? `${tenant.address}, ${tenant.city}` : tenant.city}</span>
+                  <span>
+                    {tenant.address
+                      ? `${tenant.address}${adaKota ? `, ${tenant.city}` : ""}`
+                      : adaKota
+                        ? tenant.city
+                        : "Alamat belum diisi"}
+                  </span>
                 </div>
                 {tenant.whatsapp && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">

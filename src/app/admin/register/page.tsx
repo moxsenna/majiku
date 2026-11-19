@@ -1,7 +1,8 @@
 import AdminAuth from "@/views/auth/AdminAuth";
 
 export const metadata = {
-  title: "Daftar Lembaga Daycare Baru | Bunayo",
+  // Tanpa akhiran brand: layout root sudah menambahkan template "%s | Bunayo".
+  title: "Daftar Lembaga Baru",
   robots: { index: false, follow: false },
 };
 

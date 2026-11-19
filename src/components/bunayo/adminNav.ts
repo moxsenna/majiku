@@ -51,10 +51,9 @@ export function adminNav(istilah: Istilah): NavEntry[] {
       label: "Pesan",
       href: "/messages",
       icon: MessageCircle,
-      sub: [
-        { label: "Pengumuman", href: "/messages", exact: true },
-        { label: "Kotak Masuk", href: "/messages/kotak-masuk" },
-      ],
+      // Kotak Masuk (percakapan wali↔guru) disembunyikan dari nav: percakapan
+      // belum melibatkan admin, layarnya selalu kosong (route tetap ada).
+      sub: [{ label: "Pengumuman", href: "/messages", exact: true }],
     },
     { group: "Kelola" },
     { key: "siswa", label: "Siswa & Keluarga", short: "Siswa", href: "/students", icon: UsersRound },

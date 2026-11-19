@@ -99,19 +99,12 @@ export async function submitTrialApplication(
 
   if (matchedClass) {
     tenantId = matchedClass.tenantId;
-  } else {
-    const [firstTenant] = await db
-      .select({ id: tenants.id })
-      .from(tenants)
-      .orderBy(asc(tenants.createdAt))
-      .limit(1);
-    if (firstTenant) {
-      tenantId = firstTenant.id;
-    }
   }
 
+  // Keamanan: tanpa fallback "tenant pertama" — pengajuan tanpa program yang
+  // sah tidak boleh mendarat di lembaga arbitrer.
   if (!tenantId) {
-    throw new Error("Lembaga daycare tidak ditemukan");
+    throw new Error("Program tidak ditemukan. Pilih program dari daftar yang tersedia.");
   }
 
   const parentName = input.parentName?.trim() || session.user.name || null;
@@ -553,6 +546,8 @@ export async function getSchedulingOptions(): Promise<SchedulingOptions> {
 export interface RegistrationProgramItem {
   id: string;
   name: string;
+  /** Nama lembaga pemilik program (multi-tenant portal ortu). */
+  tenantName: string;
   age: string;
   price: number;
   schedule: string;
@@ -562,8 +557,13 @@ export interface RegistrationProgramItem {
   status: "open" | "full" | "closed";
 }
 
+/**
+ * Program aktif dari lembaga aktif, dengan sisa kuota nyata.
+ * TIDAK ADA program fiktif: bila belum ada data, kembalikan [] — UI menampilkan
+ * empty state jujur (kepercayaan > tampilan penuh).
+ */
 export async function getAvailablePrograms(): Promise<RegistrationProgramItem[]> {
-  const dbClasses = await db
+  const rows = await db
     .select({
       id: classes.id,
       name: classes.name,
@@ -571,58 +571,35 @@ export async function getAvailablePrograms(): Promise<RegistrationProgramItem[]>
       capacity: classes.capacity,
       pricePerMonth: classes.pricePerMonth,
       schedule: classes.schedule,
+      tenantName: tenants.name,
+      enrolled: sql<number>`(
+        select count(*)::int
+        from ${studentEnrollments}
+        where ${studentEnrollments.classId} = ${classes.id}
+          and ${studentEnrollments.isActive} = true
+      )`,
     })
     .from(classes)
-    .where(eq(classes.isActive, true))
+    .innerJoin(tenants, eq(classes.tenantId, tenants.id))
+    .where(and(eq(classes.isActive, true), eq(tenants.isActive, true)))
     .orderBy(asc(classes.name));
 
-  if (dbClasses.length === 0) {
-    return [
-      {
-        id: "toddler",
-        name: "Program Toddler",
-        age: "1.5 - 3 tahun",
-        price: 2000000,
-        schedule: "Senin - Jumat, 08:00 - 12:00",
-        features: ["Stimulasi motorik", "Musik & gerak", "Bermain sensori"],
-        quota: 20,
-        enrolled: 0,
-        status: "open",
-      },
-      {
-        id: "playgroup",
-        name: "Playgroup",
-        age: "3 - 4 tahun",
-        price: 2500000,
-        schedule: "Senin - Jumat, 08:00 - 13:00",
-        features: ["Belajar huruf & angka", "Kegiatan seni", "Bermain kreatif"],
-        quota: 25,
-        enrolled: 0,
-        status: "open",
-      },
-      {
-        id: "kindergarten",
-        name: "TK A & B",
-        age: "4 - 6 tahun",
-        price: 3000000,
-        schedule: "Senin - Jumat, 07:30 - 14:00",
-        features: ["Persiapan SD", "Bahasa Inggris", "Ekstrakurikuler"],
-        quota: 30,
-        enrolled: 0,
-        status: "open",
-      },
-    ];
-  }
-
-  return dbClasses.map((c) => ({
-    id: c.id,
-    name: c.name,
-    age: c.description || "2 - 6 tahun",
-    price: Number(c.pricePerMonth) || 2000000,
-    schedule: c.schedule || "Senin - Jumat, 08:00 - 12:00",
-    features: ["Aktivitas belajar terstruktur", "Laporan harian perkembangan", "Dokumentasi foto kegiatan"],
-    quota: c.capacity || 20,
-    enrolled: 0,
-    status: "open",
-  }));
+  return rows.map((c) => {
+    const quota = c.capacity || 0;
+    const enrolled = c.enrolled ?? 0;
+    const status: "open" | "full" | "closed" =
+      quota > 0 && enrolled >= quota ? "full" : "open";
+    return {
+      id: c.id,
+      name: c.name,
+      tenantName: c.tenantName,
+      age: c.description || "—",
+      price: Number(c.pricePerMonth) || 0,
+      schedule: c.schedule || "Jadwal mengikuti lembaga",
+      features: ["Aktivitas belajar terstruktur", "Laporan harian perkembangan", "Dokumentasi foto kegiatan"],
+      quota,
+      enrolled,
+      status,
+    };
+  });
 }

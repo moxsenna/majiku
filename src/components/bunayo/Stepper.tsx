@@ -1,8 +1,20 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Langkah (kit .steps): aktif = Tinta, selesai = centang hijau lembut. */
-export function Stepper({ steps, current, className }: { steps: string[]; current: number; className?: string }) {
+/** Langkah (kit .steps): aktif = Tinta, selesai = centang hijau lembut.
+ * srLabelsOnMobile: label disembunyikan visual di layar ≤560px tapi tetap
+ * terbaca screen reader (sr-only) — jangan pakai text-[0px]. */
+export function Stepper({
+  steps,
+  current,
+  className,
+  srLabelsOnMobile = false,
+}: {
+  steps: string[];
+  current: number;
+  className?: string;
+  srLabelsOnMobile?: boolean;
+}) {
   return (
     <ol className={cn("flex items-center", className)} aria-label="Langkah">
       {steps.map((label, i) => {
@@ -26,7 +38,9 @@ export function Stepper({ steps, current, className }: { steps: string[]; curren
               >
                 {done ? <Check className="h-4 w-4" strokeWidth={3} /> : i + 1}
               </span>
-              <span className={cn(!on && "max-[560px]:hidden")}>{label}</span>
+              <span className={cn(!on && !srLabelsOnMobile && "max-[560px]:hidden", srLabelsOnMobile && "max-[560px]:sr-only")}>
+                {label}
+              </span>
             </span>
             {i < steps.length - 1 && <span aria-hidden className="mx-3 h-[1.5px] min-w-6 flex-1 bg-border" />}
           </li>

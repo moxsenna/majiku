@@ -50,14 +50,43 @@ export default function PengaturanLembaga({ initialData }: { initialData?: Penga
   const { toast } = useToast();
   const query = useQuery({ queryKey: ["pengaturan"], queryFn: getPengaturan, initialData });
   const { data, isError, refetch } = query;
-  const [form, setForm] = useState({ name: "", whatsapp: "", address: "" });
+  const [form, setForm] = useState({
+    name: "",
+    whatsapp: "",
+    address: "",
+    city: "",
+    priceFrom: "",
+    bankName: "",
+    bankAccountNumber: "",
+    bankAccountHolder: "",
+  });
 
   useEffect(() => {
-    if (data) setForm({ name: data.lembaga.name, whatsapp: data.lembaga.whatsapp ?? "", address: data.lembaga.address ?? "" });
+    if (data)
+      setForm({
+        name: data.lembaga.name,
+        whatsapp: data.lembaga.whatsapp ?? "",
+        address: data.lembaga.address ?? "",
+        city: data.lembaga.city === "Belum diisi" ? "" : data.lembaga.city,
+        priceFrom: data.lembaga.priceFrom > 0 ? String(data.lembaga.priceFrom) : "",
+        bankName: data.lembaga.bank.bankName ?? "",
+        bankAccountNumber: data.lembaga.bank.bankAccountNumber ?? "",
+        bankAccountHolder: data.lembaga.bank.bankAccountHolder ?? "",
+      });
   }, [data]);
 
   const simpan = useMutation({
-    mutationFn: () => updateTenantProfile({ name: form.name.trim(), phone: form.whatsapp.trim() || undefined, address: form.address.trim() || undefined }),
+    mutationFn: () =>
+      updateTenantProfile({
+        name: form.name.trim(),
+        phone: form.whatsapp.trim() || undefined,
+        address: form.address.trim() || undefined,
+        city: form.city.trim() || undefined,
+        priceFrom: form.priceFrom.trim() ? Number(form.priceFrom.trim().replace(/\D/g, "")) : 0,
+        bankName: form.bankName.trim() || undefined,
+        bankAccountNumber: form.bankAccountNumber.trim() || undefined,
+        bankAccountHolder: form.bankAccountHolder.trim() || undefined,
+      }),
     onSuccess: () => {
       toast({ title: "Profil lembaga disimpan" });
       qc.invalidateQueries({ queryKey: ["pengaturan"] });
@@ -87,7 +116,12 @@ export default function PengaturanLembaga({ initialData }: { initialData?: Penga
   const berubah =
     form.name.trim() !== data.lembaga.name ||
     form.whatsapp.trim() !== (data.lembaga.whatsapp ?? "") ||
-    form.address.trim() !== (data.lembaga.address ?? "");
+    form.address.trim() !== (data.lembaga.address ?? "") ||
+    form.city.trim() !== (data.lembaga.city === "Belum diisi" ? "" : data.lembaga.city) ||
+    form.priceFrom.trim() !== (data.lembaga.priceFrom > 0 ? String(data.lembaga.priceFrom) : "") ||
+    form.bankName.trim() !== (data.lembaga.bank.bankName ?? "") ||
+    form.bankAccountNumber.trim() !== (data.lembaga.bank.bankAccountNumber ?? "") ||
+    form.bankAccountHolder.trim() !== (data.lembaga.bank.bankAccountHolder ?? "");
   const r = data.ringkasan;
 
   return (
@@ -130,11 +164,24 @@ export default function PengaturanLembaga({ initialData }: { initialData?: Penga
                 <Field id="l-alamat" label="Alamat">
                   <Input id="l-alamat" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} disabled={!bisaUbah} />
                 </Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field id="l-kota" label="Kota" hint="Tampil di marketplace.">
+                    <Input id="l-kota" value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} disabled={!bisaUbah} placeholder="Contoh: Bandung" />
+                  </Field>
+                  <Field id="l-harga" label="Biaya mulai (Rp/bulan)" hint="Tampil di marketplace. Kosongkan bila belum mau dipublikasikan.">
+                    <Input
+                      id="l-harga"
+                      inputMode="numeric"
+                      value={form.priceFrom}
+                      onChange={(e) => setForm((f) => ({ ...f, priceFrom: e.target.value.replace(/\D/g, "") }))}
+                      disabled={!bisaUbah}
+                      placeholder="Contoh: 500000"
+                    />
+                  </Field>
+                </div>
                 <dl className="grid grid-cols-[140px_1fr] gap-x-3 gap-y-2 text-[15px]">
                   <dt className="text-muted-foreground">Jenis</dt>
                   <dd>{LABEL_JENIS_LEMBAGA[data.lembaga.type]}</dd>
-                  <dt className="text-muted-foreground">Kota</dt>
-                  <dd>{data.lembaga.city}</dd>
                   <dt className="text-muted-foreground">Pemilik</dt>
                   <dd className="break-all">{data.pemilik ? `${data.pemilik.name} · ${data.pemilik.email}` : "—"}</dd>
                 </dl>
@@ -144,7 +191,18 @@ export default function PengaturanLembaga({ initialData }: { initialData?: Penga
                       <Button
                         type="button"
                         variant="sec"
-                        onClick={() => setForm({ name: data.lembaga.name, whatsapp: data.lembaga.whatsapp ?? "", address: data.lembaga.address ?? "" })}
+                        onClick={() =>
+                          setForm({
+                            name: data.lembaga.name,
+                            whatsapp: data.lembaga.whatsapp ?? "",
+                            address: data.lembaga.address ?? "",
+                            city: data.lembaga.city === "Belum diisi" ? "" : data.lembaga.city,
+                            priceFrom: data.lembaga.priceFrom > 0 ? String(data.lembaga.priceFrom) : "",
+                            bankName: data.lembaga.bank.bankName ?? "",
+                            bankAccountNumber: data.lembaga.bank.bankAccountNumber ?? "",
+                            bankAccountHolder: data.lembaga.bank.bankAccountHolder ?? "",
+                          })
+                        }
                       >
                         Batal
                       </Button>
@@ -183,8 +241,8 @@ export default function PengaturanLembaga({ initialData }: { initialData?: Penga
                 </Link>
               </Panel>
               <p className="text-[13px] text-muted-foreground">
-                Pengaturan penagihan (tanggal terbit otomatis, pengingat, rekening pencairan, denda, biaya transaksi), cabang, logo, dan notifikasi
-                belum tersedia. Tagihan saat ini diterbitkan manual dari Keuangan.
+                Pengaturan penagihan otomatis (tanggal terbit otomatis, pengingat, pencairan, denda, biaya transaksi), cabang, logo, dan notifikasi
+                belum tersedia. Tagihan saat ini diterbitkan manual dari Keuangan; instruksi pembayaran manual ke orang tua memakai rekening di atas.
               </p>
             </div>
           </div>

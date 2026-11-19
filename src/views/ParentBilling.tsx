@@ -94,13 +94,16 @@ export default function ParentBilling({ invoices = [], paymentsEnabled = false }
       | "unpaid"
       | "overdue",
     paidDate: inv.paidAt ? format(new Date(inv.paidAt), "d MMMM yyyy", { locale: idLocale }) : undefined,
-    // Nama/alamat lembaga belum ada di ringkasan tagihan; jangan isi alamat & telepon karangan.
-    schoolName: "Bunayo",
+    // Alamat & telepon tidak diisi karangan — hanya nama lembaga nyata.
+    schoolName: inv.tenantName || "Tagihan lembaga",
   });
 
   const bayarOnline = async (invoiceId: string, inv?: ParentInvoiceSummary) => {
     if (!paymentsEnabled) {
-      toast({ title: "Pembayaran online belum aktif", description: "Minta admin lembaga mengaktifkan PayCore.", variant: "destructive" });
+      toast({
+        title: "Pembayaran online belum tersedia",
+        description: "Buka detail tagihan untuk nomor rekening lembaga, lalu kirim bukti transfer lewat Konfirmasi Transfer Manual.",
+      });
       return;
     }
     const target = inv ?? invoices.find((i) => i.id === invoiceId);

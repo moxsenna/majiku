@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Clock, ArrowRight, ShieldCheck } from "lucide-react";
 
 export const metadata = {
-  title: "Status Pembayaran | Bunayo",
+  title: "Status Pembayaran",
   robots: { index: false, follow: false },
 };
 

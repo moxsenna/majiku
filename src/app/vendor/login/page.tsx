@@ -1,7 +1,7 @@
 import VendorAuth from "@/views/auth/VendorAuth";
 
 export const metadata = {
-  title: "Masuk Super Admin Platform | Bunayo",
+  title: "Masuk Super Admin Platform",
   robots: { index: false, follow: false },
 };
 

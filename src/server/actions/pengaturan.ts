@@ -39,6 +39,14 @@ export interface PengaturanData {
     address: string | null;
     whatsapp: string | null;
     isVerified: boolean;
+    /** Harga mulai layanan untuk marketplace; 0 = belum diisi (disembunyikan). */
+    priceFrom: number;
+    /** Rekening untuk instruksi pembayaran manual ke orang tua. */
+    bank: {
+      bankName: string | null;
+      bankAccountNumber: string | null;
+      bankAccountHolder: string | null;
+    };
   };
   pemilik: { name: string; email: string } | null;
   ringkasan: { anakAktif: number; kelasAktif: number; kapasitas: number; stafAktif: number };
@@ -126,6 +134,12 @@ export async function getPengaturan(): Promise<PengaturanData> {
       address: t.address,
       whatsapp: t.whatsapp,
       isVerified: !!t.isVerified,
+      priceFrom: Number(t.priceFrom ?? 0),
+      bank: {
+        bankName: t.bankName ?? null,
+        bankAccountNumber: t.bankAccountNumber ?? null,
+        bankAccountHolder: t.bankAccountHolder ?? null,
+      },
     },
     pemilik: pemilik[0] ?? null,
     ringkasan: {
@@ -177,6 +191,12 @@ function demoPengaturan(): PengaturanData {
       address: "Jl. Contoh No. 12, Bandung",
       whatsapp: "0812-0000-0000",
       isVerified: true,
+      priceFrom: 2500000,
+      bank: {
+        bankName: "BCA",
+        bankAccountNumber: "1234567890",
+        bankAccountHolder: "Yayasan Rumah Pelangi",
+      },
     },
     pemilik: { name: "Dewi Lestari", email: "dewi@contoh.id" },
     ringkasan: { anakAktif: 38, kelasAktif: 4, kapasitas: 44, stafAktif: 4 },

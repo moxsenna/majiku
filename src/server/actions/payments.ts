@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { desc, eq, or } from "drizzle-orm";
 import { db } from "@/db";
-import { invoices, paymentOrders, students, classes, studentEnrollments } from "@/db/schema";
+import { invoices, paymentOrders, students, classes, studentEnrollments, tenants } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { createPayCoreOrder, isPaymentsEnabled } from "@/server/paycore";
@@ -26,6 +26,7 @@ export interface ParentInvoiceSummary {
   id: string;
   invoiceNumber: string;
   studentName: string;
+  tenantName: string | null;
   billingPeriodStart: string | null;
   billingPeriodEnd: string | null;
   amount: number;
@@ -50,6 +51,7 @@ export async function getMyInvoices(): Promise<ParentInvoiceSummary[]> {
       id: invoices.id,
       invoiceNumber: invoices.invoiceNumber,
       studentName: students.name,
+      tenantName: tenants.name,
       billingPeriodStart: invoices.billingPeriodStart,
       billingPeriodEnd: invoices.billingPeriodEnd,
       amount: invoices.amount,
@@ -61,6 +63,7 @@ export async function getMyInvoices(): Promise<ParentInvoiceSummary[]> {
     })
     .from(invoices)
     .innerJoin(students, eq(invoices.studentId, students.id))
+    .innerJoin(tenants, eq(students.tenantId, tenants.id))
     .where(isAdmin ? undefined : eq(students.parentUserId, session.user.id))
     .orderBy(desc(invoices.dueDate));
 
@@ -68,6 +71,7 @@ export async function getMyInvoices(): Promise<ParentInvoiceSummary[]> {
     id: r.id,
     invoiceNumber: r.invoiceNumber,
     studentName: r.studentName,
+    tenantName: r.tenantName ?? null,
     billingPeriodStart: r.billingPeriodStart,
     billingPeriodEnd: r.billingPeriodEnd,
     amount: Number(r.amount ?? 0),
@@ -83,6 +87,16 @@ export interface ParentInvoiceDetail extends ParentInvoiceSummary {
   className: string | null;
   parentName: string | null;
   parentPhone: string | null;
+  /** Nama lembaga penerbit tagihan (untuk dokumen & instruksi bayar). */
+  tenantName: string | null;
+  /** WhatsApp lembaga (untuk konfirmasi transfer manual). */
+  tenantWhatsapp: string | null;
+  /** Rekening lembaga untuk instruksi pembayaran manual (bisa null bila belum diisi). */
+  bank: {
+    bankName: string | null;
+    bankAccountNumber: string | null;
+    bankAccountHolder: string | null;
+  } | null;
   payments: {
     id: string;
     paycoreOrderId: string | null;
@@ -111,9 +125,15 @@ export async function getMyInvoiceById(
       parentPhone: students.parentPhone,
       parentEmail: students.parentEmail,
       studentParentUserId: students.parentUserId,
+      tenantName: tenants.name,
+      tenantWhatsapp: tenants.whatsapp,
+      tenantBankName: tenants.bankName,
+      tenantBankAccountNumber: tenants.bankAccountNumber,
+      tenantBankAccountHolder: tenants.bankAccountHolder,
     })
     .from(invoices)
     .innerJoin(students, eq(invoices.studentId, students.id))
+    .innerJoin(tenants, eq(students.tenantId, tenants.id))
     .where(eq(invoices.id, invoiceId))
     .limit(1);
 
@@ -159,6 +179,16 @@ export async function getMyInvoiceById(
     className: enrollRows[0]?.className ?? null,
     parentName: row.parentName,
     parentPhone: row.parentPhone,
+    tenantName: row.tenantName ?? null,
+    tenantWhatsapp: row.tenantWhatsapp ?? null,
+    bank:
+      row.tenantBankName || row.tenantBankAccountNumber || row.tenantBankAccountHolder
+        ? {
+            bankName: row.tenantBankName ?? null,
+            bankAccountNumber: row.tenantBankAccountNumber ?? null,
+            bankAccountHolder: row.tenantBankAccountHolder ?? null,
+          }
+        : null,
     payments: payments.map((p) => ({
       id: p.id,
       paycoreOrderId: p.paycoreOrderId,
