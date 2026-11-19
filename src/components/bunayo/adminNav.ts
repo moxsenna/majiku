@@ -45,7 +45,16 @@ export function adminNav(istilah: Istilah): NavEntry[] {
         { label: "RPP", href: "/lesson-plans" },
       ],
     },
-    { key: "pesan", label: "Pesan", href: "/messages", icon: MessageCircle },
+    {
+      key: "pesan",
+      label: "Pesan",
+      href: "/messages",
+      icon: MessageCircle,
+      sub: [
+        { label: "Pengumuman", href: "/messages", exact: true },
+        { label: "Kotak Masuk", href: "/messages/kotak-masuk" },
+      ],
+    },
     { group: "Kelola" },
     { key: "siswa", label: "Siswa & Keluarga", short: "Siswa", href: "/students", icon: UsersRound },
     { key: "trial", label: "Pendaftaran & Trial", href: "/crm", indent: true },

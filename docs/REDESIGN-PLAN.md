@@ -308,3 +308,17 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | State | isi/kosong/memuat/galat | EmptyState "Belum ada kelas"→Buat kelas; kalender tanpa kelas → Buka Kelas & Program; tanpa sesi → Tambah sesi; skeleton; ErrorBanner + Stale |
 | Bersih-bersih | — | `views/Classes.tsx`, `views/Schedule.tsx` dihapus |
 
+
+### Fase 3 · Pesan — O11 Pengumuman + O10 Kotak masuk (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | baca-saja, scope tenant | `pesan.ts` `getPengumuman` (daftar + pengirim + penerima saat ini + keluarga tanpa akun; definisi di kepala file). Kirim/hapus = action lama `createAnnouncement`/`deleteAnnouncement` |
+| Jujur soal penerima | jumlah nyata, yang tak menerima disebut | "Semua keluarga dengan akun aktif · N keluarga" + "M keluarga belum punya akun … Lihat wali belum tertaut" (→ S1 `?filter=wali`) |
+| Alur | tulis → konfirmasi → terkirim → hapus | Playwright DB uji: AlertDialog "Kirim ke 1 keluarga?", toast, muncul di Terkirim (dikelompokkan per bulan, jam + penerima + pengirim), hapus dengan konfirmasi → hilang |
+| O10 | EmptyState jujur | Admin tidak punya percakapan (`conversations` = wali↔guru, N29) → "Kotak masuk lembaga belum tersedia" + arahan ke Pengumuman/WA; tidak membaca chat privat wali–guru |
+| Navigasi | sub Pesan | adminNav: Pengumuman · Kotak Masuk; di ≤1000 tautan "Kotak masuk" di header |
+| BARU disembunyikan | audiens per kelas, jadwal kirim, WA, draf, tingkat baca | catatan di bawah daftar Terkirim; backlog O10/O11 |
+| Demo | baca-saja | InfoBox Mode demo, form nonaktif, tanpa tombol hapus |
+| State | isi/kosong/memuat/galat | EmptyState "Belum ada pengumuman" (390), skeleton dua panel, ErrorBanner + Stale |
+| Bersih-bersih | — | `views/Messages.tsx` dihapus |

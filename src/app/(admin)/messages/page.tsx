@@ -1,9 +1,10 @@
-import Messages from "@/views/Messages";
-import { listAnnouncements } from "@/server/actions/announcements";
+import Pengumuman from "@/views/pesan/Pengumuman";
+import { getPengumuman } from "@/server/actions/pesan";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Pengumuman" };
 
 export default async function Page() {
-  const rows = await listAnnouncements();
-  return <Messages announcements={rows} />;
+  const initialData = await getPengumuman().catch(() => undefined);
+  return <Pengumuman initialData={initialData} />;
 }
