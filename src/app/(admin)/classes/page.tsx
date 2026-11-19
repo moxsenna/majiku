@@ -1,21 +1,11 @@
-import Classes from "@/views/Classes";
-import {
-  listClassesWithTutor,
-  listTutorOptions,
-} from "@/server/actions/classesCrud";
+import KelasProgram from "@/views/kelas/KelasProgram";
+import { getKelasProgram } from "@/server/actions/kelasJadwal";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Kelas & program" };
 
 export default async function Page() {
-  const [classesList, tutorOptions] = await Promise.all([
-    listClassesWithTutor(),
-    listTutorOptions(),
-  ]);
-
-  return (
-    <Classes
-      initialClasses={classesList}
-      availableTutors={tutorOptions}
-    />
-  );
+  // Galat dimuat sebagai bendera: view menampilkan banner + Coba lagi, bukan "Belum ada kelas".
+  const initialData = await getKelasProgram().catch(() => undefined);
+  return <KelasProgram initialData={initialData} />;
 }

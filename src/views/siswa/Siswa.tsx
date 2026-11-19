@@ -147,7 +147,7 @@ export default function Siswa({
                   searchPlaceholder="Cari nama anak atau wali"
                   initialQuery={params.get("q") ?? ""}
                   filters={filters}
-                  defaultFilter="aktif"
+                  defaultFilter={kelas.some((k) => k.id === params.get("kelas")) ? `k-${params.get("kelas")}` : "aktif"}
                   activeRowId={aktifId}
                   onRowClick={(r) => setAktifId(r.id)}
                   renderCard={(r) => (

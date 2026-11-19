@@ -289,5 +289,22 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Responsif | 1440/834/390 | 1440 tabel + InfoBox; 390 mode kartu, filter melipat, bottom nav Kehadiran aktif; screenshot tersimpan |
 | Lint/build | lulus | `npm run lint` 0, `npm run build` sukses |
 
-**Belum diverifikasi**: alur izin guru (action approve belum ada); O1/O2 Kelas & Jadwal masih tampilan lama — urutan berikutnya sesuai Fase 3.
+**Belum diverifikasi**: alur izin guru (action approve belum ada).
+
+### Fase 3 · Kelas & Jadwal — O1 Kelas & program + O2 Kalender sesi (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | baca-saja, scope tenant, satu sumber jadwal | `kelasJadwal.ts` (`getKelasProgram`, `getKalenderSesi`; definisi di kepala file). Jadwal kartu O1 diringkas dari `class_schedules` aktif ("Sen–Jum 09.00–11.00"); kolom teks `classes.schedule` tidak ditampilkan/ditanyakan lagi (N21) |
+| Tulis | hanya action lama | `createClass`/`updateClass`/`toggleClassActive`, `create/update/delete/toggleClassSchedule`. `updateClass` dipanggil dengan `tutorId` hanya bila guru diganti (action menghapus & membuat ulang penugasan → tarif honor kembali bawaan) |
+| O1 kartu | krayon kelas, guru·ruang, terisi/kapasitas + bar, ≥90% merah, kursi/daftar tunggu/trial | screenshot DB uji 1440/834/390 + demo ("Playgroup B 11/12 Hampir penuh" merah) |
+| O1 → siswa | "Lihat anak" membuka S1 terfilter kelas | `/students?kelas=<id>` → chip kelas aktif (Playwright) |
+| O2 grid | minggu berjalan, hari ini stabilo, sesi tumpang tindih berdampingan | Lajur otomatis per hari (demo: Toddler A full-day + Baby Bee + Playgroup B tanpa saling menutupi); Sabtu tampil bila ada sesi Sabtu |
+| O2 ≤560 / Agenda | daftar per hari | Mode Agenda (tombol) dan otomatis di 390 |
+| Alur tulis | buat kelas → sesi → jeda → nonaktif | Playwright DB uji: kelas baru muncul, sesi Senin 09.00 tampil di grid, Jeda → InfoBox "1 sesi dijeda" (bisa dibuka lagi), kartu kembali "Belum ada jadwal", Nonaktifkan → chip Nonaktif |
+| Slot tanpa kelas | dicegah | Action `listSchedules` memfilter tenant lewat kelas (inner join) → slot "Semua kelas" lama tak akan pernah tampil; pilihan itu dihapus dari dialog |
+| BARU disembunyikan | sesi konkret per tanggal, navigasi minggu, Tanpa guru + pengganti (O3), libur bertanggal + dampak (O4), batas usia terstruktur, paket per kelas | catatan jujur di bawah kalender; backlog O2/O3/O4 |
+| Demo | baca-saja | InfoBox Mode demo, tombol tambah/ubah tidak dirender |
+| State | isi/kosong/memuat/galat | EmptyState "Belum ada kelas"→Buat kelas; kalender tanpa kelas → Buka Kelas & Program; tanpa sesi → Tambah sesi; skeleton; ErrorBanner + Stale |
+| Bersih-bersih | — | `views/Classes.tsx`, `views/Schedule.tsx` dihapus |
 
