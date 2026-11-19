@@ -1,13 +1,12 @@
-import LessonPlans from "@/views/LessonPlans";
-import { listLessonPlans, getClassOptions } from "@/server/actions/lessonPlans";
-import { todayInWib } from "@/lib/datetime";
+import RppMinggu from "@/views/rpp/RppMinggu";
+import { getRppMinggu } from "@/server/actions/rpp";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "RPP" };
 
-export default async function Page() {
-  const [plans, classOptions] = await Promise.all([
-    listLessonPlans(),
-    getClassOptions(),
-  ]);
-  return <LessonPlans plans={plans} classOptions={classOptions} today={todayInWib()} />;
+export default async function Page({ searchParams }: { searchParams: Promise<{ minggu?: string }> }) {
+  const { minggu } = await searchParams;
+  // Galat dimuat sebagai bendera: view menampilkan banner + Coba lagi, bukan "Belum ada RPP".
+  const initialData = await getRppMinggu(minggu).catch(() => undefined);
+  return <RppMinggu initialData={initialData} minggu={minggu} />;
 }

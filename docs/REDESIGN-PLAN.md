@@ -337,3 +337,17 @@ Belum diverifikasi: tema gelap pada shell, lembar "Lainnya" (≤560) dibuka, aku
 | Demo | baca-saja | InfoBox Mode demo, tombol tulis/hapus tidak dirender |
 | State | isi/kosong/memuat/galat | EmptyState "Belum ada anak di kelas", skeleton, ErrorBanner + Stale |
 | Bersih-bersih | — | `views/DailyReports.tsx`, `views/Gallery.tsx` dihapus |
+
+### Fase 3 · Pembelajaran — O8 RPP (2026-11-19)
+
+| CHECK | EXPECT | EVIDENCE |
+|---|---|---|
+| Sumber | baca-saja, scope tenant | `rpp.ts` `getRppMinggu(minggu)` — RPP berkelas milik tenant (RPP tanpa kelas tak punya pemilik lembaga → tidak tampil), hari bersesi dari `class_schedules`, RPP minggu lalu. Tulis/hapus = action lama `createLessonPlan`/`updateLessonPlan`/`deleteLessonPlan` |
+| Papan mingguan | tab per kelas, kolom per hari, status, jam kegiatan, bahan, hari ini bingkai tebal | demo 1440 sesuai frame O8 (Sen Selesai, Sel Berjalan, Rab "Tidak ada sesi" redup, Kam Direncanakan); jam kegiatan dihitung dari jam mulai + durasi |
+| Tujuan minggu ini | chip krayon | gabungan tujuan RPP kelas di minggu itu |
+| Alur | buat → salin dari minggu lalu → hapus | Playwright DB uji: RPP baru tampil di Kam, minggu depan "Salin dari minggu lalu" → AlertDialog → tersalin (hari terisi tidak ditimpa), dua RPP uji dihapus |
+| Navigasi minggu | ‹ › | `?minggu=YYYY-MM-DD`, minggu berjalan tanpa parameter |
+| BARU disembunyikan | libur bertanggal mengosongkan hari, tujuan ↔ indikator perkembangan, trial ikut sesi | catatan di bawah papan; backlog O8 |
+| Demo | baca-saja | InfoBox Mode demo, tombol RPP/salin tidak dirender, kartu tidak bisa diklik |
+| State | isi/kosong/memuat/galat | EmptyState "Belum ada RPP minggu ini" → Buat RPP / Salin (390), skeleton 5 kolom, ErrorBanner + Stale |
+| Bersih-bersih | — | `views/LessonPlans.tsx` dihapus |
