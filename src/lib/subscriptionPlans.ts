@@ -22,7 +22,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     features: [
       "Hingga 50 siswa aktif",
       "2 kelas / rombel belajar",
-      "Absensi digital & QR Code",
+      "Absensi digital",
       "Laporan harian & dokumentasi kegiatan",
       "Chat langsung dengan orang tua",
       "Support via email & komunitas",
@@ -39,7 +39,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     features: [
       "Hingga 200 siswa aktif",
       "10 kelas / rombel belajar",
-      "Monitoring kehadiran & QR real-time",
+      "Monitoring kehadiran harian",
       "Billing SPP otomatis & pembayaran PayCore",
       "Manajemen tutor & kalkulasi honor",
       "Cloud R2 galeri foto tanpa batas",
@@ -50,17 +50,14 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
   enterprise: {
     id: "enterprise",
     name: "Paket Enterprise",
-    badge: "Franchise & Jaringan",
-    description: "Solusi lengkap jaringan cabang lembaga & yayasan",
+    badge: "Skala Besar",
+    description: "Untuk lembaga besar dengan kebutuhan khusus",
     priceMonthly: 1500000,
     priceYearly: 15000000, // Hemat 2 bulan
     features: [
       "Unlimited siswa & kelas",
-      "Multi-cabang / multi-tenant terpadu",
-      "Custom domain & branding mandiri",
       "Integrasi payment gateway Duitku/PayCore",
-      "Export data akuntansi & laporan keuangan",
-      "Dedicated Account Manager 24/7",
+      "Dedicated Account Manager",
       "Pelatihan & onboarding staf khusus",
     ],
   },

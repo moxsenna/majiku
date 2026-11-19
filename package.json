@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "start": "next start",
     "preview": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && opennextjs-cloudflare deploy"
+    "deploy": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && opennextjs-cloudflare deploy",
+    "postinstall": "node scripts/patch-floating-ui.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

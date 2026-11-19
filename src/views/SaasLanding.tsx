@@ -459,7 +459,7 @@ export default function SaasLanding() {
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/admin/register">
-                <Button size="lg" className="press h-btn-lg rounded-full bg-foreground px-7 text-base text-background hover:bg-foreground/90">
+                <Button size="lg" className="press h-btn-lg rounded-full bg-[hsl(249_26%_14%)] px-7 text-base text-[hsl(40_100%_98%)] hover:bg-[hsl(249_26%_20%)]">
                   Coba 14 hari gratis
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Button>
