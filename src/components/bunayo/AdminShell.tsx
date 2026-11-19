@@ -94,7 +94,7 @@ function SidebarNav({
           onClick={onNavigate}
           aria-current={on ? "page" : undefined}
           className={cn(
-            "relative flex items-center rounded text-sidebar-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-soft",
+            "press relative flex items-center rounded text-sidebar-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-soft",
             rail
               ? "mx-auto h-[54px] w-[60px] flex-col justify-center gap-[3px] text-center text-[10px] leading-tight"
               : "h-9 gap-2.5 whitespace-nowrap px-2 text-sm",
@@ -221,7 +221,7 @@ function SidebarFoot({
         onClick={onNavigate}
         aria-current={on ? "page" : undefined}
         className={cn(
-          "relative flex items-center rounded text-sidebar-foreground hover:bg-muted",
+          "press relative flex items-center rounded text-sidebar-foreground hover:bg-muted",
           rail ? "h-[54px] w-[60px] flex-col justify-center gap-[3px] text-[10px]" : "h-9 gap-2.5 px-2 text-sm",
           on && "bg-muted font-semibold text-foreground",
         )}
@@ -348,7 +348,7 @@ export function AdminShell({ nav, settings, mobileTabs, org, user, onSignOut, no
             </span>
           );
           return t.href ? (
-            <Link key={t.key} href={t.href} aria-current={on ? "page" : undefined} className={cls}>
+            <Link key={t.key} href={t.href} aria-current={on ? "page" : undefined} className={cn(cls, "press")}>
               {icon}
               {t.label}
               {t.dot && <span className="absolute right-[calc(50%-16px)] top-1 h-2 w-2 rounded-full bg-destructive" />}

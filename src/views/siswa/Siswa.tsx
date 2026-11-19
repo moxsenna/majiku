@@ -114,7 +114,7 @@ export default function Siswa({
   ];
 
   const aksi = (
-    <Button asChild>
+    <Button asChild className="press">
       <Link href="/students/baru">
         <Plus aria-hidden />
         Daftarkan anak
@@ -138,7 +138,7 @@ export default function Siswa({
               <ErrorBanner title="Daftar siswa gagal diperbarui" description="Yang tampil adalah data terakhir yang berhasil dimuat." onRetry={() => refetch()} />
             )}
             <Stale stale={isError}>
-              <div className="grid items-start gap-5 min-[1001px]:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="rise grid items-start gap-5 min-[1001px]:grid-cols-[minmax(0,1fr)_380px]">
                 <DataTable
                   rows={data}
                   columns={kolom}

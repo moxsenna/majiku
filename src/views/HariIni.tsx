@@ -211,7 +211,7 @@ export default function HariIni({ initialData }: { initialData?: HariIniData }) 
 
         <Stale stale={isError}>
           <div className="flex flex-col gap-5">
-            <StatRow>
+            <StatRow className="rise">
               <StatCard
                 label="Tiba"
                 periode="hari ini"
@@ -239,7 +239,7 @@ export default function HariIni({ initialData }: { initialData?: HariIniData }) 
             </StatRow>
 
             <div className="grid items-start gap-5 min-[561px]:grid-cols-2 min-[1001px]:grid-cols-[1.25fr_1fr_1fr]">
-              <Panel>
+              <Panel className="rise rise-2">
                 <PanelHeader title="Mendesak" meta={<span className={cn("tabular", mendesak.length > 0 && "text-destructive")}>{mendesak.length}</span>} />
                 {mendesak.length === 0 ? (
                   <PanelRow>
@@ -253,7 +253,7 @@ export default function HariIni({ initialData }: { initialData?: HariIniData }) 
                         <span className="block text-[13px] text-muted-foreground">{m.sub}</span>
                       </span>
                       <span>
-                        <Button asChild size="sm" variant={i === 0 ? "pri" : "sec"}>
+                        <Button asChild size="sm" variant={i === 0 ? "pri" : "sec"} className="press">
                           <Link href={m.action.href}>{m.action.label}</Link>
                         </Button>
                       </span>
@@ -262,7 +262,7 @@ export default function HariIni({ initialData }: { initialData?: HariIniData }) 
                 )}
               </Panel>
 
-              <Panel>
+              <Panel className="rise rise-2">
                 <PanelHeader
                   title="Kelas hari ini"
                   action={
@@ -303,7 +303,7 @@ export default function HariIni({ initialData }: { initialData?: HariIniData }) 
                 )}
               </Panel>
 
-              <Panel className="min-[561px]:max-[1000px]:col-span-2">
+              <Panel className="rise rise-3 min-[561px]:max-[1000px]:col-span-2">
                 <PanelHeader title="Nanti" meta={<span className="tabular">{nantiCount}</span>} />
                 {nantiCount === 0 && (
                   <PanelRow>

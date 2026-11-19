@@ -76,7 +76,7 @@ export default function Ringkasan({ initialData }: { initialData?: KeuanganData 
         ) : (
           <Stale stale={isError}>
             <div className="flex flex-col gap-5">
-              <StatRow>
+              <StatRow className="rise">
                 <StatCard
                   label="Total tagihan"
                   periode={data.periode}
