@@ -86,11 +86,25 @@ export function DemoAccessModal({
   const handleLoginDemo = async (opt: DemoRoleOption) => {
     setLoadingRole(opt.id);
     try {
-      // Login langsung via BetterAuth client
-      await authClient.signIn.email({
+      // Login langsung via BetterAuth client. authClient tidak melempar
+      // exception untuk kegagalan auth — hasilnya wajib dicek, kalau tidak
+      // redirect tetap terjadi tanpa sesi dan pengguna memantul tanpa pesan.
+      const { error } = await authClient.signIn.email({
         email: opt.email,
         password: "Password123!",
       });
+      if (error) {
+        toast({
+          title: "Gagal Masuk Demo",
+          description:
+            error.status === 429
+              ? "Terlalu banyak percobaan. Tunggu sebentar (±1 menit) lalu coba lagi."
+              : error.message || "Terjadi kesalahan saat masuk. Coba lagi.",
+          variant: "destructive",
+        });
+        setLoadingRole(null);
+        return;
+      }
 
       toast({
         title: `Masuk sebagai ${opt.title} ✓`,
