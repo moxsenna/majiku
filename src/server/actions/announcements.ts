@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { desc, eq, and, or, inArray } from "drizzle-orm";
+import { desc, eq, and, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { announcements, students } from "@/db/schema";
 import { auth } from "@/server/auth";
@@ -77,9 +77,7 @@ export async function getLatestAnnouncementsForParent() {
     .from(students)
     .where(
       and(
-        session.user.email
-          ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))
-          : eq(students.parentUserId, session.user.id),
+        eq(students.parentUserId, session.user.id),
         eq(students.isActive, true)
       )
     );

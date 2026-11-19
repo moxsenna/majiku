@@ -431,14 +431,7 @@ export async function getMyTrialApplications(): Promise<TrialApplicationRow[]> {
     .from(trialApplications)
     .leftJoin(classes, eq(trialApplications.classId, classes.id))
     .leftJoin(tutors, eq(trialApplications.tutorId, tutors.id))
-    .where(
-      session.user.email
-        ? or(
-            eq(trialApplications.parentUserId, session.user.id),
-            eq(trialApplications.parentEmail, session.user.email)
-          )
-        : eq(trialApplications.parentUserId, session.user.id)
-    )
+    .where(eq(trialApplications.parentUserId, session.user.id))
     .orderBy(desc(trialApplications.createdAt));
 
   return rows;

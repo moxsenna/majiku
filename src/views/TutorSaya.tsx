@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronRight, ClipboardCheck, ClipboardList, LogOut, Target, type LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIstilah } from "@/hooks/useIstilah";
+import { isDemoEmail } from "@/lib/demo";
 import { KidAvatar, MobileCard, MobileGroupTitle, MobileHeader, ThemeToggle } from "@/components/bunayo";
 
 function MenuRow({ href, icon: Icon, label, sub }: { href: string; icon: LucideIcon; label: string; sub?: string }) {
@@ -33,7 +34,16 @@ export default function TutorSaya() {
       <MobileHeader title="Saya" />
       <div className="flex flex-col gap-3 px-4">
         <MobileCard className="flex-row items-center gap-3">
-          {name ? <KidAvatar name={name} size="lg" krayon="anggur" /> : <span className="sk sk-circle h-12 w-12" />}
+          {name ? (
+            <KidAvatar
+              name={name}
+              photoUrl={user?.image || (isDemoEmail(user?.email) ? "/images/avatars/parent-rina.jpg" : undefined)}
+              size="lg"
+              krayon="anggur"
+            />
+          ) : (
+            <span className="sk sk-circle h-12 w-12" />
+          )}
           <span className="min-w-0">
             <b className="block truncate font-display text-lg font-bold">{name || "…"}</b>
             <small className="block truncate text-[13px] text-muted-foreground">{istilah.guru}{user?.email ? ` · ${user.email}` : ""}</small>

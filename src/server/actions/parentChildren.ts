@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { sql, eq, and, or, desc, isNull } from "drizzle-orm";
+import { sql, eq, and, or, desc } from "drizzle-orm";
 import { db } from "@/db";
 import {
   students,
@@ -65,19 +65,13 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
     await ensureDemoAttendanceToday().catch(() => {});
   }
 
-  // Auto-heal / auto-link jika ada siswa yang didaftarkan lembaga dengan email ini tapi belum tersambung ke user.id
-  if (userEmail) {
-    await db
-      .update(students)
-      .set({ parentUserId: session.user.id, updatedAt: new Date() })
-      .where(and(eq(students.parentEmail, userEmail), isNull(students.parentUserId)))
-      .catch(() => {});
-  }
-
   // --- QUERY REAL DATABASE ---
+  // Keamanan: siswa HANYA diakses lewat parent_user_id (penautan eksplisit oleh
+  // admin lembaga). Tidak ada auto-claim berbasis email — akun yang mendaftar
+  // dengan email orang lain tidak boleh melihat data anak.
   const todayDate = todayInWib();
 
-  // Query siswa terdaftar milik parent (berdasarkan parentUserId, parentEmail, atau demo student)
+  // Query siswa terdaftar milik parent (parent_user_id; demo memakai id demo)
   const myStudents = await db
     .select({
       id: students.id,
@@ -102,11 +96,8 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
         isDemo
           ? or(
               eq(students.parentUserId, session.user.id),
-              userEmail ? eq(students.parentEmail, userEmail) : sql`false`,
               eq(students.id, "stu_demo_aisyah")
             )
-          : userEmail
-          ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, userEmail))
           : eq(students.parentUserId, session.user.id),
         eq(students.isActive, true)
       )
@@ -126,7 +117,12 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
           age: 5,
           attendanceToday: true,
           checkInTime: "07:45",
-          recentPhotos: [],
+          recentPhotos: [
+            "/images/reports/report-aisyah-art.jpg",
+            "/images/reports/report-aisyah-sensory.jpg",
+            "/images/daycare/daycare-art.jpg",
+            "/images/daycare/daycare-outdoor.jpg",
+          ],
         },
       ];
     }

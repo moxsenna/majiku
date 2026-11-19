@@ -10,6 +10,7 @@ export interface BirthdayEntry {
   id: string;
   name: string;
   className: string | null;
+  photoUrl?: string | null;
   birthDate: string;
   turningAge: number;
   daysUntil: number;
@@ -76,6 +77,7 @@ export async function getUpcomingBirthdays(refDateStr?: string): Promise<Birthda
     .select({
       id: students.id,
       name: students.name,
+      photoUrl: students.photoUrl,
       dateOfBirth: students.dateOfBirth,
       parentName: students.parentName,
       parentPhone: students.parentPhone,
@@ -106,6 +108,7 @@ export async function getUpcomingBirthdays(refDateStr?: string): Promise<Birthda
   interface AggregatedStudent {
     id: string;
     name: string;
+    photoUrl?: string | null;
     dateOfBirth: string | null;
     parentName: string | null;
     parentPhone: string | null;
@@ -119,6 +122,7 @@ export async function getUpcomingBirthdays(refDateStr?: string): Promise<Birthda
       student = {
         id: row.id,
         name: row.name,
+        photoUrl: row.photoUrl,
         dateOfBirth: row.dateOfBirth,
         parentName: row.parentName,
         parentPhone: row.parentPhone,
@@ -149,6 +153,7 @@ export async function getUpcomingBirthdays(refDateStr?: string): Promise<Birthda
         id: student.id,
         name: student.name,
         className,
+        photoUrl: student.photoUrl,
         birthDate: student.dateOfBirth,
         turningAge: details.turningAge,
         daysUntil: details.daysUntil,

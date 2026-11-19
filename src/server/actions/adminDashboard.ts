@@ -299,6 +299,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
     .select({
       id: dailyReports.id,
       studentName: students.name,
+      studentAvatar: students.photoUrl,
       className: classes.name,
       reportDate: dailyReports.reportDate,
       mood: dailyReports.mood,
@@ -315,7 +316,7 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
   const mappedRecentDailyReports: DemoDailyReport[] = recentReports.map((r) => ({
     id: r.id,
     studentName: r.studentName,
-    studentAvatar: "",
+    studentAvatar: r.studentAvatar || "/images/avatars/student-aisyah.jpg",
     className: r.className || "Kelas Umum",
     time: r.reportDate ? String(r.reportDate) : todayDate,
     type: "activity",

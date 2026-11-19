@@ -44,6 +44,7 @@ export interface TutorDashboardData {
   isDemo: boolean;
   isAssigned: boolean;
   tutorName: string;
+  tutorPhoto?: string | null;
   todayPresentCount: number;
   pendingReportsCount: number;
   unreadMessagesCount: number;
@@ -98,6 +99,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     .select({
       id: tutors.id,
       name: tutors.name,
+      photoUrl: tutors.photoUrl,
       tenantId: tutors.tenantId,
     })
     .from(tutors)
@@ -123,6 +125,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
         isDemo: true,
         isAssigned: true,
         tutorName: session.user.name || "Bu Rina Wijaya",
+        tutorPhoto: "/images/avatars/parent-rina.jpg",
         todayPresentCount: 2,
         pendingReportsCount: 1,
         unreadMessagesCount: 1,
@@ -340,6 +343,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     isDemo: false,
     isAssigned: true,
     tutorName: tutorRecord.name,
+    tutorPhoto: tutorRecord.photoUrl || (isDemo ? "/images/avatars/parent-rina.jpg" : null),
     todayPresentCount,
     pendingReportsCount: mappedStudents.filter((s) => s.needsReport).length,
     unreadMessagesCount,

@@ -283,7 +283,12 @@ export default function FotoKegiatan({ initialData }: { initialData?: FotoData }
                 <div className="grid grid-cols-4 gap-3 max-[1000px]:grid-cols-3 max-[560px]:grid-cols-2">
                   {tampil.map((f) => (
                     <figure key={f.id} className="group relative overflow-hidden rounded border border-border bg-card">
-                      <img src={`/api/photos/${f.photoKey}`} alt={f.caption || "Foto kegiatan"} className="aspect-square w-full bg-muted object-cover" loading="lazy" />
+                      <img
+                        src={f.photoKey.startsWith("/") || f.photoKey.startsWith("http") ? f.photoKey : `/api/photos/${f.photoKey}`}
+                        alt={f.caption || "Foto kegiatan"}
+                        className="aspect-square w-full bg-muted object-cover"
+                        loading="lazy"
+                      />
                       <figcaption className="flex flex-col gap-1 px-3 py-2.5">
                         {f.caption && <span className="line-clamp-2 text-[13px]">{f.caption}</span>}
                         <span className="flex flex-wrap items-center gap-1.5">

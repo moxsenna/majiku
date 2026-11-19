@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/db";
-import { user, userRoles, students, tenants, trialApplications, classes } from "@/db/schema";
+import { user, userRoles, students, tenants } from "@/db/schema";
 import { auth } from "@/server/auth";
 
 export interface RegisterAdminInput {
@@ -106,6 +106,8 @@ export async function registerDaycareAdminAction(input: RegisterAdminInput) {
       whatsapp: input.phone || null,
       isVerified: false,
       isActive: true,
+      // Masa trial SaaS 14 hari sejak pendaftaran
+      trialUntil: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
       // Tautkan pemilik lembaga ke akun admin pembuat
       adminUserId: res.user.id,
     })
@@ -165,29 +167,13 @@ export async function registerParentAction(input: RegisterParentInput) {
     })
     .onConflictDoNothing();
 
-  // 1. Sinkronisasi otomatis: Hubungkan semua siswa yang telah didaftarkan lembaga dengan email ini
-  await db
-    .update(students)
-    .set({
-      parentUserId: res.user.id,
-      parentName: name,
-      parentPhone: input.phone?.trim() || undefined,
-      updatedAt: new Date(),
-    })
-    .where(eq(students.parentEmail, email));
+  // Keamanan: TIDAK ADA auto-claim berbasis email. Penautan anak/pengajuan
+  // trial ke akun parent dilakukan eksplisit oleh admin lembaga (Tautkan Akun
+  // Ortu). Akun baru tanpa penautan tidak melihat data apa pun.
 
-  // 2. Sinkronisasi otomatis: Hubungkan pengajuan trial yang dibuat dengan email ini
-  await db
-    .update(trialApplications)
-    .set({
-      parentUserId: res.user.id,
-      updatedAt: new Date(),
-    })
-    .where(eq(trialApplications.parentEmail, email));
-
-  // 3. Jika menyertakan data anak, buat data profil anak jika belum ada di database.
-  // tenantId anak di-derive dari pengajuan trial / anak terhubung (lembaga yang diajak);
-  // bila belum ada afiliasi lembaga, pembuatan profil anak ditunda sampai pendaftaran program.
+  // Jika menyertakan data anak, buat profil anak hanya bila akun sudah
+  // memiliki afiliasi lembaga yang sah (anak terautorisasi via parent_user_id);
+  // bila belum, pembuatan profil anak ditunda sampai pendaftaran program.
   if (childName) {
     const existing = await db
       .select({ id: students.id })
@@ -196,29 +182,12 @@ export async function registerParentAction(input: RegisterParentInput) {
       .limit(1);
 
     if (existing.length === 0) {
-      // Derive tenant: dari pengajuan trial via email ini -> kelasnya -> lembaganya
-      const [trialRow] = await db
-        .select({ classId: trialApplications.classId })
-        .from(trialApplications)
-        .where(eq(trialApplications.parentEmail, email))
+      const [linked] = await db
+        .select({ tenantId: students.tenantId })
+        .from(students)
+        .where(eq(students.parentUserId, res.user.id))
         .limit(1);
-      let childTenantId: string | null = null;
-      if (trialRow?.classId) {
-        const [cls] = await db
-          .select({ tenantId: classes.tenantId })
-          .from(classes)
-          .where(eq(classes.id, trialRow.classId))
-          .limit(1);
-        childTenantId = cls?.tenantId ?? null;
-      }
-      if (!childTenantId) {
-        const [linked] = await db
-          .select({ tenantId: students.tenantId })
-          .from(students)
-          .where(eq(students.parentUserId, res.user.id))
-          .limit(1);
-        childTenantId = linked?.tenantId ?? null;
-      }
+      const childTenantId = linked?.tenantId ?? null;
 
       if (childTenantId) {
         await db

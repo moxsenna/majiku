@@ -66,7 +66,12 @@ export default function TutorDashboard({ initialData }: TutorDashboardProps) {
         </div>
         {nama && (
           <Link href="/tutor/saya" aria-label="Saya" className="press">
-            <KidAvatar name={nama} krayon="matahari" size="md" />
+            <KidAvatar
+              name={nama}
+              photoUrl={data?.tutorPhoto || (isDemo ? "/images/avatars/parent-rina.jpg" : undefined)}
+              krayon="matahari"
+              size="md"
+            />
           </Link>
         )}
       </header>

@@ -67,11 +67,7 @@ export async function getInvoices(): Promise<InvoiceRow[]> {
     const ctx = await requireTenantContext();
     conditions.push(eq(students.tenantId, ctx.tenantId));
   } else if (isParent) {
-    conditions.push(
-      session.user.email
-        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
-        : eq(students.parentUserId, session.user.id)
-    );
+    conditions.push(eq(students.parentUserId, session.user.id));
   }
 
   const query = db
@@ -167,11 +163,7 @@ export async function getBillingEnrollments(): Promise<BillingEnrollmentRow[]> {
     const ctx = await requireTenantContext();
     conditions.push(eq(students.tenantId, ctx.tenantId));
   } else if (isParent) {
-    conditions.push(
-      session.user.email
-        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
-        : eq(students.parentUserId, session.user.id)
-    );
+    conditions.push(eq(students.parentUserId, session.user.id));
   }
 
   const rows = await db

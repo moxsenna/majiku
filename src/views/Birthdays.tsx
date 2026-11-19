@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Cake,
   Send,
@@ -167,6 +167,9 @@ export default function Birthdays({ entries }: BirthdaysProps) {
                     <div className="flex items-center gap-4">
                       <div className="relative">
                         <Avatar size="xl">
+                          {student.photoUrl && (
+                            <AvatarImage src={student.photoUrl} alt={student.name} className="object-cover" />
+                          )}
                           <AvatarFallback className="bg-highlight/20 text-highlight font-bold">
                             {student.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
@@ -268,6 +271,9 @@ export default function Birthdays({ entries }: BirthdaysProps) {
                   >
                     <div className="flex items-center gap-4">
                       <Avatar size="lg">
+                        {student.photoUrl && (
+                          <AvatarImage src={student.photoUrl} alt={student.name} className="object-cover" />
+                        )}
                         <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                           {student.name.slice(0, 2).toUpperCase()}
                         </AvatarFallback>

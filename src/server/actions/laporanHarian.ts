@@ -173,8 +173,85 @@ export interface FotoData {
 
 export async function getFotoKegiatan(): Promise<FotoData> {
   const ctx = await requireTenantContext();
-  if (ctx.isDemo)
-    return { isDemo: true, diambilPada: new Date().toISOString(), foto: [], kelas: [], anak: [] };
+  if (ctx.isDemo) {
+    const nowIso = new Date().toISOString();
+    return {
+      isDemo: true,
+      diambilPada: nowIso,
+      foto: [
+        {
+          id: "demo-gf-1",
+          photoKey: "/images/reports/report-aisyah-art.jpg",
+          caption: "Aisyah bangga menunjukkan hasil karya mewarnai bunga matahari",
+          studentName: "Aisyah Putri",
+          classId: "cls_bunga_matahari",
+          className: "Kelas Bunga Matahari",
+          pengunggah: "Bu Rina Wijaya",
+          diunggah: nowIso,
+        },
+        {
+          id: "demo-gf-2",
+          photoKey: "/images/reports/report-aisyah-sensory.jpg",
+          caption: "Eksplorasi sensori tekstur pasir kinetik dan manik-manik warna",
+          studentName: "Aisyah Putri",
+          classId: "cls_bunga_matahari",
+          className: "Kelas Bunga Matahari",
+          pengunggah: "Bu Rina Wijaya",
+          diunggah: nowIso,
+        },
+        {
+          id: "demo-gf-3",
+          photoKey: "/images/reports/report-aisyah-meal.jpg",
+          caption: "Makan siang mandiri dengan menu gizi seimbang dan buah segar",
+          studentName: "Aisyah Putri",
+          classId: "cls_bunga_matahari",
+          className: "Kelas Bunga Matahari",
+          pengunggah: "Bu Rina Wijaya",
+          diunggah: nowIso,
+        },
+        {
+          id: "demo-gf-4",
+          photoKey: "/images/reports/report-group-outdoor.jpg",
+          caption: "Aktivitas motorik kasar di area taman bermain outdoor yang teduh",
+          studentName: "Raka Pratama",
+          classId: "cls_bunga_matahari",
+          className: "Kelas Bunga Matahari",
+          pengunggah: "Bu Rina Wijaya",
+          diunggah: nowIso,
+        },
+        {
+          id: "demo-gf-5",
+          photoKey: "/images/reports/report-circle-story.jpg",
+          caption: "Circle time mendengarkan cerita fabel interaktif bersama Bu Rina",
+          studentName: "Keisha Azzahra",
+          classId: "cls_bunga_matahari",
+          className: "Kelas Bunga Matahari",
+          pengunggah: "Bu Rina Wijaya",
+          diunggah: nowIso,
+        },
+        {
+          id: "demo-gf-6",
+          photoKey: "/images/reports/report-naptime-peaceful.jpg",
+          caption: "Waktu istirahat tidur siang yang tenang, nyaman, dan sejuk",
+          studentName: "Arjuna Wijaya",
+          classId: "cls_bunga_matahari",
+          className: "Kelas Bunga Matahari",
+          pengunggah: "Bu Rina Wijaya",
+          diunggah: nowIso,
+        },
+      ],
+      kelas: [
+        { id: "cls_bunga_matahari", name: "Kelas Bunga Matahari" },
+        { id: "cls_pelangi", name: "Kelas Pelangi" },
+      ],
+      anak: [
+        { id: "stu_demo_aisyah", name: "Aisyah Putri" },
+        { id: "stu_demo_raka", name: "Raka Pratama" },
+        { id: "stu_demo_keisha", name: "Keisha Azzahra" },
+        { id: "stu_demo_arjuna", name: "Arjuna Wijaya" },
+      ],
+    };
+  }
 
   const [foto, kelas, anak] = await Promise.all([
     db

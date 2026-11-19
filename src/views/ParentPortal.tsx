@@ -13,7 +13,7 @@ import type { TrialApplicationRow } from "@/server/actions/trial";
 import type { ReportRow } from "@/server/actions/dailyReports";
 import type { ParentChildData } from "@/server/actions/parentChildren";
 
-const foto = (key: string) => `/api/photos/${key}`;
+const foto = (key: string) => (key.startsWith("/") || key.startsWith("http") ? key : `/api/photos/${key}`);
 const panggilanDari = (c: ParentChildData) => (c.nickname || c.name).trim().split(/\s+/)[0];
 
 function labelHari(tanggal: string): string {

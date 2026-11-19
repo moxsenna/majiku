@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
-import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   dailyReports,
@@ -16,6 +16,7 @@ import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { requireTenantContext, resolveTenantIdForUser, assertDemoMutationLock } from "@/server/authz";
 import { isValidDateString, todayInWib } from "@/lib/datetime";
+import { isDemoEmail } from "@/lib/demo";
 import { deletePhoto } from "@/server/r2";
 
 export interface DailyReportItem {
@@ -465,23 +466,30 @@ export async function getReportsForParent(): Promise<DailyReportItem[]> {
   const roles: AppRole[] = await getMyRoles().catch(() => []);
   if (!roles.includes("parent") && !roles.includes("admin")) return [];
 
+  const userEmail = session.user.email;
+  const isDemo = isDemoEmail(userEmail);
+
   const myStudents = await db
     .select({ id: students.id })
     .from(students)
     .where(
       and(
-        session.user.email
+        isDemo
           ? or(
               eq(students.parentUserId, session.user.id),
-              eq(students.parentEmail, session.user.email)
+              eq(students.id, "stu_demo_aisyah")
             )
           : eq(students.parentUserId, session.user.id),
         eq(students.isActive, true)
       )
     );
 
-  if (myStudents.length === 0) return [];
   const studentIds = myStudents.map((s) => s.id);
+  if (isDemo && !studentIds.includes("stu_demo_aisyah")) {
+    studentIds.push("stu_demo_aisyah");
+  }
+
+  if (studentIds.length === 0) return [];
 
   const rows = await db
     .select({

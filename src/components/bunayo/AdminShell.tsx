@@ -47,7 +47,7 @@ export interface AdminShellProps {
   /** Lima tab navigasi bawah (≤ 560 px); tab ke-5 "Lainnya" membuka menu lengkap */
   mobileTabs: { key: string; label: string; icon: LucideIcon; href?: string; dot?: boolean }[];
   org: { name: string; sub?: string | null } | null;
-  user: { name: string; role: string } | null;
+  user: { name: string; role: string; image?: string | null } | null;
   onSignOut: () => void;
   /** Lonceng notifikasi (topbar mobile). Kosongkan bila belum ada sumber notifikasi nyata. */
   notifSlot?: React.ReactNode;
@@ -248,7 +248,7 @@ function SidebarFoot({
       )}
       {!rail && <ThemeToggle compact className="my-1.5" />}
       <div className={cn("flex items-center gap-2.5 p-2", rail && "justify-center")}>
-        {user ? <KidAvatar name={user.name} size="sm" krayon="anggur" /> : <span className="sk sk-circle h-[34px] w-[34px]" />}
+        {user ? <KidAvatar name={user.name} photoUrl={user.image} size="sm" krayon="anggur" /> : <span className="sk sk-circle h-[34px] w-[34px]" />}
         {!rail && (
           <div className="min-w-0 flex-1">
             <b className="block truncate text-sm">{user?.name ?? "…"}</b>

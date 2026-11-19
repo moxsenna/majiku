@@ -16,11 +16,12 @@ import {
   attendance,
   invoices,
   dailyReports,
+  galleryPhotos,
   conversations,
   messages,
   announcements,
 } from "../src/db/schema";
-import { eq, or } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 
 // Scrypt hash for "Password123!" in BetterAuth
 const PASSWORD_HASH =
@@ -115,24 +116,25 @@ async function main() {
     email: string;
     name: string;
     role: "admin" | "tutor" | "parent";
+    image: string;
   }
 
   const demoUsers: DemoUserDef[] = [
     // Primary accounts
-    { id: "usr_demo_admin", email: "admin@bunayo.test", name: "Admin Bunayo", role: "admin" },
-    { id: "usr_demo_tutor", email: "tutor@bunayo.test", name: "Bu Rina Wijaya (Tutor)", role: "tutor" },
-    { id: "usr_demo_parent", email: "parent@bunayo.test", name: "Ibu Anita (Bunda Aisyah)", role: "parent" },
+    { id: "usr_demo_admin", email: "admin@bunayo.test", name: "Admin Bunayo", role: "admin", image: "/images/avatars/admin-avatar.jpg" },
+    { id: "usr_demo_tutor", email: "tutor@bunayo.test", name: "Bu Rina Wijaya (Tutor)", role: "tutor", image: "/images/avatars/parent-rina.jpg" },
+    { id: "usr_demo_parent", email: "parent@bunayo.test", name: "Ibu Anita (Bunda Aisyah)", role: "parent", image: "/images/avatars/parent-anita.jpg" },
 
     // Aliases
-    { id: "usr_demo_admin_gmail", email: "admin.test@gmail.com", name: "Admin Bunayo (Gmail)", role: "admin" },
-    { id: "usr_demo_tutor_gmail", email: "tutor.test@gmail.com", name: "Bu Rina Wijaya (Gmail)", role: "tutor" },
-    { id: "usr_demo_parent_gmail", email: "parent.test@gmail.com", name: "Ibu Anita (Gmail)", role: "parent" },
-    { id: "usr_demo_rina_bunayo", email: "rina@bunayo.test", name: "Bu Rina Wijaya", role: "tutor" },
+    { id: "usr_demo_admin_gmail", email: "admin.test@gmail.com", name: "Admin Bunayo (Gmail)", role: "admin", image: "/images/avatars/admin-avatar.jpg" },
+    { id: "usr_demo_tutor_gmail", email: "tutor.test@gmail.com", name: "Bu Rina Wijaya (Gmail)", role: "tutor", image: "/images/avatars/parent-rina.jpg" },
+    { id: "usr_demo_parent_gmail", email: "parent.test@gmail.com", name: "Ibu Anita (Gmail)", role: "parent", image: "/images/avatars/parent-anita.jpg" },
+    { id: "usr_demo_rina_bunayo", email: "rina@bunayo.test", name: "Bu Rina Wijaya", role: "tutor", image: "/images/avatars/parent-rina.jpg" },
 
     // Legacy aliases
-    { id: "usr_demo_admin_leg", email: "admin@majiku.test", name: "Admin Bunayo (Legacy)", role: "admin" },
-    { id: "usr_demo_rina_leg", email: "rina@majiku.test", name: "Bu Rina (Legacy)", role: "tutor" },
-    { id: "usr_demo_parent_leg", email: "parent@majiku.test", name: "Ibu Anita (Legacy)", role: "parent" },
+    { id: "usr_demo_admin_leg", email: "admin@majiku.test", name: "Admin Bunayo (Legacy)", role: "admin", image: "/images/avatars/admin-avatar.jpg" },
+    { id: "usr_demo_rina_leg", email: "rina@majiku.test", name: "Bu Rina (Legacy)", role: "tutor", image: "/images/avatars/parent-rina.jpg" },
+    { id: "usr_demo_parent_leg", email: "parent@majiku.test", name: "Ibu Anita (Legacy)", role: "parent", image: "/images/avatars/parent-anita.jpg" },
   ];
 
   for (const u of demoUsers) {
@@ -145,13 +147,13 @@ async function main() {
       effectiveUserId = byEmail.id;
       await db
         .update(user)
-        .set({ name: u.name, emailVerified: true })
+        .set({ name: u.name, emailVerified: true, image: u.image })
         .where(eq(user.id, effectiveUserId));
     } else if (byId) {
       effectiveUserId = byId.id;
       await db
         .update(user)
-        .set({ email: u.email, name: u.name, emailVerified: true })
+        .set({ email: u.email, name: u.name, emailVerified: true, image: u.image })
         .where(eq(user.id, effectiveUserId));
     } else {
       await db
@@ -161,6 +163,7 @@ async function main() {
           name: u.name,
           email: u.email,
           emailVerified: true,
+          image: u.image,
         });
     }
 
@@ -235,43 +238,81 @@ async function main() {
     });
   console.log("✓ Kelas siap.");
 
-  // 4. Tutor: Bu Rina Wijaya
+  // 4. Tutors
   const [tutorUser] = await db.select().from(user).where(eq(user.email, "tutor@bunayo.test"));
   const tutorUserId = tutorUser?.id || "usr_demo_tutor";
 
   await db
     .insert(tutors)
-    .values({
-      id: "tut_demo_rina",
-      tenantId: "tnt_demo",
-      userId: tutorUserId,
-      name: "Bu Rina Wijaya",
-      email: "tutor@bunayo.test",
-      phone: "081234567891",
-      photoUrl: "/images/avatars/parent-rina.jpg",
-      isActive: true,
-    })
+    .values([
+      {
+        id: "tut_demo_rina",
+        tenantId: "tnt_demo",
+        userId: tutorUserId,
+        name: "Bu Rina Wijaya",
+        email: "tutor@bunayo.test",
+        phone: "081234567891",
+        photoUrl: "/images/avatars/parent-rina.jpg",
+        isActive: true,
+      },
+      {
+        id: "tut_demo_maya",
+        tenantId: "tnt_demo",
+        name: "Ibu Maya Sari",
+        email: "maya@bunayo.test",
+        phone: "081234567892",
+        photoUrl: "/images/avatars/tutor-maya.jpg",
+        isActive: true,
+      },
+      {
+        id: "tut_demo_dina",
+        tenantId: "tnt_demo",
+        name: "Ibu Dina Permata",
+        email: "dina@bunayo.test",
+        phone: "081234567893",
+        photoUrl: "/images/avatars/tutor-dina.jpg",
+        isActive: true,
+      },
+      {
+        id: "tut_demo_ahmad",
+        tenantId: "tnt_demo",
+        name: "Pak Ahmad Rizki",
+        email: "ahmad@bunayo.test",
+        phone: "081234567894",
+        photoUrl: "/images/avatars/tutor-ahmad.jpg",
+        isActive: true,
+      },
+    ])
     .onConflictDoUpdate({
       target: tutors.id,
       set: {
         tenantId: "tnt_demo",
-        userId: tutorUserId,
-        photoUrl: "/images/avatars/parent-rina.jpg",
+        photoUrl: sql`excluded.photo_url`,
+        name: sql`excluded.name`,
       },
     });
 
-  // Assign Bu Rina to Kelas Bunga Matahari
+  // Assign Bu Rina to Kelas Bunga Matahari & Ibu Maya to Kelas Pelangi
   await db
     .insert(tutorClassAssignments)
-    .values({
-      id: "tca_demo_rina_matahari",
-      tutorId: "tut_demo_rina",
-      classId: "cls_bunga_matahari",
-      ratePerSession: "75000",
-      isActive: true,
-    })
+    .values([
+      {
+        id: "tca_demo_rina_matahari",
+        tutorId: "tut_demo_rina",
+        classId: "cls_bunga_matahari",
+        ratePerSession: "75000",
+        isActive: true,
+      },
+      {
+        id: "tca_demo_maya_pelangi",
+        tutorId: "tut_demo_maya",
+        classId: "cls_pelangi",
+        ratePerSession: "75000",
+        isActive: true,
+      },
+    ])
     .onConflictDoNothing();
-  console.log("✓ Tutor Bu Rina siap & ditugaskan di Kelas Bunga Matahari.");
+  console.log("✓ Tutor Bu Rina & rekan guru siap.");
 
   // 5. Students
   const [parentUser] = await db.select().from(user).where(eq(user.email, "parent@bunayo.test"));
@@ -325,6 +366,30 @@ async function main() {
       photoUrl: "/images/avatars/student-arjuna.jpg",
       registrationDate: "2026-02-10",
       classId: "cls_bunga_matahari",
+    },
+    {
+      id: "stu_demo_budi",
+      name: "Budi Santoso",
+      dateOfBirth: "2021-09-14",
+      parentUserId: null,
+      parentName: "Pak Hendra Santoso",
+      parentPhone: "081244556677",
+      parentEmail: "hendra.budi@gmail.com",
+      photoUrl: "/images/avatars/student-budi.jpg",
+      registrationDate: "2026-02-15",
+      classId: "cls_pelangi",
+    },
+    {
+      id: "stu_demo_ahmad",
+      name: "Ahmad Rizki",
+      dateOfBirth: "2021-05-20",
+      parentUserId: null,
+      parentName: "Ibu Sarah Rizki",
+      parentPhone: "081255667788",
+      parentEmail: "sarah.ahmad@gmail.com",
+      photoUrl: "/images/avatars/student-ahmad.jpg",
+      registrationDate: "2026-02-20",
+      classId: "cls_pelangi",
     },
   ];
 
@@ -511,7 +576,7 @@ async function main() {
     });
   console.log("✓ Tagihan SPP sinkron siap.");
 
-  // 8. Daily Reports for Aisyah Putri
+  // 8. Daily Reports (Laporan Harian Guru ke Orang Tua)
   await db
     .insert(dailyReports)
     .values([
@@ -522,12 +587,17 @@ async function main() {
         tutorUserId: tutorUserId,
         reportDate: today,
         mood: "Sangat ceria & antusias",
-        meals: "Makan siang lahap: Sayur sop wortel + ayam fillet, habis 1 porsi",
-        nap: "Tidur siang nyenyak 1 jam 30 menit (12:30 - 14:00 WIB)",
+        meals: "Habis 1 porsi: Nasi tim ayam suwir, sup bayam wortel, pepaya potong. Minum air putih 3 gelas.",
+        nap: "Tidur siang nyenyak 1 jam 45 menit (12:30 - 14:15 WIB), bangun segar.",
         activities:
-          "Mewarnai bunga matahari, menyusun balok lego melatih motorik halus, senam riang bersama Bu Rina.",
-        notes: "Aisyah sangat kooperatif hari ini dan membantu merapikan mainan bersama teman-teman.",
-        photos: ["/images/reports/report-art-activity.jpg", "/images/daycare/daycare-sensory.jpg"],
+          "1. Senam irama pagi bersama Bu Rina\n2. Melipat origami dan mewarnai bunga matahari\n3. Eksplorasi sensori tekstur pasir warna di meja sensori\n4. Bernyanyi lagu daerah bersama teman sekelas.",
+        notes:
+          "Aisyah sangat mandiri hari ini saat merapikan krayon setelah kegiatan seni. Hubungan sosial dengan teman-teman semakin hangat! 🌟",
+        photos: [
+          "/images/reports/report-aisyah-art.jpg",
+          "/images/reports/report-aisyah-sensory.jpg",
+          "/images/reports/report-aisyah-meal.jpg",
+        ],
         status: "submitted",
       },
       {
@@ -536,23 +606,130 @@ async function main() {
         classId: "cls_bunga_matahari",
         tutorUserId: tutorUserId,
         reportDate: getPastDate(1),
-        mood: "Senang dan aktif bereksplorasi",
-        meals: "Nasi tim ikan salmon + brokoli, minum air putih 3 gelas",
-        nap: "Tidur siang 1 jam (13:00 - 14:00 WIB)",
-        activities: "Mengenal bentuk geometri, bermain pasir kinetik, mendengarkan dongeng fabel.",
-        notes: "Aisyah menunjukkan peningkatan fokus saat menyusun puzzle 12 keping.",
-        photos: ["/images/daycare/daycare-sensory.jpg"],
+        mood: "Senang dan penuh rasa ingin tahu",
+        meals: "Nasi lembut ikan salmon brokoli + pisang barangan, piring bersih.",
+        nap: "Tidur siang 1 jam 30 menit (13:00 - 14:30 WIB).",
+        activities:
+          "Eksplorasi balok geometri, menyusun menara balok 10 tingkat, aktivitas gerak ceria di playground outdoor.",
+        notes:
+          "Aisyah sangat fokus menyusun puzzle dan menara balok tanpa jatuh. Respon motorik halus dan koordinasi matanya berkembang pesat.",
+        photos: [
+          "/images/reports/report-circle-story.jpg",
+          "/images/reports/report-group-outdoor.jpg",
+        ],
+        status: "submitted",
+      },
+      {
+        id: `rep_demo_aisyah_${getPastDate(2)}`,
+        studentId: "stu_demo_aisyah",
+        classId: "cls_bunga_matahari",
+        tutorUserId: tutorUserId,
+        reportDate: getPastDate(2),
+        mood: "Tenang, ceria, dan bersahabat",
+        meals: "Sup bola-bola tahu ayam + jagung manis, minum susu hangat 1 cangkir.",
+        nap: "Tidur siang lelap 1 jam 40 menit (12:45 - 14:25 WIB).",
+        activities:
+          "Circle time mendengarkan dongeng fabel 'Kancil yang Bijak' bersama Bu Rina, senam peregangan anak.",
+        notes:
+          "Aisyah aktif bertanya mengenai karakter hewan di buku cerita dan mampu menceritakan kembali dengan bahasanya sendiri.",
+        photos: [
+          "/images/reports/report-naptime-peaceful.jpg",
+          "/images/reports/report-group-outdoor.jpg",
+        ],
+        status: "submitted",
+      },
+      {
+        id: `rep_demo_raka_${today}`,
+        studentId: "stu_demo_raka",
+        classId: "cls_bunga_matahari",
+        tutorUserId: tutorUserId,
+        reportDate: today,
+        mood: "Aktif dan bersemangat",
+        meals: "Makan siang lahap: Nasi ayam kecap + sayur bening bayam, habis 1 porsi.",
+        nap: "Tidur siang 1 jam 15 menit (13:00 - 14:15 WIB).",
+        activities:
+          "Bermain motorik kasar di playground outdoor, mengenal angka 1-10 dengan kartu bergambar.",
+        notes: "Raka sangat bersemangat saat sesi bermain outdoor bersama teman-teman.",
+        photos: ["/images/reports/report-group-outdoor.jpg"],
         status: "submitted",
       },
     ])
     .onConflictDoUpdate({
       target: dailyReports.id,
       set: {
-        reportDate: today,
+        reportDate: sql`excluded.report_date`,
+        mood: sql`excluded.mood`,
+        meals: sql`excluded.meals`,
+        nap: sql`excluded.nap`,
+        activities: sql`excluded.activities`,
+        notes: sql`excluded.notes`,
+        photos: sql`excluded.photos`,
         status: "submitted",
       },
     });
-  console.log("✓ Laporan harian Aisyah siap.");
+  console.log("✓ Laporan harian lengkap guru ke orang tua siap.");
+
+  // 8b. Gallery Photos (Foto Kegiatan Dokumentasi Lembaga)
+  await db
+    .insert(galleryPhotos)
+    .values([
+      {
+        id: "gp_demo_1",
+        studentId: "stu_demo_aisyah",
+        classId: "cls_bunga_matahari",
+        photoKey: "/images/reports/report-aisyah-art.jpg",
+        caption: "Aisyah menunjukkan hasil kreasi mewarnai bunga matahari",
+        uploadedByUserId: tutorUserId,
+      },
+      {
+        id: "gp_demo_2",
+        studentId: "stu_demo_aisyah",
+        classId: "cls_bunga_matahari",
+        photoKey: "/images/reports/report-aisyah-sensory.jpg",
+        caption: "Eksplorasi sensori tekstur pasir dan manik-manik warna",
+        uploadedByUserId: tutorUserId,
+      },
+      {
+        id: "gp_demo_3",
+        studentId: "stu_demo_aisyah",
+        classId: "cls_bunga_matahari",
+        photoKey: "/images/reports/report-aisyah-meal.jpg",
+        caption: "Makan siang bersama dengan menu gizi seimbang",
+        uploadedByUserId: tutorUserId,
+      },
+      {
+        id: "gp_demo_4",
+        studentId: "stu_demo_raka",
+        classId: "cls_bunga_matahari",
+        photoKey: "/images/reports/report-group-outdoor.jpg",
+        caption: "Aktivitas motorik kasar di taman bermain outdoor",
+        uploadedByUserId: tutorUserId,
+      },
+      {
+        id: "gp_demo_5",
+        studentId: "stu_demo_keisha",
+        classId: "cls_bunga_matahari",
+        photoKey: "/images/reports/report-circle-story.jpg",
+        caption: "Circle time mendengarkan cerita dan dongeng bersama Bu Rina",
+        uploadedByUserId: tutorUserId,
+      },
+      {
+        id: "gp_demo_6",
+        studentId: "stu_demo_arjuna",
+        classId: "cls_bunga_matahari",
+        photoKey: "/images/reports/report-naptime-peaceful.jpg",
+        caption: "Waktu istirahat tidur siang yang nyaman dan tenang",
+        uploadedByUserId: tutorUserId,
+      },
+    ])
+    .onConflictDoUpdate({
+      target: galleryPhotos.id,
+      set: {
+        photoKey: sql`excluded.photo_key`,
+        caption: sql`excluded.caption`,
+      },
+    });
+  console.log("✓ Foto kegiatan galeri lembaga siap.");
 
   // 9. Conversations & Messages
   const [conv] = await db

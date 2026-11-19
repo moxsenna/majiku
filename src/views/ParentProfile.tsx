@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inisial } from "@/lib/format";
+import { isDemoEmail } from "@/lib/demo";
 import { useAuth } from "@/hooks/useAuth";
 import { KidAvatar, MobileGroupTitle, MobileSubHeader } from "@/components/bunayo";
 import { getMyChildren } from "@/server/actions/parentChildren";
@@ -63,12 +64,12 @@ export default function ParentProfile() {
 
       <div className="flex flex-col gap-4 px-4 pb-4">
         <section className="rise field-ink flex items-center gap-4 rounded-[28px] bg-langit p-5">
-          <span
-            aria-hidden
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-[hsl(0_0%_100%/.5)] font-display text-[22px] font-bold text-[hsl(249_26%_14%)] ring-4 ring-[hsl(0_0%_100%/.55)]"
-          >
-            {inisial(nama)}
-          </span>
+          <KidAvatar
+            name={nama}
+            photoUrl={user?.image || (isDemoEmail(email) ? "/images/avatars/parent-anita.jpg" : undefined)}
+            size="xl"
+            className="shrink-0 ring-4 ring-[hsl(0_0%_100%/.55)]"
+          />
           <div className="min-w-0">
             <h1 className="truncate font-display text-[26px] font-bold leading-[1.1] tracking-[-0.025em]">{nama}</h1>
             <span className="field-sub flex items-center gap-1.5 text-sm" title={email}>

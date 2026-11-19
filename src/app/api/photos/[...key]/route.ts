@@ -104,7 +104,7 @@ export async function GET(
         .where(
           and(
             eq(students.id, studentId),
-            sql`(${students.parentUserId} = ${session.user.id} OR ${students.parentEmail} = ${session.user.email})`
+            eq(students.parentUserId, session.user.id)
           )
         )
         .limit(1);

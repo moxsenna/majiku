@@ -74,14 +74,7 @@ export async function getWaitingList(): Promise<WaitingListRow[]> {
       return [];
     }
   } else if (isParent) {
-    conditions.push(
-      session.user.email
-        ? or(
-            eq(waitingList.parentUserId, session.user.id),
-            eq(waitingList.parentEmail, session.user.email)
-          )!
-        : eq(waitingList.parentUserId, session.user.id)
-    );
+    conditions.push(eq(waitingList.parentUserId, session.user.id));
   }
 
   const query = db

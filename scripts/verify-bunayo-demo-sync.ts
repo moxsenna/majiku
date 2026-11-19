@@ -107,7 +107,7 @@ async function runVerification() {
 
   // 6. Check Students & Cross-Portal Synchronization
   const demoStudents = await db.select().from(students).where(eq(students.tenantId, DEMO_TENANT_ID));
-  assert(demoStudents.length === 4, `Jumlah siswa sinkron: ${demoStudents.length} siswa (Aisyah, Raka, Keisha, Arjuna)`);
+  assert(demoStudents.length >= 4, `Jumlah siswa sinkron: ${demoStudents.length} siswa (Aisyah, Raka, Keisha, Arjuna, dkk)`);
 
   const [aisyah] = await db.select().from(students).where(eq(students.id, "stu_demo_aisyah")).limit(1);
   assert(!!aisyah, "Siswa Aisyah Putri (stu_demo_aisyah) ditemukan");

@@ -86,11 +86,7 @@ export async function getTodayAttendance(): Promise<AttendanceRow[]> {
   const conditions = [eq(attendance.date, today)];
 
   if (!isAdmin && !isTutor && isParent) {
-    conditions.push(
-      session.user.email
-        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
-        : eq(students.parentUserId, session.user.id)
-    );
+    conditions.push(eq(students.parentUserId, session.user.id));
   } else if (!isParent) {
     // Isolasi tenant staff: admin lembaga -> lembaganya; tutor -> kelas penugasannya saja
     const scope = await tenantScopeConditions(session, isTutor && !isAdmin ? "tutor" : "admin");
@@ -157,11 +153,7 @@ export async function getMonthlyAttendance(year: number, month: number): Promise
   ];
 
   if (!isAdmin && !isTutor && isParent) {
-    conditions.push(
-      session.user.email
-        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
-        : eq(students.parentUserId, session.user.id)
-    );
+    conditions.push(eq(students.parentUserId, session.user.id));
   } else if (!isParent) {
     const scope = await tenantScopeConditions(session, isTutor && !isAdmin ? "tutor" : "admin");
     if (!scope) return [];
@@ -242,11 +234,7 @@ export async function getAttendanceEnrollments(): Promise<AttendanceEnrollmentRo
   const conditions = [eq(studentEnrollments.isActive, true)];
 
   if (!isAdmin && !isTutor && isParent) {
-    conditions.push(
-      session.user.email
-        ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, session.user.email))!
-        : eq(students.parentUserId, session.user.id)
-    );
+    conditions.push(eq(students.parentUserId, session.user.id));
   } else if (!isParent) {
     const scope = await tenantScopeConditions(session, isTutor && !isAdmin ? "tutor" : "admin");
     if (!scope) return [];

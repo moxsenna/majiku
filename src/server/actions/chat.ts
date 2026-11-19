@@ -192,12 +192,7 @@ export async function getChatPartners(): Promise<ChatPartner[]> {
       .innerJoin(user, eq(user.id, tutors.userId))
       .where(
         and(
-          session.user.email
-            ? or(
-                eq(students.parentUserId, session.user.id),
-                eq(students.parentEmail, session.user.email)
-              )
-            : eq(students.parentUserId, session.user.id),
+          eq(students.parentUserId, session.user.id),
           eq(students.isActive, true),
           isNotNull(tutors.userId),
           ne(tutors.userId, session.user.id)

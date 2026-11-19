@@ -47,6 +47,8 @@ export const tenants = pgTable("tenants", {
   photos: jsonb("photos").$type<string[]>().default([]),
   whatsapp: text("whatsapp"),
   adminUserId: text("admin_user_id").references(() => user.id, { onDelete: "set null" }),
+  // Masa trial SaaS 14 hari: diisi saat lembaga mendaftar. NULL = tenant lama/demo (tanpa trial).
+  trialUntil: timestamp("trial_until", { withTimezone: true }),
   isVerified: boolean("is_verified").default(false),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
