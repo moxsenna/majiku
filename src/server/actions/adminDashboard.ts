@@ -17,6 +17,7 @@ import {
 import { auth } from "@/server/auth";
 import { requireTenantContext } from "@/server/authz";
 import { isDemoEmail } from "@/lib/demo";
+import { ensureDemoAttendanceToday } from "@/server/authz";
 import { todayInWib } from "@/lib/datetime";
 import {
   demoDailyReports,
@@ -84,8 +85,9 @@ export async function getAdminDashboardOverview(): Promise<AdminDashboardOvervie
   const userEmail = session?.user?.email;
   const isDemo = isDemoEmail(userEmail);
 
-  // Jika akun demo (*@majiku.test atau demo@majiku.id), sajikan mock dataset penuh
+  // Jika akun demo, pastikan data absensi hari ini tersinkronisasi
   if (isDemo) {
+    ensureDemoAttendanceToday().catch(() => {});
     const demoClassesWidget = getDemoClassesForWidget();
     const demoTutorsWidget = getDemoTutorsForWidget();
     return {

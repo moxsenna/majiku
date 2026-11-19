@@ -1,311 +1,300 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { 
-  Users, MessageCircle, Clock, BookOpen, Camera, 
-  ChevronRight, TrendingUp, AlertCircle,
-  Upload, ClipboardCheck
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronRight, ClipboardList, MapPin, MessageCircle, NotebookPen, TriangleAlert, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { QuickActionButton } from "@/components/dashboard/QuickActionButton";
-import { TutorScheduleWidget } from "@/components/dashboard/TutorScheduleWidget";
-import { TutorEarningsWidget } from "@/components/dashboard/TutorEarningsWidget";
-import { TutorNotificationsWidget } from "@/components/dashboard/TutorNotificationsWidget";
-import { TutorLessonPlanWidget } from "@/components/dashboard/TutorLessonPlanWidget";
-import { useToast } from "@/hooks/use-toast";
+import { formatJam, formatTanggal, inisial } from "@/lib/format";
+import { KELAS_KRAYON, krayonDari } from "@/lib/krayon";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { AvatarStack, KidAvatar, MobileGroupTitle } from "@/components/bunayo";
 import {
   getTutorDashboardOverview,
   type TutorDashboardData,
+  type TutorScheduleItem,
+  type TutorStudentItem,
 } from "@/server/actions/tutorDashboard";
+import { getMyTutorAttendanceToday, recordTutorAttendance } from "@/server/actions/attendance";
 
 interface TutorDashboardProps {
   initialData?: TutorDashboardData;
 }
 
-const earningsData = {
-  baseSalary: 3000000,
-  sessionEarnings: 2000000,
-  sessionsCompleted: 20,
-  kpiScore: 92,
-  kpiBonus: 450000,
-  totalEarnings: 5450000,
-};
+function salam(): string {
+  const jam = Number(formatJam(new Date()).slice(0, 2));
+  if (jam < 11) return "Pagi";
+  if (jam < 15) return "Siang";
+  if (jam < 18) return "Sore";
+  return "Malam";
+}
 
+/** GV1 Hari Ini: absen diri, kelas yang diampu (bidang warna kelas), lalu tugas. */
 export default function TutorDashboard({ initialData }: TutorDashboardProps) {
-  const router = useRouter();
-  const { toast } = useToast();
   const { user } = useAuth();
-
-  const { data: dashboardData } = useQuery({
+  const { data } = useQuery({
     queryKey: ["tutor-dashboard-overview"],
     queryFn: getTutorDashboardOverview,
     initialData,
   });
 
-  const data = dashboardData || initialData;
-  const isDemo = data?.isDemo ?? true;
+  const isDemo = data?.isDemo ?? false;
   const isAssigned = data?.isAssigned ?? isDemo;
+  const nama = (data?.tutorName || user?.name || "").trim();
+  const siswa = data?.todayStudents ?? [];
 
-  const displayName = data?.tutorName || user?.name || "Guru Pengajar";
-  const studentsList = data?.todayStudents || [];
-  const schedulesList = data?.schedules || [];
-
-  // Sumber jujur: tugas pembuatan laporan harian siswa yang pending
-  const honestNotifications = studentsList
-    .filter((s) => s.needsReport)
-    .map((s) => ({
-      id: `report-pending-${s.id}`,
-      type: "reminder" as const,
-      title: "Laporan Belum Dibuat",
-      message: `Laporan perkembangan untuk ${s.name} (${s.class}) belum dibuat hari ini.`,
-      studentName: s.name,
-      time: "Hari ini",
-      isRead: false,
-    }));
-
-  const handleReviseReport = (notifId: string) => {
-    const notif = honestNotifications.find(n => n.id === notifId);
-    toast({
-      title: "Buka Editor Laporan",
-      description: `Mengisi laporan harian ${notif?.studentName || "siswa"}`,
-    });
-    router.push("/tutor/progress");
-  };
+  // Kelompokkan anak per kelas: satu bidang warna per kelas, warna = ID/nama kelas (sama di semua layar).
+  const kelas = Object.values(
+    siswa.reduce<Record<string, { nama: string; anak: TutorStudentItem[] }>>((acc, s) => {
+      (acc[s.class] ??= { nama: s.class, anak: [] }).anak.push(s);
+      return acc;
+    }, {}),
+  );
+  const perluLaporan = siswa.filter((s) => s.needsReport);
+  const pesan = data?.unreadMessagesCount ?? 0;
 
   return (
-    <div className="p-4 lg:p-6 pb-20 lg:pb-6 space-y-6">
-      {/* Welcome Card */}
-      <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-1">Selamat Datang, {displayName}! 👋</h2>
-              <p className="text-sm text-primary-foreground/80">
-                {isDemo
-                  ? "Mode Demo: Menampilkan simulasi jadwal dan siswa aktif."
-                  : "Pantau dan kelola aktivitas belajar mengajar harian siswa di kelas Anda."}
-              </p>
-            </div>
-            <div className="hidden md:block">
-              <div className="text-right">
-                <p className="text-xs text-primary-foreground/70">Portal Tutor Bunayo</p>
-                <Badge
-                  variant="outline"
-                  className="border-primary-foreground/40 text-primary-foreground text-xs mt-1"
-                >
-                  {isAssigned ? "Aktif Mengajar" : "Menunggu Penugasan"}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="flex flex-col gap-4 px-4 pb-4 pt-2">
+      <header className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <span className="block text-[15px] font-medium text-muted-foreground" suppressHydrationWarning>
+            {formatTanggal(new Date(), { hari: true, panjang: true }).replace(/ \d{4}$/, "")}
+          </span>
+          <h1 className="truncate font-display text-[34px] font-extrabold leading-[1.05] tracking-[-0.03em]" suppressHydrationWarning>
+            {salam()}, {nama.split(/\s+/).slice(0, 2).join(" ") || "Guru"}
+          </h1>
+        </div>
+        {nama && (
+          <Link href="/tutor/saya" aria-label="Saya" className="press">
+            <KidAvatar name={nama} krayon="matahari" size="lg" />
+          </Link>
+        )}
+      </header>
 
-      {/* Warning Banner untuk Tutor yang Belum Ditugaskan ke Kelas */}
-      {!isAssigned && !isDemo && (
-        <Card className="border-warning/30 bg-warning/5">
-          <CardContent className="p-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-foreground text-sm">Akun Belum Ditugaskan ke Kelas</h3>
-              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                Akun Anda telah terdaftar sebagai Tutor, tetapi belum dihubungkan ke rombel/kelas aktif oleh Admin Daycare. Harap hubungi administrator daycare untuk penugasan kelas.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      {isDemo && (
+        <div className="flex items-center justify-between rounded-sheet bg-amber-500/10 border border-amber-500/20 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
+          <span className="flex items-center gap-2 font-medium">
+            <span>👁️</span>
+            <span>Mode Demo Bunayo: Eksplorasi Interaktif</span>
+          </span>
+          <span className="text-[11px] opacity-80">Simulasi Aman</span>
+        </div>
       )}
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
-                <Users className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{data?.todayPresentCount || 0}</p>
-                <p className="text-xs text-muted-foreground">Siswa Hadir</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <AbsenSaya />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                <Camera className="w-5 h-5 text-orange-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{data?.pendingReportsCount || 0}</p>
-                <p className="text-xs text-muted-foreground">Laporan Pending</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {!isAssigned ? (
+        <section className="rise field-ink flex flex-col gap-2 rounded-[28px] bg-matahari p-5">
+          <h2 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.03em]">Belum ada kelas</h2>
+          <p className="field-sub text-[15px] leading-relaxed">
+            Akun Anda sudah terdaftar sebagai guru, tetapi admin lembaga belum menugaskan kelas. Minta admin menautkan Anda ke kelas agar
+            anak-anak muncul di sini.
+          </p>
+        </section>
+      ) : kelas.length === 0 ? (
+        <section className="rounded-sheet bg-card p-5">
+          <p className="text-[15px] font-semibold">Kelas Anda belum punya anak terdaftar</p>
+          <p className="mt-1 text-sm text-foreground-2">Anak yang didaftarkan admin ke kelas Anda muncul di sini.</p>
+        </section>
+      ) : (
+        kelas.map((k, i) => (
+          <KartuKelas key={k.nama} nama={k.nama} anak={k.anak} utama={i === 0} jadwal={data?.schedules.find((j) => j.className === k.nama)} />
+        ))
+      )}
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{data?.unreadMessagesCount || 0}</p>
-                <p className="text-xs text-muted-foreground">Pesan Baru</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-purple-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{isAssigned ? `${data?.kpiScore || 90}%` : "0%"}</p>
-                <p className="text-xs text-muted-foreground">Skor KPI</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-        <QuickActionButton
-          icon={ClipboardCheck}
-          label="Antrean Trial"
-          color="blue"
-          onClick={() => router.push("/tutor/trials")}
-        />
-        <QuickActionButton
-          icon={Upload}
-          label="Upload Laporan"
-          color="orange"
-          onClick={() => router.push("/tutor/progress")}
-        />
-        <QuickActionButton
-          icon={Clock}
-          label="Absensi"
-          color="green"
-          onClick={() => router.push("/tutor/attendance")}
-        />
-        <QuickActionButton
-          icon={MessageCircle}
-          label="Chat"
-          color="blue"
-          onClick={() => router.push("/tutor/chat")}
-        />
-        <QuickActionButton
-          icon={BookOpen}
-          label="Panduan"
-          color="purple"
-          onClick={() => router.push("/tutor/guides")}
-        />
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Today's Students */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Siswa Hari Ini</CardTitle>
-              <Badge variant="secondary">{studentsList.length} siswa</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {studentsList.length === 0 ? (
-              <div className="py-8 text-center text-xs text-muted-foreground bg-muted/20 rounded-xl">
-                Belum ada siswa yang terdaftar di kelas Anda.
-              </div>
-            ) : (
-              studentsList.map((student) => (
-                <div key={student.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage src={student.avatar || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                        {student.name.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-sm">{student.name}</p>
-                      <p className="text-xs text-muted-foreground">{student.class}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {student.status === "hadir" ? (
-                      <Badge variant="default" className="bg-green-500">Hadir</Badge>
-                    ) : student.status === "izin" ? (
-                      <Badge variant="secondary">Izin</Badge>
-                    ) : (
-                      <Badge variant="outline">Belum Absen</Badge>
-                    )}
-                    {student.needsReport && (
-                      <AlertCircle className="w-4 h-4 text-orange-500" />
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-            <Link href="/tutor/progress">
-              <Button variant="outline" className="w-full mt-2">
-                Upload Laporan Harian
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* Recent Messages / Communication Hub */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Pesan Orang Tua</CardTitle>
-              <Badge variant="outline">Chat</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="py-6 text-center text-xs text-muted-foreground bg-muted/20 rounded-xl">
-              Gunakan fitur chat untuk berkomunikasi langsung dengan orang tua siswa di kelas Anda.
-            </div>
-            <Link href="/tutor/chat">
-              <Button variant="outline" className="w-full mt-2">
-                Buka Chat Siswa
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* Lesson Plan Widget */}
-        <TutorLessonPlanWidget />
-
-        {/* Tutor Schedule */}
-        <TutorScheduleWidget schedules={schedulesList} />
-
-        {/* Notifications */}
-        <TutorNotificationsWidget 
-          notifications={honestNotifications} 
-          onReviseReport={handleReviseReport}
-        />
-
-        {/* Earnings Widget (Hanya tampil untuk simulasi demo) */}
-        {isDemo && <TutorEarningsWidget {...earningsData} />}
-      </div>
+      <section className="rise rise-3 flex flex-col gap-2" aria-labelledby="tugas-judul">
+        <h2 id="tugas-judul" className="px-1 font-display text-xl font-bold tracking-tight">
+          Tugas hari ini
+        </h2>
+        <ul className="overflow-hidden rounded-sheet bg-card">
+          {perluLaporan.length > 0 && (
+            <Tugas
+              href="/tutor/progress"
+              icon={NotebookPen}
+              krayon="langit"
+              title={`Laporan harian ${perluLaporan.length} anak`}
+              sub={perluLaporan.slice(0, 3).map((s) => s.name.split(/\s+/)[0]).join(", ") + (perluLaporan.length > 3 ? ` +${perluLaporan.length - 3}` : "")}
+            />
+          )}
+          {pesan > 0 && (
+            <Tugas href="/tutor/chat" icon={MessageCircle} krayon="tomat" title={`${pesan} pesan orang tua`} sub="Belum dibaca" />
+          )}
+          <Tugas href="/tutor/trials" icon={ClipboardList} krayon="anggur" title="Observasi trial" sub="Anak trial yang perlu dinilai" />
+        </ul>
+        {perluLaporan.length === 0 && siswa.length > 0 && (
+          <p className="px-1 text-sm text-foreground-2">Semua laporan harian sudah terkirim. Terima kasih!</p>
+        )}
+      </section>
     </div>
+  );
+}
+
+/* ---------------- Absen diri (check-in / check-out) ---------------- */
+
+function AbsenSaya({ disabled }: { disabled?: boolean }) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const { data: absen, isLoading } = useQuery({
+    queryKey: ["tutor-absen-hari-ini"],
+    queryFn: getMyTutorAttendanceToday,
+    enabled: !disabled,
+  });
+  const catat = useMutation({
+    mutationFn: (type: "check-in" | "check-out") => recordTutorAttendance({ type, method: "manual" }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["tutor-absen-hari-ini"] });
+      toast({ title: r.type === "check-in" ? `Check-in ${formatJam(r.time)}` : `Check-out ${formatJam(r.time)}` });
+    },
+    onError: (err: any) =>
+      toast({
+        title: "Mode Simulasi Demo",
+        description: err?.message || "Perubahan data simulasi dinonaktifkan untuk menjaga integritas demo.",
+      }),
+  });
+
+  const masuk = absen?.checkInTime;
+  const pulang = absen?.checkOutTime;
+
+  return (
+    <section className="rise flex min-h-[60px] items-center gap-3 rounded-full bg-card py-2 pl-4 pr-2 shadow-soft">
+      <MapPin className={cn("h-5 w-5 shrink-0", masuk ? "text-success" : "text-muted-foreground")} aria-hidden />
+      <span className="min-w-0 flex-1 text-[15px]">
+        {isLoading && !disabled ? (
+          <span className="sk block h-4 w-40" />
+        ) : pulang ? (
+          <>
+            <b className="tabular text-success">Pulang {formatJam(pulang)}</b>
+            <span className="text-muted-foreground"> · masuk {formatJam(masuk)}</span>
+          </>
+        ) : masuk ? (
+          <b className="tabular text-success">Check-in {formatJam(masuk)}</b>
+        ) : (
+          <b>Belum check-in</b>
+        )}
+      </span>
+      {!pulang && (
+        <button
+          type="button"
+          disabled={disabled || isLoading || catat.isPending}
+          onClick={() => catat.mutate(masuk ? "check-out" : "check-in")}
+          className={cn(
+            "press h-11 shrink-0 rounded-full px-4 text-[15px] font-semibold disabled:opacity-50",
+            masuk ? "bg-muted text-foreground" : "bg-foreground text-background",
+          )}
+        >
+          {catat.isPending ? "Mencatat…" : masuk ? "Check-out" : "Check-in"}
+        </button>
+      )}
+    </section>
+  );
+}
+
+/* ---------------- Kartu kelas: bidang warna kelas ---------------- */
+
+function KartuKelas({
+  nama,
+  anak,
+  utama,
+  jadwal,
+}: {
+  nama: string;
+  anak: TutorStudentItem[];
+  utama: boolean;
+  jadwal?: TutorScheduleItem;
+}) {
+  // time dari server: "08:00 (60m)"
+  const jam = jadwal?.time.match(/^(\d{1,2}[:.]\d{2})/)?.[1];
+  const k = KELAS_KRAYON[krayonDari(nama)];
+  const hadir = anak.filter((a) => a.status === "hadir");
+  const izin = anak.filter((a) => a.status === "izin");
+  const belumLapor = anak.filter((a) => a.needsReport).length;
+
+  if (!utama) {
+    return (
+      <Link href="/tutor/schedule" className="press flex items-center gap-3 rounded-sheet bg-card p-4">
+        <span aria-hidden className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-full font-display text-[15px] font-bold field-ink", k.bg)}>
+          {inisial(nama)}
+        </span>
+        <span className="min-w-0 flex-1">
+          <b className="block truncate font-display text-lg font-bold">{nama}</b>
+          <span className="tabular block text-[13px] text-muted-foreground">
+            {hadir.length} dari {anak.length} sudah tiba
+          </span>
+        </span>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" aria-hidden />
+      </Link>
+    );
+  }
+
+  return (
+    <section className={cn("rise rise-2 field-ink flex flex-col gap-4 rounded-[28px] p-5", k.bg)} aria-label={`Kelas ${nama}`}>
+      <div>
+        <h2 className="font-display text-[40px] font-extrabold leading-none tracking-[-0.035em] [text-wrap:balance]">{nama}</h2>
+        {jadwal && (
+          <span className="field-sub tabular mt-1.5 block text-[15px]">
+            {jam ? `${formatJam(jam)} · ` : ""}
+            {jadwal.location}
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-3">
+        {hadir.length > 0 && <AvatarStack people={hadir.map((a) => ({ id: a.id, name: a.name, photoUrl: a.avatar }))} size="sm" />}
+        <span className="text-[15px]">
+          <b className="tabular">
+            {hadir.length} dari {anak.length}
+          </b>{" "}
+          sudah tiba{izin.length > 0 && <span className="field-sub"> · {izin.length} izin</span>}
+        </span>
+      </div>
+      {belumLapor > 0 && (
+        <p className="flex items-start gap-2.5 rounded-[16px] bg-[hsl(0_0%_100%/.5)] px-3.5 py-3 text-[15px]">
+          <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+          <span>
+            <b>{belumLapor} anak</b> belum ada laporan harian
+          </span>
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        <Link
+          href="/tutor/attendance"
+          className="press grid h-btn-lg place-items-center rounded-full bg-[hsl(249_26%_14%)] text-base font-semibold text-[hsl(40_60%_96%)]"
+        >
+          Absen anak
+        </Link>
+        <Link href="/tutor/progress" className="press grid h-btn-lg place-items-center rounded-full bg-[hsl(0_0%_100%/.6)] text-base font-semibold">
+          Kirim kabar
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function Tugas({
+  href,
+  icon: Icon,
+  krayon,
+  title,
+  sub,
+}: {
+  href: string;
+  icon: LucideIcon;
+  krayon: keyof typeof KELAS_KRAYON;
+  title: string;
+  sub?: string;
+}) {
+  const k = KELAS_KRAYON[krayon];
+  return (
+    <li className="border-b border-border-subtle last:border-b-0">
+      <Link href={href} className="flex min-h-[64px] items-center gap-3 px-4 py-3 hover:bg-muted">
+        <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-[10px]", k.soft, k.ink)}>
+          <Icon className="h-[18px] w-[18px]" aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <b className="block truncate text-base font-semibold">{title}</b>
+          {sub && <span className="block truncate text-[13px] text-muted-foreground">{sub}</span>}
+        </span>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" aria-hidden />
+      </Link>
+    </li>
   );
 }

@@ -27,6 +27,7 @@ import {
 } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
+import { assertDemoMutationLock } from "@/server/authz";
 
 export interface ConversationSummary {
   id: string;
@@ -463,6 +464,7 @@ export async function sendMessage(
   if (!session) {
     throw new Error("Unauthorized: Anda harus login");
   }
+  assertDemoMutationLock(session);
 
   const trimmed = (body ?? "").trim();
   if (trimmed.length === 0) {

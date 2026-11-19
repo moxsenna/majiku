@@ -14,6 +14,7 @@ import {
 import { auth } from "@/server/auth";
 import { isDemoEmail } from "@/lib/demo";
 import { todayInWib } from "@/lib/datetime";
+import { ensureDemoAttendanceToday } from "@/server/authz";
 
 export interface ParentChildData {
   id: string;
@@ -60,6 +61,10 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
   const userEmail = session.user.email;
   const isDemo = isDemoEmail(userEmail);
 
+  if (isDemo) {
+    await ensureDemoAttendanceToday().catch(() => {});
+  }
+
   // Auto-heal / auto-link jika ada siswa yang didaftarkan lembaga dengan email ini tapi belum tersambung ke user.id
   if (userEmail) {
     await db
@@ -72,7 +77,7 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
   // --- QUERY REAL DATABASE ---
   const todayDate = todayInWib();
 
-  // Query siswa terdaftar milik parent (berdasarkan parentUserId atau parentEmail)
+  // Query siswa terdaftar milik parent (berdasarkan parentUserId, parentEmail, atau demo student)
   const myStudents = await db
     .select({
       id: students.id,
@@ -94,7 +99,13 @@ export async function getMyChildren(): Promise<ParentChildData[]> {
     .leftJoin(classes, eq(studentEnrollments.classId, classes.id))
     .where(
       and(
-        userEmail
+        isDemo
+          ? or(
+              eq(students.parentUserId, session.user.id),
+              userEmail ? eq(students.parentEmail, userEmail) : sql`false`,
+              eq(students.id, "stu_demo_aisyah")
+            )
+          : userEmail
           ? or(eq(students.parentUserId, session.user.id), eq(students.parentEmail, userEmail))
           : eq(students.parentUserId, session.user.id),
         eq(students.isActive, true)

@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { waitingList, classes, students, studentEnrollments } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export interface WaitingListRow {
   id: string;
@@ -133,7 +133,9 @@ export async function getWaitingList(): Promise<WaitingListRow[]> {
 }
 
 export async function createWaitingListEntry(input: CreateWaitingListInput): Promise<{ id: string }> {
-  const { tenantId } = await requireTenantContext();
+  const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
+  const tenantId = ctx.tenantId;
 
   const studentName = input.studentName?.trim();
   if (!studentName) {
@@ -175,7 +177,9 @@ export async function updateWaitingListStatus(
   id: string,
   status: WaitingListStatusType
 ): Promise<{ ok: boolean }> {
-  const { tenantId } = await requireTenantContext();
+  const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
+  const tenantId = ctx.tenantId;
 
   const allowedStatuses: WaitingListStatusType[] = ["waiting", "notified", "confirmed", "expired", "cancelled"];
   if (!allowedStatuses.includes(status)) {
@@ -210,7 +214,9 @@ export async function updateWaitingListStatus(
 export async function promoteWaitingListToStudent(
   waitingListId: string
 ): Promise<{ studentId: string }> {
-  const { tenantId } = await requireTenantContext();
+  const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
+  const tenantId = ctx.tenantId;
 
   const [entry] = await db
     .select()

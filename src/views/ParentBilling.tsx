@@ -18,7 +18,6 @@ import {
   Eye,
   Loader2,
   QrCode,
-  FileText,
 } from "lucide-react";
 import { InvoiceModal } from "@/components/invoice/InvoiceModal";
 import { PaymentModal } from "@/components/payment/PaymentModal";
@@ -128,9 +127,8 @@ export default function ParentBilling({
       paidDate: inv.paidAt
         ? format(new Date(inv.paidAt), "d MMMM yyyy", { locale: idLocale })
         : undefined,
-      schoolName: "MAJIKU Daycare & Preschool",
-      schoolAddress: "Jl. Pendidikan No. 123, Jakarta",
-      schoolPhone: "(021) 1234-5678",
+      // Nama/alamat lembaga belum ada di ringkasan tagihan; jangan isi alamat & telepon karangan.
+      schoolName: "Bunayo",
     };
   };
 
@@ -162,10 +160,11 @@ export default function ParentBilling({
         qrString: result.qrString,
       });
     } catch (e: any) {
+      const isDemo = e.message?.includes("Demo");
       toast({
-        title: "Gagal Membuat Pembayaran",
+        title: isDemo ? "Mode Simulasi Demo" : "Gagal Membuat Pembayaran",
         description: e.message || "Terjadi kesalahan saat menghubungi payment gateway",
-        variant: "destructive",
+        variant: isDemo ? "default" : "destructive",
       });
     } finally {
       setIsPayingId(null);
@@ -427,14 +426,6 @@ export default function ParentBilling({
                 </p>
               </div>
 
-              <div className="p-3 rounded-lg bg-muted/20 space-y-1">
-                <p className="font-semibold text-foreground flex items-center gap-1.5">
-                  <FileText className="h-4 w-4 text-secondary-foreground" /> Transfer Bank Manual
-                </p>
-                <p className="text-muted-foreground text-[11px]">
-                  BCA: 123-456-7890 (a.n. MAJIKU) · Mandiri: 987-654-3210 (a.n. MAJIKU).
-                </p>
-              </div>
             </CardContent>
           </Card>
         </main>

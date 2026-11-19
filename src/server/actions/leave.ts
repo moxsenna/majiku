@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { tutorLeaveRequests, tutors } from "@/db/schema";
-import { requireTutorContext, requireTenantContext } from "@/server/authz";
+import { requireTutorContext, requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 import { eq, and, or, desc } from "drizzle-orm";
 import { isValidDateString } from "@/lib/datetime";
 
@@ -18,6 +18,7 @@ export type TutorLeaveRequestItem = typeof tutorLeaveRequests.$inferSelect;
 
 export async function submitLeaveRequest(input: SubmitLeaveRequestInput) {
   const session = await requireTutorContext();
+  assertDemoMutationLock(session);
 
   const leaveType = (input.leaveType ?? "").trim();
   if (!leaveType) {

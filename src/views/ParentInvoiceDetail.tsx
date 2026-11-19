@@ -116,7 +116,11 @@ export default function ParentInvoiceDetail({ invoice, paymentsEnabled }: Props)
         qrString: result.qrString,
       });
     } catch (e: any) {
-      toast.error(e.message || "Gagal menghubungkan ke payment gateway");
+      if (e.message?.includes("Demo")) {
+        toast.info(e.message);
+      } else {
+        toast.error(e.message || "Gagal menghubungkan ke payment gateway");
+      }
     } finally {
       setIsPaying(false);
     }

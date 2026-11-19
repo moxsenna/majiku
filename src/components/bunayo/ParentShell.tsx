@@ -40,7 +40,7 @@ export function ParentShell({ children }: { children: React.ReactNode }) {
 
   return (
     <ActiveKidContext.Provider value={{ activeKidId, setActiveKidId }}>
-      <div className="min-h-screen bg-surface print:bg-background">
+      <div className="app-mobile min-h-screen bg-surface print:bg-background">
         <div className={cn("mx-auto min-w-0 max-w-[560px] print:pb-0", TAB_BAR_SPACE)}>{children}</div>
         <FloatingTabBar items={PARENT_TABS} className="print:hidden" />
       </div>

@@ -16,7 +16,7 @@ const TUTOR_TABS: TabItem[] = [
 /** Shell portal guru: mobile-first (390), konten dibatasi 560 px di layar lebar, navigasi melayang 4 tab. */
 export function TutorLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="app-mobile min-h-screen bg-surface">
       <main className={cn("mx-auto min-w-0 max-w-[560px]", TAB_BAR_SPACE)}>{children}</main>
       <FloatingTabBar items={TUTOR_TABS} />
     </div>

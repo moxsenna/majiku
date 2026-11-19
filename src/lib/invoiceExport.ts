@@ -99,9 +99,9 @@ export function generateInvoiceHTML(invoice: Invoice & {
   const subtotal = invoice.subtotal || invoice.amount;
   const discount = invoice.discount || 0;
   const total = invoice.total || invoice.amount;
-  const schoolName = invoice.schoolName || "MAJIKU Daycare & Preschool";
-  const schoolAddress = invoice.schoolAddress || "Jl. Pendidikan No. 123, Jakarta Selatan";
-  const schoolPhone = invoice.schoolPhone || "(021) 1234-5678";
+  const schoolName = invoice.schoolName || "Bunayo";
+  const schoolAddress = invoice.schoolAddress || "";
+  const schoolPhone = invoice.schoolPhone || "";
 
   return `
 <!DOCTYPE html>

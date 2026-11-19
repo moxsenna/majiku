@@ -7,6 +7,7 @@ import { invoices, paymentOrders, students, classes, studentEnrollments } from "
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
 import { createPayCoreOrder, isPaymentsEnabled } from "@/server/paycore";
+import { assertDemoMutationLock } from "@/server/authz";
 
 async function getSessionSafely() {
   try {
@@ -192,6 +193,7 @@ export async function createInvoicePaymentOrder(
   if (!session) {
     throw new Error("Unauthorized: Anda harus login untuk membayar");
   }
+  assertDemoMutationLock(session);
 
   const detail = await getMyInvoiceById(invoiceId);
   if (!detail) {

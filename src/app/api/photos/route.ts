@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { getMyRoles } from "@/server/actions/roles";
 import { putPhoto, ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from "@/server/r2";
+import { isDemoEmail } from "@/lib/demo";
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
@@ -9,6 +10,13 @@ export async function POST(req: Request) {
   });
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (isDemoEmail(session.user.email)) {
+    return Response.json(
+      { error: "Mode Demo: Fitur upload foto dinonaktifkan untuk menjaga integritas simulasi." },
+      { status: 403 }
+    );
   }
 
   const roles = await getMyRoles();

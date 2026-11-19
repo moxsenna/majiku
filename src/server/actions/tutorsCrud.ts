@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { tutors, tutorClassAssignments, classes, user } from "@/db/schema";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export type TutorRecord = typeof tutors.$inferSelect;
 
@@ -71,6 +71,7 @@ export async function listTutorsWithAssignments(): Promise<TutorWithAssignments[
 
 export async function createTutor(input: CreateTutorInput): Promise<{ id: string }> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!input.name || !input.name.trim()) {
     throw new Error("Nama tutor wajib diisi");
@@ -110,6 +111,7 @@ export async function updateTutor(
   partial: UpdateTutorInput
 ): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!id) {
     throw new Error("ID tutor wajib diisi");
@@ -156,6 +158,7 @@ export async function updateTutor(
 
 export async function toggleTutorActive(id: string, isActive: boolean): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!id) {
     throw new Error("ID tutor wajib diisi");
@@ -204,6 +207,7 @@ export async function listLinkableUsers(): Promise<LinkableUser[]> {
 
 export async function linkTutorUser(tutorId: string, userId: string): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!tutorId) {
     throw new Error("ID tutor wajib diisi");
@@ -264,6 +268,7 @@ export async function linkTutorUser(tutorId: string, userId: string): Promise<vo
 
 export async function unlinkTutorUser(tutorId: string): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!tutorId) {
     throw new Error("ID tutor wajib diisi");
@@ -289,6 +294,7 @@ export async function assignTutorClass(
   ratePerSession: number = 50000
 ): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
   if (!tutorId || !classId) throw new Error("ID tutor dan kelas wajib diisi");
 
   const [tutor] = await db
@@ -316,6 +322,7 @@ export async function assignTutorClass(
 
 export async function removeTutorClassAssignment(assignmentId: string): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
   if (!assignmentId) throw new Error("ID penugasan wajib diisi");
 
   const scopedAssignments = db

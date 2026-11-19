@@ -14,7 +14,7 @@ import {
 } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireTenantContext, resolveTenantIdForUser } from "@/server/authz";
+import { requireTenantContext, resolveTenantIdForUser, assertDemoMutationLock } from "@/server/authz";
 import { isValidDateString, todayInWib } from "@/lib/datetime";
 import { deletePhoto } from "@/server/r2";
 
@@ -143,6 +143,7 @@ export async function createDailyReport(
   input: CreateDailyReportInput
 ): Promise<{ created: number }> {
   const session = await requireTutorOrAdmin();
+  assertDemoMutationLock(session);
 
   if (!input.studentIds || !Array.isArray(input.studentIds) || input.studentIds.length === 0) {
     throw new Error("Pilih minimal satu siswa");
@@ -419,6 +420,7 @@ export async function deleteDailyReport(id: string): Promise<void> {
   const session = await requireAdminOrModerator();
   const tenantId = await resolveTenantIdForUser(session.user.id);
   if (!tenantId) throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
+  assertDemoMutationLock(session, tenantId);
 
   if (!id) {
     throw new Error("ID laporan wajib diisi");

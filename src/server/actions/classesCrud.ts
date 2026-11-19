@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { classes, tutorClassAssignments, tutors } from "@/db/schema";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export type ClassRecord = typeof classes.$inferSelect;
 
@@ -46,6 +46,7 @@ export async function listClasses(): Promise<ClassRecord[]> {
 
 export async function createClass(input: CreateClassInput): Promise<{ id: string }> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!input.name || !input.name.trim()) {
     throw new Error("Nama kelas wajib diisi");
@@ -99,6 +100,7 @@ export async function createClass(input: CreateClassInput): Promise<{ id: string
 
 export async function updateClass(id: string, partial: UpdateClassInput): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!id) {
     throw new Error("ID kelas wajib diisi");
@@ -176,6 +178,7 @@ export async function updateClass(id: string, partial: UpdateClassInput): Promis
 
 export async function assignTutorToClass(classId: string, tutorId: string | null): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
   if (!classId) throw new Error("ID kelas wajib diisi");
 
   const [cls] = await db
@@ -245,6 +248,7 @@ export async function listTutorOptions(): Promise<Array<{ id: string; name: stri
 
 export async function toggleClassActive(id: string, isActive: boolean): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!id) {
     throw new Error("ID kelas wajib diisi");

@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { attendance, studentEnrollments, students, classes, tutors, tutorAttendance, tutorClassAssignments } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireRoles, resolveTenantIdForUser } from "@/server/authz";
+import { requireRoles, resolveTenantIdForUser, assertDemoMutationLock } from "@/server/authz";
 import { todayInWib, timeInWib } from "@/lib/datetime";
 
 export interface AttendanceRow {
@@ -303,6 +303,7 @@ export async function recordStudentCheckIn(input: {
   const session = await requireRoles("admin", "tutor", "moderator");
   const tenantId = await resolveTenantIdForUser(session.user.id);
   if (!tenantId) throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
+  assertDemoMutationLock(session, tenantId);
 
   // Guard tenant: siswa wajib milik lembaga pemanggil
   const [student] = await db
@@ -385,6 +386,7 @@ export async function recordStudentCheckOut(input: { attendanceId: string }) {
   const session = await requireRoles("admin", "tutor", "moderator");
   const tenantId = await resolveTenantIdForUser(session.user.id);
   if (!tenantId) throw new Error("Forbidden: akun tidak terhubung ke lembaga mana pun");
+  assertDemoMutationLock(session, tenantId);
 
   const [record] = await db
     .select({ id: attendance.id, tenantId: students.tenantId })
@@ -418,6 +420,7 @@ export async function recordTutorAttendance(input: {
 }) {
   const session = await getSessionSafely();
   if (!session) throw new Error("Unauthorized");
+  assertDemoMutationLock(session);
   const now = new Date();
   // Waktu selalu dari server (WIB) — jangan percaya jam perangkat klien
   const timeStr = timeInWib(now);

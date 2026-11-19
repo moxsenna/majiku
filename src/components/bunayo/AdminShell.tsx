@@ -174,13 +174,25 @@ function SidebarSearch({ onSearch }: { onSearch?: (q: string) => void }) {
 
 function OrgBox({ org }: { org: AdminShellProps["org"] }) {
   if (!org) return <span className="sk h-[50px] w-full rounded" />;
+  const isDemo = org.name.toLowerCase().includes("demo");
   return (
-    <div className="flex items-center gap-2 rounded border border-border px-2.5 py-2">
-      <KidAvatar name={org.name} size="xs" />
-      <span className="min-w-0 flex-1">
-        <b className="block truncate text-sm text-foreground">{org.name}</b>
-        {org.sub && <small className="block truncate text-xs text-muted-foreground">{org.sub}</small>}
-      </span>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-2 rounded border border-border px-2.5 py-2">
+        <KidAvatar name={org.name} size="xs" />
+        <span className="min-w-0 flex-1">
+          <b className="block truncate text-sm text-foreground">{org.name}</b>
+          {org.sub && <small className="block truncate text-xs text-muted-foreground">{org.sub}</small>}
+        </span>
+      </div>
+      {isDemo && (
+        <div className="flex items-center justify-between rounded bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+          <span className="flex items-center gap-1.5">
+            <span>👁️</span>
+            <span>Mode Demo Aktif</span>
+          </span>
+          <span className="text-[10px] opacity-75">Simulasi</span>
+        </div>
+      )}
     </div>
   );
 }

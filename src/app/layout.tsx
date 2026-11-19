@@ -22,7 +22,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2046C4",
+  // Bilah status menyatu dengan latar app (--surface terang / gelap), bukan pita biru.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F2E9" },
+    { media: "(prefers-color-scheme: dark)", color: "#100F15" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

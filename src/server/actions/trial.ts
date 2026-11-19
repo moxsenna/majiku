@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { trialApplications, tutors, classes, students, studentEnrollments, tenants, tutorClassAssignments } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 import { todayInWib } from "@/lib/datetime";
 
 export interface SubmitTrialApplicationInput {
@@ -76,6 +76,7 @@ export async function submitTrialApplication(
   if (!session) {
     throw new Error("Unauthorized: Anda harus login untuk mengajukan trial");
   }
+  assertDemoMutationLock(session);
 
   const roles: AppRole[] = await getMyRoles().catch(() => []);
   if (!hasRole(roles, "parent")) {
@@ -150,6 +151,7 @@ export async function scheduleTrial(
   input: ScheduleTrialInput
 ): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!trialId) {
     throw new Error("ID pengajuan trial wajib diisi");
@@ -209,6 +211,7 @@ export async function markTrialAwaitingReview(trialId: string): Promise<void> {
   if (!session) {
     throw new Error("Unauthorized: Anda harus login untuk memperbarui status trial");
   }
+  assertDemoMutationLock(session);
 
   const tutorRows = await db
     .select({ id: tutors.id, tenantId: tutors.tenantId })
@@ -443,6 +446,7 @@ export async function getMyTrialApplications(): Promise<TrialApplicationRow[]> {
 
 export async function admitTrial(trialId: string): Promise<{ success: boolean; studentId: string }> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
   if (!trialId) throw new Error("ID pengajuan trial wajib diisi");
 
   const [trial] = await db

@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { invoices, studentEnrollments, students, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export interface InvoiceRow {
   id: string;
@@ -210,6 +210,7 @@ export async function getBillingEnrollments(): Promise<BillingEnrollmentRow[]> {
 
 export async function markInvoicePaid(invoiceId: string) {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
   if (!invoiceId) throw new Error("ID invoice wajib diisi");
 
   const scopedInvoices = db
@@ -246,6 +247,7 @@ export interface CreateInvoiceInput {
 
 export async function createInvoice(input: CreateInvoiceInput) {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!input.studentId) throw new Error("Pilih siswa terlebih dahulu");
   if (!input.amount || input.amount <= 0) throw new Error("Nominal tagihan harus lebih dari 0");

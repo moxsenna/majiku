@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { galleryPhotos, students, classes, user, tutors } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 import { deletePhoto } from "@/server/r2";
 
 export interface GalleryPhotoRow {
@@ -47,13 +47,13 @@ async function getSessionSafely() {
   }
 }
 
-async function getTenantIdForGallery(): Promise<{ tenantId: string; userId: string }> {
+async function getTenantIdForGallery(): Promise<{ tenantId: string; userId: string; session: NonNullable<Awaited<ReturnType<typeof getSessionSafely>>> }> {
   const session = await getSessionSafely();
   if (!session) throw new Error("Unauthorized: Anda harus login");
   const roles: AppRole[] = await getMyRoles().catch(() => []);
   if (roles.includes("admin") || roles.includes("moderator")) {
     const ctx = await requireTenantContext();
-    return { tenantId: ctx.tenantId, userId: ctx.session.user.id };
+    return { tenantId: ctx.tenantId, userId: ctx.session.user.id, session };
   }
   if (roles.includes("tutor")) {
     const [tutor] = await db
@@ -68,7 +68,7 @@ async function getTenantIdForGallery(): Promise<{ tenantId: string; userId: stri
         )
       )
       .limit(1);
-    if (tutor) return { tenantId: tutor.tenantId, userId: session.user.id };
+    if (tutor) return { tenantId: tutor.tenantId, userId: session.user.id, session };
   }
   throw new Error("Unauthorized: Akses galeri ditolak");
 }
@@ -113,7 +113,8 @@ export async function listGalleryPhotos(): Promise<GalleryPhotoRow[]> {
 export async function uploadGalleryPhotos(
   input: UploadGalleryPhotosInput
 ): Promise<{ created: number }> {
-  const { tenantId, userId } = await getTenantIdForGallery();
+  const { tenantId, userId, session } = await getTenantIdForGallery();
+  assertDemoMutationLock(session, tenantId);
 
   const { photoKeys } = input;
   if (!Array.isArray(photoKeys) || photoKeys.length === 0) {
@@ -186,6 +187,7 @@ export async function uploadGalleryPhotos(
 
 export async function deleteGalleryPhoto(id: string): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   const [photo] = await db
     .select({

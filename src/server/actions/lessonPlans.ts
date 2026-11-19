@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { lessonPlans, classes, user } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 import { isValidDateString } from "@/lib/datetime";
 
 export type LessonPlanRecord = typeof lessonPlans.$inferSelect;
@@ -167,6 +167,7 @@ export async function createLessonPlan(
   input: CreateLessonPlanInput
 ): Promise<{ id: string }> {
   const session = await requireAdminOrModerator();
+  assertDemoMutationLock(session);
 
   const title = validateTitle(input.title);
   const planDate = validatePlanDate(input.planDate);
@@ -220,7 +221,9 @@ export async function updateLessonPlan(
   id: string,
   partial: UpdateLessonPlanInput
 ): Promise<void> {
-  const { tenantId } = await requireTenantContext();
+  const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
+  const tenantId = ctx.tenantId;
 
   const existing = await db
     .select({
@@ -297,7 +300,8 @@ export async function updateLessonPlan(
 }
 
 export async function deleteLessonPlan(id: string): Promise<void> {
-  await requireAdminOrModerator();
+  const session = await requireAdminOrModerator();
+  assertDemoMutationLock(session);
 
   const deleted = await db
     .delete(lessonPlans)

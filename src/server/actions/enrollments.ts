@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { studentEnrollments, students, classes } from "@/db/schema";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export interface MoveStudentClassInput {
   studentId: string;
@@ -13,7 +13,9 @@ export interface MoveStudentClassInput {
 }
 
 export async function moveStudentClass(input: MoveStudentClassInput): Promise<{ ok: boolean }> {
-  const { tenantId } = await requireTenantContext();
+  const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
+  const tenantId = ctx.tenantId;
 
   const studentId = input.studentId?.trim();
   const toClassId = input.toClassId?.trim();

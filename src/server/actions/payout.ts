@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { tutors, tutorClassAssignments, tutorBonuses, classes } from "@/db/schema";
 import { auth } from "@/server/auth";
 import { getMyRoles, type AppRole } from "@/server/actions/roles";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export interface TutorItem {
   id: string;
@@ -277,6 +277,7 @@ export async function updateTutorRate(params: {
   rate: number;
 }) {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   const [tutor] = await db
     .select({ id: tutors.id })
@@ -336,6 +337,7 @@ export async function addTutorBonus(params: {
   year?: number;
 }) {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   const [tutor] = await db
     .select({ id: tutors.id })

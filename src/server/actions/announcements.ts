@@ -5,7 +5,7 @@ import { desc, eq, and, or, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { announcements, students } from "@/db/schema";
 import { auth } from "@/server/auth";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export type AnnouncementRow = typeof announcements.$inferSelect;
 
@@ -27,6 +27,7 @@ export async function createAnnouncement(
   input: CreateAnnouncementInput
 ): Promise<{ id: string; recipientCount: number }> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   const title = (input.title ?? "").trim();
   const body = (input.body ?? "").trim();
@@ -103,6 +104,7 @@ export async function getLatestAnnouncementsForParent() {
 
 export async function deleteAnnouncement(id: string): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   const deleted = await db
     .delete(announcements)

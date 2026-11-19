@@ -18,6 +18,7 @@ import {
 import { auth } from "@/server/auth";
 import { isDemoEmail } from "@/lib/demo";
 import { todayInWib } from "@/lib/datetime";
+import { ensureDemoAttendanceToday } from "@/server/authz";
 
 export interface TutorStudentItem {
   id: string;
@@ -63,6 +64,10 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
   const userEmail = session?.user?.email;
   const isDemo = isDemoEmail(userEmail);
 
+  if (isDemo) {
+    await ensureDemoAttendanceToday().catch(() => {});
+  }
+
   if (!session?.user) {
     return {
       isDemo: false,
@@ -88,7 +93,7 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
 
   const todayDate = todayInWib();
 
-  // 1. Cari profil tutor dari user ID atau email
+  // 1. Cari profil tutor dari user ID atau email (atau tut_demo_rina jika demo)
   const [tutorRecord] = await db
     .select({
       id: tutors.id,
@@ -98,7 +103,13 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
     .from(tutors)
     .where(
       and(
-        userEmail
+        isDemo
+          ? or(
+              eq(tutors.userId, session.user.id),
+              userEmail ? eq(tutors.email, userEmail) : sql`false`,
+              eq(tutors.id, "tut_demo_rina")
+            )
+          : userEmail
           ? or(eq(tutors.userId, session.user.id), eq(tutors.email, userEmail))
           : eq(tutors.userId, session.user.id),
         eq(tutors.isActive, true)
@@ -111,20 +122,20 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
       return {
         isDemo: true,
         isAssigned: true,
-        tutorName: session.user.name || "Bu Rina",
-        todayPresentCount: 12,
-        pendingReportsCount: 5,
-        unreadMessagesCount: 3,
-        kpiScore: 92,
+        tutorName: session.user.name || "Bu Rina Wijaya",
+        todayPresentCount: 2,
+        pendingReportsCount: 1,
+        unreadMessagesCount: 1,
+        kpiScore: 95,
         todayStudents: [
-          { id: "1", name: "Ahmad Rizki", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: true },
-          { id: "2", name: "Siti Aisyah", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: false },
-          { id: "3", name: "Budi Santoso", class: "Kelas Bintang", avatar: "", status: "hadir", needsReport: true },
-          { id: "4", name: "Dewi Lestari", class: "Kelas Pelangi", avatar: "", status: "izin", needsReport: false },
+          { id: "stu_demo_aisyah", name: "Aisyah Putri", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-aisyah.jpg", status: "hadir", needsReport: false },
+          { id: "stu_demo_raka", name: "Raka Pratama", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-raka.jpg", status: "hadir", needsReport: true },
+          { id: "stu_demo_keisha", name: "Keisha Azzahra", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-keisha.jpg", status: "izin", needsReport: false },
+          { id: "stu_demo_arjuna", name: "Arjuna Wijaya", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-arjuna.jpg", status: "izin", needsReport: false },
         ],
         schedules: [
-          { id: "1", date: "Hari ini", dayName: "Hari ini", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang A1", studentsCount: 15, status: "today" },
-          { id: "2", date: "Besok", dayName: "Besok", className: "Kelas Pelangi", time: "08:00 - 12:00", location: "Ruang A2", studentsCount: 12, status: "upcoming" },
+          { id: "1", date: "Hari ini", dayName: "Hari ini", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang Matahari (Lantai 1)", studentsCount: 4, status: "today" },
+          { id: "2", date: "Besok", dayName: "Besok", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang Matahari (Lantai 1)", studentsCount: 4, status: "upcoming" },
         ],
       };
     }
@@ -166,19 +177,19 @@ export async function getTutorDashboardOverview(): Promise<TutorDashboardData> {
         isDemo: true,
         isAssigned: true,
         tutorName: tutorRecord.name,
-        todayPresentCount: 12,
-        pendingReportsCount: 5,
-        unreadMessagesCount: 3,
-        kpiScore: 92,
+        todayPresentCount: 2,
+        pendingReportsCount: 1,
+        unreadMessagesCount: 1,
+        kpiScore: 95,
         todayStudents: [
-          { id: "1", name: "Ahmad Rizki", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: true },
-          { id: "2", name: "Siti Aisyah", class: "Kelas Bunga Matahari", avatar: "", status: "hadir", needsReport: false },
-          { id: "3", name: "Budi Santoso", class: "Kelas Bintang", avatar: "", status: "hadir", needsReport: true },
-          { id: "4", name: "Dewi Lestari", class: "Kelas Pelangi", avatar: "", status: "izin", needsReport: false },
+          { id: "stu_demo_aisyah", name: "Aisyah Putri", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-aisyah.jpg", status: "hadir", needsReport: false },
+          { id: "stu_demo_raka", name: "Raka Pratama", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-raka.jpg", status: "hadir", needsReport: true },
+          { id: "stu_demo_keisha", name: "Keisha Azzahra", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-keisha.jpg", status: "izin", needsReport: false },
+          { id: "stu_demo_arjuna", name: "Arjuna Wijaya", class: "Kelas Bunga Matahari", avatar: "/images/avatars/student-arjuna.jpg", status: "izin", needsReport: false },
         ],
         schedules: [
-          { id: "1", date: "Hari ini", dayName: "Hari ini", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang A1", studentsCount: 15, status: "today" },
-          { id: "2", date: "Besok", dayName: "Besok", className: "Kelas Pelangi", time: "08:00 - 12:00", location: "Ruang A2", studentsCount: 12, status: "upcoming" },
+          { id: "1", date: "Hari ini", dayName: "Hari ini", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang Matahari (Lantai 1)", studentsCount: 4, status: "today" },
+          { id: "2", date: "Besok", dayName: "Besok", className: "Kelas Bunga Matahari", time: "08:00 - 12:00", location: "Ruang Matahari (Lantai 1)", studentsCount: 4, status: "upcoming" },
         ],
       };
     }

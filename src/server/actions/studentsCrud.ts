@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
 import { db } from "@/db";
 import { students, studentEnrollments, classes, user, userRoles, trialApplications } from "@/db/schema";
-import { requireTenantContext } from "@/server/authz";
+import { requireTenantContext, assertDemoMutationLock } from "@/server/authz";
 
 export type StudentRecord = typeof students.$inferSelect;
 
@@ -83,6 +83,7 @@ export async function listStudentsWithEnrollments(): Promise<StudentWithEnrollme
 
 export async function createStudent(input: CreateStudentInput): Promise<{ id: string }> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!input.name || !input.name.trim()) {
     throw new Error("Nama siswa wajib diisi");
@@ -153,6 +154,7 @@ export async function updateStudent(
   partial: UpdateStudentInput
 ): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!id) {
     throw new Error("ID siswa wajib diisi");
@@ -214,6 +216,7 @@ export async function linkStudentParent(
   parentUserId: string | null
 ): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
   if (!studentId) throw new Error("ID siswa wajib diisi");
 
   const result = await db
@@ -266,6 +269,7 @@ export async function getLinkableParents(): Promise<
 
 export async function toggleStudentActive(id: string, isActive: boolean): Promise<void> {
   const ctx = await requireTenantContext();
+  assertDemoMutationLock(ctx.session, ctx.tenantId);
 
   if (!id) {
     throw new Error("ID siswa wajib diisi");
